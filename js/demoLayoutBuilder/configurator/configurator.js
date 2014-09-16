@@ -1,8 +1,9 @@
-DemoLayoutBuilder.Configurator = function($targetEl) {
+DemoLayoutBuilder.Configurator = function($targetEl, demoLayout) {
     var me = this;
 
     this._$view = View.attach(this._$view, $targetEl, View.ids.DEMO_LAYOUT_BUILDER.CONFIGURATOR);
 
+    this._demoLayout = null;
     this._gridTypeSelector = null;
 
     this._horizontalGridSettings = null;
@@ -49,12 +50,20 @@ DemoLayoutBuilder.Configurator = function($targetEl) {
     }
 
     this._construct = function() {
+        me._demoLayout = demoLayout;
+
        me._gridTypeSelector = new DemoLayoutBuilder.GridTypeSelector(me._$view.find("." + me._css.gridTypeSelectorClass));
        me._horizontalGridSettings = new DemoLayoutBuilder.GridSettings(
-            me._$view.find("." + me._css.horizontalGridSettingsClass), DemoLayoutBuilder.GridSettings.SETTING_TYPES.HORIZONTAL_GRID, me
+            me._$view.find("." + me._css.horizontalGridSettingsClass), 
+            DemoLayoutBuilder.GridSettings.SETTING_TYPES.HORIZONTAL_GRID, 
+            me,
+            me._demoLayout
        );
        me._verticalGridSettings = new DemoLayoutBuilder.GridSettings(
-            me._$view.find("." + me._css.verticalGridSettingsClass), DemoLayoutBuilder.GridSettings.SETTING_TYPES.VERTICAL_GRID, me
+            me._$view.find("." + me._css.verticalGridSettingsClass), 
+            DemoLayoutBuilder.GridSettings.SETTING_TYPES.VERTICAL_GRID, 
+            me,
+            me._demoLayout
        );
 
        me._horizontalGridAdditionalSettings = me._horizontalGridSettings.getGridAdditionalSettings();

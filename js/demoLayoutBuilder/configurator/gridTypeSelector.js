@@ -50,15 +50,20 @@ DemoLayoutBuilder.GridTypeSelector = function($targetEl) {
     }
 
     this._bindEvents = function() {
-        $(window).on(DemoLayoutBuilder.GridTypeSelector.EVENT_WINDOW_RESIZE, function() {
-            me._renderVerticalGridImage();
-            me._renderHorizontalGridImage();
+        $(window).on(DemoLayoutBuilder.GridTypeSelector.EVENT_WINDOW_RESIZE, function() { 
+            var resizeEventNormalizer = new ResizeEventNormalizer();
+            var normalizedFunc = resizeEventNormalizer.apply(function() {
+                me._renderVerticalGridImage();
+                me._renderHorizontalGridImage();
 
-            // Updating atoms selected styles, because they were recreated
-            if(me.isVerticalGridTypeSelected())
-                me._setSelectedCss(me._$verticalGridTypeSelector);
-            else if(me.isHorizontalGridTypeSelected())
-                me._setSelectedCss(me._$horizontalGridTypeSelector);
+                // Updating atoms selected styles, because they were recreated
+                if(me.isVerticalGridTypeSelected())
+                    me._setSelectedCss(me._$verticalGridTypeSelector);
+                else if(me.isHorizontalGridTypeSelected())
+                    me._setSelectedCss(me._$horizontalGridTypeSelector);
+            });
+            
+            normalizedFunc.apply(me); 
         });
 
         me._$verticalGridTypeSelector.on("mouseenter", function() {
@@ -181,15 +186,14 @@ DemoLayoutBuilder.GridTypeSelector.prototype._renderHorizontalGridImage = functi
 
 DemoLayoutBuilder.GridTypeSelector.prototype._createAtom = function() {
     var borderSize = 4;
-    var $div = $("<div/>").addClass(this._css.atomClass);
-    $div.css({
-        position: "absolute",
-        width: this._atomSize + "px", 
-        height: this._atomSize + "px",
-        "line-height": (this._atomSize - borderSize) + "px"
-    });
+    var div = document.createElement("div");
+    div.setAttribute("class", this._css.atomClass);
+    div.style.position = "absolute";
+    div.style.width = this._atomSize + "px";
+    div.style.height = this._atomSize + "px";
+    div.style.lineHeight = (this._atomSize - borderSize) + "px";
 
-    return $div;
+    return div;
 }
 
 DemoLayoutBuilder.GridTypeSelector.prototype._removeRenderedAtoms = function($gridImage) {
@@ -217,10 +221,11 @@ DemoLayoutBuilder.GridTypeSelector.prototype._renderAtoms = function($gridImage,
         var nextPositionTop = spacerHeight;
         for(var j = 0; j < verticalAtomsCount; j++)
         {
-            var $atom = this._createAtom();
-            $atom.addClass(this._css.atomClass + "-" + i + "-" + j);
-            $atom.css({left: nextPositionLeft + "px", top: nextPositionTop + "px"});
-            $gridImage.append($atom);
+            var atom = this._createAtom();
+            atom.setAttribute("class", atom.getAttribute("class") + " " + this._css.atomClass + "-" + i + "-" + j);
+            atom.style.left = nextPositionLeft + "px";
+            atom.style.top = nextPositionTop + "px";
+            $gridImage.get(0).appendChild(atom);
 
             nextPositionTop += this._atomSize + spacerHeight;
         }

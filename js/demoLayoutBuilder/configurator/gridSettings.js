@@ -1,8 +1,9 @@
-DemoLayoutBuilder.GridSettings = function($targetEl, settingsType, gridConfigurator) {
+DemoLayoutBuilder.GridSettings = function($targetEl, settingsType, gridConfigurator, demoLayout) {
     var me = this;
 
     this._$view = null;
 
+    this._demoLayout = null;
     this._gridConfigurator = null;
     this._gridAdditionalSettings = null;
     this._createGrid = null;
@@ -62,6 +63,7 @@ DemoLayoutBuilder.GridSettings = function($targetEl, settingsType, gridConfigura
     ];
 
     this._construct = function() {
+        me._demoLayout = demoLayout;
         me._settingsType = settingsType;
         me._gridConfigurator = gridConfigurator;
         me._attachView(); 
@@ -69,7 +71,8 @@ DemoLayoutBuilder.GridSettings = function($targetEl, settingsType, gridConfigura
         me._gridAdditionalSettings = new DemoLayoutBuilder.GridAdditionalSettings(
             $targetEl, 
             me,
-            me._gridConfigurator.getGridTypeSelector()
+            me._gridConfigurator.getGridTypeSelector(),
+            me._demoLayout
         );
         me._createGrid = new DemoLayoutBuilder.CreateGrid($targetEl, me);
 
@@ -81,7 +84,8 @@ DemoLayoutBuilder.GridSettings = function($targetEl, settingsType, gridConfigura
             $prependDemonstrator, 
             me, 
             DemoLayoutBuilder.GridSettings.INSERT_MODES.PREPEND,
-            me._gridConfigurator.getGridTypeSelector()
+            me._gridConfigurator.getGridTypeSelector(),
+            me._demoLayout
         );
 
         var $appendDemonstrator = me._$view.find("." + me._css.appendDemonstratorClass);
@@ -89,7 +93,8 @@ DemoLayoutBuilder.GridSettings = function($targetEl, settingsType, gridConfigura
             $appendDemonstrator, 
             me, 
             DemoLayoutBuilder.GridSettings.INSERT_MODES.APPEND,
-            me._gridConfigurator.getGridTypeSelector()
+            me._gridConfigurator.getGridTypeSelector(),
+            me._demoLayout
         );
 
         me._bindEvents();

@@ -57,8 +57,13 @@ DemoLayoutBuilder.IntersectionsSettingDemonstrator = function($targetEl, gridAdd
 
     this._bindEvents = function() {
         $(window).on(DemoLayoutBuilder.IntersectionsSettingDemonstrator.EVENT_WINDOW_RESIZE, function() {
-            me._removeRenderedAtoms();
-            me._renderAtoms();
+            var resizeEventNormalizer = new ResizeEventNormalizer();
+            var normalizedFunc = resizeEventNormalizer.apply(function() {
+                me._removeRenderedAtoms();
+                me._renderAtoms();
+            });
+
+            normalizedFunc.apply(me);
         });
 
         $(this._gridAdditionalSettings).on(DemoLayoutBuilder.GridAdditionalSettings.EVENT_INTERSECTION_STRATEGY_CHANGE, function(event, intersectionMode) {
@@ -133,15 +138,14 @@ DemoLayoutBuilder.IntersectionsSettingDemonstrator.prototype._createAtom = funct
     if(this._currentGridBGIndex == gridBgs.length)
         this._currentGridBGIndex = 0;
 
-    var $div = $("<div/>").addClass(this._css.atomClass).addClass(this._css.atomBorderClass);
-    $div.addClass(gridBgs[this._currentGridBGIndex]).css({
-        position: "absolute",
-        width: atomWidth + "px",
-        height: atomHeight + "px",
-        "line-height": atomHeight - 5 + "px",
-    });
+    var div = document.createElement("div");
+    div.setAttribute("class", this._css.atomClass + " " + this._css.atomBorderClass + " " + gridBgs[this._currentGridBGIndex]);
+    div.style.position = "absolute";
+    div.style.width = atomWidth + "px";
+    div.style.height = atomHeight + "px";
+    div.style.lineHeight = atomHeight - 5 + "px";
 
-    return $div;
+    return div;
 }
 
 DemoLayoutBuilder.IntersectionsSettingDemonstrator.prototype._addVerticalGridItemIds = function() {
@@ -207,10 +211,11 @@ DemoLayoutBuilder.IntersectionsSettingDemonstrator.prototype._renderVerticalGrid
 
     var me = this;
     var createAtom = function(atomWidth, atomHeight, leftPos, topPos, row, col) {
-        var $atom = me._createAtom(atomWidth, atomHeight);
-        $atom.addClass(me._css.atomClass + "-" + row + "-" + col);
-        $atom.css({left: leftPos + "px", top: topPos + "px"});
-        me._$layout.append($atom);
+        var atom = me._createAtom(atomWidth, atomHeight);
+        atom.setAttribute("class", atom.getAttribute("class") + " " + me._css.atomClass + "-" + row + "-" + col);
+        atom.style.left = leftPos + "px";
+        atom.style.top = topPos + "px";
+        me._$layout.get(0).appendChild(atom);
     }
 
     var nextPositionLeft = this._spacerWidth;
@@ -241,10 +246,11 @@ DemoLayoutBuilder.IntersectionsSettingDemonstrator.prototype._renderVerticalGrid
 
     var me = this;
     var createAtom = function(atomWidth, atomHeight, leftPos, topPos, row, col) {
-        var $atom = me._createAtom(atomWidth, atomHeight);
-        $atom.addClass(me._css.atomClass + "-" + row + "-" + col);
-        $atom.css({left: leftPos + "px", top: topPos + "px"});
-        me._$layout.append($atom);
+        var atom = me._createAtom(atomWidth, atomHeight);
+        atom.setAttribute("class", atom.getAttribute("class") + " " + me._css.atomClass + "-" + row + "-" + col);
+        atom.style.left = leftPos + "px";
+        atom.style.top = topPos + "px";
+        me._$layout.get(0).appendChild(atom);
     }
 
     var nextPositionLeft = this._spacerWidth;
@@ -328,10 +334,11 @@ DemoLayoutBuilder.IntersectionsSettingDemonstrator.prototype._renderHorizontalGr
 
     var me = this;
     var createAtom = function(atomWidth, atomHeight, leftPos, topPos, row, col) {
-        var $atom = me._createAtom(atomWidth, atomHeight);
-        $atom.addClass(me._css.atomClass + "-" + row + "-" + col);
-        $atom.css({left: leftPos + "px", top: topPos + "px"});
-        me._$layout.append($atom);
+        var atom = me._createAtom(atomWidth, atomHeight);
+        atom.setAttribute("class", atom.getAttribute("class") + " " + me._css.atomClass + "-" + row + "-" + col);
+        atom.style.left = leftPos + "px";
+        atom.style.top = topPos + "px";
+        me._$layout.get(0).appendChild(atom);
     }
 
     var nextPositionTop = this._spacerHeight;
@@ -369,10 +376,11 @@ DemoLayoutBuilder.IntersectionsSettingDemonstrator.prototype._renderHorizontalGr
 
     var me = this;
     var createAtom = function(atomWidth, atomHeight, leftPos, topPos, row, col) {
-        var $atom = me._createAtom(atomWidth, atomHeight);
-        $atom.addClass(me._css.atomClass + "-" + row + "-" + col);
-        $atom.css({left: leftPos + "px", top: topPos + "px"});
-        me._$layout.append($atom);
+        var atom = me._createAtom(atomWidth, atomHeight);
+        atom.setAttribute("class", atom.getAttribute("class") + " " + me._css.atomClass + "-" + row + "-" + col);
+        atom.style.left = leftPos + "px";
+        atom.style.top = topPos + "px";
+        me._$layout.get(0).appendChild(atom);
     }
 
     var nextPositionLeft = this._smallAtomSpacerWidth;

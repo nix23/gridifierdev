@@ -1,8 +1,9 @@
-DemoLayoutBuilder.SortDispersionSettingDemonstrator = function($targetEl, gridAdditionalSettings, gridSettings, gridTypeSelector) {
+DemoLayoutBuilder.SortDispersionSettingDemonstrator = function($targetEl, gridAdditionalSettings, gridSettings, gridTypeSelector, demoLayout) {
     var me = this;
 
     this._$view = View.attach(this._$view, $targetEl, View.ids.DEMO_LAYOUT_BUILDER.SORT_DISPERSION_SETTING_DEMONSTRATOR);
 
+    this._demoLayout = null;
     this._gridAdditionalSettings = null;
     this._gridTypeSelector = null;
 
@@ -37,6 +38,7 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator = function($targetEl, gridAd
     }
 
     this._construct = function() {
+        me._demoLayout = demoLayout;
         me._gridAdditionalSettings = gridAdditionalSettings;
         me._gridSettings = gridSettings;
         me._gridTypeSelector = gridTypeSelector;
@@ -62,8 +64,13 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator = function($targetEl, gridAd
         var me = this;
 
         $(window).on(DemoLayoutBuilder.SortDispersionSettingDemonstrator.EVENT_WINDOW_RESIZE, function() {
-            me._removeAllRenderedAtoms();
-            me._renderAtoms();
+            var resizeEventNormalizer = new ResizeEventNormalizer();
+            var normalizedFunc = resizeEventNormalizer.apply(function() {
+                me._removeAllRenderedAtoms();
+                me._renderAtoms();
+            });
+
+            normalizedFunc.apply(me);
         });
 
         $(me._gridTypeSelector).on(DemoLayoutBuilder.GridTypeSelector.EVENT_GRID_TYPE_CHANGE, function(event,
@@ -98,12 +105,17 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator = function($targetEl, gridAd
             }
         }
         $(this._gridAdditionalSettings).on(DemoLayoutBuilder.GridAdditionalSettings.EVENT_SORT_DISPERSION_MODE_CHANGE, sdChangeHandler);
+
+        $(me._demoLayout).on(DemoLayoutBuilder.EVENT_CREATE_GRID, function() {
+            me._stopLayoutAnimation();
+        });
     }
 
     this._unbindEvents = function() {
         $(window).off(DemoLayoutBuilder.SortDispersionSettingDemonstrator.EVENT_WINDOW_RESIZE);
         $(this._gridAdditionalSettings).off(DemoLayoutBuilder.GridAdditionalSettings.EVENT_SORT_DISPERSION_MODE_CHANGE);
         $(me._gridTypeSelector).off(DemoLayoutBuilder.GridTypeSelector.EVENT_GRID_TYPE_CHANGE);
+        $(me._demoLayout).off(DemoLayoutBuilder.EVENT_CREATE_GRID);
     }
 
     this.destruct = function() {
@@ -263,23 +275,28 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._createAtom = func
     }
     this._itemNumber++;
 
-    var $div = $("<div/>").addClass(atomClass).addClass(this._css.atomBorderClass);
-    $div.css({
-        position: "absolute",
-        width: atomWidth + "px",
-        height: atomHeight + "px",
-        "line-height": atomHeight - 5 + "px"
-    });
-    $div.html(this._itemNumber);
+    var div = document.createElement("div");
+    div.setAttribute("class", atomClass + " " + this._css.atomBorderClass);
+    div.style.position = "absolute";
+    div.style.width = atomWidth + "px";
+    div.style.height = atomHeight + "px";
+    div.style.lineHeight = atomHeight - 5 + "px";
+    div.innerHTML = this._itemNumber;
 
     if(atomBgType == DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_BG_TYPES.DEFAULT)
-        $div.css("background", "rgb(210,210,210");
+        div.style.background = "rgb(210,210,210)";
     else if(atomBgType == DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_BG_TYPES.FIRST_SPECIAL)
-        $div.addClass("gridFourthBg").css({color: "white"});
+    {
+        div.setAttribute("class", div.getAttribute("class") + " gridFourthBg");
+        div.style.color = "white";
+    }
     else if(atomBgType == DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_BG_TYPES.SECOND_SPECIAL)
-        $div.addClass("gridFifthBg").css({color: "white"});
+    {
+        div.setAttribute("class", div.getAttribute("class") + " gridFifthBg");
+        div.style.color = "white";
+    }
 
-    return $div;
+    return div;
 }
 
 DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._getGridAtomParams = function($layoutFrame) {
@@ -327,10 +344,11 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._renderVerticalGri
             else
                 var atomBgType = DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_BG_TYPES.DEFAULT;
 
-            var $atom = this._createAtom(DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_TYPES.DEFAULT, atomBgType);
-            $atom.addClass(this._css.atomClass + "-" + j + "-" + i);
-            $atom.css({left: nextPositionLeft + "px", top: nextPositionTop + "px"});
-            $layoutFrame.append($atom);
+            var atom = this._createAtom(DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_TYPES.DEFAULT, atomBgType);
+            atom.setAttribute("class", atom.getAttribute("class") + " " + this._css.atomClass + "-" + j + "-" + i);
+            atom.style.left = nextPositionLeft + "px";
+            atom.style.top = nextPositionTop + "px";
+            $layoutFrame.get(0).appendChild(atom);
 
             nextPositionLeft += this._atomSize + atomParams.spacerWidth;
             currentItem++;
@@ -378,10 +396,11 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._renderVerticalGri
                 var atomBgType = DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_BG_TYPES.DEFAULT;
             }
 
-            var $atom = this._createAtom(atomType, atomBgType, atomParams.spacerWidth, atomParams.spacerHeight);
-            $atom.addClass(this._css.atomClass + "-" + j + "-" + i);
-            $atom.css({left: nextPositionLeft + "px", top: nextPositionTop + "px"});
-            $layoutFrame.append($atom);
+            var atom = this._createAtom(atomType, atomBgType, atomParams.spacerWidth, atomParams.spacerHeight);
+            atom.setAttribute("class", atom.getAttribute("class") + " " + this._css.atomClass + "-" + j + "-" + i);
+            atom.style.left = nextPositionLeft + "px";
+            atom.style.top = nextPositionTop + "px";
+            $layoutFrame.get(0).appendChild(atom);
 
             nextPositionLeft += this._atomSize + atomParams.spacerWidth;
             currentItem++;
@@ -431,10 +450,11 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._renderVerticalGri
                 var atomType = DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_TYPES.DEFAULT;
                 var atomBgType = DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_BG_TYPES.SECOND_SPECIAL;
 
-                var $atom = this._createAtom(atomType, atomBgType);
-                $atom.addClass(this._css.atomClass + "-0-" + (atomParams.horizontalAtomsCount - 1));
-                $atom.css({left: lastAtomOnFirstLinePositionLeft + "px", top: atomParams.spacerHeight + "px"});
-                $layoutFrame.append($atom);
+                var atom = this._createAtom(atomType, atomBgType);
+                atom.setAttribute("class", atom.getAttribute("class") + " " + this._css.atomClass + "-0-" + (atomParams.horizontalAtomsCount - 1));
+                atom.style.left = lastAtomOnFirstLinePositionLeft + "px";
+                atom.style.top = atomParams.spacerHeight + "px";
+                $layoutFrame.get(0).appendChild(atom);
 
                 currentItem++;
                 atomBgType = DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_BG_TYPES.DEFAULT;
@@ -445,10 +465,11 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._renderVerticalGri
                 var atomBgType = DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_BG_TYPES.DEFAULT;
             }
             
-            var $atom = this._createAtom(atomType, atomBgType, atomParams.spacerWidth, atomParams.spacerHeight);
-            $atom.addClass(this._css.atomClass + "-" + j + "-" + i);
-            $atom.css({left: nextPositionLeft + "px", top: nextPositionTop + "px"});
-            $layoutFrame.append($atom);
+            var atom = this._createAtom(atomType, atomBgType, atomParams.spacerWidth, atomParams.spacerHeight);
+            atom.setAttribute("class", atom.getAttribute("class") + " " + this._css.atomClass + "-" + j + "-" + i);
+            atom.style.left = nextPositionLeft + "px";
+            atom.style.top = nextPositionTop + "px";
+            $layoutFrame.get(0).appendChild(atom);
 
             nextPositionLeft += this._atomSize + atomParams.spacerWidth;
             currentItem++;
@@ -482,10 +503,11 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._renderHorizontalG
             else
                 var atomBgType = DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_BG_TYPES.DEFAULT;
 
-            var $atom = this._createAtom(DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_TYPES.DEFAULT, atomBgType);
-            $atom.addClass(this._css.atomClass + "-" + j + "-" + i);
-            $atom.css({left: nextPositionLeft + "px", top: nextPositionTop + "px"});
-            $layoutFrame.append($atom);
+            var atom = this._createAtom(DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_TYPES.DEFAULT, atomBgType);
+            atom.setAttribute("class", atom.getAttribute("class") + " " + this._css.atomClass + "-" + j + "-" + i);
+            atom.style.left = nextPositionLeft + "px";
+            atom.style.top = nextPositionTop + "px";
+            $layoutFrame.get(0).appendChild(atom);
 
             nextPositionTop += this._atomSize + atomParams.spacerHeight;
             currentItem++;
@@ -535,10 +557,11 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._renderHorizontalG
                 var atomBgType = DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_BG_TYPES.DEFAULT;
             }
 
-            var $atom = this._createAtom(atomType, atomBgType, atomParams.spacerWidth, atomParams.spacerHeight);
-            $atom.addClass(this._css.atomCalss + "-" + j + "-" + i);
-            $atom.css({left: nextPositionLeft + "px", top: nextPositionTop + "px"});
-            $layoutFrame.append($atom);
+            var atom = this._createAtom(atomType, atomBgType, atomParams.spacerWidth, atomParams.spacerHeight);
+            atom.setAttribute("class", atom.getAttribute("class") + " " + this._css.atomClass + "-" + j + "-" + i);
+            atom.style.left = nextPositionLeft + "px";
+            atom.style.top = nextPositionTop + "px";
+            $layoutFrame.get(0).appendChild(atom);
 
             nextPositionTop += this._atomSize + atomParams.spacerHeight;
             currentItem++;
@@ -594,10 +617,11 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._renderHorizontalG
                 var atomType = DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_TYPES.DEFAULT;
                 var atomBgType = DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_BG_TYPES.SECOND_SPECIAL;
 
-                var $atom = this._createAtom(atomType, atomBgType);
-                $atom.addClass(this._css.atomClass + "-2-" + (atomParams.horizontalAtomsCount - 3));
-                $atom.css({left: mostBottomAtomBeforeTransitionedPositionLeft + "px", top: mostBottomAtomBeforeTransitionedPositionTop + "px"});
-                $layoutFrame.append($atom);
+                var atom = this._createAtom(atomType, atomBgType);
+                atom.setAttribute("class", atom.getAttribute("class") + " " + this._css.atomClass + "-2-" + (atomParams.horizontalAtomsCount - 3));
+                atom.style.left = mostBottomAtomBeforeTransitionedPositionLeft + "px";
+                atom.style.top = mostBottomAtomBeforeTransitionedPositionTop + "px";
+                $layoutFrame.get(0).appendChild(atom);
 
                 currentItem++;
                 atomBgType = DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_BG_TYPES.DEFAULT;
@@ -608,10 +632,11 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._renderHorizontalG
                 var atomBgType = DemoLayoutBuilder.SortDispersionSettingDemonstrator.ATOM_BG_TYPES.DEFAULT;
             }
 
-            var $atom = this._createAtom(atomType, atomBgType, atomParams.spacerWidth, atomParams.spacerHeight);
-            $atom.addClass(this._css.atomClass + "-" + j + "-" + i);
-            $atom.css({left: nextPositionLeft + "px", top: nextPositionTop + "px"});
-            $layoutFrame.append($atom);
+            var atom = this._createAtom(atomType, atomBgType, atomParams.spacerWidth, atomParams.spacerHeight);
+            atom.setAttribute("class", atom.getAttribute("class") + " " + this._css.atomClass + "-" + j + "-" + i);
+            atom.style.left = nextPositionLeft + "px";
+            atom.style.top = nextPositionTop + "px";
+            $layoutFrame.get(0).appendChild(atom);
 
             nextPositionTop += this._atomSize + atomParams.spacerHeight;
             currentItem++;

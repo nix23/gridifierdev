@@ -1,8 +1,9 @@
-DemoLayoutBuilder.InsertSettingDemonstrator = function($targetEl, gridSettings, insertMode, gridTypeSelector) {
+DemoLayoutBuilder.InsertSettingDemonstrator = function($targetEl, gridSettings, insertMode, gridTypeSelector, demoLayout) {
     var me = this;
 
     this._$view = View.attach(this._$view, $targetEl, View.ids.DEMO_LAYOUT_BUILDER.INSERT_SETTING_DEMONSTRATOR);
 
+    this._demoLayout = null;
     this._insertMode = null;
     this._gridTypeSelector = null;
 
@@ -29,6 +30,7 @@ DemoLayoutBuilder.InsertSettingDemonstrator = function($targetEl, gridSettings, 
     }
 
     this._construct = function() {
+        me._demoLayout = demoLayout;
         me._gridSettings = gridSettings;
         me._gridTypeSelector = gridTypeSelector;
 
@@ -39,10 +41,10 @@ DemoLayoutBuilder.InsertSettingDemonstrator = function($targetEl, gridSettings, 
             me._gridAnimator = new DemoLayoutBuilder.InsertSettingDemonstrator.HorizontalGridAnimator(me);
         else if(me._gridSettings._isVerticalGridType())
             me._gridAnimator = new DemoLayoutBuilder.InsertSettingDemonstrator.VerticalGridAnimator(me);
-
+        
         me._renderAtoms();
         me._launchAnimation();
-
+        
         if(me._gridSettings._isHorizontalGridType())
             me._stopAnimation();
 
@@ -51,8 +53,13 @@ DemoLayoutBuilder.InsertSettingDemonstrator = function($targetEl, gridSettings, 
 
     this._bindEvents = function() {
         $(window).on(DemoLayoutBuilder.InsertSettingDemonstrator.EVENT_WINDOW_RESIZE, function() {
-            me._removeRenderedAtoms();
-            me._renderAtoms();
+            var resizeEventNormalizer = new ResizeEventNormalizer();
+            var normalizedFunc = resizeEventNormalizer.apply(function() {
+                me._removeRenderedAtoms();
+                me._renderAtoms();
+            });
+
+            normalizedFunc.apply(me);
         });
 
         $(me._gridTypeSelector).on(DemoLayoutBuilder.GridTypeSelector.EVENT_GRID_TYPE_CHANGE, function(event, 
@@ -74,11 +81,16 @@ DemoLayoutBuilder.InsertSettingDemonstrator = function($targetEl, gridSettings, 
                     me._stopAnimation();
             }
         });
+
+        $(me._demoLayout).on(DemoLayoutBuilder.EVENT_CREATE_GRID, function() {
+            me._stopAnimation();
+        });
     }
 
     this._unbindEvents = function() {
         $(window).off(DemoLayoutBuilder.InsertSettingDemonstrator.EVENT_WINDOW_RESIZE);
         $(me._gridTypeSelector).off(DemoLayoutBuilder.GridTypeSelector.EVENT_GRID_TYPE_CHANGE);
+        $(me._demoLayout).off(DemoLayoutBuilder.EVENT_CREATE_GRID);
     }
 
     this.destruct = function() {
@@ -160,16 +172,15 @@ DemoLayoutBuilder.InsertSettingDemonstrator.prototype._createAtom = function() {
     if(this._currentGridBGIndex == gridBgs.length)
         this._currentGridBGIndex = 0;
 
-    var $div = $("<div/>").addClass(this._css.atomClass).addClass(this._css.atomBorderClass);
-    $div.addClass(gridBgs[this._currentGridBGIndex]).css({
-        position: "absolute",
-        width: this._atomSize + "px",
-        height: this._atomSize + "px",
-        "line-height": this._atomSize - 5 + "px",
-        "visibility": "hidden"
-    });
+    var div = document.createElement("div");
+    div.setAttribute("class", this._css.atomClass + " " + this._css.atomBorderClass + " " + gridBgs[this._currentGridBGIndex]);
+    div.style.position = "absolute";
+    div.style.width = this._atomSize + "px";
+    div.style.height = this._atomSize + "px";
+    div.style.lineHeight = this._atomSize - 5 + "px";
+    div.style.visibility = "hidden";
 
-    return $div;
+    return div;
 }
 
 DemoLayoutBuilder.InsertSettingDemonstrator.prototype._renderAtoms = function() {
@@ -177,7 +188,7 @@ DemoLayoutBuilder.InsertSettingDemonstrator.prototype._renderAtoms = function() 
     this._currentAnimationStep = 0;
     this._currentGridBGIndex = -1;
     var layoutWidth = this._$layout.outerWidth();
-    var layoutHeight = this._$layout.outerHeight();
+    var layoutHeight = this._$layout.outerHeight(); 
 
     var atomWidth = this._atomSize + this._atomMargin * 2;
     var atomHeight = this._atomSize + this._atomMargin * 2;
@@ -191,16 +202,17 @@ DemoLayoutBuilder.InsertSettingDemonstrator.prototype._renderAtoms = function() 
     var spacerWidth = totalAvailableWidthPerSpacers / (horizontalAtomsCount + 1);
     var spacerHeight = totalAvailableHeightPerSpacers / (verticalAtomsCount + 1);
 
-    var nextPositionLeft = spacerWidth;
+    var nextPositionLeft = spacerWidth; var layout = this._$layout.get(0); 
     for(var i = 0; i < horizontalAtomsCount; i++)
     {
-        var nextPositionTop = spacerHeight;
+        var nextPositionTop = spacerHeight; 
         for(var j = 0; j < verticalAtomsCount; j++)
-        {
-            var $atom = this._createAtom();
-            $atom.addClass(this._css.atomClass + "-" + j + "-" + i);
-            $atom.css({left: nextPositionLeft + "px", top: nextPositionTop + "px"});
-            this._$layout.append($atom);
+        {   
+            var atom = this._createAtom();
+            atom.setAttribute("class", atom.getAttribute("class") + " " + this._css.atomClass + "-" + j + "-" + i);
+            atom.style.left = nextPositionLeft + "px";
+            atom.style.top = nextPositionTop + "px";
+            this._$layout.get(0).appendChild(atom);
 
             this._animationSteps++;
             nextPositionTop += this._atomSize + spacerHeight;

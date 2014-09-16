@@ -1,8 +1,9 @@
-DemoLayoutBuilder.GridAdditionalSettings = function($targetEl, gridSettings, gridTypeSelector) {
+DemoLayoutBuilder.GridAdditionalSettings = function($targetEl, gridSettings, gridTypeSelector, demoLayout) {
     var me = this;
 
     this._$view = null;
 
+    this._demoLayout = null;
     this._gridTypeSelector = null;
 
     this._$customSortDispersionSeparator = null;
@@ -83,6 +84,7 @@ DemoLayoutBuilder.GridAdditionalSettings = function($targetEl, gridSettings, gri
     ];
 
     this._construct = function() { 
+        me._demoLayout = demoLayout;
         me._gridSettings = gridSettings;
         me._gridTypeSelector = gridTypeSelector;
         me._attachView();
@@ -99,7 +101,7 @@ DemoLayoutBuilder.GridAdditionalSettings = function($targetEl, gridSettings, gri
         );
 
         me._sortDispersionSettingDemonstrator = new DemoLayoutBuilder.SortDispersionSettingDemonstrator(
-            me._$view.find("." + me._css.sortDispersionDemonstratorClass), me, me._gridSettings, me._gridTypeSelector
+            me._$view.find("." + me._css.sortDispersionDemonstratorClass), me, me._gridSettings, me._gridTypeSelector, me._demoLayout
         );
 
         me._selectStrategySetting(me._$view.find("." + me._css.defaultIntersectionSettingClass));

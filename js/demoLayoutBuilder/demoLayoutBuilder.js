@@ -10,7 +10,7 @@ DemoLayoutBuilder = function($targetEl) {
     this._$gridConfiguratorAccordionTab = null;
     this._$gridLayoutAccordionTab = null;
 
-    this._accordionTabSlideMsInterval = 1000;
+    this._accordionTabSlideMsInterval = 4000;
 
     this._css = {
         demoLayoutBuilderClass: "demoLayoutBuilder",
@@ -23,7 +23,7 @@ DemoLayoutBuilder = function($targetEl) {
         me._$gridConfiguratorAccordionTab = me._$demoLayoutBuilder.find("." + me._css.gridConfiguratorAccordionTabClass);
         me._$gridLayoutAccordionTab = me._$demoLayoutBuilder.find("." + me._css.gridLayoutAccordionTabClass);
 
-        me._gridConfigurator = new DemoLayoutBuilder.Configurator(me._$gridConfiguratorAccordionTab);
+        me._gridConfigurator = new DemoLayoutBuilder.Configurator(me._$gridConfiguratorAccordionTab, me);
         
         this._bindEvents();
     }
@@ -39,6 +39,7 @@ DemoLayoutBuilder = function($targetEl) {
                 gridifierSettings
             );
 
+            $(me).trigger(DemoLayoutBuilder.EVENT_CREATE_GRID);
             me._showGridLayoutAccordionTab();
         });
 
@@ -52,6 +53,7 @@ DemoLayoutBuilder = function($targetEl) {
                 gridifierSettings
             ); 
 
+            $(me).trigger(DemoLayoutBuilder.EVENT_CREATE_GRID);
             me._showGridLayoutAccordionTab();
         });
     }
@@ -68,6 +70,8 @@ DemoLayoutBuilder = function($targetEl) {
     this._construct();
     return this;
 }
+
+DemoLayoutBuilder.EVENT_CREATE_GRID = "demoLayoutBuilder.createGrid";
 
 DemoLayoutBuilder.prototype._showGridLayoutAccordionTab = function() {
     var me = this;
