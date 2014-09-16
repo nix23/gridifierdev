@@ -1,0 +1,16 @@
+.demoLayoutBuilder {
+    width: 100%;
+}
+
+.demoLayoutBuilder .gridConfiguratorAccordionTab {
+    width: 100%;
+    max-height: 1480px;
+    overflow: hidden;
+}
+
+.demoLayoutBuilder .gridLayoutAccordionTab {
+    width: 100%;
+    max-height: 0px;
+    overflow: hidden;
+    display: none;
+}

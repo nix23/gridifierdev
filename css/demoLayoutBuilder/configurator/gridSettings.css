@@ -1,0 +1,113 @@
+#configurator .gridSettings .settings {
+    clear: both;
+    width: 100%;
+    background: rgb(235,235,235);
+}
+
+#configurator .gridSettings .insertSettings {
+    height: 635px;
+}
+
+#configurator .gridSettings .settingsWrapper {
+    float: left;
+    width: 50%;
+    height: 100%;
+}
+
+#configurator .gridSettings .settingsHeading {
+    width: 100%;
+    height: 60px;
+}
+
+#configurator .gridSettings .settingsHeading .label {
+    width: 100%;
+    height: 26px;
+    line-height: 26px;
+    margin-top: 12px;
+    font-weight: bold;
+    font-size: 30px;
+    letter-spacing: -1px;
+}
+
+#configurator .gridSettings .settingsHeading .sublabel {
+    width: 100%;
+    height: 20px;
+    margin-top: 3px;
+}
+
+#configurator .gridSettings .settingsContent {
+    width: 100%;
+    height: calc(100% - 60px);
+    height: -webkit-calc(100% - 60px);
+    height: -moz-calc(100% - 60px);
+}
+
+#configurator .gridSettings .setting {
+    width: 99%;
+    height: 130px;
+    box-sizing: border-box;
+    margin-top: 5px;
+}
+
+#configurator .gridSettings .setting:hover {
+    cursor: pointer;
+}
+
+#configurator .gridSettings .selectedSetting {
+    border: 5px rgb(235,235,235) solid;
+}
+
+#configurator .gridSettings .setting .legend {
+    float: left;
+    width: 100%;
+    height: 130px;
+}
+
+#configurator .gridSettings .setting .legend .settingName {
+    width: 100%;
+    height: 28px;
+    line-height: 28px;
+    margin-top: 12px;
+    font-weight: bold;
+    font-size: 28px;
+    letter-spacing: -1px;
+    text-align: left;
+    padding-left: 10px;
+}
+
+#configurator .gridSettings .setting .legend .settingDescription {
+    width: 97%;
+    height: 52px;
+    font-size: 18px;
+    letter-spacing: 0px;
+    text-align: left;
+    padding-left: 10px;
+    line-height: 26px;
+    margin-top: 2px;
+}
+
+#configurator .gridSettings .demonstrator {
+    width: 99%;
+    box-sizing: border-box;
+    background: rgb(220,220,220);
+}
+
+#configurator .gridSettings .prependDemonstrator {
+    height: 140px;
+    margin-top: 10px;
+}
+
+#configurator .gridSettings .appendDemonstrator {
+    height: 280px;
+    margin-top: 5px;
+}
+
+#configurator .gridSettings .verticalGridDemonstrator {
+    border-left: 5px solid;
+    border-right: 5px solid;
+}
+
+#configurator .gridSettings .horizontalGridDemonstrator {
+    border-top: 5px solid;
+    border-bottom: 5px solid;
+}

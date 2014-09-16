@@ -1,0 +1,86 @@
+<div class="settings additionalSettings">
+    <div class="settingsWrapper insersectionStrategySettings">
+        <div class="settingsHeading">
+            <div class="label">
+                <span class="{{ settingNameHighlightClass }}">Intersection</span> strategy
+            </div>
+
+            <div class="sublabel">
+                {{ intersectionStrategySublabel }}
+            </div>
+        </div>
+
+        <div class="settingsContent" data-applyplugin="cssCalcNormalizer" data-plugin-mode="substractFromParent" 
+                                                     data-plugin-secondvalue="60px" data-plugin-property="height">
+            <div class="setting defaultIntersectionStrategySetting selectedSetting intersectionSetting">
+                <div class="legend">
+                    <div class="settingName">
+                        <span class="{{ settingNameHighlightClass }}">Default</span> strategy
+                    </div>
+
+                    <div class="settingDescription">
+                        {{ defaultIntersectionStrategyDescription }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting noIntersectionsStrategySetting selectedSetting intersectionSetting">
+                <div class="legend">
+                    <div class="settingName">
+                        <span class="{{ settingNameHighlightClass }}">No intersections</span> strategy
+                    </div>
+
+                    <div class="settingDescription">
+                        {{ noIntersectionsStrategyDescription }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="demonstrator intersectionsDemonstrator {{ demonstratorClass }}">
+            </div>
+        </div>
+    </div>
+
+    <div class="settingsWrapper sortDispersionSettings">
+        <div class="settingsHeading">
+            <div class="label">
+                <span class="{{ settingNameHighlightClass }}">Sort</span> dispersion
+            </div>
+
+            <div class="sublabel">
+                {{ sortDispersionHeadingSublabel }}
+            </div>
+        </div>
+
+        <div class="settingsContent" data-applyplugin="cssCalcNormalizer" data-plugin-mode="substractFromParent"
+                                                      data-plugin-secondvalue="60px" data-plugin-property="height">
+            <div class="setting disabledSortDispersionSetting selectedSetting sortDispersionSetting">
+                <div class="legend">
+                    <div class="settingName">
+                        <span class="{{ settingNameHighlightClass }}">Disabled</span> dispersion
+                    </div>
+
+                    <div class="settingDescription">
+                        {{ disabledDispersionDescription }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting customSortDispersionSetting selectedSetting sortDispersionSetting">
+                <div class="legend">
+                    <div class="settingName">
+                        <span class="{{ settingNameHighlightClass }}">Custom</span> dispersion <span class="customDispersionSeparator">>></span> <span class="customDispersionValue {{ settingNameHighlightClass }}"></span>
+                    </div>
+
+                    <div class="settingDescription {{ sortDispersionClass }}">
+                        <div class="sortDispersionSlider">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="demonstrator sortDispersionDemonstrator {{ demonstratorClass }}">
+            </div>
+        </div>
+    </div>
+</div>

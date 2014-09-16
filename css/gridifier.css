@@ -1,0 +1,164 @@
+html, body {
+    width: 100%;
+    height: 100%;
+    background: rgb(220,220,220);
+    text-align: center;
+    min-width: 960px;
+    font-family: "Open Sans";
+}
+
+#demoLayoutContainer {
+    float: left;
+    width: calc(100% - 30px);
+    width: -webkit-calc(100% - 30px);
+    width: -moz-calc(100% - 30px);
+    min-width: 930px;
+    margin: 0 15px;
+    margin-top: 15px;
+}
+
+.atomBorder { 
+    border-color: black !important;  
+    box-shadow: 2px 2px 2px #888888;
+}
+
+/* Blue */
+.gridFirstColor {
+    color: rgb(129,181,228) !important;
+}
+
+/* Violet */
+.gridSecondColor {
+    color: rgb(179,158,199) !important;
+}
+
+
+/* Orange */
+.gridThirdColor {
+    color: rgb(249,172,64) !important;
+}
+
+/* Red */
+.gridFourthColor {
+    color: rgb(197,79,51) !important; 
+}
+
+
+/* Green */
+.gridFifthColor {
+    color: rgb(73,158,75) !important;
+}
+
+/* Blue */
+.gridFirstBg {
+    background: rgb(129,181,228) !important;
+}
+
+/* Violet */
+.gridSecondBg {
+    background: rgb(179,158,199) !important;
+}
+
+
+/* Orange */
+.gridThirdBg {
+    background: rgb(249,172,64) !important;
+}
+
+/* Red */
+.gridFourthBg {
+    background: rgb(197,79,51) !important;
+}
+
+
+/* Green */
+.gridFifthBg {
+    background: rgb(73,158,75) !important;
+}
+
+/* Blue */
+.gridFirstBorderColor {
+    background: rgb(129,181,228) !important;
+}
+
+/* Violet */
+.gridSecondBorderColor {
+    border-color: rgb(179,158,199) !important;
+}
+
+
+/* Orange */
+.gridThirdBorderColor {
+    border-color: rgb(249,172,64) !important;
+}
+
+/* Red */
+.gridFourthBorderColor {
+    border-color: rgb(197,79,51) !important;
+}
+
+
+/* Green */
+.gridFifthBorderColor {
+    border-color: rgb(73,158,75) !important;
+}
+
+/* Horizontal */
+#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-handle {
+    background: rgb(197,79,51);
+}
+
+#configurator .horizontalSortDispersion .sortDispersionSlider.noUi-connect {
+    background: rgb(197,79,51);
+}
+
+#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-pips {
+    color: rgb(197,79,51);
+}
+
+#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-marker {
+    background: rgb(197,79,51);
+}
+
+#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-marker-sub {
+    background: rgb(197,79,51);
+}
+
+#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-marker-large {
+    background: rgb(197,79,51);
+}
+
+/* Vertical */
+#configurator .verticalSortDispersion .sortDispersionSlider .noUi-handle {
+    background: rgb(73,158,75);
+}
+
+#configurator .verticalSortDispersion .sortDispersionSlider.noUi-connect {
+    background: rgb(73,158,75);
+}
+
+#configurator .verticalSortDispersion .sortDispersionSlider .noUi-pips {
+    color: rgb(73,158,75);
+}
+
+#configurator .verticalSortDispersion .sortDispersionSlider .noUi-marker {
+    background: rgb(73,158,75);
+}
+
+#configurator .verticalSortDispersion .sortDispersionSlider .noUi-marker-sub {
+    background: rgb(73,158,75);
+}
+
+#configurator .verticalSortDispersion .sortDispersionSlider .noUi-marker-large {
+    background: rgb(73,158,75);
+}
+
+#configurator .sortDispersionSlider[disabled].noUi-connect,
+#configurator .sortDispersionSlider[disabled] .noUi-connect {
+    background: rgb(210,210,210);
+}
+
+#configurator .sortDispersionSlider[disabled] .noUi-handle {
+    cursor: not-allowed;
+    background: rgb(170,170,170);
+}

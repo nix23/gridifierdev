@@ -1,0 +1,24 @@
+#configurator .gridSettings .additionalSettings {
+    height: 565px;
+}
+
+#configurator .gridSettings .intersectionsDemonstrator {
+    height: 205px;
+    margin-top: 10px;
+}
+
+#configurator .gridSettings .sortDispersionDemonstrator {
+    height: 205px;
+    margin-top: 10px;
+}
+
+#configurator .sortDispersionSlider {
+    width: 90%;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+#configurator .customSortDispersionSetting .settingName .customDispersionSeparator,
+#configurator .customSortDispersionSetting .settingNmae .customDispersionValue {
+    visibility: hidden;
+}
