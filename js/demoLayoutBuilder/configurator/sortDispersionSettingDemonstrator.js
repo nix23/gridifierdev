@@ -14,6 +14,9 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator = function($targetEl, gridAd
     this._atomMargin = 4;
     this._itemNumber = 0;
 
+    this._isAnimationActive = false;
+    this._wasAnimationActive = null;
+
     this._toggleLayoutFrameTimeout = null;
    // this._frameRenderMsInterval = 3000;
     this._frameRenderMsInterval = 800;
@@ -109,6 +112,16 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator = function($targetEl, gridAd
         $(me._demoLayout).on(DemoLayoutBuilder.EVENT_CREATE_GRID, function() {
             me._stopLayoutAnimation();
         });
+
+        $(me._demoLayout).on(DemoLayoutBuilder.EVENT_LOCK_CONFIGURATOR_ANIMATIONS, function() {
+            me._wasAnimationActive = me._isAnimationActive;
+            me._stopLayoutAnimation();
+        });
+
+        $(me._demoLayout).on(DemoLayoutBuilder.EVENT_UNLOCK_CONFIGURATOR_ANIMATIONS, function() {
+            if(me._wasAnimationActive)
+                me._launchLayoutAnimation();
+        });
     }
 
     this._unbindEvents = function() {
@@ -116,6 +129,8 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator = function($targetEl, gridAd
         $(this._gridAdditionalSettings).off(DemoLayoutBuilder.GridAdditionalSettings.EVENT_SORT_DISPERSION_MODE_CHANGE);
         $(me._gridTypeSelector).off(DemoLayoutBuilder.GridTypeSelector.EVENT_GRID_TYPE_CHANGE);
         $(me._demoLayout).off(DemoLayoutBuilder.EVENT_CREATE_GRID);
+        $(me._demoLayout).off(DemoLayoutBuilder.EVENT_LOCK_CONFIGURATOR_ANIMATIONS);
+        $(me._demoLayout).off(DemoLayoutBuilder.EVENT_UNLOCK_CONFIGURATOR_ANIMATIONS);
     }
 
     this.destruct = function() {
@@ -214,6 +229,7 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._toggleCurrentLayo
 }
 
 DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._launchLayoutAnimation = function() {
+    this._isAnimationActive = true;
     if(this._$currentVisibleFrame == null)
         this._$currentVisibleFrame = this._$disabledSdInsertionFrame;
     this._toggleLayoutFrameTimeout = setTimeout($.proxy(this._toggleCurrentLayoutFrames, this), 0);
@@ -222,6 +238,7 @@ DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._launchLayoutAnima
 DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._stopLayoutAnimation = function() {
     if(this._toggleLayoutFrameTimeout != null)
         clearTimeout(this._toggleLayoutFrameTimeout);
+    this._isAnimationActive = false;
 }
 
 DemoLayoutBuilder.SortDispersionSettingDemonstrator.prototype._removeAllRenderedAtoms = function() {

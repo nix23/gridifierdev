@@ -18,6 +18,7 @@ DemoLayoutBuilder.InsertSettingDemonstrator = function($targetEl, gridSettings, 
 
     this._frameRenderMsInterval = 150;
     this._isAnimationActive = false;
+    this._wasAnimationActive = null;
     this._animationSteps = null;
     this._currentAnimationStep = 0;
     this._horizontalAtomsCount = null;
@@ -85,12 +86,24 @@ DemoLayoutBuilder.InsertSettingDemonstrator = function($targetEl, gridSettings, 
         $(me._demoLayout).on(DemoLayoutBuilder.EVENT_CREATE_GRID, function() {
             me._stopAnimation();
         });
+
+        $(me._demoLayout).on(DemoLayoutBuilder.EVENT_LOCK_CONFIGURATOR_ANIMATIONS, function() {
+            me._wasAnimationActive = me._isAnimationActive;
+            me._stopAnimation();
+        });
+
+        $(me._demoLayout).on(DemoLayoutBuilder.EVENT_UNLOCK_CONFIGURATOR_ANIMATIONS, function() {
+            if(me._wasAnimationActive)
+                me._launchAnimation();
+        });
     }
 
     this._unbindEvents = function() {
         $(window).off(DemoLayoutBuilder.InsertSettingDemonstrator.EVENT_WINDOW_RESIZE);
         $(me._gridTypeSelector).off(DemoLayoutBuilder.GridTypeSelector.EVENT_GRID_TYPE_CHANGE);
         $(me._demoLayout).off(DemoLayoutBuilder.EVENT_CREATE_GRID);
+        $(me._demoLayout).off(DemoLayoutBuilder.EVENT_LOCK_CONFIGURATOR_ANIMATIONS);
+        $(me._demoLayout).off(DemoLayoutBuilder.EVENT_UNLOCK_CONFIGURATOR_ANIMATIONS);
     }
 
     this.destruct = function() {

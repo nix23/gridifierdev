@@ -183,6 +183,10 @@ DemoLayoutBuilder.Configurator.prototype._debugGridifierSettings = function() {
     }
 }
 
+DemoLayoutBuilder.Configurator.prototype.getView = function() {
+    return this._$view;
+}
+
 DemoLayoutBuilder.Configurator.prototype.getGridTypeSelector = function() {
     return this._gridTypeSelector;
 }

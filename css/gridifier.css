@@ -7,6 +7,10 @@ html, body {
     font-family: "Open Sans";
 }
 
+body {
+    overflow-y: scroll;
+}
+
 #demoLayoutContainer {
     float: left;
     width: calc(100% - 30px);
