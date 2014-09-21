@@ -32,3 +32,20 @@
     cursor: pointer;
     color: white;
 }
+
+#demoLayout .gridHeadingView {
+    width: 100%;
+}
+
+#demoLayout .gridTopControlsView,
+#demoLayout .gridBottomControlsView {
+    width: 100%;
+}
+
+#demoLayout .gridView {
+    width: 100%;
+}
+
+#demoLayout .gridSourcesDumperView {
+    width: 100%;
+}

@@ -5,16 +5,34 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
     this._demoLayoutBuilder = null;
 
+    this._gridHeading = null;
+    this._gridTopControls = null;
+    this._grid = null;
+    this._gridBottomControls = null;
+    this._gridSourcesDumper = null;
+
     this._gridType = null;
     this._gridifierSettings = null;
 
     this._$loadGridConfiguratorButton = null;
 
+    this._$gridHeadingView = null;
+    this._$gridTopControlsView = null;
+    this._$gridView = null;
+    this._$gridBottomControlsView = null;
+    this._$gridSourcesDumperView = null;
+
     this._css = {
         verticalGridThemeBgClass: "gridFifthBg",
         horizontalGridThemeBgClass: "gridFourthBg",
 
-        loadGridConfiguratorButtonClass: "loadGridConfiguratorButton"
+        loadGridConfiguratorButtonClass: "loadGridConfiguratorButton",
+
+        gridHeadingViewClass: "gridHeadingView",
+        gridTopControlsViewClass: "gridTopControlsView",
+        gridViewClass: "gridView",
+        gridBottomControlsViewClass: "gridBottomControlsView",
+        gridSourcesDumperClass: "gridSourcesDumperView"
     }
 
     this._verticalGridViewParams = {
@@ -33,12 +51,28 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._attachView();
 
         me._$loadGridConfiguratorButton = me._$view.find("." + me._css.loadGridConfiguratorButtonClass);
+        me._$gridHeadingView = me._$view.find("." + me._css.gridHeadingViewClass);
+        me._$gridTopControlsView = me._$view.find("." + me._css.gridTopControlsViewClass);
+        me._$gridView = me._$view.find("." + me._css.gridViewClass);
+        me._$gridBottomControlsView = me._$view.find("." + me._css.gridBottomControlsViewClass);
+        me._$gridSourcesDumperView = me._$view.find("." + me._css.gridSourcesDumperClass);
+
+        if(me.isVerticalGrid()) {
+            me._gridHeading = new DemoLayoutBuilder.DemoLayout.VerticalGridHeading(me._$gridHeadingView);
+            me._grid = new DemoLayoutBuilder.DemoLayout.VerticalGrid(me._$gridView);
+        }
+        else if(me.isHorizontalGrid()) {
+            me._gridHeading = new DemoLayoutBuilder.DemoLayout.HorizontalGridHeading(me._$gridHeadingView);
+            me._grid = new DemoLayoutBuilder.DemoLayout.HorizontalGrid(me._$gridView);
+        }
+
+        me._gridTopControls = new DemoLayoutBuilder.DemoLayout.GridControls(me._$gridTopControlsView);
+        me._gridBottomControls = new DemoLayoutBuilder.DemoLayout.GridControls(me._$gridBottomControlsView);
+        me._gridSourcesDumper = new DemoLayoutBuilder.DemoLayout.GridSourcesDumper(me._$gridSourcesDumperView);
 
         me._bindEvents();
     }
 
-    // @todo Vivoditj kod sozdanija gridifiera? S pravilnoj temoj
-    // @todo Vinositj v otdelnuju papku renderfunction, sortfunctions, etc..
     this._bindEvents = function() {
         me._$loadGridConfiguratorButton.on("mouseenter", function() {
             if(me.isVerticalGrid())
@@ -74,7 +108,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         else if(me.isHorizontalGrid())
             var viewParams = me.horizontalGridParams;
 
-        me._$view = View.attach(me._$view, $targetEl, View.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT, viewParams);
+        me._$view = View.attach(me._$view, $targetEl, View.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT.DEMO_LAYOUT, viewParams);
     }
 
     this._construct();

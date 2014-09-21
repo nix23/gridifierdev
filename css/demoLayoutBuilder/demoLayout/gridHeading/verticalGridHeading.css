@@ -1,0 +1,46 @@
+#demoLayout .gridHeadingView .heading {
+    width: 100%;
+    height: 90px;
+    text-align: center;
+    background: rgb(210,210,210);
+}
+
+#demoLayout .gridHeadingView .heading .layoutInfo {
+    display: inline-block;
+    height: 90px;
+}
+
+#demoLayout .gridHeadingView .heading .layoutInfo .item {
+    float: left;
+    height: 90px;
+}
+
+#demoLayout .gridHeadingView .heading .layoutInfo .item .paramsGroupName {
+    float: left;
+    font-size: 22px;
+    font-weight: bold;
+    margin-right: 15px;
+    height: 90px;
+    line-height: 90px;
+}
+
+#demoLayout .gridHeadingView .heading .layoutInfo .item .param {
+    float: left;
+    margin-right: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
+    height: 90px;
+    color: white;
+    font-weight: bold;
+}
+
+#demoLayout .gridHeadingView .heading .layoutInfo .item .param .name {
+    margin-top: 15px;
+    font-size: 22px;
+    letter-spacing: -1px;
+}
+
+#demoLayout .gridHeadingView .heading .layoutInfo .item .param .value {
+    font-size: 20px;
+    letter-spacing: -1px;
+}

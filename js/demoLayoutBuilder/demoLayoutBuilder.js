@@ -10,7 +10,8 @@ DemoLayoutBuilder = function($targetEl) {
     this._$gridConfiguratorAccordionTab = null;
     this._$gridLayoutAccordionTab = null;
 
-    this._accordionTabSlideMsInterval = 500;
+    //this._accordionTabSlideMsInterval = 500; @todo remove
+    this._accordionTabSlideMsInterval = 0;
 
     this._css = {
         demoLayoutBuilderClass: "demoLayoutBuilder",

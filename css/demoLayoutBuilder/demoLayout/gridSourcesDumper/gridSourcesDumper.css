@@ -1,0 +1,29 @@
+#demoLayout .gridSourcesDumperView .gridSourcesDumper {
+    width: 100%;
+    background: rgb(210,210,210);
+    overflow: hidden;
+}
+
+#demoLayout .gridSourcesDumperView .gridSourcesDumper .left {
+    float: left;
+    width: 50%;
+}
+
+#demoLayout .gridSourcesDumperView .gridSourcesDumper .right {
+    float: left;
+    width: 50%;
+}
+
+#demoLayout .gridSourcesDumperView .gridSourcesDumper .heading {
+    width: 100%;
+    height: 70px;
+    line-height: 70px;
+    color: white;
+    font-weight: bold;
+    font-size: 24px;
+    letter-spacing: -1px;
+}
+
+#demoLayout .gridSourcesDumperView .gridSourcesDumper .content {
+    width: 100%;
+}

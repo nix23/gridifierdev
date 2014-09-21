@@ -12,7 +12,23 @@ var View = {
             SORT_DISPERSION_SETTING_DEMONSTRATOR: "demoLayoutBuilder.sortDispersionSettingDemonstrator",
             CREATE_GRID: "demoLayoutBuilder.createGrid",
 
-            DEMO_LAYOUT: "demoLayoutBuilder.demoLayout"
+            DEMO_LAYOUT: {
+                DEMO_LAYOUT: "demoLayoutBuilder.demoLayout",
+
+                GRID_HEADING: {
+                    HORIZONTAL_GRID: "demoLayoutBuilder.demoLayout.gridHeading.horizontalGrid",
+                    VERTICAL_GRID: "demoLayoutBuilder.demoLayout.gridHeading.verticalGrid"
+                },
+
+                GRID_CONTROLS: "demoLayoutBuilder.demoLayout.gridControls",
+
+                GRID: {
+                    HORIZONTAL_GRID: "demoLayoutBuilder.demoLayout.grid.horizontalGrid",
+                    VERTICAL_GRID: "demoLayoutBuilder.demoLayout.grid.verticalGrid"
+                },
+
+                GRID_SOURCES_DUMPER: "demoLayoutBuilder.demoLayout.gridSourcesDumper"
+            }
         }
     },
 
@@ -73,8 +89,44 @@ var View = {
         });
 
         var demoLayoutView = twig({
-            id: this.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT,
+            id: this.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT.DEMO_LAYOUT,
             href: "views/demoLayoutBuilder/demoLayout/demoLayout.html.twig",
+            async: false
+        });
+
+        var demoLayoutGridHeadingHorizontalGridView = twig({
+            id: this.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT.GRID_HEADING.HORIZONTAL_GRID,
+            href: "views/demoLayoutBuilder/demoLayout/gridHeading/horizontalGridHeading.html.twig",
+            async: false
+        });
+
+        var demoLayoutGridHeadingVerticalGridView = twig({
+            id: this.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT.GRID_HEADING.VERTICAL_GRID,
+            href: "views/demoLayoutBuilder/demoLayout/gridHeading/verticalGridHeading.html.twig",
+            async: false
+        });
+
+        var demoLayoutGridControlsView = twig({
+            id: this.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT.GRID_CONTROLS,
+            href: "views/demoLayoutBuilder/demoLayout/gridControls/gridControls.html.twig",
+            async: false
+        });
+
+        var demoLayoutGridHorizontalGridView = twig({
+            id: this.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT.GRID.HORIZONTAL_GRID,
+            href: "views/demoLayoutBuilder/demoLayout/grid/horizontalGrid.html.twig",
+            async: false
+        });
+
+        var demoLayoutGridVerticalGridView = twig({
+            id: this.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT.GRID.VERTICAL_GRID,
+            href: "views/demoLayoutBuilder/demoLayout/grid/verticalGrid.html.twig",
+            async: false
+        });
+
+        var demoLayoutGridSourcesDumperView = twig({
+            id: this.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT.GRID_SOURCES_DUMPER,
+            href: "views/demoLayoutBuilder/demoLayout/gridSourcesDumper/gridSourcesDumper.html.twig",
             async: false
         });
     },
