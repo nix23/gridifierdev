@@ -1,0 +1,33 @@
+.gridControlsSelector .rightSide .fade {
+    width: 100%;
+}
+
+.gridControlsSelector .rightSide .fade .block {
+    float: left;
+    width: 47%;
+    position: relative;
+}
+
+.gridControlsSelector .rightSide .fade .blockHorizontalMargin {
+    margin-left: 5%;
+}
+
+.gridControlsSelector .rightSide .fade .block .blockHeading {
+    width: 100%;
+    height: 20px;
+    color: white;
+    text-align: center;
+    line-height: 20px;
+    font-size: 14px;
+}
+
+.gridControlsSelector .rightSide .fade .block .blockElement {
+    width: 65px;
+    height: 65px;
+    line-height: 65px;
+    box-sizing: border-box;
+    margin: 5px auto;
+    text-align: center;
+    color: white;
+    font-size: 18px;
+}

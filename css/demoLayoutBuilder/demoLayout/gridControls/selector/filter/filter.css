@@ -1,0 +1,16 @@
+.gridControlsSelector .filterDemo {
+    width: 100%;
+    margin-left: 10px;
+    margin-top: 0px;
+}
+
+.gridControlsSelector .filterDemo .atom {
+    float: left;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    margin-left: 5px;
+    font-size: 20px;
+    text-align: center;
+    color: white;
+}

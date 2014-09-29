@@ -24,6 +24,8 @@ body {
 .atomBorder { 
     border-color: black !important;  
     box-shadow: 2px 2px 2px #888888;
+    -moz-box-shadow: 2px 2px 2px #888888;
+    -webkit-box-shadow: 2px 2px 2px #888888;
 }
 
 /* Blue */
@@ -35,7 +37,6 @@ body {
 .gridSecondColor {
     color: rgb(179,158,199) !important;
 }
-
 
 /* Orange */
 .gridThirdColor {
@@ -63,7 +64,6 @@ body {
     background: rgb(179,158,199) !important;
 }
 
-
 /* Orange */
 .gridThirdBg {
     background: rgb(249,172,64) !important;
@@ -74,7 +74,6 @@ body {
     background: rgb(197,79,51) !important;
 }
 
-
 /* Green */
 .gridFifthBg {
     background: rgb(73,158,75) !important;
@@ -82,7 +81,7 @@ body {
 
 /* Blue */
 .gridFirstBorderColor {
-    background: rgb(129,181,228) !important;
+    border-color: rgb(129,181,228) !important;
 }
 
 /* Violet */
@@ -108,52 +107,64 @@ body {
 }
 
 /* Horizontal */
-#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-handle {
+#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-handle,
+.horizontalNoUiSlider .noUi-handle {
     background: rgb(197,79,51);
 }
 
-#configurator .horizontalSortDispersion .sortDispersionSlider.noUi-connect {
+#configurator .horizontalSortDispersion .sortDispersionSlider.noUi-connect,
+.horizontalNoUiSlider.noUi-connect {
     background: rgb(197,79,51);
 }
 
-#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-pips {
+#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-pips,
+.horizontalNoUiSlider .noUi-pips {
     color: rgb(197,79,51);
 }
 
-#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-marker {
+#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-marker,
+.horizontalNoUiSlider .noUi-marker {
     background: rgb(197,79,51);
 }
 
-#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-marker-sub {
+#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-marker-sub,
+.horizontalNoUiSlider .noUi-marker-sub {
     background: rgb(197,79,51);
 }
 
-#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-marker-large {
+#configurator .horizontalSortDispersion .sortDispersionSlider .noUi-marker-large,
+.horizontalNoUiSlider .noUi-marker-large {
     background: rgb(197,79,51);
 }
 
 /* Vertical */
-#configurator .verticalSortDispersion .sortDispersionSlider .noUi-handle {
+#configurator .verticalSortDispersion .sortDispersionSlider .noUi-handle,
+.verticalNoUiSlider .noUi-handle {
     background: rgb(73,158,75);
 }
 
-#configurator .verticalSortDispersion .sortDispersionSlider.noUi-connect {
+#configurator .verticalSortDispersion .sortDispersionSlider.noUi-connect,
+.verticalNoUiSlider.noUi-connect {
     background: rgb(73,158,75);
 }
 
-#configurator .verticalSortDispersion .sortDispersionSlider .noUi-pips {
+#configurator .verticalSortDispersion .sortDispersionSlider .noUi-pips,
+.verticalNoUiSlider .noUi-pips {
     color: rgb(73,158,75);
 }
 
-#configurator .verticalSortDispersion .sortDispersionSlider .noUi-marker {
+#configurator .verticalSortDispersion .sortDispersionSlider .noUi-marker,
+.verticalNoUiSlider .noUi-marker {
     background: rgb(73,158,75);
 }
 
-#configurator .verticalSortDispersion .sortDispersionSlider .noUi-marker-sub {
+#configurator .verticalSortDispersion .sortDispersionSlider .noUi-marker-sub,
+.verticalNoUiSlider .noUi-marker-sub {
     background: rgb(73,158,75);
 }
 
-#configurator .verticalSortDispersion .sortDispersionSlider .noUi-marker-large {
+#configurator .verticalSortDispersion .sortDispersionSlider .noUi-marker-large,
+.verticalNoUiSlider .noUi-marker-large {
     background: rgb(73,158,75);
 }
 

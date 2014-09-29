@@ -1,20 +1,148 @@
-DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl) {
+DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl, 
+                                                                                     demoLayout, 
+                                                                                     controlsType, 
+                                                                                     gridifierDynamicSettings,
+                                                                                     gridControlsManager) {
     var me = this;
 
-    this._$view = View.attach(this._$view, $targetEl, View.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT.GRID_CONTROLS);
+    this._$view = null;
+
+    this._controlsType = null;
+    this._gridifierDynamicSettings = null;
+    this._gridControlsManager = null;
+
+    this._demoLayout = null;
+    this._legendDecorator = null;
+
+    this._controls = [];
+
+    this._$prependControl = null;
+    this._$appendControl = null;
+    this._$batchSizeControl = null;
+    this._$toggleControl = null;
+    this._$filterControl = null;
+    this._$sortControl = null;
+
+    this._selectorManager = null;
 
     this._css = {
+        verticalGridHighlightedTextColorClass: "gridFifthColor",
+        horizontalGridHighlightedTextColorClass: "gridFourthColor",
+        selectorIconClass: "selectorIcon",
 
-    }
+        verticalGridSelectedControlItemBgClass: "gridFifthBg",
+        horizontalGridSelectedControlItemBgClass: "gridFourthBg",
+        selectedControlItemColor: "selected",
+        selectedSelectorIconClass: "selectedSelectorIcon",
+
+        topLeftControlClass: "topLeftControl",
+        topRightControlClass: "topRightControl",
+        middleLeftControlClass: "middleLeftControl",
+        middleRightControlClass: "middleRightControl",
+        bottomLeftControlClass: "bottomLeftControl",
+        bottomRightControlClass: "bottomRightControl",
+
+        legendDefaultTextClass: "defaultText",
+        legendHighlightedTextClass: "highlightedText",
+        sublabelTextClass: "sublabelText"
+    };
+
+    this._verticalGridViewParams = {
+        legendHighlightedTextColorClass: me._css.verticalGridHighlightedTextColorClass,
+        selectedControlItemBgClass: me._css.verticalGridSelectedControlItemBgClass,
+        labelStrongBgClass: me._css.verticalGridSelectedControlItemBgClass
+    };
+
+    this._horizontalGridViewParams = {
+        legendHighlightTextColorClass: me._css.horizontalGridHighlightedTextColorClass,
+        selectedControlItemBgClass: me._css.horizontalGridSelectedControlItemBgClass,
+        labelStrongBgClass: me._css.horizontalGridSelectedControlItemBgClass
+    };
+
+    this._viewParams = null;
 
     this._construct = function() {
+        me._demoLayout = demoLayout;
+        me._controlsType = controlsType;
+        me._gridifierDynamicSettings = gridifierDynamicSettings;
+        me._gridControlsManager = gridControlsManager;
 
+        me._attachView();
+        if(me._demoLayout.isVerticalGrid())
+            me._viewParams = me._verticalGridViewParams;
+        else if(me._demoLayout.isHorizontalGrid())
+            me._viewParams = me._horizontalGridViewParams;
+        me._legendDecorator = new DemoLayoutBuilder.DemoLayout.GridControls.LegendDecorator(me._demoLayout, me, me._viewParams);
 
-        this._bindEvents();
+        if(me.areTopControls())
+        {
+            me._$toggleControl = me._$view.find("." + me._css.topLeftControlClass);
+            me._$filterControl = me._$view.find("." + me._css.middleLeftControlClass);
+            me._$sortControl = me._$view.find("." + me._css.bottomLeftControlClass);
+
+            me._$batchSizeControl = me._$view.find("." + me._css.topRightControlClass);
+            me._$prependControl = me._$view.find("." + me._css.bottomRightControlClass);
+            me._$appendControl =  me._$view.find("." + me._css.middleRightControlClass);
+        }
+        else if(me.areBottomControls())
+        {
+            me._$toggleControl = me._$view.find("." + me._css.bottomLeftControlClass);
+            me._$filterControl = me._$view.find("." + me._css.middleLeftControlClass);
+            me._$sortControl = me._$view.find("." + me._css.topLeftControlClass); 
+
+            me._$batchSizeControl = me._$view.find("." + me._css.bottomRightControlClass);
+            me._$prependControl = me._$view.find("." + me._css.topRightControlClass);
+            me._$appendControl = me._$view.find("." + me._css.middleRightControlClass);
+        }
+
+        me._controls.push(me._$batchSizeControl);
+        me._controls.push(me._$prependControl);
+        me._controls.push(me._$appendControl);
+        me._controls.push(me._$toggleControl);
+        me._controls.push(me._$sortControl);
+        me._controls.push(me._$filterControl);
+
+        me._selectorManager = new DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager(
+            me, 
+            me._gridifierDynamicSettings,
+            me._gridControlsManager,
+            me._demoLayout, 
+            me._$toggleControl, 
+            me._$filterControl, 
+            me._$sortControl, 
+            me._$batchSizeControl
+        );
+
+        me._decorateControlLegends();
+        me._legendDecorator.decorateLegendSublabels(me._controls);
+
+        me._bindEvents();
+    }
+
+    this._decorateControlLegends = function() {
+        me._legendDecorator.decoratePrependControl(me._$prependControl);
+        me._legendDecorator.decorateAppendControl(me._$appendControl);
+        me._legendDecorator.decorateBatchSizeControl(me._$batchSizeControl);
+        me._legendDecorator.decorateToggleControl(me._$toggleControl);
+        me._legendDecorator.decorateSortControl(me._$sortControl);
+        me._legendDecorator.decorateFilterControl(me._$filterControl);
     }
 
     this._bindEvents = function() {
+        for(var i = 0; i < me._controls.length; i++)
+        {
+            var $control = me._controls[i];
+            $control.on("mouseenter", function() {
+                me._setSelectedControl($(this));
+            });
 
+            $control.on("mouseleave", function(event) {
+                if(!me._selectorManager.isMouseOverSelector(event.pageX, event.pageY)) {
+                    me.unsetSelectedControl($(this));
+                    return;
+                }
+            });
+        }
     }
 
     this._unbindEvents = function() {
@@ -25,6 +153,72 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl) {
         me._unbindEvents();
     }
 
+    this._attachView = function() {
+        if(me._demoLayout.isVerticalGrid())
+            var viewParams = me._verticalGridViewParams;
+        else if(me._demoLayout.isHorizontalGrid())
+            var viewParams = me._horizontalGridViewParams;
+
+        me._$view = View.attach(me._$view, $targetEl, View.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT.GRID_CONTROLS, viewParams);
+    }
+
     this._construct();
     return this;
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS_TYPES = {TOP: 0, BOTTOM: 1};
+DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS = {
+    APPEND: 0, PREPEND: 1, FILTER: 2, SORT: 3, TOGGLE: 4, BATCH_SIZE: 5
+};
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype._setSelectedControl = function($control) {
+    $control.addClass(this._viewParams.selectedControlItemBgClass);
+    $control.find("." + this._css.legendDefaultTextClass).addClass(this._css.selectedControlItemColor);
+    $control.find("." + this._css.legendHighlightedTextClass).addClass(this._css.selectedControlItemColor);
+    $control.find("." + this._css.sublabelTextClass).addClass(this._css.selectedControlItemColor);
+
+    var $selectorIcon = $control.find("." + this._css.selectorIconClass);
+    if($selectorIcon.length > 0)
+        $selectorIcon.addClass(this._css.selectedSelectorIconClass);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype.unsetSelectedControl = function($control) {
+    $control.removeClass(this._viewParams.selectedControlItemBgClass);
+    $control.find("." + this._css.legendDefaultTextClass).removeClass(this._css.selectedControlItemColor);
+    $control.find("." + this._css.legendHighlightedTextClass).removeClass(this._css.selectedControlItemColor);
+    $control.find("." + this._css.sublabelTextClass).removeClass(this._css.selectedControlItemColor);
+
+    var $selectorIcon = $control.find("." + this._css.selectorIconClass);
+    if($selectorIcon.length > 0)
+        $selectorIcon.removeClass(this._css.selectedSelectorIconClass);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype.areTopControls = function() {
+    return this._controlsType == DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS_TYPES.TOP;
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype.areBottomControls = function() {
+    return this._controlsType == DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS_TYPES.BOTTOM;
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype._getControlByConst = function(control) {
+    if(control == DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS.APPEND)
+        return this._$appendControl;
+    else if(control == DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS.PREPEND)
+        return this._$prependControl;
+    else if(control == DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS.FILTER)
+        return this._$filterControl;
+    else if(control == DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS.SORT)
+        return this._$sortControl;
+    else if(control == DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS.TOGGLE)
+        return this._$toggleControl;
+    else if(control == DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS.BATCH_SIZE)
+        return this._$batchSizeControl;
+    else
+        throw new Error("GridControls: Unknown control const: " + control);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype.setControlSublabel = function(control, sublabel) {
+    $control = this._getControlByConst(control); 
+    this._legendDecorator.setControlSublabel($control, sublabel);
 }

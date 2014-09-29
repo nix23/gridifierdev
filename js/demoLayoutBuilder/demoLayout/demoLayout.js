@@ -13,9 +13,11 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
     this._gridType = null;
     this._gridifierSettings = null;
+    this._gridifierDynamicSettings = null;
 
     this._$loadGridConfiguratorButton = null;
 
+    this._gridControlsManager = null;
     this._$gridHeadingView = null;
     this._$gridTopControlsView = null;
     this._$gridView = null;
@@ -49,6 +51,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierSettings = gridifierSettings;
 
         me._attachView();
+        me._gridifierDynamicSettings = new DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings();
 
         me._$loadGridConfiguratorButton = me._$view.find("." + me._css.loadGridConfiguratorButtonClass);
         me._$gridHeadingView = me._$view.find("." + me._css.gridHeadingViewClass);
@@ -66,8 +69,29 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             me._grid = new DemoLayoutBuilder.DemoLayout.HorizontalGrid(me._$gridView);
         }
 
-        me._gridTopControls = new DemoLayoutBuilder.DemoLayout.GridControls(me._$gridTopControlsView);
-        me._gridBottomControls = new DemoLayoutBuilder.DemoLayout.GridControls(me._$gridBottomControlsView);
+        me._gridControlsManager = new DemoLayoutBuilder.DemoLayout.GridControlsManager();
+        me._gridTopControls = new DemoLayoutBuilder.DemoLayout.GridControls(
+            me._$gridTopControlsView, 
+            me,
+            DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS_TYPES.TOP,
+            me._gridifierDynamicSettings,
+            me._gridControlsManager
+        );
+        me._gridBottomControls = new DemoLayoutBuilder.DemoLayout.GridControls(
+            me._$gridBottomControlsView, 
+            me,
+            DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS_TYPES.BOTTOM,
+            me._gridifierDynamicSettings,
+            me._gridControlsManager
+        );
+        me._gridControlsManager.addGridControls(me._gridTopControls);
+        me._gridControlsManager.addGridControls(me._gridBottomControls);
+
+        me._gridControlsManager.selectToggleControlScaleOption();
+        me._gridControlsManager.selectFilterControlAllOption();
+        me._gridControlsManager.selectSortControlByGUIDOption();
+        me._gridControlsManager.setBatchSizeOption(1);
+
         me._gridSourcesDumper = new DemoLayoutBuilder.DemoLayout.GridSourcesDumper(me._$gridSourcesDumperView);
 
         me._bindEvents();
@@ -100,6 +124,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
     this.destruct = function() {
         me._unbindEvents();
         me._$view.remove();
+        // @todo remove all grid stuff here
     }
 
     this._attachView = function() {
@@ -127,4 +152,31 @@ DemoLayoutBuilder.DemoLayout.prototype.isVerticalGrid = function() {
 
 DemoLayoutBuilder.DemoLayout.prototype.isHorizontalGrid = function() {
     return this._gridType == DemoLayoutBuilder.DemoLayout.GRID_TYPES.HORIZONTAL_GRID;
+}
+
+DemoLayoutBuilder.DemoLayout.prototype._getGridifierSetting = function(settingName) {
+    if(typeof this._gridifierSettings[settingName] == "undefined")
+        throw new Error("demoLayout: unknown settingName '" + settingName + "'");
+
+    return this._gridifierSettings[settingName];
+}
+
+DemoLayoutBuilder.DemoLayout.prototype.isDefaultPrependGrid = function() {
+    return this._getGridifierSetting("prependType") == Gridifier.PREPEND_TYPES.DEFAULT_PREPEND;
+}
+
+DemoLayoutBuilder.DemoLayout.prototype.isReversedPrependGrid = function() {
+    return this._getGridifierSetting("prependType") == Gridifier.PREPEND_TYPES.REVERSED_PREPEND;
+}
+
+DemoLayoutBuilder.DemoLayout.prototype.isMirroredPrependGrid = function() {
+    return this._getGridifierSetting("prependType") == Gridifier.PREPEND_TYPES.MIRRORED_PREPEND;
+}
+
+DemoLayoutBuilder.DemoLayout.prototype.isDefaultAppendGrid = function() {
+    return this._getGridifierSetting("appendType") == Gridifier.APPEND_TYPES.DEFAULT_APPEND;
+}
+
+DemoLayoutBuilder.DemoLayout.prototype.isReversedAppendGrid = function() {
+    return this._getGridifierSetting("appendType") == Gridifier.APPEND_TYPES.REVERSED_APPEND;
 }

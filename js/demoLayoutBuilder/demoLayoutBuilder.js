@@ -27,7 +27,14 @@ DemoLayoutBuilder = function($targetEl) {
         me._gridConfigurator = new DemoLayoutBuilder.Configurator(me._$gridConfiguratorAccordionTab, me);
         
         this._bindEvents(); 
-        $(me._gridConfigurator).trigger(DemoLayoutBuilder.Configurator.EVENT_CREATE_VERTICAL_GRID); // @tmp
+        $(me._gridConfigurator).trigger(DemoLayoutBuilder.Configurator.EVENT_CREATE_VERTICAL_GRID, [{
+            appendType: "defaultAppend",
+            gridType: "verticalGrid",
+            intersectionStrategy: "default",
+            prependType: "defaultPrepend",
+            sortDispersionMode: "disabled",
+            sortDispersionValue: null
+        }]); // @tmp
     }
 
     this._bindEvents = function() {
@@ -60,7 +67,7 @@ DemoLayoutBuilder = function($targetEl) {
         $(me._gridConfigurator).on(DemoLayoutBuilder.Configurator.EVENT_CREATE_VERTICAL_GRID, function(event, gridifierSettings) {
             if(me._gridLayout != null)
                 me._gridLayout.destruct();
-
+            
             me._gridLayout = new DemoLayoutBuilder.DemoLayout(
                 me._$gridLayoutAccordionTab,
                 DemoLayoutBuilder.DemoLayout.GRID_TYPES.VERTICAL_GRID,

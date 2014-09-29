@@ -1,0 +1,51 @@
+.gridControlsSelector .batchSizeDemo {
+    width: 100%;
+    min-height: 160px;
+    margin-left: 10px;
+    margin-top: 8px;
+}
+
+.gridControlsSelector .batchSizeDemo .atom {
+    text-align: center;
+    color: white;
+    font-size: 18px;
+}
+
+.gridControlsSelector .batchSizeDemo .atomMarginTop {
+    margin-top: 5px;
+}
+
+.gridControlsSelector .batchSizeDemo .batchSizeOneAtom {
+    width: 120px;
+    height: 120px;
+    line-height: 120px;
+    margin-left: 90px;
+    font-size: 36px;
+}
+
+.gridControlsSelector .batchSizeDemo .batchSizeTwoAtomsAtom {
+    float: left;
+    width: 100px;
+    height: 100px;
+    line-height: 100px;
+    margin-left: 35px;
+    font-size: 36px;
+}
+
+.gridControlsSelector .batchSizeDemo .batchSizeFromThreeTillFifteenAtom {
+    float: left;
+    width: 50px;
+    height: 50px;
+    line-height: 50px;
+    margin-left: 5px;
+    font-size: 20px;
+}
+
+.gridControlsSelector .batchSizeDemo .batchSizeAfterFifteenAtom {
+    float: left;
+    width: 25px;
+    height: 25px;
+    line-height: 25px;
+    margin-left: 5px;
+    font-size: 14px;
+}
