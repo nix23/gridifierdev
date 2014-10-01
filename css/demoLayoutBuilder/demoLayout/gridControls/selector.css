@@ -1,5 +1,5 @@
 .gridControlsSelector {
-    background: rgb(210,210,210);
+    background: rgb(220,220,220);
     position: absolute;
     overflow: hidden;
     height: 0px;
@@ -10,7 +10,7 @@
     width: 100%;
     overflow: hidden;
     box-sizing: border-box;
-    border: 5px rgb(210,210,210) solid;
+    border: 5px rgb(220,220,220) solid;
 }
 
 .gridControlsSelector .highlightedRow {

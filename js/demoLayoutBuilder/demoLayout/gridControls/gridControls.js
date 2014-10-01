@@ -14,6 +14,13 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
     this._demoLayout = null;
     this._legendDecorator = null;
 
+    this._$controlsHeading = null;
+
+    this._headingControls = [];
+
+    this._$clearGridControl = null;
+    this._$itemCssControl = null;
+
     this._controls = [];
 
     this._$prependControl = null;
@@ -34,6 +41,18 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
         horizontalGridSelectedControlItemBgClass: "gridFourthBg",
         selectedControlItemColor: "selected",
         selectedSelectorIconClass: "selectedSelectorIcon",
+
+        controlsHeadingClass: "controlsHeading",
+        controlsHeadingLegendPrefixClass: "legendPrefix",
+        controlsHeadingButtonTextHighlightClass: "buttonTextHighlight",
+        controlsHeadingSelectorTextHighlightClass: "selectorTextHighlight",
+
+        controlsHeadingClearGridControlClass: "clearGridControl",
+        controlsHeadingItemCssControlClass: "selectItemCssControl",
+
+        controlsHeadingBorderValueClass: "borderValue",
+        controlsHeadingMarginValueClass: "marginValue",
+        controlsHeadingBoxSizingValueClass: "boxSizingValue",
 
         topLeftControlClass: "topLeftControl",
         topRightControlClass: "topRightControl",
@@ -74,6 +93,15 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
             me._viewParams = me._horizontalGridViewParams;
         me._legendDecorator = new DemoLayoutBuilder.DemoLayout.GridControls.LegendDecorator(me._demoLayout, me, me._viewParams);
 
+        me._$controlsHeading = me._$view.find("." + me._css.controlsHeadingClass);
+        me._decorateControlHeading();
+
+        me._$clearGridControl = me._$view.find("." + me._css.controlsHeadingClearGridControlClass);
+        me._$itemCssControl = me._$view.find("." + me._css.controlsHeadingItemCssControlClass);
+
+        me._headingControls.push(me._$clearGridControl);
+        me._headingControls.push(me._$itemCssControl);
+
         if(me.areTopControls())
         {
             me._$toggleControl = me._$view.find("." + me._css.topLeftControlClass);
@@ -107,6 +135,7 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
             me._gridifierDynamicSettings,
             me._gridControlsManager,
             me._demoLayout, 
+            me._$itemCssControl,
             me._$toggleControl, 
             me._$filterControl, 
             me._$sortControl, 
@@ -117,6 +146,30 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
         me._legendDecorator.decorateLegendSublabels(me._controls);
 
         me._bindEvents();
+    }
+
+    this._decorateControlHeading = function() {
+        var elementsToHighlight = [];
+
+        $.each(me._$controlsHeading.find("." + me._css.controlsHeadingLegendPrefixClass), function() {
+            elementsToHighlight.push($(this));
+        });
+
+        $.each(me._$controlsHeading.find("." + me._css.controlsHeadingButtonTextHighlightClass), function() {
+            elementsToHighlight.push($(this));
+        });
+
+        $.each(me._$controlsHeading.find("." + me._css.controlsHeadingSelectorTextHighlightClass), function() {
+            elementsToHighlight.push($(this));
+        });
+
+        for(var i = 0; i < elementsToHighlight.length; i++)
+        {
+            if(this._demoLayout.isVerticalGrid())
+                elementsToHighlight[i].addClass(this._css.verticalGridHighlightedTextColorClass);
+            else if(this._demoLayout.isHorizontalGrid())
+                elementsToHighlight[i].addClass(this._css.horizontalGridHighlightedTextColorClass);
+        }
     }
 
     this._decorateControlLegends = function() {
@@ -143,6 +196,29 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
                 }
             });
         }
+
+        for(var i = 0; i < me._headingControls.length; i++)
+        {
+            var $headingControl = me._headingControls[i];
+            $headingControl.on("mouseenter", function() {
+                me._setSelectedHeadingControl($(this));
+            });
+        }
+
+        for(var i = 0; i < me._headingControls.length; i++)
+        {
+            var $headingControl = me._headingControls[i];
+            $headingControl.on("mouseleave", function(event) {
+                if(!me._selectorManager.isMouseOverSelector(event.pageX, event.pageY)) {
+                    me.unsetSelectedHeadingControl($(this));
+                    return;
+                }
+            });
+        }
+
+        me._$clearGridControl.on("click", function() {
+            console.log("Clear grid!");
+        });
     }
 
     this._unbindEvents = function() {
@@ -167,9 +243,38 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
 }
 
 DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS_TYPES = {TOP: 0, BOTTOM: 1};
+DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES = {
+    BORDER: 0, MARGIN: 1, BOX_SIZING: 2
+};
 DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS = {
     APPEND: 0, PREPEND: 1, FILTER: 2, SORT: 3, TOGGLE: 4, BATCH_SIZE: 5
 };
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype._setSelectedHeadingControl = function($headingControl) {
+    var me = this;
+    $headingControl.addClass(this._viewParams.selectedControlItemBgClass);
+    $headingControl.addClass(me._css.selectedControlItemColor);
+    $.each($headingControl.find("span"), function() {
+        $(this).addClass(me._css.selectedControlItemColor);
+    });
+
+    var $selectorIcon = $headingControl.find("." + this._css.selectorIconClass);
+    if($selectorIcon.length > 0)
+        $selectorIcon.addClass(this._css.selectedSelectorIconClass);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype.unsetSelectedHeadingControl = function($headingControl) {
+    var me = this;
+    $headingControl.removeClass(this._viewParams.selectedControlItemBgClass);
+    $headingControl.removeClass(me._css.selectedControlItemColor);
+    $.each($headingControl.find("span"), function() {
+        $(this).removeClass(me._css.selectedControlItemColor);
+    });
+
+    var $selectorIcon = $headingControl.find("." + this._css.selectorIconClass);
+    if($selectorIcon.length > 0)
+        $selectorIcon.removeClass(this._css.selectedSelectorIconClass);
+}
 
 DemoLayoutBuilder.DemoLayout.GridControls.prototype._setSelectedControl = function($control) {
     $control.addClass(this._viewParams.selectedControlItemBgClass);
@@ -216,6 +321,22 @@ DemoLayoutBuilder.DemoLayout.GridControls.prototype._getControlByConst = functio
         return this._$batchSizeControl;
     else
         throw new Error("GridControls: Unknown control const: " + control);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype._getHeaderControlByConst = function(controlType) {
+    if(controlType == DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BORDER)
+        return this._$itemCssControl.find("." + this._css.controlsHeadingBorderValueClass);
+    else if(controlType == DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.MARGIN)
+        return this._$itemCssControl.find("." + this._css.controlsHeadingMarginValueClass);
+    else if(controlType == DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BOX_SIZING)
+        return this._$itemCssControl.find("." + this._css.controlsHeadingBoxSizingValueClass);
+    else
+        throw new Error("GridControls: Unknown control conts: " + control);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype.setHeadingControlLabel = function(controlType, newLabel) {
+    var $headerControl = this._getHeaderControlByConst(controlType);
+    $headerControl.text(newLabel);
 }
 
 DemoLayoutBuilder.DemoLayout.GridControls.prototype.setControlSublabel = function(control, sublabel) {

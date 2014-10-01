@@ -84,7 +84,7 @@ CssCalcNormalizer = {
         var closureNormalizedElementGUID = this.normalizedElementGUID;
         $elem.attr("data-" + this.PLUGIN_GUID_DATA_ATTR_POSTFIX, closureNormalizedElementGUID);
         $elem.css(propertyName, ($elem.parent().outerWidth() - parseInt(secondValue, 10)) + "px");
-
+        
         $(window).on("resize.cssCalcNormalizerElem" + closureNormalizedElementGUID, function() {
             // Element was deleted
             if($elem.closest("body").length == 0)

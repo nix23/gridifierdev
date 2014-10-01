@@ -30,6 +30,36 @@ DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.addGridControls = fun
     this._gridControls.push(gridControls);
 }
 
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype._setItemCssControlValue = function(controlType, label) {
+    for(var i = 0; i < this._gridControls.length; i++) {
+        this._gridControls[i].setHeadingControlLabel(controlType, label);
+    }
+}
+
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setItemCssControlBorder = function(newBorderVal) {
+    this._setItemCssControlValue(
+        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BORDER, newBorderVal + "px"
+    );
+}
+
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setItemCssControlMargin = function(newMargin) {
+    this._setItemCssControlValue(
+        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.MARGIN, newMargin + "px"
+    );
+}
+
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setBoxSizingItemCssControlBorderBoxOption = function() {
+    this._setItemCssControlValue(
+        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BOX_SIZING, "Border"
+    );
+}
+
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setBoxSizingItemCssControlContentBoxOption = function() {
+    this._setItemCssControlValue(
+        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BOX_SIZING, "Content"
+    );
+}
+
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype._selectToggleControlOption = function(sublabel) {
     for(var i = 0; i < this._gridControls.length; i++) { 
         this._gridControls[i].setControlSublabel(

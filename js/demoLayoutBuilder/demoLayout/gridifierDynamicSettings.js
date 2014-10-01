@@ -3,6 +3,10 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings = function() {
 
     this._$view = null;
 
+    this._itemBorder = 0;
+    this._itemMargin = 0;
+    this._boxSizing = null;
+
     this._toggleFunction = null;
     this._filterFunction = null;
     this._sortFunction = null;
@@ -12,6 +16,10 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings = function() {
     };
 
     this._construct = function() {
+        me.setItemBorder(3);
+        me.setItemMargin(0);
+        me.setBorderBoxBoxSizing();
+
         if(!browserDetector.isIe8())
             me.setScaleToggleFunction();
         else
@@ -20,7 +28,7 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings = function() {
         me.setAllFilterFunction();
         me.setByGUIDSortFunction();
         me.setBatchSize(1);
-
+        //me._debug();
         me._bindEvents();
     }
 
@@ -34,8 +42,58 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings = function() {
         me._unbindEvents();
     }
 
+    this._debug = function() {
+        console.log("");
+
+        console.log("***********************************************************************");
+        console.log("*********** GridifierDynamicSettings DEBUG ****************");
+        console.log("***********************************************************************");
+
+        console.log("");
+        console.log("Border: " + me.getItemBorder() + "px; \nMargin: " + me.getItemMargin() + "px;");
+        var borderBoxValue = (me.isBorderBoxBoxSizing()) ? "border-box" : "content-box";
+        console.log("Box-sizing: " + borderBoxValue);
+
+        if(me.isScaleToggleFunction())
+            var toggleValue = "scale";
+        else if(me.isFadeToggleFunction())
+            var toggleValue = "fade";
+        else if(me.isVisibilityToggleFunction())
+            var toggleValue = "visibility";
+
+        if(me.isAllFilterFunction())
+            var filterValue = "all";
+        else if(me.isBlueFilterFunction())
+            var filterValue = "blue";
+        else if(me.isVioletFilterFunction())
+            var filterValue = "violet";
+        else if(me.isRedFilterFunction())
+            var filterValue = "red";
+        else if(me.isYellowFilterFunction())
+            var filterValue = "yellow";
+        else if(me.isGreenFilterFunction())
+            var filterValue = "green";
+
+        if(me.isByGUIDSortFunction())
+            var sortValue = "by GUID";
+        else if(me.isByItemColorSortFunction())
+            var sortValue = "by item color";
+
+        console.log("Toggle: " + toggleValue + " \nFilter: " + filterValue + " \nSort: " + sortValue);
+        console.log("Batch size: " + me.getBatchSize());
+
+        console.log("");
+        console.log("***********************************************************************");
+        console.log("*********** GridifierDynamicSettings DEBUG  END **********");
+        console.log("***********************************************************************");
+    }
+
     this._construct();
     return this;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.BOX_SIZINGS = {
+    BORDER_BOX: 0, CONTEXT_BOX: 1
 }
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.TOGGLE_FUNCTIONS = {
@@ -48,6 +106,41 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.FILTER_FUNCTIONS = {
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.SORT_FUNCTIONS = {
     BY_GUID: 0, BY_ITEM_COLOR: 1
+}
+
+/* Item border */
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setItemBorder = function(itemBorder) {
+    this._itemBorder = itemBorder;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getItemBorder = function() {
+    return this._itemBorder;
+}
+
+/* Item margin */
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setItemMargin = function(itemMargin) {
+    this._itemMargin = itemMargin;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getItemMargin = function() {
+    return this._itemMargin;
+}
+
+/* Box sizing */
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setBorderBoxBoxSizing = function() {
+    this._boxSizing = DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.BOX_SIZINGS.BORDER_BOX;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setContentBoxBoxSizing = function() {
+    this._boxSizing = DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.BOX_SIZINGS.CONTENT_BOX;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.isBorderBoxBoxSizing = function() {
+    return this._boxSizing == DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.BOX_SIZINGS.BORDER_BOX;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.isContentBoxBoxSizing = function() {
+    return this._boxSizing == DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.BOX_SIZINGS.CONTENT_BOX;
 }
 
 /* Toggle functions */

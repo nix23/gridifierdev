@@ -1,0 +1,36 @@
+.gridControlsSelector .itemCssControls {
+    width: 100%;
+    height: 65px;
+}
+
+.gridControlsSelector .itemCssControls .itemCssPropertySlider {
+    width: 100%;
+    margin-top: 7px;
+}
+
+.gridControlsSelector .itemCssControls .itemCssPropertySlider .noUi-value {
+    margin-left: -50px;
+    width: 100px;
+    font-size: 16px;
+    letter-spacing: -1px;
+}
+
+.gridControlsSelector .itemCssControls .horizontalNoUiSlider .noUi-marker-large,
+.gridControlsSelector .itemCssControls .verticalNoUiSlider .noUi-marker-large {
+    background: rgb(150,150,150);
+}
+
+.gridControlsSelector .itemCssControls .horizontalNoUiSlider .noUi-marker-sub,
+.gridControlsSelector .itemCssControls .verticalNoUiSlider .noUi-marker-sub {
+    background: rgb(150,150,150);
+}
+
+.gridControlsSelector .itemCssControls .horizontalNoUiSlider .noUi-marker,
+.gridControlsSelector .itemCssControls .verticalNoUiSlider .noUi-marker {
+   background: rgb(150,150,150);
+}
+
+.gridControlsSelector .itemCssControls .verticalNoUiSlider .noUi-pips,
+.gridControlsSelector .itemCssControls .horizontalNoUiSlider .noUi-pips {
+    font-weight: bold;
+}

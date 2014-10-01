@@ -2207,7 +2207,7 @@ function closure ( target, options, originalOptions ){
 		return indexes;
 	}
 
-	function addMarking ( CSSstyle, orientation, direction, spread, filterFunc, formatter, replaceLastLabelMarking, replacedValue, lastLabelMarking ) { // @modified
+	function addMarking ( CSSstyle, orientation, direction, spread, filterFunc, formatter, replaceLastLabelMarking, replacedValue, lastLabelMarking, replaceFirstLabelMarking, replacedFirstValue, firstLabelMarking ) { // @modified
 
 		var style = ['horizontal', 'vertical'][orientation],
 			element = $('<div/>');
@@ -2236,6 +2236,8 @@ function closure ( target, options, originalOptions ){
 			if ( values[1] ) {
 				if(replacedValue != null && values[0] == replacedValue) // @modified
 					var marker = lastLabelMarking; // @modified
+				else if(replacedFirstValue != null && values[0] == replacedFirstValue) // @modified
+					var marker = firstLabelMarking; // @modified
 				else // @modified
 					var marker = formatter.to(values[0]); // @modified
 
@@ -2262,6 +2264,9 @@ function closure ( target, options, originalOptions ){
 		var replaceLastLabelMarking = grid.replaceLastLabelMarking || false; // @modified
 		var lastLabelMarking = grid.lastLabelMarking || null; // @modified
 		var replacedValue = grid.replacedValue || null; // @modified
+		var replaceFirstLabelMarking = grid.replaceFirstLabelMarking || false; // @modified
+		var firstLabelMarking = grid.firstLabelMarking || null; // @modified
+		var replacedFirstValue = grid.replacedFirstValue || null; // @modified
 
 		return this.each(function(){
 
@@ -2278,7 +2283,10 @@ function closure ( target, options, originalOptions ){
 				format,
 				replaceLastLabelMarking, // @modified
 				replacedValue, // @modified
-				lastLabelMarking // @modified
+				lastLabelMarking, // @modified,
+				replaceFirstLabelMarking, // @modified
+				replacedFirstValue, // @modified
+				firstLabelMarking // @modified
 			));
 		});
 	};

@@ -87,7 +87,15 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridControlsManager.addGridControls(me._gridTopControls);
         me._gridControlsManager.addGridControls(me._gridBottomControls);
 
-        me._gridControlsManager.selectToggleControlScaleOption();
+        me._gridControlsManager.setItemCssControlBorder(5);
+        me._gridControlsManager.setItemCssControlMargin(0);
+        me._gridControlsManager.setBoxSizingItemCssControlBorderBoxOption();
+
+        if(!browserDetector.isIe8())
+            me._gridControlsManager.selectToggleControlScaleOption();
+        else
+            me._gridControlsManager.selectToggleControlVisibilityOption();
+
         me._gridControlsManager.selectFilterControlAllOption();
         me._gridControlsManager.selectSortControlByGUIDOption();
         me._gridControlsManager.setBatchSizeOption(1);

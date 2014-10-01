@@ -3,7 +3,9 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector = function(gridControls,
                                                                                                    $bodyEl, 
                                                                                                    $elementToSnap, 
                                                                                                    snapOffset, 
-                                                                                                   selectorOptions) {
+                                                                                                   selectorOptions,
+                                                                                                   selectorMinWidth,
+                                                                                                   extendedRightSideWidth) {
     var me = this;
 
     this._$view = null;
@@ -59,9 +61,12 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector = function(gridControls,
                 me._snapOffset.top = snapOffset.top;
         }
         me._selectorOptions = selectorOptions;
+
+        if(typeof selectorMinWidth == "number")
+            me._selectorMinWidth = selectorMinWidth;
         
         me._createSelector();
-        me._createSelectorRows();
+        me._createSelectorRows(extendedRightSideWidth);
         me._snapToElement();
         me._bindEvents();
     }
@@ -140,7 +145,7 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector.prototype._getSelectorWidth =
         return this._$elementToSnap.outerWidth();
 }
 
-DemoLayoutBuilder.DemoLayout.GridControls.Selector.prototype._createSelectorRows = function() {
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.prototype._createSelectorRows = function(extendedRightSideWidth) {
     // var $spacerRow = $("<div/>");
     // $spacerRow.addClass(this._css.selectorSpacerRowClass);
     // this._$selector.append($spacerRow);
@@ -149,6 +154,7 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector.prototype._createSelectorRows
     {
         var $row = $("<div/>");
         $row.addClass(this._css.selectorRowClass);
+
         if(i % 2 != 0) 
             $row.addClass(this._css.selectorHighlightedRowClass);
         if(this._selectorOptions[i].isSelected) {
@@ -191,6 +197,8 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector.prototype._createSelectorRows
 
         var $rightSide = $("<div/>");
         $rightSide.addClass(this._css.selectorRowRightSideClass);
+        if(typeof extendedRightSideWidth == "number")
+            $rightSide.css("width", extendedRightSideWidth + "px");
 
         $row.append($leftSide); 
         $row.append($rightSide);
