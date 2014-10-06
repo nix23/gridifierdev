@@ -278,7 +278,11 @@ var
 
 				if ( typeof optionValue === 'string' ) {
 					filteredOptions[optionName] = optionValue;
-				} else {
+
+				} 
+				else if( typeof optionValue.toString == "function" ) // @modified
+					filteredOptions[optionName] = optionValue; // @modified
+				else {
 					throw new Error(optionName);
 				}
 			}

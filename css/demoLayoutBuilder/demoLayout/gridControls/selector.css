@@ -31,6 +31,10 @@
     text-align: left;
 }
 
+.gridControlsSelector .row .reducedLeftSideWidth {
+    width: 150px;
+}
+
 .gridControlsSelector .row .leftSide .label {
     font-size: 22px;
 }

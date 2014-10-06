@@ -110,9 +110,44 @@
         </div>
 
         <div class="rightSide">
-            <div class="items">
-                    <div style="float: left; width: 65px; height: 65px; background: blue; margin-left: 2%">
+            <div class="itemSettings">
+
+                {% set gridItemBgs = ['gridFirstBg', 'gridSecondBg', 'gridThirdBg', 'gridFourthBg', 'gridFifthBg'] %}
+                {% for i in 1..50 %}
+                    <div class="itemSetting{% if i > 1 %} itemSettingTopMargin{% endif %} item{{ i }}Sizes">
+                        <div class="left">
+                            <div class="gridItem atomBorder {{ cycle(gridItemBgs, i) }}">
+                                {{ i }}
+                            </div>
+                        </div>
+
+                        <div class="right {% if i > 1 %}cloneCssCalcNormalizerItemSettingUpdates{%endif %}"{% if i == 1 %}
+                                                     data-applyplugin="cssCalcNormalizer" data-plugin-mode="substractFromParent" 
+                                                     data-plugin-secondvalue="85px" data-plugin-property="width"
+                                                     data-clone-updates-class="cloneCssCalcNormalizerItemSettingUpdates"
+                                                      {% endif %}>
+                            <div class="leftSide">
+                                <div class="gridItemSettingsSelector" data-itemSizesSelectorId="{{ i }}">
+                                    Width: 
+                                    <span class="itemWidth {{ legendHighlightedTextColorClass }}">0px</span> 
+                                    Height: 
+                                    <span class="itemHeight {{ legendHighlightedTextColorClass }}">0px</span>
+
+                                    <div class="selectorWrapper">
+                                         <div class="selectorIcon"></div>
+                                     </div>
+                                </div>
+                            </div>
+
+                            <div class="rightSide">
+                                <div class="applyToAllItemSetting">
+                                    Apply to all
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                {% endfor %}
+
             </div>
         </div>
     </div>

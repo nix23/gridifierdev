@@ -30,6 +30,38 @@ DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.addGridControls = fun
     this._gridControls.push(gridControls);
 }
 
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setAllItemSizes = function(newWidthLabel, newHeightLabel) {
+    for(var i = 0; i < this._gridControls.length; i++) {
+        for(var itemSizesIndex = 1; itemSizesIndex <= 50; itemSizesIndex++) {
+            this._gridControls[i].setItemSizesLabel(itemSizesIndex, newWidthLabel, newHeightLabel);
+        }
+    }
+}
+
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setItemSizes = function(itemSizesIndexToSet, newWidthLabel, newHeightLabel) {
+    for(var i = 0; i < this._gridControls.length; i++) {
+        for(var itemSizesIndex = 1; itemSizesIndex <= 50; itemSizesIndex++) {
+            if(itemSizesIndexToSet == itemSizesIndex)
+            {
+                this._gridControls[i].setItemSizesLabel(itemSizesIndex, newWidthLabel, newHeightLabel);
+                break;
+            }
+        }
+    }
+}
+
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setItemWidth = function(itemSizesIndex, newWidthLabel) {
+    for(var i = 0; i < this._gridControls.length; i++) {
+        this._gridControls[i].setItemWidthLabel(itemSizesIndex, newWidthLabel);
+    }
+}
+
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setItemHeight = function(itemSizesIndex, newHeightLabel) {
+    for(var i = 0; i< this._gridControls.length; i++) {
+        this._gridControls[i].setItemHeightLabel(itemSizesIndex, newHeightLabel);
+    }
+}
+
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype._setItemCssControlValue = function(controlType, label) {
     for(var i = 0; i < this._gridControls.length; i++) {
         this._gridControls[i].setHeadingControlLabel(controlType, label);

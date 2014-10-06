@@ -63,14 +63,14 @@ Accordion.prototype._collectItems = function() {
 Accordion.prototype._calculateItemPositions = function() {
     var nextOffsetLeft = 0;
     for(var accordionItemId in this._items)
-    {
-        var $accordionItem = this._items[accordionItemId];
+    { 
+        var $accordionItem = this._items[accordionItemId]; 
         $accordionItem.css({
             position: "absolute",
-            left: nextOffsetLeft + "px",
-            top: "0px"
+            left: nextOffsetLeft + "px"//,
+            //top: "0px"
         });
-
+        
         nextOffsetLeft += $accordionItem.outerWidth();
     }
 }

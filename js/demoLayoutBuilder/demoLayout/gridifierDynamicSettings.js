@@ -3,6 +3,8 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings = function() {
 
     this._$view = null;
 
+    this._itemSizes = [];
+
     this._itemBorder = 0;
     this._itemMargin = 0;
     this._boxSizing = null;
@@ -16,6 +18,8 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings = function() {
     };
 
     this._construct = function() {
+        me.setAllItemSizes("100px", "100px");
+
         me.setItemBorder(3);
         me.setItemMargin(0);
         me.setBorderBoxBoxSizing();
@@ -48,6 +52,12 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings = function() {
         console.log("***********************************************************************");
         console.log("*********** GridifierDynamicSettings DEBUG ****************");
         console.log("***********************************************************************");
+
+        console.log("");
+        console.log("Item sizes:");
+        for(var i = 0; i <= 49; i++) {
+            console.log("Item " + (i + 1) + ": width = " + this._itemSizes[i].width + " height: " + this._itemSizes[i].height);
+        }
 
         console.log("");
         console.log("Border: " + me.getItemBorder() + "px; \nMargin: " + me.getItemMargin() + "px;");
@@ -106,6 +116,64 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.FILTER_FUNCTIONS = {
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.SORT_FUNCTIONS = {
     BY_GUID: 0, BY_ITEM_COLOR: 1
+}
+
+/* Item sizes */
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setAllItemSizes = function(width, height) {
+    this._itemSizes = [];
+
+    for(var i = 1; i <= 50; i++) {
+        var sizes = {};
+        sizes.width = width;
+        sizes.height = height;
+
+        this._itemSizes[i - 1] = sizes;
+    }
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setItemSizes = function(itemSizesIndex, width, height) {
+    for(var i = 0; i <= 49; i++) {
+        if(i == itemSizesIndex) {
+            this._itemSizes[i].width = width;
+            this._itemSizes[i].height = height;
+            break;
+        }
+    }
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setItemWidth = function(itemSizesIndex, width) {
+    for(var i = 0; i <= 49; i++) {
+        if(i == itemSizesIndex) {
+            this._itemSizes[i].width = width;
+            break;
+        }
+    }
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setItemHeight = function(itemSizesIndex, height) {
+    for(var i = 0; i <= 49; i++) {
+        if(i == itemSizesIndex) {
+            this._itemSizes[i].height = height;
+            break;
+        }
+    }
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getItemSizes = function(itemSizesIndex) {
+    for(var i =0 ; i <= 49; i++) {
+        if(i == itemSizesIndex)
+            return this._itemSizes[i];
+    }
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getItemWidth = function(itemSizesIndex) {
+    var itemSizes = this.getItemSizes(itemSizesIndex);
+    return itemSizes.width;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getItemHeight = function(itemSizesIndex) {
+    var itemSizes = this.getItemSizes(itemSizesIndex);
+    return itemSizes.height;
 }
 
 /* Item border */

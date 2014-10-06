@@ -173,12 +173,151 @@
     color: white !important; 
 }
 
-#demoLayout .gridControlsView .controls .controlsContent .rightSide .items {
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .itemSettings {
     width: calc(100% - 5px); 
     width: -moz-calc(100% - 5px);
     width: -webkit-calc(100% - 5px);
     height: 205px; 
     margin-top: 5px; 
     background: rgb(220,220,220); 
-    overflow-y: scroll
+    overflow-y: scroll;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .itemSetting {
+    width: 99%;
+    height: 65px;
+    box-sizing: border-box;
+    border: 1px rgb(150,150,150) solid;
+    background: rgb(235,235,235);
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .itemSettingTopMargin {
+    margin-top: 5px;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .left {
+    position: relative;
+    float: left;
+    width: 80px;
+    height: 65px;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .left .gridItem {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    margin-left: -20px;
+    margin-top: -28px;
+    width: 52px;
+    height: 52px;
+    line-height: 46px;
+    color: white;
+    font-weight: bold;
+    letter-spacing: -1px;
+    box-sizing: border-box;
+    border: 3px black solid;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right {
+    position: relative;
+    float: left;
+    width: -webkit-calc(100% - 80px);
+    width: -moz-calc(100% - 80px);
+    width: calc(100% - 80px); 
+    height: 65px; 
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right .leftSide {
+    position: relative;
+    width: 60%;
+    height: 65px; 
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right .rightSide {
+    position: relative;
+    width: 40%;
+    height: 65px;
+    text-align: center;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right .gridItemSettingsSelector {
+    position: relative;
+    height: 39px;
+    line-height: 39px;
+    margin-top: 12px; 
+    letter-spacing: -1px; 
+    line-height: 38px;
+    display: inline-block; 
+    font-size: 14px; 
+    font-weight: bold;
+    color: rgb(60,60,60);
+    padding-left: 15px;
+    padding-right: 15px; 
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right .gridItemSizeSelectorBorder {
+    border-left: 1px black solid;
+    border-top: 1px black solid;
+    border-bottom: 1px black solid;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right .selectedSelector {
+    color: white !important;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right .gridItemSettingsSelector:hover {
+    cursor: pointer;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right .gridItemSettingsSelector .selectorWrapper {
+    position: absolute; 
+    width: 25px; 
+    height: 39px; 
+    right: -11px; 
+    top: -1px;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right .gridItemSettingsSelector .selectorWrapperBorder {
+    border-right: 1px black solid;
+    border-top: 1px black solid;
+    border-bottom: 1px black solid;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right .gridItemSettingsSelector .selectorIcon {
+    position: absolute; 
+    top: 11px;
+    width: 0; 
+    height: 0; 
+    border-style: solid;
+    border-width: 8px 8px 0 8px; 
+    border-color: rgb(60,60,60) transparent transparent transparent; 
+    margin-top: 5px; 
+    margin-left: 5px;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right .gridItemSettingsSelector .selectedSelectorIcon {
+    border-color: rgb(255,255,255) transparent transparent transparent;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right .applyToAllItemSetting {
+    margin-top: 11px;
+    width: 80%; 
+    height: 42px; 
+    line-height: 40px;
+    background: rgb(220,220,220); 
+    font-size: 14px; 
+    font-weight: bold; 
+    letter-spacing: -1px;
+    color: rgb(60,60,60);
+    border: 1px rgb(150,150,150) solid;
+    box-sizing: border-box; 
+    margin-left: 15px;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right .selectedApplyToAllItemSetting {
+    color: white;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .right .applyToAllItemSetting:hover {
+    cursor: pointer;
 }

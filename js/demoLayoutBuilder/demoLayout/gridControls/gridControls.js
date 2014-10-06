@@ -15,8 +15,12 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
     this._legendDecorator = null;
 
     this._$controlsHeading = null;
+    this._$gridItemSettingsSelector = null;
+    this._$applyToAllControl = null;
 
     this._headingControls = [];
+
+    this._$itemSizesControl = null;
 
     this._$clearGridControl = null;
     this._$itemCssControl = null;
@@ -54,6 +58,23 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
         controlsHeadingMarginValueClass: "marginValue",
         controlsHeadingBoxSizingValueClass: "boxSizingValue",
 
+        controlsHeadingGridItemsSettingSelectorClass: "gridItemSettingsSelector",
+        controlsHeadingGridItemsSettingSelectorItemWidthClass: "itemWidth",
+        controlsHeadingGridItemsSettingSelectorItemHeightClass: "itemHeight",
+        controlsHeadingGridItemsSettingSelectorWrapperClass: "selectorWrapper",
+        controlsHeadingGridItemsSettingSelectorWrapperBorderClass: "selectorWrapperBorder",
+        controlsHeadingGridItemsSettingSelectorSelectorIconClass: "selectorIcon",
+        controlsHeadingGridItemsSettingSelectorSelectedSelectorIconClass: "selectedSelectorIcon",
+        controlsHeadingGridItemsSettingSelectedSelectorClass: "selectedSelector",
+        controlsHeadingGridItemSizeSelectorBorder: "gridItemSizeSelectorBorder",
+        controlsHeadingApplyToAllControlClass: "applyToAllItemSetting",
+        controlsHeadingSelectedApplyToAllControlsClass: "selectedApplyToAllItemSetting",
+        controlsHeadingItemSizesPrefix: "item",
+        controlsHeadingItemSizesPostfix: "Sizes",
+
+        verticalGridSelectedBorderClass: "gridFifthSelectorBorderColor",
+        horizontalGridSelectedBorderClass: "gridFourthSelectorBorderColor",
+
         topLeftControlClass: "topLeftControl",
         topRightControlClass: "topRightControl",
         middleLeftControlClass: "middleLeftControl",
@@ -69,13 +90,15 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
     this._verticalGridViewParams = {
         legendHighlightedTextColorClass: me._css.verticalGridHighlightedTextColorClass,
         selectedControlItemBgClass: me._css.verticalGridSelectedControlItemBgClass,
-        labelStrongBgClass: me._css.verticalGridSelectedControlItemBgClass
+        labelStrongBgClass: me._css.verticalGridSelectedControlItemBgClass,
+        selectedBorderClass: me._css.verticalGridSelectedBorderClass
     };
 
     this._horizontalGridViewParams = {
-        legendHighlightTextColorClass: me._css.horizontalGridHighlightedTextColorClass,
+        legendHighlightedTextColorClass: me._css.horizontalGridHighlightedTextColorClass,
         selectedControlItemBgClass: me._css.horizontalGridSelectedControlItemBgClass,
-        labelStrongBgClass: me._css.horizontalGridSelectedControlItemBgClass
+        labelStrongBgClass: me._css.horizontalGridSelectedControlItemBgClass,
+        selectedBorderClass: me._css.horizontalGridSelectedBorderClass
     };
 
     this._viewParams = null;
@@ -95,6 +118,11 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
 
         me._$controlsHeading = me._$view.find("." + me._css.controlsHeadingClass);
         me._decorateControlHeading();
+
+        me._$gridItemSettingsSelector = me._$view.find("." + me._css.controlsHeadingGridItemsSettingSelectorClass);
+        me._$applyToAllControl = me._$view.find("." + me._css.controlsHeadingApplyToAllControlClass);
+
+        me._$itemSizesControl = me._$gridItemSettingsSelector;
 
         me._$clearGridControl = me._$view.find("." + me._css.controlsHeadingClearGridControlClass);
         me._$itemCssControl = me._$view.find("." + me._css.controlsHeadingItemCssControlClass);
@@ -135,6 +163,7 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
             me._gridifierDynamicSettings,
             me._gridControlsManager,
             me._demoLayout, 
+            me._$itemSizesControl,
             me._$itemCssControl,
             me._$toggleControl, 
             me._$filterControl, 
@@ -219,6 +248,31 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
         me._$clearGridControl.on("click", function() {
             console.log("Clear grid!");
         });
+
+        me._$gridItemSettingsSelector.on("mouseenter", function() {
+            me._setSelectedGridItemSettingControl($(this));
+        });
+
+        me._$gridItemSettingsSelector.on("mouseleave", function() {
+            if(!me._selectorManager.isMouseOverSelector(event.pageX, event.pageY)) {
+                me.unsetSelectedGridItemSettingControl($(this));
+                return;
+            }
+        });
+
+        me._$applyToAllControl.on("mouseenter", function() {
+            $(this).addClass(me._viewParams.selectedControlItemBgClass);
+            $(this).addClass(me._css.controlsHeadingSelectedApplyToAllControlsClass);
+        });
+
+        me._$applyToAllControl.on("mouseleave", function() {
+            $(this).removeClass(me._viewParams.selectedControlItemBgClass);
+            $(this).removeClass(me._css.controlsHeadingSelectedApplyToAllControlsClass);
+        });
+
+        me._$applyToAllControl.on("click", function() {
+            console.log("Apply to all");
+        });
     }
 
     this._unbindEvents = function() {
@@ -249,6 +303,42 @@ DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES = {
 DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS = {
     APPEND: 0, PREPEND: 1, FILTER: 2, SORT: 3, TOGGLE: 4, BATCH_SIZE: 5
 };
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype._setSelectedGridItemSettingControl = function($gridItemSettingControl) {
+    $gridItemSettingControl.addClass(this._viewParams.selectedControlItemBgClass);
+    $gridItemSettingControl.addClass(this._css.controlsHeadingGridItemsSettingSelectedSelectorClass);
+    $gridItemSettingControl.addClass(this._css.controlsHeadingGridItemSizeSelectorBorder);
+
+    var $itemWidth = $gridItemSettingControl.find("." + this._css.controlsHeadingGridItemsSettingSelectorItemWidthClass);
+    var $itemHeight = $gridItemSettingControl.find("." + this._css.controlsHeadingGridItemsSettingSelectorItemHeightClass);
+    $itemWidth.addClass(this._css.controlsHeadingGridItemsSettingSelectedSelectorClass);
+    $itemHeight.addClass(this._css.controlsHeadingGridItemsSettingSelectedSelectorClass);
+
+    var $selectorWrapper = $gridItemSettingControl.find("." + this._css.controlsHeadingGridItemsSettingSelectorWrapperClass);
+    $selectorWrapper.addClass(this._viewParams.selectedControlItemBgClass);
+    $selectorWrapper.addClass(this._css.controlsHeadingGridItemsSettingSelectorWrapperBorderClass);
+
+    var $selectorIcon = $gridItemSettingControl.find("." + this._css.controlsHeadingGridItemsSettingSelectorSelectorIconClass);
+    $selectorIcon.addClass(this._css.controlsHeadingGridItemsSettingSelectorSelectedSelectorIconClass);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype.unsetSelectedGridItemSettingControl = function($gridItemSettingControl) {
+    $gridItemSettingControl.removeClass(this._viewParams.selectedControlItemBgClass);
+    $gridItemSettingControl.removeClass(this._css.controlsHeadingGridItemsSettingSelectedSelectorClass);
+    $gridItemSettingControl.removeClass(this._css.controlsHeadingGridItemSizeSelectorBorder);
+
+    var $itemWidth = $gridItemSettingControl.find("." + this._css.controlsHeadingGridItemsSettingSelectorItemWidthClass);
+    var $itemHeight = $gridItemSettingControl.find("." + this._css.controlsHeadingGridItemsSettingSelectorItemHeightClass);
+    $itemWidth.removeClass(this._css.controlsHeadingGridItemsSettingSelectedSelectorClass);
+    $itemHeight.removeClass(this._css.controlsHeadingGridItemsSettingSelectedSelectorClass);
+
+    var $selectorWrapper = $gridItemSettingControl.find("." + this._css.controlsHeadingGridItemsSettingSelectorWrapperClass);
+    $selectorWrapper.removeClass(this._viewParams.selectedControlItemBgClass);
+    $selectorWrapper.removeClass(this._css.controlsHeadingGridItemsSettingSelectorWrapperBorderClass);
+
+    var $selectorIcon = $gridItemSettingControl.find("." + this._css.controlsHeadingGridItemsSettingSelectorSelectorIconClass);
+    $selectorIcon.removeClass(this._css.controlsHeadingGridItemsSettingSelectorSelectedSelectorIconClass);
+}
 
 DemoLayoutBuilder.DemoLayout.GridControls.prototype._setSelectedHeadingControl = function($headingControl) {
     var me = this;
@@ -337,6 +427,38 @@ DemoLayoutBuilder.DemoLayout.GridControls.prototype._getHeaderControlByConst = f
 DemoLayoutBuilder.DemoLayout.GridControls.prototype.setHeadingControlLabel = function(controlType, newLabel) {
     var $headerControl = this._getHeaderControlByConst(controlType);
     $headerControl.text(newLabel);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype._getItemSizes = function(itemSizesIndex) {
+    var itemSizesClass = "";
+    itemSizesClass += this._css.controlsHeadingItemSizesPrefix;
+    itemSizesClass += itemSizesIndex;
+    itemSizesClass += this._css.controlsHeadingItemSizesPostfix;
+
+    var $itemSizes = this._$view.find("." + itemSizesClass);
+    return $itemSizes;
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype.setItemSizesLabel = function(itemSizesIndex, newWidthLabel, newHeightLabel) {
+    var $itemSizes = this._getItemSizes(itemSizesIndex);
+
+    var $itemWidth = $itemSizes.find("." + this._css.controlsHeadingGridItemsSettingSelectorItemWidthClass);
+    var $itemHeight = $itemSizes.find("." + this._css.controlsHeadingGridItemsSettingSelectorItemHeightClass);
+
+    $itemWidth.text(newWidthLabel);
+    $itemHeight.text(newHeightLabel);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype.setItemWidthLabel = function(itemSizesIndex, newWidthLabel) {
+    var $itemSizes = this._getItemSizes(itemSizesIndex);
+    var $itemWidth = $itemSizes.find("." + this._css.controlsHeadingGridItemsSettingsSelectorItemWidthClass);
+    $itemWidth.text(newWidthLabel);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype.setItemHeightLabel = function(itemSizesIndex, newHeightLabel) {
+    var $itemSizes = this._getItemSizes(itemSizesIndex);
+    var $itemHeight = $itemSizes.find("." + this._css.controlsHeadingGridItemsSettingSelectorItemHeightClass);
+    $itemHeight.text(newHeightLabel);
 }
 
 DemoLayoutBuilder.DemoLayout.GridControls.prototype.setControlSublabel = function(control, sublabel) {

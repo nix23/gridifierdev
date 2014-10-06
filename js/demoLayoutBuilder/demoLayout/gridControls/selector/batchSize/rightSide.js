@@ -85,7 +85,8 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector.BatchSize.RightSide.prototype
 
 DemoLayoutBuilder.DemoLayout.GridControls.Selector.BatchSize.RightSide.prototype._createAtom = function() {
     var $atom = $("<div/>").addClass(this._css.atomClass);
-    $atom.addClass(this._getNextBgClass());
+    $atom.addClass(this._getNextBgClass()); 
+    $atom.css("visibility", "hidden");
     $atom.html("G");
 
     return $atom;
@@ -137,4 +138,23 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector.BatchSize.RightSide.prototype
                 $atom.addClass(this._css.atomMarginTop);
         }
     }
+
+    this._renderAtoms();
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.BatchSize.RightSide.prototype._renderAtoms = function() {
+    if(browserDetector.isIe8())
+    {
+        this._$view.find("." + this._css.atomClass).css("visibility", "visible");
+        return;
+    }
+
+    var scaleTimeout = 600;
+    $.each($("." + this._css.atomClass), function() {
+        var $atom = $(this);
+        $(this).transition({scale: 0}, 0, function() {
+            $atom.css("visibility", "visible");
+            $atom.transition({scale: 1}, scaleTimeout, function() {});
+        });
+    });
 }

@@ -5,7 +5,8 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector = function(gridControls,
                                                                                                    snapOffset, 
                                                                                                    selectorOptions,
                                                                                                    selectorMinWidth,
-                                                                                                   extendedRightSideWidth) {
+                                                                                                   extendedRightSideWidth,
+                                                                                                   reducedLeftSideWidth) {
     var me = this;
 
     this._$view = null;
@@ -24,6 +25,8 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector = function(gridControls,
     this._$selector = null;
     this._selectorMinWidth = 600;
 
+    this._reducedLeftSideWidth = false;
+
     this._optionLeftSide = null;
     this._optionRightSide = null;
 
@@ -34,6 +37,7 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector = function(gridControls,
         selectorSelectedRowClass: "row-selected",
         selectorHighlightedRowClass: "highlightedRow",
         selectorRowLeftSideClass: "leftSide",
+        selectorReducedLeftSideWidthClass: "reducedLeftSideWidth",
         selectorRowLeftSideLabelClass: "label",
         selectorRowLeftSideSublabelClass: "sublabel",
         selectorRowRightSideClass: "rightSide",
@@ -64,6 +68,8 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector = function(gridControls,
 
         if(typeof selectorMinWidth == "number")
             me._selectorMinWidth = selectorMinWidth;
+
+        me._reducedLeftSideWidth = reducedLeftSideWidth || false;
         
         me._createSelector();
         me._createSelectorRows(extendedRightSideWidth);
@@ -175,6 +181,9 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector.prototype._createSelectorRows
 
         var $leftSide = $("<div/>");
         $leftSide.addClass(this._css.selectorRowLeftSideClass);
+
+        if(this._reducedLeftSideWidth)
+            $leftSide.addClass(this._css.selectorReducedLeftSideWidthClass);
 
         var $leftSideLabel = $("<div/>");
         $leftSideLabel.addClass(this._css.selectorRowLeftSideLabelClass);

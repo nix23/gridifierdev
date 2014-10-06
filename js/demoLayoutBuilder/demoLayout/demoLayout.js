@@ -87,7 +87,9 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridControlsManager.addGridControls(me._gridTopControls);
         me._gridControlsManager.addGridControls(me._gridBottomControls);
 
-        me._gridControlsManager.setItemCssControlBorder(5);
+        me._gridControlsManager.setAllItemSizes("100px", "100px");
+
+        me._gridControlsManager.setItemCssControlBorder(3);
         me._gridControlsManager.setItemCssControlMargin(0);
         me._gridControlsManager.setBoxSizingItemCssControlBorderBoxOption();
 

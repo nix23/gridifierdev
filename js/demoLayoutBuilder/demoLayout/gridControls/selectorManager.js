@@ -2,6 +2,7 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager = function(gridControl
                                                                                                               gridifierDynamicSettings,
                                                                                                               gridControlsManager,
                                                                                                               demoLayout, 
+                                                                                                              $itemSizesControl,
                                                                                                               $itemCssControl,
                                                                                                               $toggleControl, 
                                                                                                               $filterControl, 
@@ -17,6 +18,7 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager = function(gridControl
 
     this._selectorControls = [];
 
+    this._$itemSizesControl = null;
     this._$itemCssControl = null;
     this._$toggleControl = null;
     this._$filterControl = null;
@@ -38,12 +40,14 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager = function(gridControl
         me._gridifierDynamicSettings = gridifierDynamicSettings;
         me._gridControlsManager = gridControlsManager;
 
+        me._$itemSizesControl = $itemSizesControl;
         me._$itemCssControl = $itemCssControl;
         me._$toggleControl = $toggleControl;
         me._$filterControl = $filterControl;
         me._$sortControl = $sortControl;
         me._$batchSizeControl = $batchSizeControl;
 
+        me._selectorControls.push(me._$itemSizesControl);
         me._selectorControls.push(me._$itemCssControl);
         me._selectorControls.push(me._$toggleControl);
         me._selectorControls.push(me._$filterControl);
@@ -54,6 +58,20 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager = function(gridControl
     }
 
     this._bindEvents = function() {
+        me._$itemSizesControl.on("click", function() {
+            if(me._isAnySelectorOpened())
+            {
+                if(me._isItemSizesSelectorOpened())
+                    me._deleteCurrentSelector(null, true);
+                else
+                    me._deleteCurrentSelector(function() {
+                        me._openItemSizesSelector($(this));
+                    });
+            }
+            else
+                me._openItemSizesSelector($(this));
+        });
+
         me._$itemCssControl.on("click", function() {
             if(me._isAnySelectorOpened())
             {
@@ -144,7 +162,7 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.EVENT_BODY_CLICK =
     "click.DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.EventBodyClick";
 
 DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.SELECTOR_TYPES = {
-    TOGGLE: 0, FILTER: 1, SORT: 2, BATCH_SIZE: 3, ITEM_CSS: 4
+    TOGGLE: 0, FILTER: 1, SORT: 2, BATCH_SIZE: 3, ITEM_CSS: 4, ITEM_SIZES: 5
 }
 
 DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isMouseOverSelector = function(pageX, pageY) {
@@ -173,6 +191,17 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isMouseOver
 }
 
 DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isMouseOverAnyControl = function(pageX, pageY) {
+    var me = this;
+
+    var isMouseOverAnyItemSizeControl = false;
+    $.each(this._$itemSizesControl, function() {
+        if(me._isMouseOverControl($(this), pageX, pageY))
+            isMouseOverAnyItemSizeControl = true;
+    });
+
+    if(isMouseOverAnyItemSizeControl)
+        return true;
+
     if(this._isMouseOverControl(this._$toggleControl, pageX, pageY) || this._isMouseOverControl(this._$filterControl, pageX, pageY)
         || this._isMouseOverControl(this._$sortControl, pageX, pageY) || this._isMouseOverControl(this._$batchSizeControl, pageX, pageY)
         || this._isMouseOverControl(this._$itemCssControl, pageX, pageY))
@@ -183,6 +212,10 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isMouseOver
 
 DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isAnySelectorOpened = function() {
     return this._currentSelectorType != null;
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isItemSizesSelectorOpened = function() {
+    return this._currentSelectorType == DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.SELECTOR_TYPES.ITEM_SIZES;
 }
 
 DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isToggleSelectorOpened = function() {
@@ -203,6 +236,11 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isSortSelec
 
 DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isBatchSizeSelectorOpened = function() {
     return this._currentSelectorType == DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.SELECTOR_TYPES.BATCH_SIZE;
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._openItemSizesSelector = function($itemSizesControl) {
+    this._currentSelectorType = DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.SELECTOR_TYPES.ITEM_SIZES;
+    this._createItemSizesSelector($itemSizesControl);
 }
 
 DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._openItemCssSelector = function() {
@@ -241,6 +279,8 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._unsetSelect
         this._gridControls.unsetSelectedControl(this._$batchSizeControl);
     else if(this._isItemCssSelectorOpened())
         this._gridControls.unsetSelectedHeadingControl(this._$itemCssControl);
+    else if(this._isItemSizesSelectorOpened())
+        this._gridControls.unsetSelectedGridItemSettingControl(this._$itemSizesControl);
 }
 
 DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._deleteCurrentSelector = function(callbackFunc,
@@ -695,6 +735,109 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._createItemC
         selectorOptions,
         880,
         550
+    );
+
+    this._bindSelectorEvents();
+    this._openCurrentSelector();
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._createItemSizesSelector = function($itemSizeControl) {
+    var me = this;
+    var itemSizesIndexAttr = "data-itemSizesSelectorId";
+    var itemSizesIndex = $itemSizeControl.attr(itemSizesIndexAttr);
+
+    if(this._demoLayout.isVerticalGrid())
+    {
+        var createWidthOptionRightSide = function($rightSide) {
+            var optionRightSide = new DemoLayoutBuilder.DemoLayout.GridControls.Selector.MultipleMeasurementsItemSize(
+                $rightSide,
+                me._demoLayout,
+                function(testParam) {
+                    console.log("update width here");
+                },
+                me._gridifierDynamicSettings.getItemWidth(itemSizesIndex)
+            );
+
+            return optionRightSide;
+        }
+
+        var createHeightOptionRightSide = function($rightSide) {
+            var optionRightSide = new DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize(
+                $rightSide,
+                me._demoLayout,
+                function(newHeight) {
+                    me._gridifierDynamicSettings.setItemHeight(itemSizesIndex, newHeight);
+                    me._gridControlsManager.setItemHeight(itemSizesIndex, newHeight + "px");
+                },
+                me._gridifierDynamicSettings.getItemHeight(itemSizesIndex)
+            );
+
+            return optionRightSide;
+        }
+    }
+    else if(this._demoLayout.isHorizontalGrid())
+    {
+        var createWidthOptionRightSide = function($rightSide) {
+            var optionRightSide = new DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize(
+                $rightSide,
+                me._demoLayout,
+                function(newWidth) {
+                    me._gridifierDynamicSettings.setItemWidth(itemSizesIndex, newWidth);
+                    me._gridControlsManager.setItemWidth(itemSizesIndex, newWidth + "px");
+                },
+               me._gridifierDynamicSettings.getItemWidth(itemSizesIndex)
+            );
+
+            return optionRightSide;
+        }
+
+        var createHeightOptionRightSide = function($rightSide) {
+            var optionRightSide = new DemoLayoutBuilder.DemoLayout.GridControls.Selector.MultipleMeasurementsItemSize(
+                $rightSide,
+                me._demoLayout,
+                function(testParam) {
+                    console.log("update height here");
+                },
+                me._gridifierDynamicSettings.getItemHeight(itemSizesIndex)
+            );
+
+            return optionRightSide;
+        }
+    }
+
+    var selectorOptions = [];
+    selectorOptions.push({
+        optionLabel: "Item width",
+        optionSublabel: "Select item width.",
+        createOptionRightSide: createWidthOptionRightSide,
+        selectHandler: function() {
+            //
+        }
+    });
+
+    selectorOptions.push({
+        optionLabel: "Item height",
+        optionSublabel: "Select item height.",
+        createOptionRightSide: createHeightOptionRightSide,
+        selectHandler: function() {
+            //
+        }
+    });
+
+    var snapOffset = {left: -540, top: 0};
+    if(this._gridControls.areBottomControls())
+        snapOffset.top -= $itemSizeControl.outerHeight() + 10;
+
+    this._currentSelector = new DemoLayoutBuilder.DemoLayout.GridControls.Selector(
+        this._gridControls,
+        this._demoLayout,
+        $("body"),
+        $itemSizeControl,
+        snapOffset,
+        selectorOptions,
+        880,
+        700,
+        true
     );
 
     this._bindSelectorEvents();

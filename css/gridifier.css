@@ -106,6 +106,33 @@ body {
     border-color: rgb(73,158,75) !important;
 }
 
+/* Blue */
+.gridFirstSelectorBorderColor {
+    border-color: rgb(129,181,228) transparent transparent transparent !important;
+}
+
+/* Violet */
+.gridSecondSelectorBorderColor {
+    border-color: rgb(179,158,199) transparent transparent transparent !important;
+}
+
+
+/* Orange */
+.gridThirdSelectorBorderColor {
+    border-color: rgb(249,172,64) transparent transparent transparent !important;
+}
+
+/* Red */
+.gridFourthSelectorBorderColor {
+    border-color: rgb(197,79,51) transparent transparent transparent !important;
+}
+
+
+/* Green */
+.gridFifthSelectorBorderColor {
+    border-color: rgb(73,158,75) transparent transparent transparent !important;
+}
+
 /* Horizontal */
 #configurator .horizontalSortDispersion .sortDispersionSlider .noUi-handle,
 .horizontalNoUiSlider .noUi-handle {
