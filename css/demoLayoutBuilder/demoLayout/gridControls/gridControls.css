@@ -184,11 +184,25 @@
 }
 
 #demoLayout .gridControlsView .controls .controlsContent .rightSide .itemSetting {
+    position: relative;
     width: 99%;
     height: 65px;
     box-sizing: border-box;
     border: 1px rgb(150,150,150) solid;
     background: rgb(235,235,235);
+    z-index: 1;
+}
+
+#demoLayout .gridControlsView .controls .controlsContent .rightSide .itemSetting .disabledItemSetting {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    height: 63px;
+    box-sizing: border-box;
+    background: url(../../../../img/transparentBg.png);
+    z-index: 2; 
+    display: none;
 }
 
 #demoLayout .gridControlsView .controls .controlsContent .rightSide .itemSettingTopMargin {
@@ -242,17 +256,19 @@
 
 #demoLayout .gridControlsView .controls .controlsContent .rightSide .right .gridItemSettingsSelector {
     position: relative;
-    height: 39px;
-    line-height: 39px;
-    margin-top: 12px; 
+    height: 59px;
+    margin-top: 1px; 
     letter-spacing: -1px; 
-    line-height: 38px;
+    line-height: 59px;
     display: inline-block; 
     font-size: 14px; 
     font-weight: bold;
     color: rgb(60,60,60);
     padding-left: 15px;
     padding-right: 15px; 
+    border-left: 1px rgb(235,235,235) solid;
+    border-top: 1px rgb(235,235,235) solid;
+    border-bottom: 1px rgb(235,235,235) solid;
 }
 
 #demoLayout .gridControlsView .controls .controlsContent .rightSide .right .gridItemSizeSelectorBorder {
@@ -272,9 +288,12 @@
 #demoLayout .gridControlsView .controls .controlsContent .rightSide .right .gridItemSettingsSelector .selectorWrapper {
     position: absolute; 
     width: 25px; 
-    height: 39px; 
-    right: -11px; 
+    height: 59px; 
+    right: -13px; 
     top: -1px;
+    border-right: 1px rgb(235,235,235) solid;
+    border-top: 1px rgb(235,235,235) solid;
+    border-bottom: 1px rgb(235,235,235) solid;
 }
 
 #demoLayout .gridControlsView .controls .controlsContent .rightSide .right .gridItemSettingsSelector .selectorWrapperBorder {
@@ -285,7 +304,7 @@
 
 #demoLayout .gridControlsView .controls .controlsContent .rightSide .right .gridItemSettingsSelector .selectorIcon {
     position: absolute; 
-    top: 11px;
+    top: 21px;
     width: 0; 
     height: 0; 
     border-style: solid;

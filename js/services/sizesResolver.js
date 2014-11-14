@@ -81,6 +81,8 @@ var SizesResolver = {
 
     // based on http://connect.microsoft.com/IE/feedback/details/695683/dimensions-returned-by-getcomputedstyle-are-wrong-if-element-has-box-sizing-border-box.
     // At least IE10 and FF7 returns computed width and height without padding and borders, so we should determine sizes calculation type here.
+    // Looks like 'workaround', but bootstrap inspired me.(They use similar aproach as in Dom.isBrowserSupportingTransitions
+    // to detect if browser is supporting transitions, they are using so-called testerEl).
     determineBorderBoxComputedSizesCalculationStrategy: function()
     {
         var testerDiv = document.createElement("div");
@@ -120,14 +122,29 @@ var SizesResolver = {
         var marginWidth = computedProperties.marginLeft + computedProperties.marginRight;
         var borderWidth = computedProperties.borderLeftWidth + computedProperties.borderRightWidth;
 
-        var outerWidth = DOMElem.offsetWidth;
+        // The HTMLElement.offsetWidth read-only property returns the layout width of an element. Typically, 
+        // an element's offsetWidth is a measurement which includes the element borders, the element horizontal padding, 
+        // the element vertical scrollbar (if present, if rendered) and the element CSS width.
+        var outerWidth = DOMElem.offsetWidth; 
+        console.log("outerWidth: " + outerWidth);
+        console.log("computedWidth: ", this.elementComputedCSS.width);
         var normalizedComputedWidth = this.normalizeComputedCSSSizeValue(this.elementComputedCSS.width);
+        console.log("normalized CW: ", normalizedComputedWidth);
 
         if(normalizedComputedWidth !== false)
             outerWidth = normalizedComputedWidth + ((this.isBoxSizingBorderBox() && this.isOuterBorderBoxSizing()) ? 0 : paddingWidth + borderWidth);
         if(includeMargins) outerWidth += marginWidth;
-
-        return Math.round(outerWidth);
+        console.log("!!! Rounded width: ", Math.round(outerWidth));
+        return Math.round(outerWidth); 
+        //                               Math.round will fail in WebKit-based browsers,
+        //                               because percentage elements will always return rounded up value.
+        //                               (356.5 => 357px). Looks like when you are attaching four 25%-width
+        //                               divs to some div, chrome is calculating them correctly.(If container is
+        //                               22px width, Divs will have 6,5,6,5 px widths). But because of Gridifier
+        //                               items are positioned absolutely in container, chrome will always round up
+        //                               the target value.(Like 357px in the example above), so we are required to
+        //                               always round down the target value.
+        //return Math.floor(outerWidth);
     },
 
     outerHeight: function(DOMElem, includeMargins)
@@ -153,6 +170,7 @@ var SizesResolver = {
         if(includeMargins) outerHeight += marginHeight;
 
         return Math.round(outerHeight);
+        //return Math.floor(outerHeight);
     },
 
     positionLeft: function(DOMElem)

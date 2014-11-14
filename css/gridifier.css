@@ -11,6 +11,15 @@ body {
     overflow-y: scroll;
 }
 
+.disableSelect {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
 #demoLayoutContainer {
     float: left;
     width: calc(100% - 30px);
@@ -127,10 +136,42 @@ body {
     border-color: rgb(197,79,51) transparent transparent transparent !important;
 }
 
-
 /* Green */
 .gridFifthSelectorBorderColor {
     border-color: rgb(73,158,75) transparent transparent transparent !important;
+}
+
+/* Border colors by sides */
+.gridFourthTopBorderColor {
+    border-top-color: rgb(197,79,51) !important;
+}
+
+.gridFifthTopBorderColor {
+    border-top-color: rgb(73,158,75) !important;
+}
+
+.gridFourthLeftBorderColor {
+    border-left-color: rgb(197,79,51) !important;
+}
+
+.gridFifthLeftBorderColor {
+    border-left-color: rgb(73,158,75) !important;
+}
+
+.gridFourthBottomBorderColor {
+    border-bottom-color: rgb(197,79,51) !important;
+}
+
+.gridFifthBottomBorderColor {
+    border-bottom-color: rgb(73,158,75) !important;
+}
+
+.gridFourthRightBorderColor {
+    border-right-color: rgb(197,79,51) !important;
+}
+
+.gridFifthRightBorderColor {
+    border-right-color: rgb(73,158,75) !important;
 }
 
 /* Horizontal */

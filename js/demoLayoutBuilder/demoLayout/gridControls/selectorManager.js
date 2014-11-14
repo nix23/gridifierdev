@@ -139,7 +139,7 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager = function(gridControl
 
         for(var i = 0; i < me._selectorControls.length; i++)
         {
-            me._selectorControls[i].on("mouseleave", function(event) {
+            me._selectorControls[i].on("mouseleave", function(event) { 
                 if(!me._isMouseOverSelector(event.pageX, event.pageY))
                     me._deleteCurrentSelector();
             });
@@ -181,11 +181,15 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isMouseOver
 DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype.isMouseOverSelector =
     DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isMouseOverSelector;
 
-DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isMouseOverControl = function($control, x, y) {
+DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isMouseOverControl = function($control, x, y, boostControlRange) {
     var x1 = $control.offset().left;
     var x2 = x1 + $control.outerWidth() - 1;
     var y1 = $control.offset().top;
     var y2 = y1 + $control.outerHeight() - 1;
+
+    // Item sizes selector absolute position icon fix
+    if(boostControlRange)
+        x2 += 30;
 
     return (x >= x1 && x <= x2 && y >= y1 && y <= y2) ? true : false;
 }
@@ -195,7 +199,7 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._isMouseOver
 
     var isMouseOverAnyItemSizeControl = false;
     $.each(this._$itemSizesControl, function() {
-        if(me._isMouseOverControl($(this), pageX, pageY))
+        if(me._isMouseOverControl($(this), pageX, pageY, true))
             isMouseOverAnyItemSizeControl = true;
     });
 
@@ -402,6 +406,40 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._createToggl
             selectHandler: function() {
                 me._gridControlsManager.selectToggleControlFadeOption();
                 me._gridifierDynamicSettings.setFadeToggleFunction();
+                me._selectOption(me._$toggleControl);
+            }
+        });
+
+        selectorOptions.push({
+            optionLabel: "RotateX",
+            optionSublabel: "Item will be toggled with smooth rotation around X-axis(CSS3).",
+            createOptionRightSide: function($rightSide) {
+                var optionRightSide = new DemoLayoutBuilder.DemoLayout.GridControls.Selector.Toggle.Rotate(
+                    $rightSide, me._demoLayout
+                );
+                return optionRightSide;
+            },
+            isSelected: this._gridifierDynamicSettings.isRotateXToggleFunction(),
+            selectHandler: function() {
+                me._gridControlsManager.selectToggleControlRotateXOption();
+                me._gridifierDynamicSettings.setRotateXToggleFunction();
+                me._selectOption(me._$toggleControl);
+            }
+        });
+
+        selectorOptions.push({
+            optionLabel: "RotateY",
+            optionSublabel: "Item will be toggled with smooth rotation around Y-axis(CSS3).",
+            createOptionRightSide: function($rightSide) {
+                var optionRightSide = new DemoLayoutBuilder.DemoLayout.GridControls.Selector.Toggle.Rotate(
+                    $rightSide, me._demoLayout, true
+                );
+                return optionRightSide;
+            },
+            isSelected: this._gridifierDynamicSettings.isRotateYToggleFunction(),
+            selectHandler: function() {
+                me._gridControlsManager.selectToggleControlRotateYOption();
+                me._gridifierDynamicSettings.setRotateYToggleFunction();
                 me._selectOption(me._$toggleControl);
             }
         });
@@ -752,10 +790,12 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._createItemS
             var optionRightSide = new DemoLayoutBuilder.DemoLayout.GridControls.Selector.MultipleMeasurementsItemSize(
                 $rightSide,
                 me._demoLayout,
-                function(testParam) {
-                    console.log("update width here");
+                function(newWidth) {
+                    me._gridifierDynamicSettings.setItemWidth(itemSizesIndex, newWidth);
+                    me._gridControlsManager.setItemWidth(itemSizesIndex, newWidth);
                 },
-                me._gridifierDynamicSettings.getItemWidth(itemSizesIndex)
+                me._gridifierDynamicSettings.getItemWidth(itemSizesIndex),
+                DemoLayoutBuilder.DemoLayout.GridControls.Selector.MultipleMeasurementsItemSize.MEASUREMENT_TYPES.WIDTH
             );
 
             return optionRightSide;
@@ -766,10 +806,11 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._createItemS
                 $rightSide,
                 me._demoLayout,
                 function(newHeight) {
-                    me._gridifierDynamicSettings.setItemHeight(itemSizesIndex, newHeight);
+                    me._gridifierDynamicSettings.setItemHeight(itemSizesIndex, newHeight + "px");
                     me._gridControlsManager.setItemHeight(itemSizesIndex, newHeight + "px");
                 },
-                me._gridifierDynamicSettings.getItemHeight(itemSizesIndex)
+                me._gridifierDynamicSettings.getItemHeight(itemSizesIndex),
+                DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.MEASUREMENT_TYPES.HEIGHT
             );
 
             return optionRightSide;
@@ -782,10 +823,11 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._createItemS
                 $rightSide,
                 me._demoLayout,
                 function(newWidth) {
-                    me._gridifierDynamicSettings.setItemWidth(itemSizesIndex, newWidth);
+                    me._gridifierDynamicSettings.setItemWidth(itemSizesIndex, newWidth + "px");
                     me._gridControlsManager.setItemWidth(itemSizesIndex, newWidth + "px");
                 },
-               me._gridifierDynamicSettings.getItemWidth(itemSizesIndex)
+               me._gridifierDynamicSettings.getItemWidth(itemSizesIndex),
+               DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.MEASUREMENT_TYPES.WIDTH
             );
 
             return optionRightSide;
@@ -795,10 +837,12 @@ DemoLayoutBuilder.DemoLayout.GridControls.SelectorManager.prototype._createItemS
             var optionRightSide = new DemoLayoutBuilder.DemoLayout.GridControls.Selector.MultipleMeasurementsItemSize(
                 $rightSide,
                 me._demoLayout,
-                function(testParam) {
-                    console.log("update height here");
+                function(newHeight) {
+                    me._gridifierDynamicSettings.setItemHeight(itemSizesIndex, newHeight);
+                    me._gridControlsManager.setItemHeight(itemSizesIndex, newHeight);
                 },
-                me._gridifierDynamicSettings.getItemHeight(itemSizesIndex)
+                me._gridifierDynamicSettings.getItemHeight(itemSizesIndex),
+                DemoLayoutBuilder.DemoLayout.GridControls.Selector.MultipleMeasurementsItemSize.MEASUREMENT_TYPES.HEIGHT
             );
 
             return optionRightSide;

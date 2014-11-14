@@ -1,8 +1,8 @@
 DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl, 
-                                                                                     demoLayout, 
-                                                                                     controlsType, 
-                                                                                     gridifierDynamicSettings,
-                                                                                     gridControlsManager) {
+                                                     demoLayout, 
+                                                     controlsType, 
+                                                     gridifierDynamicSettings,
+                                                     gridControlsManager) {
     var me = this;
 
     this._$view = null;
@@ -84,7 +84,13 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
 
         legendDefaultTextClass: "defaultText",
         legendHighlightedTextClass: "highlightedText",
-        sublabelTextClass: "sublabelText"
+        sublabelTextClass: "sublabelText",
+
+        itemSettingsClass: "itemSettings",
+        itemSettingClass: "itemSetting",
+        itemWidthClass: "itemWidth",
+        itemHeightClass: "itemHeight",
+        disabledItemClass: "disabledItemSetting"
     };
 
     this._verticalGridViewParams = {
@@ -253,7 +259,7 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
             me._setSelectedGridItemSettingControl($(this));
         });
 
-        me._$gridItemSettingsSelector.on("mouseleave", function() {
+        me._$gridItemSettingsSelector.on("mouseleave", function(event) { 
             if(!me._selectorManager.isMouseOverSelector(event.pageX, event.pageY)) {
                 me.unsetSelectedGridItemSettingControl($(this));
                 return;
@@ -271,7 +277,24 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
         });
 
         me._$applyToAllControl.on("click", function() {
-            console.log("Apply to all");
+            $clickedItemSetting = $(this).closest("." + me._css.itemSettingClass);
+            clickedItemWidth = $clickedItemSetting.find("." + me._css.itemWidthClass).text();
+            clickedItemHeight = $clickedItemSetting.find("." + me._css.itemHeightClass).text();
+
+            me._gridControlsManager.setAllItemSizes(clickedItemWidth, clickedItemHeight);
+            me._gridifierDynamicSettings.setAllItemSizes(clickedItemWidth, clickedItemHeight);
+        });
+
+        me._$prependControl.on("click", function() {
+            $(me).trigger(DemoLayoutBuilder.DemoLayout.GridControls.EVENT_CONTROL_SELECT, [
+                DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS.PREPEND
+            ]);
+        });
+
+        me._$appendControl.on("click", function() {
+            $(me).trigger(DemoLayoutBuilder.DemoLayout.GridControls.EVENT_CONTROL_SELECT, [
+                DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS.APPEND
+            ]);
         });
     }
 
@@ -295,6 +318,8 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
     this._construct();
     return this;
 }
+
+DemoLayoutBuilder.DemoLayout.GridControls.EVENT_CONTROL_SELECT = "DemoLayoutBuilder.DemoLayout.GridControls.controlSelect";
 
 DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS_TYPES = {TOP: 0, BOTTOM: 1};
 DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES = {
@@ -450,9 +475,9 @@ DemoLayoutBuilder.DemoLayout.GridControls.prototype.setItemSizesLabel = function
 }
 
 DemoLayoutBuilder.DemoLayout.GridControls.prototype.setItemWidthLabel = function(itemSizesIndex, newWidthLabel) {
-    var $itemSizes = this._getItemSizes(itemSizesIndex);
-    var $itemWidth = $itemSizes.find("." + this._css.controlsHeadingGridItemsSettingsSelectorItemWidthClass);
-    $itemWidth.text(newWidthLabel);
+    var $itemSizes = this._getItemSizes(itemSizesIndex); 
+    var $itemWidth = $itemSizes.find("." + this._css.controlsHeadingGridItemsSettingSelectorItemWidthClass);
+    $itemWidth.text(newWidthLabel); 
 }
 
 DemoLayoutBuilder.DemoLayout.GridControls.prototype.setItemHeightLabel = function(itemSizesIndex, newHeightLabel) {
@@ -464,4 +489,21 @@ DemoLayoutBuilder.DemoLayout.GridControls.prototype.setItemHeightLabel = functio
 DemoLayoutBuilder.DemoLayout.GridControls.prototype.setControlSublabel = function(control, sublabel) {
     $control = this._getControlByConst(control); 
     this._legendDecorator.setControlSublabel($control, sublabel);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.prototype.setEnabledItemControls = function(newBatchSize) {
+    var me = this;
+    var itemNumber = 0;
+
+    $.each(this._$view.find("." + this._css.itemSettingClass), function() {
+        var $disabledItemSetting = $(this).find("." + me._css.disabledItemClass);
+
+        itemNumber++;
+        if(itemNumber <= newBatchSize) {
+            $disabledItemSetting.css("display", "none");
+        }
+        else {
+            $disabledItemSetting.css("display", "block");
+        }
+    });
 }

@@ -2,6 +2,7 @@
     width: 100%;
     background: rgb(210,210,210);
     overflow: hidden;
+    margin-top: 15px;
 }
 
 #demoLayout .gridSourcesDumperView .gridSourcesDumper .left {

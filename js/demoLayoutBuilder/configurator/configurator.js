@@ -278,7 +278,7 @@ DemoLayoutBuilder.Configurator.prototype._gridSortDispersionModeChangeEventHandl
         else
         {
             var sortDispersionSettingValue = Gridifier.SORT_DISPERSION_MODES.CUSTOM;
-            var sortDispersionValueSettingValue = sortDispersionValue;
+            var sortDispersionValueSettingValue = sortDispersionValue + "px";
         }
     }
 

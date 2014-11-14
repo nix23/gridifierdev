@@ -4,9 +4,11 @@
     overflow: hidden;
     height: 0px;
     border: 5px rgb(190,190,190) solid;
+    z-index: 3;
 }
 
 .gridControlsSelector .row {
+    position: relative;
     width: 100%;
     overflow: hidden;
     box-sizing: border-box;

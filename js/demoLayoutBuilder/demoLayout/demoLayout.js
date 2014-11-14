@@ -4,6 +4,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
     this._$view = null;
 
     this._demoLayoutBuilder = null;
+    this._gridifier = null;
 
     this._gridHeading = null;
     this._gridTopControls = null;
@@ -18,7 +19,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
     this._$loadGridConfiguratorButton = null;
 
     this._gridControlsManager = null;
-    this._$gridHeadingView = null;
+    this._$gridTopHeadingView = null;
+    this._$gridBottomHeadingView = null;
     this._$gridTopControlsView = null;
     this._$gridView = null;
     this._$gridBottomControlsView = null;
@@ -30,7 +32,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
         loadGridConfiguratorButtonClass: "loadGridConfiguratorButton",
 
-        gridHeadingViewClass: "gridHeadingView",
+        gridTopHeadingViewClass: "gridTopHeadingView",
+        gridBottomHeadingViewClass: "gridBottomHeadingView",
         gridTopControlsViewClass: "gridTopControlsView",
         gridViewClass: "gridView",
         gridBottomControlsViewClass: "gridBottomControlsView",
@@ -54,22 +57,27 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierDynamicSettings = new DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings();
 
         me._$loadGridConfiguratorButton = me._$view.find("." + me._css.loadGridConfiguratorButtonClass);
-        me._$gridHeadingView = me._$view.find("." + me._css.gridHeadingViewClass);
+        me._$gridTopHeadingView = me._$view.find("." + me._css.gridTopHeadingViewClass);
+        me._$gridBottomHeadingView = me._$view.find("." + me._css.gridBottomHeadingViewClass);
         me._$gridTopControlsView = me._$view.find("." + me._css.gridTopControlsViewClass);
         me._$gridView = me._$view.find("." + me._css.gridViewClass);
         me._$gridBottomControlsView = me._$view.find("." + me._css.gridBottomControlsViewClass);
         me._$gridSourcesDumperView = me._$view.find("." + me._css.gridSourcesDumperClass);
 
         if(me.isVerticalGrid()) {
-            me._gridHeading = new DemoLayoutBuilder.DemoLayout.VerticalGridHeading(me._$gridHeadingView);
             me._grid = new DemoLayoutBuilder.DemoLayout.VerticalGrid(me._$gridView);
+            me._gridTopHeading = new DemoLayoutBuilder.DemoLayout.VerticalGridHeading(me._$gridTopHeadingView, me._grid);
+            me._gridBottomHeading = new DemoLayoutBuilder.DemoLayout.VerticalGridHeading(me._$gridBottomHeadingView, me._grid);
         }
         else if(me.isHorizontalGrid()) {
-            me._gridHeading = new DemoLayoutBuilder.DemoLayout.HorizontalGridHeading(me._$gridHeadingView);
             me._grid = new DemoLayoutBuilder.DemoLayout.HorizontalGrid(me._$gridView);
+            me._gridTopHeading = new DemoLayoutBuilder.DemoLayout.HorizontalGridHeading(me._$gridTopHeadingView, me._grid);
+            me._gridBottomHeading = new DemoLayoutBuilder.DemoLayout.HorizontalGridHeading(me._$gridBottomHeadingView, me._grid);
         }
+        
+       me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
 
-        me._gridControlsManager = new DemoLayoutBuilder.DemoLayout.GridControlsManager();
+        me._gridControlsManager = new DemoLayoutBuilder.DemoLayout.GridControlsManager(me._gridifier);
         me._gridTopControls = new DemoLayoutBuilder.DemoLayout.GridControls(
             me._$gridTopControlsView, 
             me,
@@ -102,7 +110,10 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridControlsManager.selectSortControlByGUIDOption();
         me._gridControlsManager.setBatchSizeOption(1);
 
-        me._gridSourcesDumper = new DemoLayoutBuilder.DemoLayout.GridSourcesDumper(me._$gridSourcesDumperView);
+        me._gridSourcesDumper = new DemoLayoutBuilder.DemoLayout.GridSourcesDumper(
+            me._$gridSourcesDumperView,
+            me
+        );
 
         me._bindEvents();
     }
@@ -125,6 +136,69 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._$loadGridConfiguratorButton.on("click", function() {
             $(me._demoLayoutBuilder).trigger(DemoLayoutBuilder.EVENT_LOAD_GRID_CONFIGURATOR);
         });
+
+        var controlClickEvent = DemoLayoutBuilder.DemoLayout.GridControls.EVENT_CONTROL_SELECT;
+        $(me._gridTopControls).on(controlClickEvent, function(event, clickedControl) {
+            if(clickedControl == DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS.APPEND)
+                me._appendNextItems();
+            else if(clickedControl == DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS.PREPEND)
+                me._prependNextItems();
+        });
+        $(me._gridBottomControls).on(controlClickEvent, function(event, clickedControl) {
+            if(clickedControl == DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS.APPEND)
+                me._appendNextItems();
+            else if(clickedControl == DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS.PREPEND)
+                me._prependNextItems();
+        });
+
+        // @todo -> Listen for correct event
+        $(me._gridifier).on("gridifier.gridSizesChange", function() {
+            $(me).trigger(DemoLayoutBuilder.DemoLayout.EVENT_DEMO_LAYOUT_SIZES_CHANGE);
+        });
+
+        // @todo -> Replace this.(Tmp for testing)
+        me._$view.on("click", ".gridItem", function() {
+            if($(this).hasClass("transformedItem")) {
+                $(this).removeClass("transformedItem");
+                me._gridifier.transformSizes($(this), "24.95%", "100px");
+            }
+            else {
+                $(this).addClass("transformedItem");
+                me._gridifier.transformSizes($(this), "49.8%", "200px");
+            }
+        });
+
+        // var containerWidthStart = 2; 
+        // //var containerWidthStart = 1069;
+        // var containerWidthEnd = 1070;
+        // for(var containerWidth = containerWidthStart; containerWidth <= containerWidthEnd; containerWidth++) {
+        //     var elementsCountStart = 2;
+        //     //var elementsCountStart = 20;
+        //     var elementsCountEnd = 20;
+        //     for(var elementsCount = elementsCountStart; elementsCount <= elementsCountEnd; elementsCount++) {
+        //         var elementWidth = containerWidth / elementsCount;
+        //         var flooredWidth = Math.floor(elementWidth);
+        //         var ceiledWidth = Math.ceil(elementWidth);
+
+        //         if(flooredWidth == ceiledWidth) {
+        //             flooredWidth = elementWidth - 1;
+        //             ceiledWidth = elementWidth + 1;
+        //         }
+
+        //         var totalPixelsCovered = 0;
+        //         for(j = 0; j < elementsCount; j++) {
+        //             if(j % 2 == 0)
+        //                 totalPixelsCovered += flooredWidth;
+        //             else
+        //                 totalPixelsCovered += ceiledWidth;
+        //         }
+
+        //         //if(totalPixelsCovered != containerWidth)
+        //          //   console.log("TotalPixelsCovered: ", totalPixelsCovered, ", containerWidth: ", containerWidth);
+
+        //         console.log("totalPixelsCovered: ", totalPixelsCovered, ", containerWidth: ", containerWidth);
+        //     }
+        // }
     }
 
     this._unbindEvents = function() {
@@ -150,10 +224,49 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
     return this;
 }
 
+DemoLayoutBuilder.DemoLayout.EVENT_DEMO_LAYOUT_SIZES_CHANGE = "demoLayoutBuilder.DemoLayout.demoLayoutSizesChange";
 DemoLayoutBuilder.DemoLayout.GRID_TYPES = {HORIZONTAL_GRID: 0, VERTICAL_GRID: 1};
 
 DemoLayoutBuilder.DemoLayout.prototype.getView = function() {
     return this._$view;
+}
+
+DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
+    var itemSizes = this._gridifierDynamicSettings.getAllItemSizes();
+    for(var i = 0; i < this._gridifierDynamicSettings.getBatchSize(); i++) {
+        var gridItem = new DemoLayoutBuilder.DemoLayout.GridItem(
+            this._grid.getGrid(),
+            this._gridifier,
+            itemSizes[i],
+            this._gridifierDynamicSettings.getItemBorder(),
+            this._gridifierDynamicSettings.getItemMargin(),
+            this._gridifierDynamicSettings.isBorderBoxBoxSizing(),
+            this._gridifierDynamicSettings.isContentBoxBoxSizing(),
+            this._gridifierDynamicSettings.getNextAppendedItemBgClass()
+        );
+        var $gridItem = gridItem.getView();
+        this._gridifier.append($gridItem);
+        gridItem.renderGUID();
+    }
+}
+
+DemoLayoutBuilder.DemoLayout.prototype._prependNextItems = function() {
+    var itemSizes = this._gridifierDynamicSettings.getAllItemSizes();
+    for(var i = 0; i < this._gridifierDynamicSettings.getBatchSize(); i++) {
+        var gridItem = new DemoLayoutBuilder.DemoLayout.GridItem(
+            this._grid.getGrid(),
+            this._gridifier,
+            itemSizes[i],
+            this._gridifierDynamicSettings.getItemBorder(),
+            this._gridifierDynamicSettings.getItemMargin(),
+            this._gridifierDynamicSettings.isBorderBoxBoxSizing(),
+            this._gridifierDynamicSettings.isContentBoxBoxSizing(),
+            this._gridifierDynamicSettings.getNextPrependedItemBgClass()
+        );
+        var $gridItem = gridItem.getView();
+        this._gridifier.prepend($gridItem);
+        gridItem.renderGUID();
+    }
 }
 
 DemoLayoutBuilder.DemoLayout.prototype.isVerticalGrid = function() {

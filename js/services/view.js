@@ -14,6 +14,7 @@ var View = {
 
             DEMO_LAYOUT: {
                 DEMO_LAYOUT: "demoLayoutBuilder.demoLayout",
+                GRID_ITEM: "demoLayoutBuilder.demoLayout.gridItem",
 
                 GRID_HEADING: {
                     HORIZONTAL_GRID: "demoLayoutBuilder.demoLayout.gridHeading.horizontalGrid",
@@ -91,6 +92,12 @@ var View = {
         var demoLayoutView = twig({
             id: this.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT.DEMO_LAYOUT,
             href: "views/demoLayoutBuilder/demoLayout/demoLayout.html.twig",
+            async: false
+        });
+
+        var demoLayoutGridItemView = twig({
+            id: this.ids.DEMO_LAYOUT_BUILDER.DEMO_LAYOUT.GRID_ITEM,
+            href: "views/demoLayoutBuilder/demoLayout/gridItem.html.twig",
             async: false
         });
 

@@ -115,6 +115,9 @@
                 {% set gridItemBgs = ['gridFirstBg', 'gridSecondBg', 'gridThirdBg', 'gridFourthBg', 'gridFifthBg'] %}
                 {% for i in 1..50 %}
                     <div class="itemSetting{% if i > 1 %} itemSettingTopMargin{% endif %} item{{ i }}Sizes">
+                        <div class="disabledItemSetting">
+                        </div>
+
                         <div class="left">
                             <div class="gridItem atomBorder {{ cycle(gridItemBgs, i) }}">
                                 {{ i }}

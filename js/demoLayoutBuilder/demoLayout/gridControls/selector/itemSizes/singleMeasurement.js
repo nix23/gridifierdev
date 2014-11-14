@@ -1,27 +1,86 @@
-DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize = function($selectorRightSide, 
-                                                                                                                                             demoLayout, 
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize = function($selectorRightSide,
+                                                                                                                                             demoLayout,
                                                                                                                                              sliderChangeHandler,
-                                                                                                                                             measurementValue) {
+                                                                                                                                             measurementValue,
+                                                                                                                                             measurementType) {
     var me = this;
 
     this._$view = null;
 
     this._demoLayout = null;
 
-    this._$itemSizeRangesSlider = null;
-    this._$itemSizeSlider = null;
+    this._$selectedValueDemonstrator = null;
+    this._$selectedValueDemonstratorValue = null;
 
-    this._itemSizeRangesSliderInitialValue = null;
-    this._itemSizeSliderInitialValue = null;
+    this._$itemRangesSelector = null;
+    this._itemRangesSelectorOptions = [];
+    this._itemRangesSelectorOptionsCount = 12;
+    this._selectedItemRangeSelectorOptionIndex = null;
+
+    this._$itemSizeSlider = null;
+    this._reinitItemSizeSlider = false;
 
     this._sliderChangeHandler = null;
 
+    this._ranges = [
+        {from: 1, to: 99, step: 1}, 
+        {from: 100, to: 199, step: 1},
+        {from: 200, to: 299, step: 1},
+        {from: 300, to: 399, step: 1},
+        {from: 400, to: 499, step: 1},
+        {from: 500, to: 599, step: 1},
+        {from: 600, to: 699, step: 1},
+        {from: 700, to: 799, step: 1},
+        {from: 800, to: 899, step: 1},
+        {from: 900, to: 999, step: 1},
+        {from: 1000, to: 1500, step: 5},
+        {from: 1500, to: 2000, step: 5}
+    ];
+
     this._css = {
         containerClass: "singleMeasurementItemSize",
+
+        selectedValueDemonstratorClass: "selectedValueDemonstrator",
+
+        demonstratorHeightArrowClass: "heightArrow",
+        demonstratorHeightArrowTopClass: "top",
+        demonstratorHeightArrowMiddleClass: "middle",
+        demonstratorHeightArrowBottomClass: "bottom",
+        demonstratorHeightContentClass: "heightContent",
+        demonstratorHeightValueClass: "heightValue",
+
+        demonstratorWidthArrowClass: "widthArrow",
+        demonstratorWidthArrowLeftClass: "left",
+        demonstratorWidthArrowCenterClass: "center",
+        demonstratorWidthArrowRightClass: "right",
+        demonstratorWidthContentClass: "widthContent",
+        demonstratorWidthValueClass: "widthValue",
+
+        itemRangesSelectorClass: "itemRangesSelector",
+        itemRangesSelectorOptionClass: "option",
+        itemRangesSelectorHighlightedOptionClass: "",
+        itemRangesSelectorOptionMarginClass: "optionMargin",
+
+        verticalGridLeftBorderColorClass: "gridFifthLeftBorderColor",
+        verticalGridBottomBorderColorClass: "gridFifthBottomBorderColor",
+        verticalGridRightBorderColorClass: "gridFifthRightBorderColor",
+        verticalGridTopBorderColorClass: "gridFifthTopBorderColor",
+
+        horizontalGridLeftBorderColorClass: "gridFourthLeftBorderColor",
+        horizontalGridBottomBorderColorClass: "gridFourthBottomBorderColor",
+        horizontalGridRightBorderColorClass: "gridFourthRightBorderColor",
+        horizontalGridTopBorderColorClass: "gridFourthTopBorderColor",
+
+        verticalGridBgClass: "gridFifthBg",
+        horizontalGridBgClass: "gridFourthBg",
+
+        verticalGridSelectedItemRangeSelectorOptionClass: "gridFifthBg selectedOption",
+        horizontalGridSelectedItemRangeSelectorOptionClass: "gridFourthBg selectedOption",
+
         sliderClass: "slider",
         sliderMarginClass: "sliderMargin",
 
-        postfixSliderPipValueClass: "sliderPipValuePostfix",
+        sliderPipValuesPostfixClass: "sliderPipValuePostfix",
 
         horizontalGridSliderClass: "horizontalNoUiSlider",
         verticalGridSliderClass: "verticalNoUiSlider"
@@ -32,16 +91,43 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize = f
         me._sliderChangeHandler = sliderChangeHandler;
 
         me._$view = $("<div/>").addClass(me._css.containerClass);
-       
-        me._transformMeasurementValueToSliderInitialValues(measurementValue);
-        me._createItemSizeRangesSlider();
+
+        me._createItemSizesRangesSelector();
+        me._createItemSizeSlider();
+        me._createSelectedValueDemonstrator(measurementType);
 
         $selectorRightSide.append(me._$view);
+
+        me._findRangeSelectorOptionByMeasurementValue(measurementValue);
+        var $option = me._itemRangesSelectorOptions[me._selectedItemRangeSelectorOptionIndex - 1];
+        me._selectItemSizeRangeSelectorOption($option);
+        me._initItemSizeSliderValues(parseInt(measurementValue, 10));
 
         me._bindEvents();
     }
 
     this._bindEvents = function() {
+        for(var i = 0; i < me._itemRangesSelectorOptions.length; i++)
+        {
+            var $itemRangeSelectorOption = me._itemRangesSelectorOptions[i];
+            $itemRangeSelectorOption.on("mouseenter", function() {
+                if(me._isRangeSelectorOptionSelected($(this))) return;
+                me._highlightItemSizeRangeSelectorOption($(this));
+            });
+
+            $itemRangeSelectorOption.on("mouseleave", function() {
+                if(me._isRangeSelectorOptionSelected($(this))) return;
+                me._unhighlightItemSizeRangeSelectorOption($(this));
+            });
+
+            $itemRangeSelectorOption.on("click", function() {
+                if(me._isRangeSelectorOptionSelected($(this))) return;
+                var $option = me._$view.find("[data-selectorOption=" + me._selectedItemRangeSelectorOptionIndex + "]");
+                me._unselectItemSizeRangeSelectorOption($option);
+                me._selectItemSizeRangeSelectorOption($(this));
+                me._initItemSizeSliderValues(me._ranges[me._selectedItemRangeSelectorOptionIndex - 1].from);
+            });
+        }
     }
 
     this._unbindEvents = function() {
@@ -55,134 +141,147 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize = f
     return this;
 }
 
-DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._transformMeasurementValueToSliderInitialValues = function(measurementValue) {
-    var rangesSliderRanges = [
-        {from: 1, to: 99}, 
-        {from: 100, to: 199},
-        {from: 200, to: 299},
-        {from: 300, to: 399},
-        {from: 400, to: 499},
-        {from: 500, to: 599},
-        {from: 600, to: 699},
-        {from: 700, to: 799},
-        {from: 800, to: 899},
-        {from: 900, to: 999},
-        {from: 1000, to: 1099},
-        {from: 1100, to: 1199},
-        {from: 1200, to: 1299},
-        {from: 1300, to: 1399},
-        {from: 1400, to: 1500}
-    ];
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.MEASUREMENT_TYPES = {
+    WIDTH: 0, HEIGHT: 1
+}
 
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._createWidthValueDemonstrator = function() {
+    var $arrowIcon = $("<div/>").addClass(this._css.demonstratorWidthArrowClass);
+    this._$selectedValueDemonstrator.append($arrowIcon);
+
+    var $arrowIconLeft = $("<div/>").addClass(this._css.demonstratorWidthArrowLeftClass);
+    var $arrowIconCenter = $("<div/>").addClass(this._css.demonstratorWidthArrowCenterClass);
+    var $arrowIconRight = $("<div/>").addClass(this._css.demonstratorWidthArrowRightClass);
+
+    if(this._demoLayout.isVerticalGrid()) {
+        $arrowIconLeft.addClass(this._css.verticalGridRightBorderColorClass);
+        $arrowIconCenter.addClass(this._css.verticalGridBgClass);
+        $arrowIconRight.addClass(this._css.verticalGridLeftBorderColorClass);
+    }
+    else if(this._demoLayout.isHorizontalGrid()) {
+        $arrowIconLeft.addClass(this._css.horizontalGridRightBorderColorClass);
+        $arrowIconCenter.addClass(this._css.horizontalGridBgClass);
+        $arrowIconRight.addClass(this._css.horizontalGridLeftBorderColorClass);
+    }
+
+    $arrowIcon.append($arrowIconLeft).append($arrowIconCenter).append($arrowIconRight);
+
+    var $content = $("<div/>").addClass(this._css.demonstratorWidthValueClass);
+    this._$selectedValueDemonstrator.append($content);
+
+    this._$selectedValueDemonstratorValue = $("<div/>").addClass(this._css.demonstratorWidthValueClass);
+    $content.append(this._$selectedValueDemonstratorValue);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._createHeightValueDemonstrator = function() {
+    var $arrowIcon = $("<div/>").addClass(this._css.demonstratorHeightArrowClass);
+    this._$selectedValueDemonstrator.append($arrowIcon);
+
+    var $arrowIconTop = $("<div/>").addClass(this._css.demonstratorHeightArrowTopClass);
+    var $arrowIconMiddle = $("<div/>").addClass(this._css.demonstratorHeightArrowMiddleClass);
+    var $arrowIconBottom = $("<div/>").addClass(this._css.demonstratorHeightArrowBottomClass);
+
+    if(this._demoLayout.isVerticalGrid()) {
+        $arrowIconTop.addClass(this._css.verticalGridBottomBorderColorClass);
+        $arrowIconMiddle.addClass(this._css.verticalGridBgClass);
+        $arrowIconBottom.addClass(this._css.verticalGridTopBorderColorClass);
+    }
+    else if(this._demoLayout.isHorizontalGrid()) { 
+        $arrowIconTop.addClass(this._css.horizontalGridBottomBorderColorClass);
+        $arrowIconMiddle.addClass(this._css.horizontalGridBgClass);
+        $arrowIconBottom.addClass(this._css.horizontalGridTopBorderColorClass);
+    }
+
+    $arrowIcon.append($arrowIconTop).append($arrowIconMiddle).append($arrowIconBottom);
+
+    var $content = $("<div/>").addClass(this._css.demonstratorHeightValueClass);
+    this._$selectedValueDemonstrator.append($content);
+
+    this._$selectedValueDemonstratorValue = $("<div/>").addClass(this._css.demonstratorHeightValueClass);
+    $content.append(this._$selectedValueDemonstratorValue);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._createSelectedValueDemonstrator = function(measurementType) {
+    this._$selectedValueDemonstrator = $("<div/>").addClass(this._css.selectedValueDemonstratorClass);
+    this._$view.append(this._$selectedValueDemonstrator);
+
+    if(measurementType == DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.MEASUREMENT_TYPES.WIDTH)
+        this._createWidthValueDemonstrator();
+    else if(measurementType == DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.MEASUREMENT_TYPES.HEIGHT)
+        this._createHeightValueDemonstrator();
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._findRangeSelectorOptionByMeasurementValue = function(measurementValue) {
     var measurementValue = parseInt(measurementValue, 10);
-    for(var i = 0; i < rangesSliderRanges.length; i++)
-    {
-        if(measurementValue >= rangesSliderRanges[i].from && 
-            measurementValue <= rangesSliderRanges[i].to) 
-        {
-            this._itemSizeRangesSliderInitialValue = rangesSliderRanges[i].from;
+
+    for(var i = 0; i < this._ranges.length; i++) {
+        if(measurementValue >= this._ranges[i].from && measurementValue <= this._ranges[i].to) {
+            this._selectedItemRangeSelectorOptionIndex = i + 1;
             break;
         }
     }
-
-    this._itemSizeSliderInitialValue = measurementValue;
 }
 
-DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.SliderPipsValuesGenerator = function(pipsValues) {
-    var me = this;
-    this._pipsValues = null;
-    this._nextPipValueIndex = -1;
-
-    this._construct = function() {
-        me._pipsValues = pipsValues;
-    }
-
-    this._css = {
-        postfixSliderPipValueClass: "sliderPipValuePostfix"
-    }
-
-    this._getNextPipValue = function() {
-        me._nextPipValueIndex++; 
-        return me._pipsValues[me._nextPipValueIndex];
-    }
-
-    this._construct();
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._isRangeSelectorOptionSelected = function($rangeSelectorOption) {
+    var selectorOptionIndex = $rangeSelectorOption.attr("data-selectorOption");
+    return this._selectedItemRangeSelectorOptionIndex == selectorOptionIndex;
 }
 
-DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.SliderPipsValuesGenerator.prototype.toString = function() {
-    var $postfixLabel = $("<span/>").addClass(this._css.postfixSliderPipValueClass).text("px");
-
-    if(this._nextPipValueIndex + 1 == this._pipsValues.length)
-        return $postfixLabel.get(0).outerHTML;
-
-    return "-" + (this._getNextPipValue() + 99) + $postfixLabel.get(0).outerHTML;
-}
-
-DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._createItemSizeRangesSlider = function() {
-    this._$itemSizeRangesSlider = $("<div/>").addClass(this._css.sliderClass);
-    this._$view.append(this._$itemSizeRangesSlider);
-
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._highlightItemSizeRangeSelectorOption = function($rangeSelectorOption) {
     if(this._demoLayout.isVerticalGrid())
-        this._$itemSizeRangesSlider.addClass(this._css.verticalGridSliderClass);
+        $rangeSelectorOption.addClass(this._css.verticalGridSelectedItemRangeSelectorOptionClass);
     else if(this._demoLayout.isHorizontalGrid())
-        this._$itemSizeRangesSlider.addClass(this._css.horizontalGridSliderClass);
-
-    this._$itemSizeRangesSlider.noUiSlider({
-        start: [this._itemSizeRangesSliderInitialValue],
-        connect: "lower",
-        step: 100,
-        range: {'min': 1, 'max': 1400}
-    });
-
-    var me = this;
-    this._$itemSizeRangesSlider.on({
-        slide: function() {
-            var newPropertyValue = Math.round(me._$itemSizeRangesSlider.val()); 
-            newPropertyValue = (newPropertyValue == 1400) ? newPropertyValue : newPropertyValue - 1;
-            if(newPropertyValue == 0) newPropertyValue = 1;
-            if(newPropertyValue == 101) newPropertyValue = 100; 
-            me._initItemSizeSliderValues(newPropertyValue, true);
-        }
-    });
-    me._createItemSizeSlider();
-
-    this._$itemSizeRangesSlider.noUiSlider_pips({
-        mode: "values",
-        values: [1, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1400],
-        format: wNumb({
-            decimals: 0,
-            postfix: new DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.SliderPipsValuesGenerator(
-                [0, 100, 200, 300, 400, 500, 600, 700, 800, 900, 1000, 1100, 1200, 1300, 1401]
-            )
-        })
-    });
-
-    this._decorateItemSizeRangesSlider();
+        $rangeSelectorOption.addClass(this._css.horizontalGridSelectedItemRangeSelectorOptionClass);
 }
 
-DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._decorateItemSizeRangesSlider = function() {
-    var even = false;
-    $.each(this._$itemSizeRangesSlider.find(".noUi-value"), function() { 
-        if(even) { 
-            var top = 30;
-            $(this).css("position", "absolute");
-            $(this).css("top", top + "px");
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._unhighlightItemSizeRangeSelectorOption = function($rangeSelectorOption) {
+    $rangeSelectorOption.removeClass(this._css.verticalGridSelectedItemRangeSelectorOptionClass);
+    $rangeSelectorOption.removeClass(this._css.horizontalGridSelectedItemRangeSelectorOptionClass);
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._unselectItemSizeRangeSelectorOption = function($rangeSelectorOption) {
+    for(var i = 0; i < this._itemRangesSelectorOptions.length; i++)
+    {
+        var selectorOptionIndex = this._itemRangesSelectorOptions[i].attr("data-selectorOption");
+        if(selectorOptionIndex == this._selectedItemRangeSelectorOptionIndex)
+        {
+            this._selectedItemRangeSelectorOptionIndex = null;
+            this._unhighlightItemSizeRangeSelectorOption($rangeSelectorOption);
+            break;
         }
-        even = !even;
-    });
+    }
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._selectItemSizeRangeSelectorOption = function($rangeSelectorOption) {
+    var selectorOptionIndex = $rangeSelectorOption.attr("data-selectorOption");
+    this._highlightItemSizeRangeSelectorOption($rangeSelectorOption);
+    this._selectedItemRangeSelectorOptionIndex = selectorOptionIndex;
+}
+
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._createItemSizesRangesSelector = function() {
+    this._$itemRangesSelector = $("<div/>").addClass(this._css.itemRangesSelectorClass);
+    this._$view.append(this._$itemRangesSelector);
 
     var even = false;
-    $.each(this._$itemSizeRangesSlider.find(".noUi-marker-large"), function() {
-        if(even) {
-            $(this).css("height","35px");
-        }
+    for(var i = 1; i <= this._itemRangesSelectorOptionsCount; i++) {
+        var $selectorOption = $("<div/>").addClass(this._css.itemRangesSelectorOptionClass);
+        $selectorOption.attr("data-selectorOption", i);
+        if(even) $selectorOption.addClass(this._css.itemRangesSelectorHighlightedOptionClass);
+        if(i > 4) $selectorOption.addClass(this._css.itemRangesSelectorOptionMarginClass);
+
+        var $selectorOptionPrefix = $("<span/>").text(this._ranges[i - 1].from + "-" + this._ranges[i - 1].to);
+        $selectorOption.html($selectorOptionPrefix.get(0).outerHTML + "px");
+
+        this._$itemRangesSelector.append($selectorOption);
+        this._itemRangesSelectorOptions.push($selectorOption);
+
         even = !even;
-    });
+        if(i % 4 == 0) even = !even;
+    }
 }
 
 DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._createItemSizeSlider = function() {
     this._$itemSizeSlider = $("<div/>").addClass(this._css.sliderClass);
-    this._$itemSizeSlider.addClass(this._css.sliderMarginClass);
     this._$view.append(this._$itemSizeSlider);
 
     if(this._demoLayout.isVerticalGrid())
@@ -190,99 +289,65 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.pro
     else if(this._demoLayout.isHorizontalGrid())
         this._$itemSizeSlider.addClass(this._css.horizontalGridSliderClass);
 
-    this._initItemSizeSliderValues(this._itemSizeSliderInitialValue);
-
     var me = this;
     this._$itemSizeSlider.on({
         slide: function() {
-            var newPropertyValue = Math.round(me._$itemSizeSlider.val()); 
+            var newPropertyValue = Math.round(me._$itemSizeSlider.val());
+            me._$selectedValueDemonstratorValue.text(newPropertyValue + "px");
             me._sliderChangeHandler(newPropertyValue);
         }
     });
 }
 
-DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._getItemSizeSliderMaxValue = function(minSliderValue) {
-    if(minSliderValue == 1) return 99;
-    return (minSliderValue < 1400) ? minSliderValue + 99 : minSliderValue + 100;
-}
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._getItemSizeSliderPipsValues = function(minSliderValue) {
+    var pipsValues = [];
+    var from = this._ranges[this._selectedItemRangeSelectorOptionIndex - 1].from;
+    var to = this._ranges[this._selectedItemRangeSelectorOptionIndex - 1].to;
+    var step = this._ranges[this._selectedItemRangeSelectorOptionIndex - 1].step;
 
-DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._getItemSizeSliderMinValue = function(initialSliderValue) {
-    var sliderRanges = [
-        {from: 1, to: 99}, 
-        {from: 100, to: 199},
-        {from: 200, to: 299},
-        {from: 300, to: 399},
-        {from: 400, to: 499},
-        {from: 500, to: 599},
-        {from: 600, to: 699},
-        {from: 700, to: 799},
-        {from: 800, to: 899},
-        {from: 900, to: 999},
-        {from: 1000, to: 1099},
-        {from: 1100, to: 1199},
-        {from: 1200, to: 1299},
-        {from: 1300, to: 1399},
-        {from: 1400, to: 1500}
-    ];
+    if(from < 1000) {
+        for(var i = from; i <= to; i += 10) {
+            pipsValues.push(i);
+            if(i == 1) i -= 1;
+        }
 
-    for(var i = 0; i < sliderRanges.length; i++) {
-        if(initialSliderValue >= sliderRanges[i].from && initialSliderValue <= sliderRanges[i].to)
-            return sliderRanges[i].from;
+        pipsValues.push(i - 10 + 9);
     }
-}
-
-DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._getItemSizeSliderPipsValues = function(initialSliderValue) {
-    if(initialSliderValue == 0) {
-        var pipsValues = [initialSliderValue + 1];
-        var nextPipValue = initialSliderValue + 9;
-    }
-    else {
-        var pipsValues = [initialSliderValue];
-        var nextPipValue = initialSliderValue + 9;
+    else { 
+        for(var i = from; i <= to; i += 50) {
+            pipsValues.push(i);
+        }
     }
 
-    for(var i = 1; i <= 9; i++) {
-        if(initialSliderValue > 99)
-            pipsValues.push(nextPipValue + 1);
-        else
-            pipsValues.push(nextPipValue);
-        nextPipValue += 10;
-    }
-    
-    if(initialSliderValue == 1)
-        pipsValues.push(nextPipValue - 1);
-    else if(initialSliderValue != 1400)
-        pipsValues.push(nextPipValue);
-    else
-        pipsValues.push(nextPipValue + 1);
-    
     return pipsValues;
 }
 
-DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._initItemSizeSliderValues = function(initialSliderValue, reinit) {
+DemoLayoutBuilder.DemoLayout.GridControls.Selector.SingleMeasurementItemSize.prototype._initItemSizeSliderValues = function(initialSliderValue) {
     var me = this;
-    var reinit = reinit || false;
 
-    var minSliderValue = this._getItemSizeSliderMinValue(initialSliderValue);
+    var minSliderValue = me._ranges[me._selectedItemRangeSelectorOptionIndex - 1].from;
     this._$itemSizeSlider.noUiSlider({
         start: [initialSliderValue],
         connect: "lower",
-        step: 1,
+        step: me._ranges[me._selectedItemRangeSelectorOptionIndex - 1].step,
         range: {
-            'min': minSliderValue, 
-            'max': this._getItemSizeSliderMaxValue(minSliderValue)
+            'min': minSliderValue,
+            'max': me._ranges[me._selectedItemRangeSelectorOptionIndex - 1].to
         }
-    }, reinit);
+    }, this._reinitItemSizeSlider);
 
-    var $pipPostfix = $("<span/>").addClass(this._css.postfixSliderPipValueClass).text("px");
+    var $sliderPipValuePostfix = $("<span/>").addClass(this._css.sliderPipValuesPostfixClass).text("px");
     this._$itemSizeSlider.noUiSlider_pips({
         mode: "values",
         values: me._getItemSizeSliderPipsValues(minSliderValue),
         format: wNumb({
             decimals: 0,
-            postfix: $pipPostfix.get(0).outerHTML
+            postfix: $sliderPipValuePostfix.get(0).outerHTML
         })
     });
 
     setTimeout(function() { me._$itemSizeSlider.trigger("slide"); }, 0);
+
+    if(!this._reinitItemSizeSlider)
+        this._reinitItemSizeSlider = true;
 }

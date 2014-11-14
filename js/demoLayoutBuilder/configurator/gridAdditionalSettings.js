@@ -66,6 +66,7 @@ DemoLayoutBuilder.GridAdditionalSettings = function($targetEl, gridSettings, gri
 
         customSortDispersionSeparatorClass: "customDispersionSeparator",
         customSortDispersionValueClass: "customDispersionValue",
+        customSortDispersionAllAvailableSpaceLabelClass: "customDispersionAllAvailableSpaceLabel",
 
         sortDispersionSliderClass: "sortDispersionSlider",
 
@@ -243,10 +244,11 @@ DemoLayoutBuilder.GridAdditionalSettings.prototype._hideCustomSortDispersionLabe
 }
 
 DemoLayoutBuilder.GridAdditionalSettings.prototype._updateCustomSortDispersionValue = function(e) {
+    var fullSizeLabelClass = this._css.customSortDispersionAllAvailableSpaceLabelClass;
     if(this._gridSettings._isHorizontalGridType())
-        var fullSizeLabel = "100% of width";
+        var fullSizeLabel = "<span class='" + fullSizeLabelClass + "'>100% of width</span>";
     else if(this._gridSettings._isVerticalGridType())
-        var fullSizeLabel = "100% of height";
+        var fullSizeLabel = "<span class='" + fullSizeLabelClass + "'>100% of height</span>";
 
     var newValue = parseInt(this._customSortDispersionValue);
     newValue = (newValue == 1000) ? fullSizeLabel : newValue + "px";

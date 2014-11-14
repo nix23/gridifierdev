@@ -14,6 +14,11 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings = function() {
     this._sortFunction = null;
     this._batchSize = 0;
 
+    this._gridItemBgClasses = ["gridFirstBg", "gridSecondBg", "gridThirdBg",
+                                                "gridFourthBg", "gridFifthBg"];
+    this._nextPrependedItemBgClassIndex = 0;
+    this._nextAppendedItemBgClassIndex = -1;
+
     this._css = {
     };
 
@@ -70,6 +75,10 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings = function() {
             var toggleValue = "fade";
         else if(me.isVisibilityToggleFunction())
             var toggleValue = "visibility";
+        else if(me.isRotateXToggleFunction())
+            var toggleValue = "rotateX";
+        else if(me.isRotateYToggleFunction())
+            var toggleValue = "rotateY";
 
         if(me.isAllFilterFunction())
             var filterValue = "all";
@@ -107,7 +116,7 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.BOX_SIZINGS = {
 }
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.TOGGLE_FUNCTIONS = {
-    SCALE: 0, FADE: 1, VISIBILITY: 2
+    SCALE: 0, FADE: 1, VISIBILITY: 2, ROTATE_X: 3, ROTATE_Y: 4
 }
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.FILTER_FUNCTIONS = {
@@ -119,6 +128,10 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.SORT_FUNCTIONS = {
 }
 
 /* Item sizes */
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getAllItemSizes = function() {
+    return this._itemSizes;
+}
+
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setAllItemSizes = function(width, height) {
     this._itemSizes = [];
 
@@ -212,6 +225,14 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.isContentBoxBoxS
 }
 
 /* Toggle functions */
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setRotateXToggleFunction = function() {
+    this._toggleFunciton = DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.TOGGLE_FUNCTIONS.ROTATE_X;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setRotateYToggleFunction = function() {
+    this._toggleFunction = DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.TOGGLE_FUNCTIONS.ROTATE_Y;
+}
+
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setScaleToggleFunction = function() {
     this._toggleFunction = DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.TOGGLE_FUNCTIONS.SCALE;
 }
@@ -222,6 +243,14 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setFadeToggleFun
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setVisibilityToggleFunction = function() {
     this._toggleFunction = DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.TOGGLE_FUNCTIONS.VISIBILITY;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.isRotateXToggleFunction = function() {
+    return this._toggleFunction == DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.TOGGLE_FUNCTIONS.ROTATE_X;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.isRotateYToggleFunction = function() {
+    return this._toggleFunction == DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.TOGGLE_FUNCTIONS.ROTATE_Y;
 }
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.isScaleToggleFunction = function() {
@@ -309,4 +338,21 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setBatchSize = f
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getBatchSize = function() {
     return this._batchSize;
+}
+
+/* Item bg colors */
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getNextAppendedItemBgClass = function() {
+    this._nextAppendedItemBgClassIndex++;
+    if(this._nextAppendedItemBgClassIndex >= this._gridItemBgClasses.length)
+        this._nextAppendedItemBgClassIndex = 0;
+
+    return this._gridItemBgClasses[this._nextAppendedItemBgClassIndex];
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getNextPrependedItemBgClass = function() {
+    this._nextPrependedItemBgClassIndex--;
+    if(this._nextPrependedItemBgClassIndex < 0)
+        this._nextPrependedItemBgClassIndex = this._gridItemBgClasses.length - 1;
+
+    return this._gridItemBgClasses[this._nextPrependedItemBgClassIndex];
 }

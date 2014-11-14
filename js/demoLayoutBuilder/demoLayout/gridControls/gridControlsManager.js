@@ -1,5 +1,7 @@
-DemoLayoutBuilder.DemoLayout.GridControlsManager = function() {
+DemoLayoutBuilder.DemoLayout.GridControlsManager = function(gridifier) {
     var me = this;
+
+    this._gridifier = null;
 
     this._$view = null;
 
@@ -9,6 +11,7 @@ DemoLayoutBuilder.DemoLayout.GridControlsManager = function() {
     };
 
     this._construct = function() {
+        me._gridifier = gridifier;
         me._bindEvents();
     }
 
@@ -100,16 +103,29 @@ DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype._selectToggleControlO
     }
 }
 
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.selectToggleControlRotateXOption = function() {
+    this._selectToggleControlOption("RotateX(CSS3)");
+    this._gridifier.toggleBy("rotateX");
+}
+
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.selectToggleControlRotateYOption = function() {
+    this._selectToggleControlOption("RotateY(CSS3)");
+    this._gridifier.toggleBy("rotateY");
+}
+
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.selectToggleControlScaleOption = function() {
     this._selectToggleControlOption("Scale(CSS3)"); 
+    this._gridifier.toggleBy("scale");
 }
 
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.selectToggleControlFadeOption = function() {
     this._selectToggleControlOption("Opacity(CSS3)");
+    this._gridifier.toggleBy("fade");
 }
 
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.selectToggleControlVisibilityOption = function() {
     this._selectToggleControlOption("Visibility");
+    this._gridifier.toggleBy("visibility");
 }
 
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype._selectFilterControlOption = function(sublabel) {
@@ -177,5 +193,7 @@ DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setBatchSizeOption = 
             DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS.PREPEND,
             "Next " + newBatchSize + ((newBatchSize == 1) ? " item" : " items")
         );
+
+        this._gridControls[i].setEnabledItemControls(newBatchSize);
     }
 }

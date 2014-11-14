@@ -60,6 +60,10 @@ DemoLayoutBuilder = function($targetEl) {
                 me
             );
 
+            $(me._gridLayout).on(DemoLayoutBuilder.DemoLayout.EVENT_DEMO_LAYOUT_SIZES_CHANGE, function() {
+                me._updateGridLayoutAccordionTabHeight();
+            });
+
             $(me).trigger(DemoLayoutBuilder.EVENT_CREATE_GRID);
             me._showGridLayoutAccordionTab();
         });
@@ -75,12 +79,20 @@ DemoLayoutBuilder = function($targetEl) {
                 me
             ); 
 
+            $(me._gridLayout).on(DemoLayoutBuilder.DemoLayout.EVENT_DEMO_LAYOUT_SIZES_CHANGE, function() {
+                setTimeout(function() {
+                    me._updateGridLayoutAccordionTabHeight();
+                }, 0);
+            });
+
             $(me).trigger(DemoLayoutBuilder.EVENT_CREATE_GRID);
             me._showGridLayoutAccordionTab();
         });
     }
 
     this._unbindEvents = function() {
+        if(me._gridLayout != null)
+            $(me._gridLayout).off(DemoLayoutBuilder.DemoLayout.EVENT_DEMO_LAYOUT_SIZES_CHANGE);
         me._unbindGridConfiguratorEvents();
     }
 
@@ -137,4 +149,9 @@ DemoLayoutBuilder.prototype._showGridConfiguratorAccordionTab = function() {
             $(me).trigger(DemoLayoutBuilder.EVENT_UNLOCK_CONFIGURATOR_ANIMATIONS);
         });
     });
+}
+
+DemoLayoutBuilder.prototype._updateGridLayoutAccordionTabHeight = function() { 
+    var gridLayoutAccordionTabHeight = this._gridLayout.getView().outerHeight();
+    this._$gridLayoutAccordionTab.css("max-height", gridLayoutAccordionTabHeight + "px");
 }

@@ -22,3 +22,7 @@
 #configurator .customSortDispersionSetting .settingNmae .customDispersionValue {
     visibility: hidden;
 }
+
+#configurator .customSortDispersionSetting .customDispersionAllAvailableSpaceLabel {
+    font-size: 22px;
+}

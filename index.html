@@ -12,9 +12,11 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->
+        <link rel="stylesheet" href="css/vendorImports.css">
+        <!--
         <link rel="stylesheet" href="css/vendor/jquery.nouislider.css">
         <link rel="stylesheet" href="css/vendor/jquery.nouislider.pips.css">
-        <link rel="stylesheet" href="css/vendor/codeHighlighter/shStyle.css">
+        <link rel="stylesheet" href="css/vendor/codeHighlighter/shStyle.css"> -->
 
         <link rel="stylesheet" href="css/normalize.css">
         <link rel="stylesheet" href="css/main.css">
@@ -22,6 +24,8 @@
 
         <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayoutBuilder.css">
 
+        <link rel="stylesheet" href="css/configuratorImports.css">
+        <!--
         <link rel="stylesheet" href="css/demoLayoutBuilder/configurator/configurator.css">
         <link rel="stylesheet" href="css/demoLayoutBuilder/configurator/gridTypeSelector.css">
         <link rel="stylesheet" href="css/demoLayoutBuilder/configurator/gridSettings.css">
@@ -29,7 +33,7 @@
         <link rel="stylesheet" href="css/demoLayoutBuilder/configurator/gridAdditionalSettings.css">
         <link rel="stylesheet" href="css/demoLayoutBuilder/configurator/intersectionsSettingDemonstrator.css">
         <link rel="stylesheet" href="css/demoLayoutBuilder/configurator/sortDispersionSettingDemonstrator.css">
-        <link rel="stylesheet" href="css/demoLayoutBuilder/configurator/createGrid.css">
+        <link rel="stylesheet" href="css/demoLayoutBuilder/configurator/createGrid.css"> -->
 
         <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/demoLayout.css">
         <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/gridHeading/horizontalGridHeading.css">
@@ -43,12 +47,13 @@
         <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/gridControls/selector/toggle/display.css">
         <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/gridControls/selector/toggle/fade.css">
         <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/gridControls/selector/toggle/scale.css">
+        <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/gridControls/selector/toggle/rotate.css">
         <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/gridControls/selector/batchSize/leftSide.css">
         <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/gridControls/selector/batchSize/rightSide.css">
         <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/gridControls/selector/filter/filter.css">
         <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/gridControls/selector/sort/sort.css">
-        <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/grid/horizontalGrid.css">
         <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/grid/verticalGrid.css">
+        <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/grid/horizontalGrid.css">
         <link rel="stylesheet" href="css/demoLayoutBuilder/demoLayout/gridSourcesDumper/gridSourcesDumper.css">
     </head>
 
@@ -67,6 +72,7 @@
         <script src="js/vendor/twig.min.js"></script>
         <script src="js/vendor/jquery.transit.min.js"></script>
         <script src="js/vendor/jquery.nouislider.all.js"></script>
+        <!--<script src="js/vendor/jquery2.js"></script>-->
         <script src="js/vendor/codeHighlighter/shMain.min.js"></script>
         <script src="js/vendor/codeHighlighter/shJavascriptDom.js"></script>
         <script src="js/vendor/codeHighlighter/shHtml.js"></script>
@@ -74,6 +80,7 @@
 
         <script src="js/services/cssCalcNormalizer.js"></script>
         <script src="js/services/sizesResolver.js"></script>
+        <script src="js/services/domAbstractionLayer.js"></script>
         <script src="js/services/view.js"></script>
         <script src="js/services/accordion.js"></script>
         <script src="js/services/browserDetector.js"></script>
@@ -95,6 +102,7 @@
 
         <script src="js/demoLayoutBuilder/demoLayout/demoLayout.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridifierDynamicSettings.js"></script>
+        <script src="js/demoLayoutBuilder/demoLayout/gridItem.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridHeading/horizontalGridHeading.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridHeading/verticalGridHeading.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridControls/gridControlsManager.js"></script>
@@ -106,6 +114,7 @@
         <script src="js/demoLayoutBuilder/demoLayout/gridControls/selector/itemSizes/multipleMeasurements.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridControls/selector/itemCss/itemCss.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridControls/selector/toggle/toggle.js"></script>
+        <script src="js/demoLayoutBuilder/demoLayout/gridControls/selector/toggle/rotate.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridControls/selector/toggle/display.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridControls/selector/toggle/fade.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridControls/selector/toggle/scale.js"></script>
@@ -119,14 +128,49 @@
         <script src="js/demoLayoutBuilder/demoLayout/gridSourcesDumper/gridSourcesDumper.js"></script> 
 
         <script src="js/gridifier/gridifier.js"></script>
+        <script src="js/gridifier/collector.js"></script>
+        <script src="js/gridifier/settings.js"></script>
+        <script src="js/gridifier/error.js"></script>
+        <script src="js/gridifier/guid.js"></script>
+        <script src="js/gridifier/connectors.js"></script>
+        <script src="js/gridifier/connectorsShifter.js"></script>
+        <script src="js/gridifier/connectorsIntersector.js"></script>
+        <script src="js/gridifier/renderer.js"></script>
+        <script src="js/gridifier/sizesTransformer.js"></script>
+        <script src="js/gridifier/normalizer.js"></script>
+
+        <script src="js/gridifier/horizontalGrid/appender.js"></script>
+        <script src="js/gridifier/horizontalGrid/prepender.js"></script>
+        <script src="js/gridifier/horizontalGrid/reversedAppender.js"></script>
+        <script src="js/gridifier/horizontalGrid/reversedPrepender.js"></script>
+        <script src="js/gridifier/horizontalGrid/mirroredPrepender.js"></script>
+        <script src="js/gridifier/horizontalGrid/connectorsCleaner.js"></script>
+        <script src="js/gridifier/horizontalGrid/connectorsSelector.js"></script>
+        <script src="js/gridifier/horizontalGrid/connectorsSorter.js"></script>
+        <script src="js/gridifier/horizontalGrid/itemCoordsExtractor.js"></script>
+        <script src="js/gridifier/horizontalGrid/connectionsIntersector.js"></script>
+        <script src="js/gridifier/horizontalGrid/connections.js"></script>
+
+        <script src="js/gridifier/verticalGrid/appender.js"></script>
+        <script src="js/gridifier/verticalGrid/prepender.js"></script>
+        <script src="js/gridifier/verticalGrid/reversedAppender.js"></script>
+        <script src="js/gridifier/verticalGrid/reversedPrepender.js"></script>
+        <script src="js/gridifier/verticalGrid/mirroredPrepender.js"></script>
+        <script src="js/gridifier/verticalGrid/connectorsCleaner.js"></script>
+        <script src="js/gridifier/verticalGrid/connectorsSelector.js"></script>
+        <script src="js/gridifier/verticalGrid/connectorsSorter.js"></script>
+        <script src="js/gridifier/verticalGrid/itemCoordsExtractor.js"></script>
+        <script src="js/gridifier/verticalGrid/connectionsIntersector.js"></script>
+        <script src="js/gridifier/verticalGrid/connections.js"></script>
+        <script src="js/gridifier/verticalGrid/transformerConnectors.js"></script>
 
         <script src="js/init.js"></script>
         <script>
-        if(!browserDetector.isIe8())
+        /*if(!browserDetector.isIe8())
         {
         document.write('<script src="http://' + ('gridifier.lh')
         .split(':')[0] + ':35729/livereload.js?snipver=1"></' + 'script>')// Tmp, delete this
-        }
+        }*/
         </script>
     </body>
 </html>
