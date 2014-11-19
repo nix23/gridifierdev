@@ -160,45 +160,13 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._$view.on("click", ".gridItem", function() {
             if($(this).hasClass("transformedItem")) {
                 $(this).removeClass("transformedItem");
-                me._gridifier.transformSizes($(this), "24.95%", "100px");
+                me._gridifier.transformSizes($(this), "25%", "200px");
             }
             else {
                 $(this).addClass("transformedItem");
-                me._gridifier.transformSizes($(this), "49.8%", "200px");
+                me._gridifier.transformSizes($(this), "50%", "400px");
             }
         });
-
-        // var containerWidthStart = 2; 
-        // //var containerWidthStart = 1069;
-        // var containerWidthEnd = 1070;
-        // for(var containerWidth = containerWidthStart; containerWidth <= containerWidthEnd; containerWidth++) {
-        //     var elementsCountStart = 2;
-        //     //var elementsCountStart = 20;
-        //     var elementsCountEnd = 20;
-        //     for(var elementsCount = elementsCountStart; elementsCount <= elementsCountEnd; elementsCount++) {
-        //         var elementWidth = containerWidth / elementsCount;
-        //         var flooredWidth = Math.floor(elementWidth);
-        //         var ceiledWidth = Math.ceil(elementWidth);
-
-        //         if(flooredWidth == ceiledWidth) {
-        //             flooredWidth = elementWidth - 1;
-        //             ceiledWidth = elementWidth + 1;
-        //         }
-
-        //         var totalPixelsCovered = 0;
-        //         for(j = 0; j < elementsCount; j++) {
-        //             if(j % 2 == 0)
-        //                 totalPixelsCovered += flooredWidth;
-        //             else
-        //                 totalPixelsCovered += ceiledWidth;
-        //         }
-
-        //         //if(totalPixelsCovered != containerWidth)
-        //          //   console.log("TotalPixelsCovered: ", totalPixelsCovered, ", containerWidth: ", containerWidth);
-
-        //         console.log("totalPixelsCovered: ", totalPixelsCovered, ", containerWidth: ", containerWidth);
-        //     }
-        // }
     }
 
     this._unbindEvents = function() {

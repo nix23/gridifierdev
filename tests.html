@@ -15,6 +15,9 @@
     <link rel="stylesheet" href="css/normalize.css">
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/vendor/qunit.css">
+
+    <style class="testStyles">
+    </style>
 </head>
 
 <body>
@@ -26,6 +29,9 @@
     <h2 id="qunit-banner"></h2>
     <h2 id="qunit-userAgent"></h2>
     <ol id="qunit-tests"></ol>
+
+    <div class="testContent">
+    </div>
 
     <!-- Vendor includes -->
     <script src="js/vendor/jquery-1.10.2.min.js"></script>
@@ -87,6 +93,8 @@
     <script src="js/gridifier/verticalGrid/transformerConnectors.js"></script>
 
     <!-- Tests includes -->
+    <script src="js/services/tests/sizesResolver.js"></script>
+
     <script src="js/gridifier/tests/sizesTransformer.js"></script>
 </body>
 </html>

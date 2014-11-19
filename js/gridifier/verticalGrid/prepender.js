@@ -26,7 +26,7 @@ Gridifier.VerticalGrid.Prepender = function(gridifier, settings, connectors, con
         me._connectorsCleaner = new Gridifier.VerticalGrid.ConnectorsCleaner(
             me._connectors, me._connections
         );
-        me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor();
+        me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor(me._gridifier);
         me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(me._connections);
 
         me._guid = guid;

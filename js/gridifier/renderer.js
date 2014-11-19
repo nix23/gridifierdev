@@ -46,9 +46,35 @@ Gridifier.Renderer.prototype.showConnections = function(connections) {
         if(this._isConnectionItemRendered(connections[i]))
             continue;
 
+        // console.log("rendering connection!");
+        // console.log("connection itemGUID: ", connections[i].itemGUID);
+        // console.log("connection x1: ", connections[i].x1);
+        // console.log("connection x2: ", connections[i].x2);
+        // console.log("grid width: ", this._gridifier.getGridX2() + 1);
+        // console.log("item width: ", (Math.abs(connections[i].x1 - connections[i].x2)));
+        // console.log("Transformed to percents: ", (connections[i].x1 / (this._gridifier.getGridX2() + 1) * 100));
+        //console.log(""); console.log(""); // LAST
+        //console.log("connection x1: ", connections[i].x1); // LAST
+        //console.log("%c" + connections[i].x2, "color:brown;font-weight:bold"); // LAST
+        connections[i].x1 = connections[i].x2 - SizesResolver.outerWidth(connections[i].item, true, true) + 1;
+        //console.log("real connection x1: ", connections[i].x1); // LAST
+        // console.log("%c" + connections[i].x1, "color:red;font-weight: bold");
+        //console.log(" outerWidth: %c" + (SizesResolver.outerWidth(connections[i].item, true, true)), "color:blue;font-weight: bold"); // LAST
+
+        // if(connections[i].x2 >= this._gridifier.getGridX2())
+        //     var left = Math.round((connections[i].x1 / (this._gridifier.getGridX2() + 1) * 100) - 0.01) + "%";
+        // else
+        //     var left = Math.floor((connections[i].x1 / (this._gridifier.getGridX2() + 1) * 100) - 0.01) + "%";
+
         Dom.css.set(connections[i].item, {
             position: "absolute",
-            left: connections[i].x1 + "px",
+            //left: connections[i].x1 + "px",
+            // @todo -> Make notice, that 0.01 substraction required per firefox(to not overflow grid)
+            // @todo -> Looks like no need to do Math.round here. Other 'workarounds' have fixed this issuse.
+            //          Workaround1 + Workaround2 = Stable bycicle
+            //left: Math.ceil((connections[i].x1 / (this._gridifier.getGridX2() + 1) * 100) - 0.01) + "%",
+            //left: (Math.floor(connections[i].x1 / (this._gridifier.getGridX2() + 1) * 100) - 0.01) + "%",
+            left: ((connections[i].x1 / (this._gridifier.getGridX2() + 1) * 100) - 0.01) + "%",
             top: connections[i].y1 + "px"
         });
 
@@ -83,7 +109,8 @@ Gridifier.Renderer.prototype.renderTransformedGrid = function() {
             setTimeout(function() { 
                 connections[i].item.style.width = targetWidth;
                 connections[i].item.style.height = targetHeight;
-                connections[i].item.style.left = connections[i].x1 + "px";
+                //connections[i].item.style.left = connections[i].x1 + "px";
+                connections[i].item.style.left = (Math.floor(connections[i].x1 / (me._gridifier.getGridX2() + 1) * 100) - 0.01) + "%",
                 connections[i].item.style.top = connections[i].y1 + "px";
             }, 0);
         }
@@ -92,7 +119,8 @@ Gridifier.Renderer.prototype.renderTransformedGrid = function() {
             Dom.css3.transition(connections[i].item, "All 600ms ease");
 
             setTimeout(function() {
-                connections[i].item.style.left = connections[i].x1 + "px";
+                //connections[i].item.style.left = connections[i].x1 + "px";
+                connections[i].item.style.left = (Math.floor(connections[i].x1 / (me._gridifier.getGridX2() + 1) * 100) - 0.01) + "%",
                 connections[i].item.style.top = connections[i].y1 + "px";
             }, 0);
         }

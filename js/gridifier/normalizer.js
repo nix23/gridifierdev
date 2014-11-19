@@ -1,7 +1,7 @@
 Gridifier.Normalizer = function() {
     // @todo -> Make option to disable/enable this option, and write docs about it.
     // (How it works, and why it can be disabled on px-valued items)
-    this._roundingNormalizationValue = 0;
+    this._roundingNormalizationValue = 2;
 
     this._css = {
     };

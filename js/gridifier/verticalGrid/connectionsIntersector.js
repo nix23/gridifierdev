@@ -29,10 +29,11 @@ Gridifier.VerticalGrid.ConnectionsIntersector.prototype.isIntersectingAnyConnect
     for(var i = 0; i < maybeIntersectableConnections.length; i++) {
         var maybeIntersectableConnection = maybeIntersectableConnections[i];
 
+        // @todo -> Move this to rounding normalizer
         var isAbove = (itemCoords.y1 < maybeIntersectableConnection.y1 && itemCoords.y2 < maybeIntersectableConnection.y1);
         var isBelow = (itemCoords.y1 > maybeIntersectableConnection.y2 && itemCoords.y2 > maybeIntersectableConnection.y2);
-        var isBefore = (itemCoords.x1 < maybeIntersectableConnection.x1 && itemCoords.x2 < maybeIntersectableConnection.x1);
-        var isBehind = (itemCoords.x1 > maybeIntersectableConnection.x2 && itemCoords.x2 > maybeIntersectableConnection.x2);
+        var isBefore = (itemCoords.x1 < maybeIntersectableConnection.x1 + 1 && itemCoords.x2 < maybeIntersectableConnection.x1 + 1);
+        var isBehind = (itemCoords.x1 > maybeIntersectableConnection.x2 - 1 && itemCoords.x2 > maybeIntersectableConnection.x2 - 1);
 
         if(!isAbove && !isBelow && !isBefore && !isBehind)
             return true;

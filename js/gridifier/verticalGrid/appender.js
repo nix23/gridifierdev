@@ -26,7 +26,7 @@ Gridifier.VerticalGrid.Appender = function(gridifier, settings, connectors, conn
         me._connectorsCleaner = new Gridifier.VerticalGrid.ConnectorsCleaner(
             me._connectors, me._connections
         );
-        me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor();
+        me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor(me._gridifier);
         me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(me._connections);
 
         me._guid = guid;
@@ -48,7 +48,7 @@ Gridifier.VerticalGrid.Appender = function(gridifier, settings, connectors, conn
     return this;
 }
 
-Gridifier.VerticalGrid.Appender.prototype.append = function(item) {
+Gridifier.VerticalGrid.Appender.prototype.append = function(item) { //console.log("connections: ", this._connections.get());
     this._guid.markIfIsFirstAppendedItem(item);
     this._initConnectors();
     var connection = this._createConnectionPerItem(item);
@@ -94,7 +94,8 @@ Gridifier.VerticalGrid.Appender.prototype._addItemConnectors = function(itemCoor
     if((itemCoords.x1 - 1) >= 0) {
         this._connectors.addAppendConnector(
             Gridifier.Connectors.SIDES.LEFT.TOP,
-            Dom.toInt(itemCoords.x1 - 1),
+            //Dom.toInt(itemCoords.x1 - 1),
+            itemCoords.x1 - 1,
             Dom.toInt(itemCoords.y1),
             Dom.toInt(itemGUID)
         );
@@ -102,13 +103,16 @@ Gridifier.VerticalGrid.Appender.prototype._addItemConnectors = function(itemCoor
 
     this._connectors.addAppendConnector(
         Gridifier.Connectors.SIDES.BOTTOM.RIGHT,
-        Dom.toInt(itemCoords.x2),
+        //Dom.toInt(itemCoords.x2),
+        itemCoords.x2,
         Dom.toInt(itemCoords.y2 + 1),
         Dom.toInt(itemGUID)
     );
 }
 
 Gridifier.VerticalGrid.Appender.prototype._createConnectionPerItem = function(item) {
+    //console.log("");
+    //console.log("Creating connection per item: ", item);
     var sortedConnectors = this._filterConnectorsPerNextConnection();
     var itemConnectionCoords = this._findItemConnectionCoords(item, sortedConnectors);
     
@@ -151,11 +155,11 @@ Gridifier.VerticalGrid.Appender.prototype._findItemConnectionCoords = function(i
         //console.log("itemCoords: ", itemCoords);
         if(itemCoords.x1 < this._normalizer.normalizeLowRounding(0))
             continue;
-
+        //console.log("x1 passed");
         var maybeIntersectableConnections = this._connectionsIntersector.findAllMaybeIntersectableConnectionsOnAppend(sortedConnectors[i]);
         if(this._connectionsIntersector.isIntersectingAnyConnection(maybeIntersectableConnections, itemCoords))
             continue;
-
+        //console.log("intersections passed");
         itemConnectionCoords = itemCoords;
 
         var connectionsBelowCurrent = this._connections.getAllConnectionsBelowY(itemCoords.y2);

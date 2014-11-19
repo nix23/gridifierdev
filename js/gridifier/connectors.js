@@ -90,6 +90,8 @@ Gridifier.Connectors.prototype._addConnector = function(type, side, x, y, itemGU
         y: y,
         itemGUID: itemGUID
     }); 
+
+    //console.log(""); console.log("Added connector: type-> " + type + "; side -> " + side + "; x: " + x + "; y: " + y);
 }
 
 Gridifier.Connectors.prototype.addAppendConnector = function(side, x, y, itemGUID) {

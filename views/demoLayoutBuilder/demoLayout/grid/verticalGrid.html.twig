@@ -3,21 +3,6 @@
         Gridifier demo grid
     </div>
 
-    <div style="width: 100%" class="gridSubview">
-        {#
-        {% for i in 1..20 %}
-            <div class="tester{{ i }}" style="width: 5%; height: 100px; border: 1px red solid; box-sizing: border-box;
-                                              position: absolute; left: {{ 5 * (i - 1) }}%; top: {{ i }}px"></div>
-        {% endfor %}
-        #}
-        {#
-        <div class="tester1" style="width: 24.95%; height: 100px; background: black; float: left"></div>
-        <div class="tester2" style="width: 24.95%; height: 100px; background: orange; float: left"></div>
-        <div class="tester3" style="width: 24.95%; height: 100px; background: red; float: left; "></div>
-        <div class="tester4" style="width: 24.95%; height: 100px; background: green; float: left;"></div>
-        #}
-    </div>
-
     <div class="gridResizer">
         <div class="icon">
             <div class="left"></div>

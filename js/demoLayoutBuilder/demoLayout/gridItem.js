@@ -57,14 +57,39 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
                                                                            isContentBoxBoxSizing,
                                                                            itemBgClass) {
     this._gridifier.markAsGridItem(this._$gridItem);
+
+    if(typeof window.borderType == "undefined")
+        window.borderType = 1;
+    else
+        window.borderType++;
+
+    if(window.borderType == 5)
+        window.borderType = 1;
+
+    if(window.borderType == 1)
+        var borderColor = "black";
+    else if(window.borderType == 2)
+        var borderColor = "brown";
+    else if(window.borderType == 3)
+        var borderColor = "red";
+    else if(window.borderType == 4)
+        var borderColor = "blue";
+
     this._$gridItem.css({
         //width: itemSizes.width,
         //height: itemSizes.height,
-        width: "5%",
-        height: "100px",
-        border: itemBorder + "px rgb(60,60,60) solid",
-        margin: itemMargin + "px",
-        "box-sizing": (isBorderBoxBoxSizing) ? "border-box" : "content-box",
+        width: "25%",
+        //height: "100px",
+        height: "200px",
+        //border: itemBorder + "px rgb(60,60,60) solid",
+        //border: "1px " + borderColor + " solid",
+        //margin: itemMargin + "px",
+        //"margin-left": "1.66%",
+        //"margin-right": "1.66%",
+        //"padding-left": "1.66%",
+        //"padding-right": "1.66%",
+        //"box-sizing": (isBorderBoxBoxSizing) ? "border-box" : "content-box",
+        //"box-sizing": "border-box",
 
         // "-webkit-box-shadow": "2px 2px 2px rgb(60,60,60)",
         // "box-shadow": "2px 2px 2px rgb(60,60,60)",
@@ -75,8 +100,7 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         "font-size": "14px",
         "font-weight": "bold"
     });
-    
-    this._$gridItem.addClass(itemBgClass);
+    //this._$gridItem.addClass(itemBgClass);
 
     var $gridItemBg = $("<div/>");
     $gridItemBg.css({
@@ -88,13 +112,13 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         width: "100%",
         height: "100%",
         // @todo -> Make Crossbrowser
-        background: "url(img/gridItemBg9.png)",
-        //background: "url(img/test2.png)",
+        //background: "url(img/gridItemBg9.png)",
+        background: "url(img/test3.jpg)",
         "background-size": "cover",
         "background-repeat": "no-repeat",
         "background-position": "center center"
     });
-    //this._$gridItem.append($gridItemBg);
+    this._$gridItem.append($gridItemBg);
 }
 
 DemoLayoutBuilder.DemoLayout.GridItem.prototype.renderGUID = function() {

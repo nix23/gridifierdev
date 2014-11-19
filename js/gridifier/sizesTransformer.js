@@ -277,7 +277,7 @@ Gridifier.SizesTransformer.prototype._reappendDependedItemWithDefaultAppend = fu
         else if(this._settings.isHorizontalGrid())
             this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors(); // @todo -> Replace with hor.grid side
     }
-
+    
     this._appender.append(dependedItem);
 }
 
