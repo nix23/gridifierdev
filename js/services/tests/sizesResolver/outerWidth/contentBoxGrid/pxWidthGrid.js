@@ -5,7 +5,7 @@ $(document).ready(function() {
 
             for(var i = 0; i < gridWidths.length; i++) {
                 var gridWidth = gridWidths[i];
-                var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPxWidth(gridWidth);
+                var $grid = this._grids.createGridWithPxWidth(gridWidth);
 
                 this._gridItemTests.setBoxSizing(this._gridItemTests.BOX_SIZINGS.CONTENT_BOX);
                 clearTestData();
@@ -81,7 +81,7 @@ $(document).ready(function() {
 
             for(var i = 0; i < gridWidths.length; i++) {
                 var gridWidth = gridWidths[i];
-                var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPxWidth(gridWidth);
+                var $grid = this._grids.createGridWithPxWidth(gridWidth);
 
                 this._gridItemTests.setBoxSizing(this._gridItemTests.BOX_SIZINGS.BORDER_BOX);
                 clearTestData();

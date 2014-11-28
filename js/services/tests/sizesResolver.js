@@ -870,89 +870,105 @@ $(document).ready(function() {
 
         },
 
-        _gridGenerator: {
-            gridsWithContentBoxBS: {
-                PADDING_PX_SIZE: "20px",
-                PADDING_PERCENTS_SIZE: "10.5%",
-                MARGIN_PX_SIZE: "20px",
-                MARGIN_PERCENTS_SIZE: "10.5%",
-                BORDER_PX_SIZE: "3px",
+        _grids: {
+            _boxSizing: null,
+            BOX_SIZINGS: {CONTENT_BOX: "content-box", BORDER_BOX: "border-box"},
 
-                createGridWithPxWidth: function(pxWidth) {
-                    var $grid = $("<div/>");
-                    $grid.css({
-                        width: pxWidth + "px",
-                        height: "500px",
-                        "box-sizing": "content-box",
-                        position: "relative"
-                    });
+            PADDING_PX_SIZE: "20px",
+            PADDING_PERCENTS_SIZE: "10.5%",
+            MARGIN_PX_SIZE: "20px",
+            MARGIN_PERCENTS_SIZE: "10.5%",
+            BORDER_PX_SIZE: "3px",
 
-                    return $grid;
-                },
-
-                createGridWithPxWidthAndPxPadding: function(pxWidth) {
-                    $grid = this.createGridWithPxWidth(pxWidth);
-                    $grid.css({"padding": this.PADDING_PX_SIZE});
-
-                    return $grid;
-                },
-
-                createGridWithPxWidthAndPxMargin: function(pxWidth) {
-                    $grid = this.createGridWithPxWidth(pxWidth);
-                    $grid.css({"margin": this.MARGIN_PX_SIZE});
-
-                    return $grid;
-                },
-
-                createGridWithPxWidthAndPxBorder: function(pxWidth) {
-                    $grid = this.createGridWithPxWidth(pxWidth);
-                    $grid.css({"border": this.BORDER_PX_SIZE + " black solid"});
-
-                    return $grid;
-                },
-
-                createGridWithPercentageWidth: function(wrapperPxWidth, percentageWidth) {
-                    var $wrapper = $("<div/>");
-                    $wrapper.css({"width": wrapperPxWidth + "px"});
-
-                    var $grid = $("<div/>");
-                    $grid.css({
-                        width: percentageWidth + "%",
-                        height: "500px",
-                        "box-sizing": "content-box",
-                        position: "relative"
-                    });
-
-                    $wrapper.append($grid);
-
-                    return $grid;
-                },
-
-                createGridWithPercentageWidthAndPercentagePadding: function(wrapperPxWidth, percentageWidth) {
-                    var $grid = this.createGridWithPercentageWidth(wrapperPxWidth, percentageWidth);
-                    $grid.css({"padding": this.PADDING_PERCENTS_SIZE});
-
-                    return $grid;
-                },
-
-                createGridWithPercentageWidthAndPercentageMargin: function(wrapperPxWidth, percentageWidth) {
-                    var $grid = this.createGridWithPercentageWidth(wrapperPxWidth, percentageWidth);
-                    $grid.css({"margin": this.MARGIN_PERCENTS_SIZE});
-
-                    return $grid;
+            setBoxSizing: function(boxSizing) {
+                if(boxSizing != this.BOX_SIZINGS.CONTENT_BOX &&
+                    boxSizing != this.BOX_SIZINGS.BORDER_BOX) {
+                    throw new Error("Can't set unknown box sizing!");
                 }
+
+                this._boxSizing = boxSizing;
             },
 
-            gridsWithBorderBoxBS: {
-                // Not supported yet by Gridifier
+            isContentBoxBSGrid: function() {
+                return this._boxSizing == this.BOX_SIZINGS.CONTENT_BOX;
+            },
+
+            isBorderBoxBSGrid: function() {
+                return this._boxSizing == this.BOX_SIZINGS.BORDER_BOX;
+            },
+
+            createGridWithPxWidth: function(pxWidth) {
+                var $grid = $("<div/>");
+                $grid.css({
+                    width: pxWidth + "px",
+                    height: "500px",
+                    "box-sizing": this._boxSizing,
+                    position: "relative"
+                });
+
+                return $grid;
+            },
+
+            createGridWithPxWidthAndPxPadding: function(pxWidth) {
+                $grid = this.createGridWithPxWidth(pxWidth);
+                $grid.css({"padding": this.PADDING_PX_SIZE});
+
+                return $grid;
+            },
+
+            createGridWithPxWidthAndPxMargin: function(pxWidth) {
+                $grid = this.createGridWithPxWidth(pxWidth);
+                $grid.css({"margin": this.MARGIN_PX_SIZE});
+
+                return $grid;
+            },
+
+            createGridWithPxWidthAndPxBorder: function(pxWidth) {
+                $grid = this.createGridWithPxWidth(pxWidth);
+                $grid.css({"border": this.BORDER_PX_SIZE + " black solid"});
+
+                return $grid;
+            },
+
+            createGridWithPercentageWidth: function(wrapperPxWidth, percentageWidth) {
+                var $wrapper = $("<div/>");
+                $wrapper.css({"width": wrapperPxWidth + "px"});
+
+                var $grid = $("<div/>");
+                $grid.css({
+                    width: percentageWidth + "%",
+                    height: "500px",
+                    "box-sizing": "content-box",
+                    position: "relative"
+                });
+
+                $wrapper.append($grid);
+
+                return $grid;
+            },
+
+            createGridWithPercentageWidthAndPercentagePadding: function(wrapperPxWidth, percentageWidth) {
+                var $grid = this.createGridWithPercentageWidth(wrapperPxWidth, percentageWidth);
+                $grid.css({"padding": this.PADDING_PERCENTS_SIZE});
+
+                return $grid;
+            },
+
+            createGridWithPercentageWidthAndPercentageMargin: function(wrapperPxWidth, percentageWidth) {
+                var $grid = this.createGridWithPercentageWidth(wrapperPxWidth, percentageWidth);
+                $grid.css({"margin": this.MARGIN_PERCENTS_SIZE});
+
+                return $grid;
             }
         },
 
         runTests: function() {
             var me = this;
 
-            test("outerWidth", function() {
+            test("outerWidth content-box", function() {
                 me._before.call(me);
+
+                me._grids.setBoxSizing(me._grids.BOX_SIZINGS.CONTENT_BOX);
 
                 outerWidthTesterPxWidthGrid.testCallWithContentBoxPxWidthGridPerAllContentBoxItems.call(me);
                 outerWidthTesterPxWidthGrid.testCallWithContentBoxPxWidthGridPerAllBorderBoxItems.call(me);
@@ -1024,13 +1040,25 @@ $(document).ready(function() {
                 return (difference < 0.1);
             },
 
+            _getGridBoxSizingLabel: function() {
+                if(outerWidthTester._grids.isContentBoxBSGrid()) {
+                    var gridBoxSizingLabel = "; content-box";
+                }
+                else if(outerWidthTester._grids.isBorderBoxBSGrid()) {
+                    var gridBoxSizingLabel = "; border-box";
+                }
+
+                return gridBoxSizingLabel;
+            },
+
             callPerItemWithPxWidth: function($grid, gridWidth, itemPxWidth, expectedItemWidth) {
                 var $item = this._createItem(itemPxWidth + "px");
                 $grid.append($item);
 
+                var BSLabel = this._getGridBoxSizingLabel();
                 ok(
                     SizesResolver.outerWidth($item.get(0)) == expectedItemWidth,
-                    "call with: Grid -> width = " + gridWidth + "; Item -> width = " + itemPxWidth + "px; " +
+                    "call with: Grid -> width = " + gridWidth + BSLabel + "; Item -> width = " + itemPxWidth + "px; " +
                     "box-sizing = " + this._boxSizing + "; "
                 );
             },
@@ -1040,9 +1068,10 @@ $(document).ready(function() {
                 $item.css({"padding": this.PADDING_PX_SIZE}); 
                 $grid.append($item);
                 
+                var BSLabel = this._getGridBoxSizingLabel();
                 ok(
                     SizesResolver.outerWidth($item.get(0)) == expectedItemWidth,
-                    "call with: Grid -> width = " + gridWidth + "; Item -> width = " + itemPxWidth + "px; " +
+                    "call with: Grid -> width = " + gridWidth + BSLabel + "; Item -> width = " + itemPxWidth + "px; " +
                     "box-sizing = " + this._boxSizing + "; padding = " + this.PADDING_PX_SIZE
                 );
             },
@@ -1052,9 +1081,10 @@ $(document).ready(function() {
                 $item.css({"margin": this.MARGIN_PX_SIZE});
                 $grid.append($item);
 
+                var BSLabel = this._getGridBoxSizingLabel();
                 ok(
                     SizesResolver.outerWidth($item.get(0), true) == expectedItemWidth,
-                    "call with: Grid -> width = " + gridWidth + "; Item -> width = " + itemPxWidth + "px; " +
+                    "call with: Grid -> width = " + gridWidth + BSLabel + "; Item -> width = " + itemPxWidth + "px; " +
                     "box-sizing = " + this._boxSizing + "; margin = " + this.MARGIN_PX_SIZE
                 );
             },
@@ -1064,9 +1094,10 @@ $(document).ready(function() {
                 $item.css({"border": this.BORDER_PX_SIZE + " black solid"});
                 $grid.append($item);
                 
+                var BSLabel = this._getGridBoxSizingLabel();
                 ok(
                     SizesResolver.outerWidth($item.get(0)) == expectedItemWidth,
-                    "call with: Grid -> width = " + gridWidth + "; Item -> width = " + itemPxWidth + "px; " +
+                    "call with: Grid -> width = " + gridWidth + BSLabel + "; Item -> width = " + itemPxWidth + "px; " +
                     "box-sizing = " + this._boxSizing + "; border = " + this.BORDER_PX_SIZE
                 );
             },
@@ -1075,11 +1106,12 @@ $(document).ready(function() {
                 var $item = this._createItem(itemPercentageWidth + "%");
                 $grid.append($item);
 
+                var BSLabel = this._getGridBoxSizingLabel();
                 ok(
                     this.doesFractionalResultsEquals(
                         SizesResolver.outerWidth($item.get(0), true), expectedItemWidth
                     ),
-                    "call with: Grid -> width = " + gridWidth + "; Item -> width = " + itemPercentageWidth + "%; " +
+                    "call with: Grid -> width = " + gridWidth + BSLabel + "; Item -> width = " + itemPercentageWidth + "%; " +
                     "box-sizing = " + this._boxSizing
                 );
             },
@@ -1089,11 +1121,12 @@ $(document).ready(function() {
                 $item.css({"padding": this.PADDING_PERCENTS_SIZE});
                 $grid.append($item);
 
+                var BSLabel = this._getGridBoxSizingLabel();
                 ok(
                     this.doesFractionalResultsEquals(
                         SizesResolver.outerWidth($item.get(0), true), expectedItemWidth
                     ),
-                    "call with: Grid -> width = " + gridWidth + "; Item -> width = " + itemPercentageWidth + "%; " +
+                    "call with: Grid -> width = " + gridWidth + BSLabel + "; Item -> width = " + itemPercentageWidth + "%; " +
                     "box-sizing = " + this._boxSizing + "; padding = " + this.PADDING_PERCENTS_SIZE
                 );
             },
@@ -1103,11 +1136,12 @@ $(document).ready(function() {
                 $item.css({"margin": this.MARGIN_PERCENTS_SIZE});
                 $grid.append($item);
 
+                var BSLabel = this._getGridBoxSizingLabel();
                 ok(
                     this.doesFractionalResultsEquals(
                         SizesResolver.outerWidth($item.get(0), true), expectedItemWidth
                     ),
-                    "call with: Grid -> width = " + gridWidth + "; Item -> width = " + itemPercentageWidth + "%; " +
+                    "call with: Grid -> width = " + gridWidth + BSLabel + "; Item -> width = " + itemPercentageWidth + "%; " +
                     "box-sizing = " + this._boxSizing + "; margin = " + this.MARGIN_PERCENTS_SIZE
                 );
             },
@@ -1117,11 +1151,12 @@ $(document).ready(function() {
                 $item.css({"border": this.BORDER_PX_SIZE + " black solid"});
                 $grid.append($item);
 
+                var BSLabel = this._getGridBoxSizingLabel();
                 ok(
                     this.doesFractionalResultsEquals(
                         SizesResolver.outerWidth($item.get(0), true), expectedItemWidth
                     ),
-                    "call with: Grid -> width = " + gridWidth + "; Item -> width = " + itemPercentageWidth + "%; " +
+                    "call with: Grid -> width = " + gridWidth + BSLabel + "; Item -> width = " + itemPercentageWidth + "%; " +
                     "box-sizing = " + this._boxSizing + "; border = " + this.BORDER_PX_SIZE
                 );
             }

@@ -11,11 +11,11 @@ $(document).ready(function() {
                     var gridPercentageWidth = gridPercentageWidths[j];
                     var gridPxWidth = gridWrapperPxWidth / 100 * gridPercentageWidth;
 
-                    var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPercentageWidthAndPercentagePadding(
+                    var $grid = this._grids.createGridWithPercentageWidthAndPercentagePadding(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     var gridLabel = gridPercentageWidth + "%; Grid Wrapper width = " + gridWrapperPxWidth;
-                    gridLabel += "; Padding: " + this._gridGenerator.gridsWithContentBoxBS.PADDING_PERCENTS_SIZE;
+                    gridLabel += "; Padding: " + this._grids.PADDING_PERCENTS_SIZE;
 
                     this._gridItemTests.setBoxSizing(this._gridItemTests.BOX_SIZINGS.CONTENT_BOX);
 
@@ -50,12 +50,12 @@ $(document).ready(function() {
                     );
 
                     clearTestData();
-                    var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPercentageWidthAndPercentagePadding(
+                    var $grid = this._grids.createGridWithPercentageWidthAndPercentagePadding(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
                     var itemWidth = 33;
-                    var gridPadding = parseFloat(this._gridGenerator.gridsWithContentBoxBS.PADDING_PERCENTS_SIZE) * 2;
+                    var gridPadding = parseFloat(this._grids.PADDING_PERCENTS_SIZE) * 2;
                     var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
                     var expectedItemWidth = (gridPxWidth + gridPxPadding) / 100 * itemWidth;
                     this._gridItemTests.callPerItemWithPercentageWidth(
@@ -66,12 +66,12 @@ $(document).ready(function() {
                     //                           Chrome calculates grid item paddings from raw parent width,
                     //                           FF calculates from raw parent width + paddings)
                     // clearTestData();
-                    // var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPercentageWidthAndPercentagePadding(
+                    // var $grid = this._grids.createGridWithPercentageWidthAndPercentagePadding(
                     //     gridWrapperPxWidth, gridPercentageWidth
                     // );
                     // $testContent.append($grid.parent()); 
                     // var itemWidth = 30;
-                    // var gridPadding = parseFloat(this._gridGenerator.gridsWithContentBoxBS.PADDING_PERCENTS_SIZE) * 2;
+                    // var gridPadding = parseFloat(this._grids.PADDING_PERCENTS_SIZE) * 2;
                     // var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
                     // var expectedItemWidth = (gridPxWidth + gridPxPadding) / 100 * itemWidth;
                     // var paddingWidth = gridPxWidth / 100 * (parseFloat(this._gridItemTests.PADDING_PERCENTS_SIZE) * 2);
@@ -83,12 +83,12 @@ $(document).ready(function() {
                     // @Notice -> test disabled.(When grid has % padding, and grid item has percentage margins,
                     //                           Chrome is calculating margins incorrectly(OK In FF))
                     // clearTestData();
-                    // var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPercentageWidthAndPercentagePadding(
+                    // var $grid = this._grids.createGridWithPercentageWidthAndPercentagePadding(
                     //     gridWrapperPxWidth, gridPercentageWidth
                     // );
                     // $testContent.append($grid.parent());
                     // var itemWidth = 33;
-                    // var gridPadding = parseFloat(this._gridGenerator.gridsWithContentBoxBS.PADDING_PERCENTS_SIZE) * 2;
+                    // var gridPadding = parseFloat(this._grids.PADDING_PERCENTS_SIZE) * 2;
                     // var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
                     // var expectedItemWidth = (gridPxWidth + gridPxPadding) / 100 * itemWidth;
                     // var marginWidth = (gridPxWidth + gridPxPadding) / 100 * (parseFloat(this._gridItemTests.MARGIN_PERCENTS_SIZE) * 2);
@@ -98,12 +98,12 @@ $(document).ready(function() {
                     // );
 
                     clearTestData();
-                    var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPercentageWidthAndPercentagePadding(
+                    var $grid = this._grids.createGridWithPercentageWidthAndPercentagePadding(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
                     var itemWidth = 33;
-                    var gridPadding = parseFloat(this._gridGenerator.gridsWithContentBoxBS.PADDING_PERCENTS_SIZE) * 2;
+                    var gridPadding = parseFloat(this._grids.PADDING_PERCENTS_SIZE) * 2;
                     var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
                     var expectedItemWidth = (gridPxWidth + gridPxPadding) / 100 * itemWidth;
                     var borderWidth = parseInt(this._gridItemTests.BORDER_PX_SIZE) * 2;
@@ -126,11 +126,11 @@ $(document).ready(function() {
                     var gridPercentageWidth = gridPercentageWidths[j];
                     var gridPxWidth = gridWrapperPxWidth / 100 * gridPercentageWidth;
 
-                    var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPercentageWidthAndPercentagePadding(
+                    var $grid = this._grids.createGridWithPercentageWidthAndPercentagePadding(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     var gridLabel = gridPercentageWidth + "%; Grid Wrapper width = " + gridWrapperPxWidth;
-                    gridLabel += "; Padding: " + this._gridGenerator.gridsWithContentBoxBS.PADDING_PERCENTS_SIZE;
+                    gridLabel += "; Padding: " + this._grids.PADDING_PERCENTS_SIZE;
 
                     this._gridItemTests.setBoxSizing(this._gridItemTests.BOX_SIZINGS.BORDER_BOX);
 
@@ -141,7 +141,7 @@ $(document).ready(function() {
                     this._gridItemTests.callPerItemWithPxWidth($grid, gridLabel, itemWidth, expectedItemWidth);
 
                     clearTestData();
-                    var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPercentageWidth(
+                    var $grid = this._grids.createGridWithPercentageWidth(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
@@ -160,7 +160,7 @@ $(document).ready(function() {
                     );
 
                     clearTestData();
-                    var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPercentageWidthAndPercentagePadding(
+                    var $grid = this._grids.createGridWithPercentageWidthAndPercentagePadding(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
@@ -171,12 +171,12 @@ $(document).ready(function() {
                     );
 
                     clearTestData();
-                    var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPercentageWidthAndPercentagePadding(
+                    var $grid = this._grids.createGridWithPercentageWidthAndPercentagePadding(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
                     var itemWidth = 33;
-                    var gridPadding = parseFloat(this._gridGenerator.gridsWithContentBoxBS.PADDING_PERCENTS_SIZE) * 2;
+                    var gridPadding = parseFloat(this._grids.PADDING_PERCENTS_SIZE) * 2;
                     var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
                     var expectedItemWidth = (gridPxWidth + gridPxPadding) / 100 * itemWidth;
                     this._gridItemTests.callPerItemWithPercentageWidth(
@@ -186,12 +186,12 @@ $(document).ready(function() {
                     // @Notice -> test disabled. (When grid has % padding set and grid item has % padding,
                     //                            IE11 returns incorrect calculated width per grid item)
                     // clearTestData();
-                    // var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPercentageWidthAndPercentagePadding(
+                    // var $grid = this._grids.createGridWithPercentageWidthAndPercentagePadding(
                     //     gridWrapperPxWidth, gridPercentageWidth
                     // );
                     // $testContent.append($grid.parent());
                     // var itemWidth = 30;
-                    // var gridPadding = parseFloat(this._gridGenerator.gridsWithContentBoxBS.PADDING_PERCENTS_SIZE) * 2;
+                    // var gridPadding = parseFloat(this._grids.PADDING_PERCENTS_SIZE) * 2;
                     // var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
                     // var expectedItemWidth = (gridPxWidth + gridPxPadding) / 100 * itemWidth;
                     // this._gridItemTests.callPerItemWithPercentageWidthAndPercentagePadding(
@@ -201,12 +201,12 @@ $(document).ready(function() {
                     // @Notice -> test disabled. (When grid has % padding and grid item has % margin,
                     //                            Chrome returns incorrect calculated margins per item)
                     // clearTestData();
-                    // var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPercentageWidthAndPercentagePadding(
+                    // var $grid = this._grids.createGridWithPercentageWidthAndPercentagePadding(
                     //     gridWrapperPxWidth, gridPercentageWidth
                     // );
                     // $testContent.append($grid.parent());
                     // var itemWidth = 33;
-                    // var gridPadding = parseFloat(this._gridGenerator.gridsWithContentBoxBS.PADDING_PERCENTS_SIZE) * 2;
+                    // var gridPadding = parseFloat(this._grids.PADDING_PERCENTS_SIZE) * 2;
                     // var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
                     // var expectedItemWidth = (gridPxWidth + gridPxPadding) / 100 * itemWidth;
                     // var marginWidth = (gridPxWidth + gridPxPadding) / 100 * (parseFloat(this._gridItemTests.MARGIN_PERCENTS_SIZE) * 2);
@@ -216,12 +216,12 @@ $(document).ready(function() {
                     // );
 
                     clearTestData();
-                    var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPercentageWidthAndPercentagePadding(
+                    var $grid = this._grids.createGridWithPercentageWidthAndPercentagePadding(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
                     var itemWidth = 33;
-                    var gridPadding = parseFloat(this._gridGenerator.gridsWithContentBoxBS.PADDING_PERCENTS_SIZE) * 2;
+                    var gridPadding = parseFloat(this._grids.PADDING_PERCENTS_SIZE) * 2;
                     var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
                     var expectedItemWidth = (gridPxWidth + gridPxPadding) / 100 * itemWidth;
                     this._gridItemTests.callPerItemWithPercentageWidthAndPxBorder(

@@ -5,8 +5,8 @@ $(document).ready(function() {
 
             for(var i = 0; i < gridWidths.length; i++) {
                 var gridWidth = gridWidths[i];
-                var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPxWidthAndPxBorder(gridWidth);
-                var gridHorizontalBorderLabel = this._gridGenerator.gridsWithContentBoxBS.BORDER_PX_SIZE;
+                var $grid = this._grids.createGridWithPxWidthAndPxBorder(gridWidth);
+                var gridHorizontalBorderLabel = this._grids.BORDER_PX_SIZE;
                 var gridLabel = gridWidth + "px; border = " + gridHorizontalBorderLabel;
 
                 this._gridItemTests.setBoxSizing(this._gridItemTests.BOX_SIZINGS.CONTENT_BOX);
@@ -83,8 +83,8 @@ $(document).ready(function() {
 
             for(var i = 0; i < gridWidths.length; i++) {
                 var gridWidth = gridWidths[i];
-                var $grid = this._gridGenerator.gridsWithContentBoxBS.createGridWithPxWidthAndPxBorder(gridWidth);
-                var gridHorizontalBorderLabel = this._gridGenerator.gridsWithContentBoxBS.BORDER_PX_SIZE;
+                var $grid = this._grids.createGridWithPxWidthAndPxBorder(gridWidth);
+                var gridHorizontalBorderLabel = this._grids.BORDER_PX_SIZE;
                 var gridLabel = gridWidth + "px; border = " + gridHorizontalBorderLabel;
 
                 this._gridItemTests.setBoxSizing(this._gridItemTests.BOX_SIZINGS.BORDER_BOX);
