@@ -56,15 +56,10 @@ Gridifier.Renderer.prototype.showConnections = function(connections) {
         //console.log(""); console.log(""); // LAST
         //console.log("connection x1: ", connections[i].x1); // LAST
         //console.log("%c" + connections[i].x2, "color:brown;font-weight:bold"); // LAST
-        connections[i].x1 = connections[i].x2 - SizesResolver.outerWidth(connections[i].item, true, true) + 1;
+        //connections[i].x1 = connections[i].x2 - SizesResolver.outerWidth(connections[i].item, true, true) + 1;
         //console.log("real connection x1: ", connections[i].x1); // LAST
         // console.log("%c" + connections[i].x1, "color:red;font-weight: bold");
         //console.log(" outerWidth: %c" + (SizesResolver.outerWidth(connections[i].item, true, true)), "color:blue;font-weight: bold"); // LAST
-
-        // if(connections[i].x2 >= this._gridifier.getGridX2())
-        //     var left = Math.round((connections[i].x1 / (this._gridifier.getGridX2() + 1) * 100) - 0.01) + "%";
-        // else
-        //     var left = Math.floor((connections[i].x1 / (this._gridifier.getGridX2() + 1) * 100) - 0.01) + "%";
 
         Dom.css.set(connections[i].item, {
             position: "absolute",
@@ -85,7 +80,7 @@ Gridifier.Renderer.prototype.showConnections = function(connections) {
 }
 
 Gridifier.Renderer.prototype.renderTransformedGrid = function() {
-    var me = this;
+    var me = this; 
     var st = Gridifier.SizesTransformer;
     var connections = this._connections.get();
 
@@ -106,29 +101,32 @@ Gridifier.Renderer.prototype.renderTransformedGrid = function() {
             connections[i].item.removeAttribute(st.TARGET_WIDTH_DATA_ATTR);
             connections[i].item.removeAttribute(st.TARGET_HEIGHT_DATA_ATTR);
 
-            setTimeout(function() { 
+           // setTimeout(function() { 
                 connections[i].item.style.width = targetWidth;
                 connections[i].item.style.height = targetHeight;
                 //connections[i].item.style.left = connections[i].x1 + "px";
-                connections[i].item.style.left = (Math.floor(connections[i].x1 / (me._gridifier.getGridX2() + 1) * 100) - 0.01) + "%",
+                connections[i].item.style.left = ((connections[i].x1 / (me._gridifier.getGridX2() + 1) * 100) - 0.01) + "%",
                 connections[i].item.style.top = connections[i].y1 + "px";
-            }, 0);
+            //}, 0);
         }
         else if(Dom.hasAttribute(connections[i].item, st.DEPENDED_ITEM_DATA_ATTR)) {
             connections[i].item.removeAttribute(st.DEPENDED_ITEM_DATA_ATTR);
             Dom.css3.transition(connections[i].item, "All 600ms ease");
 
-            setTimeout(function() {
+            //setTimeout(function() {
                 //connections[i].item.style.left = connections[i].x1 + "px";
-                connections[i].item.style.left = (Math.floor(connections[i].x1 / (me._gridifier.getGridX2() + 1) * 100) - 0.01) + "%",
+                connections[i].item.style.left = ((connections[i].x1 / (me._gridifier.getGridX2() + 1) * 100) - 0.01) + "%",
                 connections[i].item.style.top = connections[i].y1 + "px";
-            }, 0);
+            //}, 0);
         }
 
         renderNextConnection(i + 1);
     }
-
-    setTimeout(function() { renderNextConnection(0); }, 0);
+    renderNextConnection(0);
+    //setTimeout(function() { renderNextConnection(0); }, 0); // @notice -> Settimeouts here will slow down
+    // overall perfomance in legacy browsers(ie8, safari 5.1.7(Win)), because caching will stop before
+    // me._gridifier.getGridX2() will be called(because of setTimeout async), and Gridifier will recursively recalculate
+    // all DOM nodes up through DOM-Tree, until reaching root node.
 }
 
 Gridifier.Renderer.prototype.renderConnectionsAfterPrependNormalization = function(prependedConnection, connections) {
@@ -139,6 +137,8 @@ Gridifier.Renderer.prototype.renderConnectionsAfterPrependNormalization = functi
             return;
 
         if(connections[i].itemGUID != prependedConnection.itemGUID) {
+            // @todo -> Remove set timeout
+            //          Where id Dom.css.transition???
             setTimeout(function() { 
                 connections[i].item.style.left = connections[i].x1 + "px";
                 connections[i].item.style.top = connections[i].y1 + "px";

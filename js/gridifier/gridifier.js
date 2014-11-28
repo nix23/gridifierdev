@@ -132,11 +132,11 @@ Gridifier.prototype.addToGrid = function(items) {
 }
 
 Gridifier.prototype.getGridX2 = function() {
-    return SizesResolver.outerWidth(this._grid) - 1;
+    return SizesResolverManager.outerWidth(this._grid) - 1;
 }
 
 Gridifier.prototype.getGridY2 = function() {
-    return SizesResolver.outerHeight(this._grid) - 1;
+    return SizesResolverManager.outerHeight(this._grid) - 1;
 }
 
 Gridifier.prototype.getGrid = function() {
@@ -270,6 +270,8 @@ Gridifier.prototype._applyPrepend = function(item) {
 // @todo -> append, prepend, delete, insert
 Gridifier.prototype.prepend = function(items) {
     var items = this._collector.toDOMCollection(items);
+    SizesResolverManager.startCachingTransaction();
+
     this._collector.ensureAllItemsAreAttachedToGrid(items);
     this._collector.ensureAllItemsCanBeAttachedToGrid(items);
 
@@ -282,7 +284,9 @@ Gridifier.prototype.prepend = function(items) {
         // @todo after each operation update grid width/height
         $(this).trigger("gridifier.gridSizesChange");
     }
+
     this.updateGridSizes();
+    SizesResolverManager.stopCachingTransaction();
 
     return this;
 }
@@ -297,6 +301,8 @@ Gridifier.prototype._applyAppend = function(item) {
 
 Gridifier.prototype.append = function(items) { 
     var items = this._collector.toDOMCollection(items);
+    SizesResolverManager.startCachingTransaction();
+
     this._collector.ensureAllItemsAreAttachedToGrid(items);
     this._collector.ensureAllItemsCanBeAttachedToGrid(items);
 
@@ -310,6 +316,8 @@ Gridifier.prototype.append = function(items) {
         // @todo also update demo layout builder heading height label
         $(this).trigger("gridifier.gridSizesChange");
     }
+    
+    SizesResolverManager.stopCachingTransaction();
     this.updateGridSizes();
 
     return this;
@@ -317,6 +325,8 @@ Gridifier.prototype.append = function(items) {
 
 Gridifier.prototype.transformSizes = function(item, newWidth, newHeight) {
     var items = this._collector.toDOMCollection(item);
+    SizesResolverManager.startCachingTransaction();
+
     this._collector.ensureAllItemsAreAttachedToGrid(items);
     this._collector.ensureAllItemsCanBeAttachedToGrid(items);
 
@@ -329,6 +339,8 @@ Gridifier.prototype.transformSizes = function(item, newWidth, newHeight) {
     );
 
     this._renderer.renderTransformedGrid();
+    SizesResolverManager.stopCachingTransaction();
+    // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
 }
 
 // @todo -> transformBatchSizes = f([{i,w,h},{i,w,h},...]) First process all one after one,

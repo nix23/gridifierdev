@@ -78,16 +78,16 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
     this._$gridItem.css({
         //width: itemSizes.width,
         //height: itemSizes.height,
-        width: "25%",
+        width: "10%",
         //height: "100px",
         height: "200px",
         //border: itemBorder + "px rgb(60,60,60) solid",
         //border: "1px " + borderColor + " solid",
         //margin: itemMargin + "px",
-        //"margin-left": "1.66%",
-        //"margin-right": "1.66%",
-        //"padding-left": "1.66%",
-        //"padding-right": "1.66%",
+        // "margin-left": "1.66%",
+        // "margin-right": "1.66%",
+        // "padding-left": "1.66%",
+        // "padding-right": "1.66%",
         //"box-sizing": (isBorderBoxBoxSizing) ? "border-box" : "content-box",
         //"box-sizing": "border-box",
 
@@ -100,7 +100,7 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         "font-size": "14px",
         "font-weight": "bold"
     });
-    //this._$gridItem.addClass(itemBgClass);
+    this._$gridItem.addClass(itemBgClass);
 
     var $gridItemBg = $("<div/>");
     $gridItemBg.css({
@@ -118,7 +118,7 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         "background-repeat": "no-repeat",
         "background-position": "center center"
     });
-    this._$gridItem.append($gridItemBg);
+    //this._$gridItem.append($gridItemBg);
 }
 
 DemoLayoutBuilder.DemoLayout.GridItem.prototype.renderGUID = function() {

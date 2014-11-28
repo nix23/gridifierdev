@@ -101,9 +101,9 @@ Gridifier.SizesTransformer.prototype.initConnectionTransform = function(connecti
         }
         
         if(targetSizeType == targetSizeTypes.width)
-            return SizesResolver.outerWidth(connection.item, true) + "px";
+            return SizesResolverManager.outerWidth(connection.item, true) + "px";
         else if(targetSizeType == targetSizeTypes.height)
-            return SizesResolver.outerHeight(connection.item, true) + "px";
+            return SizesResolverManager.outerHeight(connection.item, true) + "px";
     }
 
     targetSizes.targetWidth = getTargetSize(newWidth, targetSizeTypes.width);
@@ -130,6 +130,7 @@ Gridifier.SizesTransformer.prototype._createTransformedConnectionItemClone = fun
         Gridifier.SizesTransformer.TRANSFORMED_ITEM_CLONE_DATA_ATTR,
         Gridifier.SizesTransformer.TRANSFORMED_ITEM_CLONE_DATA_ATTR_VALUE
     );
+    SizesResolverManager.unmarkAsCached(transformedItemClone);
 
     Dom.css.set(transformedItemClone, {
         position: "absolute", 
@@ -354,8 +355,8 @@ Gridifier.SizesTransformer.prototype._makeNoIntersectionsStrategyFakeCallToFixPr
     else {
         this.transformConnectionSizes(
             lastPrependedConnection,
-            SizesResolver.outerWidth(connection.item) + "px",
-            SizesResolver.outerHeight(connection.item) + "px"
+            SizesResolverManager.outerWidth(connection.item) + "px",
+            SizesResolverManager.outerHeight(connection.item) + "px"
         );
     }
 

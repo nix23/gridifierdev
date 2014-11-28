@@ -212,6 +212,7 @@ DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
             this._gridifierDynamicSettings.isContentBoxBoxSizing(),
             this._gridifierDynamicSettings.getNextAppendedItemBgClass()
         );
+        
         var $gridItem = gridItem.getView();
         this._gridifier.append($gridItem);
         gridItem.renderGUID();

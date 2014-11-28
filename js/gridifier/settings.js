@@ -37,11 +37,11 @@ Gridifier.Settings = function(settings) {
 
             var scene = document.createElement("div");
             Dom.css.set(scene, {
-                width: SizesResolver.outerWidth(item, true) + "px",
-                height: SizesResolver.outerHeight(item, true) + "px",
+                width: SizesResolverManager.outerWidth(item, true) + "px",
+                height: SizesResolverManager.outerHeight(item, true) + "px",
                 position: "absolute",
-                top: SizesResolver.positionTop(item) + "px",
-                left: SizesResolver.positionLeft(item) + "px"
+                top: SizesResolverManager.positionTop(item) + "px",
+                left: SizesResolverManager.positionLeft(item) + "px"
             });
             Dom.css3.perspective(scene, "200px"); 
             grid.appendChild(scene);

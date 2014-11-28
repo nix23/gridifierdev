@@ -1,15 +1,45 @@
 // DOM abstraction layer
 var Dom = {
+    hasDOMElemOwnPropertyFunction: null,
+
     init: function() {
         this.createTrimFunction();
+        this.createHasDOMElemOwnPropertyFunction();
     },
 
+    // @todo -> Refactor this(Don't overload users JS)
     createTrimFunction: function() {
         if(typeof String.prototype.trim !== 'function') {
             String.prototype.trim = function() {
                 return this.replace(/^\s+|\s+$/g, '');
             }
         }
+    },
+
+    // ie11, ff30(Probably some others too) doesn't support
+    // Object.prototype.hasOwnProperty.call per DOM Objects
+    createHasDOMElemOwnPropertyFunction: function() {
+        var testerDiv = document.createElement("div");
+        var rootElement = document.body || document.documentElement;
+        rootElement.appendChild(testerDiv);
+
+        if(Object.prototype.hasOwnProperty.call(testerDiv, "innerHTML")) {
+            this.hasDOMElemOwnPropertyFunction = function(DOMElem, propertyToMatch) {
+                return Object.prototype.hasOwnProperty.call(DOMElem, propertyToMatch);
+            }
+        }
+        else {
+            this.hasDOMElemOwnPropertyFunction = function(DOMElem, propertyToMatch) {
+                for(var property in DOMElem) {
+                    if(property == propertyToMatch)
+                        return true;
+                }
+                
+                return false;
+            }
+        }
+
+        rootElement.removeChild(testerDiv);
     },
 
     toInt: function(maybeNotInt) {
@@ -80,6 +110,10 @@ var Dom = {
         return false;
     },
 
+    hasDOMElemOwnProperty: function(DOMElem, propertyToMatch) {
+        return this.hasDOMElemOwnPropertyFunction(DOMElem, propertyToMatch);
+    },
+
     css: {
         set: function(DOMElem, params) {
             if(!Dom.isNativeDOMObject(DOMElem))
@@ -91,6 +125,9 @@ var Dom = {
 
         hasClass: function(DOMElem, classToFind) {
             var classesString = DOMElem.getAttribute("class");
+            if(classesString == null || classesString.length == 0)
+                return false;
+
             var classes = classesString.split(" ");
 
             for(var i = 0; i < classes.length; i++)

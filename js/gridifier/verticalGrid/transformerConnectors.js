@@ -63,7 +63,7 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerRev
     // First prepended item should be processed separately(To not align to corner).
     if(this._guid.wasItemPrepended(this._guid.getItemGUID(transformedConnection.item))
        && this._connections.count() == 0) {
-        var transformedItemCloneWidth = SizesResolver.outerWidth(transformedItemClone, true);
+        var transformedItemCloneWidth = SizesResolverManager.outerWidth(transformedItemClone, true);
         this._connectors.flush();
 
         if(transformedConnection.x2 - transformedItemCloneWidth + 1 >= 0
@@ -96,7 +96,7 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerDef
     // First prepended item should be processed separately(To not align to corner).
     if(this._guid.wasItemPrepended(this._guid.getItemGUID(transformedConnection.item))
        && this._connections.count() == 0) {
-        var transformedItemCloneWidth = SizesResolver.outerWidth(transformedItemClone, true);
+        var transformedItemCloneWidth = SizesResolverManager.outerWidth(transformedItemClone, true);
         this._connectors.flush();
 
         if(transformedConnection.x1 + transformedItemCloneWidth - 1 <= this._gridifier.getGridX2()) {

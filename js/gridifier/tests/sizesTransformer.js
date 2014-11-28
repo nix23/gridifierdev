@@ -102,5 +102,6 @@ $(document).ready(function() {
         }
     }
 
-    initConnectionTransformTester.runTests();
+    // @todo -> refactor before and after, move into test() body(async bug)
+    //initConnectionTransformTester.runTests();
 });

@@ -86,11 +86,11 @@ Gridifier.Collector.prototype.ensureAllItemsAreAttachedToGrid = function(items) 
 }
 
 Gridifier.Collector.prototype._isItemWiderThanGridWidth = function(item) {
-    return SizesResolver.outerWidth(item, true) > SizesResolver.outerWidth(this._grid);
+    return SizesResolverManager.outerWidth(item, true) > SizesResolverManager.outerWidth(this._grid);
 }
 
 Gridifier.Collector.prototype._isItemTallerThatGridHeight = function(item) {
-    return SizesResolver.outerHeight(item, true) > SizesResolver.outerHeight(this._grid);
+    return SizesResolverManager.outerHeight(item, true) > SizesResolverManager.outerHeight(this._grid);
 }
 
 Gridifier.Collector.prototype.canItemBeAttachedToGrid = function(item) {
@@ -104,8 +104,8 @@ Gridifier.Collector.prototype.throwWrongItemSizesError = function(item) {
     if(this._settings.isVerticalGrid()) {
         var errorParam = {
             item: item, 
-            itemWidth: SizesResolver.outerWidth(item, true),
-            gridWidth: SizesResolver.outerWidth(this._grid)
+            itemWidth: SizesResolverManager.outerWidth(item, true),
+            gridWidth: SizesResolverManager.outerWidth(this._grid)
         };
 
         var errorType = Gridifier.Error.ERROR_TYPES.COLLECTOR.ITEM_WIDER_THAN_GRID_WIDTH;
@@ -113,8 +113,8 @@ Gridifier.Collector.prototype.throwWrongItemSizesError = function(item) {
     else if(this._settings.isHorizontalGrid()) {
         var errorParam = {
             item: item,
-            itemHeight: SizesResolver.outerHeight(item, true),
-            gridHeight: SizesResolver.outerHeight(this._grid)
+            itemHeight: SizesResolverManager.outerHeight(item, true),
+            gridHeight: SizesResolverManager.outerHeight(this._grid)
         };
 
         var errorType = Gridifier.Error.ERROR_TYPES.COLLECTOR.ITEM_TALLER_THAN_GRID_HEIGHT;
@@ -161,9 +161,12 @@ Gridifier.Collector.prototype.toDOMCollection = function(items) {
 
         return DOMItems;
     }
-
+    
     if(Dom.isArray(items)) {
         for(var i = 0; i < items.length; i++) {
+            if(Dom.isJqueryObject(items[i]))
+                items[i] = items[i].get(0);
+
             if(!Dom.isNativeDOMObject(items[i])) {
                 createNotDomElementError(items[i]);
             }

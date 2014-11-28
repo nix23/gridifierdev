@@ -95,7 +95,7 @@ Gridifier.VerticalGrid.Appender.prototype._addItemConnectors = function(itemCoor
         this._connectors.addAppendConnector(
             Gridifier.Connectors.SIDES.LEFT.TOP,
             //Dom.toInt(itemCoords.x1 - 1),
-            itemCoords.x1 - 1,
+            parseFloat(itemCoords.x1 - 1),
             Dom.toInt(itemCoords.y1),
             Dom.toInt(itemGUID)
         );
@@ -104,7 +104,7 @@ Gridifier.VerticalGrid.Appender.prototype._addItemConnectors = function(itemCoor
     this._connectors.addAppendConnector(
         Gridifier.Connectors.SIDES.BOTTOM.RIGHT,
         //Dom.toInt(itemCoords.x2),
-        itemCoords.x2,
+        parseFloat(itemCoords.x2),
         Dom.toInt(itemCoords.y2 + 1),
         Dom.toInt(itemGUID)
     );
