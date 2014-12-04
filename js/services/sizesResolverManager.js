@@ -29,8 +29,11 @@ var SizesResolverManager = {
 
         SizesResolver.recalculatePercentageHeightFunction = function(DOMElem, 
                                                                      includeMargins, 
-                                                                     disablePercentageCSSRecalc) {
-            return SizesResolverManager.outerHeight(DOMElem, includeMargins, disablePercentageCSSRecalc);
+                                                                     disablePercentageCSSRecalc,
+                                                                     disableBordersCalc) {
+            return SizesResolverManager.outerHeight(
+                DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc
+            );
         }
     },
 
@@ -180,9 +183,12 @@ var SizesResolverManager = {
         return returnedValue;
     },
 
-    outerHeight: function(DOMElem, includeMargins) {
-        if(!this._isCachingTransactionActive)
-            return SizesResolver.outerHeight(DOMElem, includeMargins);
+    outerHeight: function(DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc) {
+        if(!this._isCachingTransactionActive) {
+            return SizesResolver.outerHeight(
+                DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc
+            );
+        }
 
         if(this._isOuterHeightCallWithSuchParamsCached(DOMElem, includeMargins)) {
             var cachedItemEntry = this._getOuterHeightCachedItemEntry(DOMElem);
@@ -192,7 +198,9 @@ var SizesResolverManager = {
                 return cachedItemEntry.cachedReturnedValues.withoutIncludeMarginsParam;
         }
 
-        var returnedValue = SizesResolver.outerHeight(DOMElem, includeMargins);
+        var returnedValue = SizesResolver.outerHeight(
+            DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc
+        );
 
         if(Dom.hasAttribute(DOMElem, SizesResolverManager.CACHED_PER_OUTERHEIGHT_DATA_ATTR)) {
             var cachedItemEntry = this._getOuterHeightCachedItemEntry(DOMElem);
@@ -223,7 +231,7 @@ var SizesResolverManager = {
         return SizesResolver.positionTop(DOMElem);
     },
 
-    positionLeft: function(item) {
+    positionLeft: function(DOMElem) {
         return SizesResolver.positionLeft(DOMElem);
     }
 }

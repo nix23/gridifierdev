@@ -1,12 +1,13 @@
 DemoLayoutBuilder.DemoLayout.GridControls.Selector = function(gridControls,
-                                                                                                   demoLayout, 
-                                                                                                   $bodyEl, 
-                                                                                                   $elementToSnap, 
-                                                                                                   snapOffset, 
-                                                                                                   selectorOptions,
-                                                                                                   selectorMinWidth,
-                                                                                                   extendedRightSideWidth,
-                                                                                                   reducedLeftSideWidth) {
+                                                              demoLayout, 
+                                                              $bodyEl, 
+                                                              $elementToSnap, 
+                                                              snapOffset, 
+                                                              selectorOptions,
+                                                              selectorMinWidth,
+                                                              extendedRightSideWidth,
+                                                              reducedLeftSideWidth,
+                                                              reverseHorizontalSnapCorner) {
     var me = this;
 
     this._$view = null;
@@ -26,6 +27,7 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector = function(gridControls,
     this._selectorMinWidth = 600;
 
     this._reducedLeftSideWidth = false;
+    this._reverseHorizontalSnapCorner = false;
 
     this._optionLeftSide = null;
     this._optionRightSide = null;
@@ -70,6 +72,7 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector = function(gridControls,
             me._selectorMinWidth = selectorMinWidth;
 
         me._reducedLeftSideWidth = reducedLeftSideWidth || false;
+        me._reverseHorizontalSnapCorner = reverseHorizontalSnapCorner || false;
         
         me._createSelector();
         me._createSelectorRows(extendedRightSideWidth);
@@ -127,7 +130,13 @@ DemoLayoutBuilder.DemoLayout.GridControls.Selector.prototype._getOuterHeight = f
 
 DemoLayoutBuilder.DemoLayout.GridControls.Selector.prototype._snapToElement = function() { 
     var top = this._$elementToSnap.offset().top + this._$elementToSnap.outerHeight() + this._snapOffset.top;
-    var left = this._$elementToSnap.offset().left + this._snapOffset.left;
+
+    if(!this._reverseHorizontalSnapCorner)
+        var left = this._$elementToSnap.offset().left + this._snapOffset.left;
+    else {
+        var left = (this._$elementToSnap.offset().left + this._$elementToSnap.outerWidth()) - this._getSelectorWidth();
+        left += this._snapOffset.left;
+    }
 
     if(this._gridControls.areBottomControls())
         top -= this._getOuterHeight();

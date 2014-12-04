@@ -5,8 +5,12 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings = function() {
 
     this._itemSizes = [];
 
-    this._itemBorder = 0;
-    this._itemMargin = 0;
+    this._marginWidth = null;
+    this._marginHeight = null;
+    this._paddingWidth = null;
+    this._paddingHeight = null;
+    this._borderWidth = null;
+    this._borderHeight = null;
     this._boxSizing = null;
 
     this._toggleFunction = null;
@@ -25,8 +29,12 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings = function() {
     this._construct = function() {
         me.setAllItemSizes("100px", "100px");
 
-        me.setItemBorder(3);
-        me.setItemMargin(0);
+        me.setMarginWidth("0px");
+        me.setMarginHeight("0px");
+        me.setPaddingWidth("0px");
+        me.setPaddingHeight("0px");
+        me.setBorderWidth("3px");
+        me.setBorderHeight("3px");
         me.setBorderBoxBoxSizing();
 
         if(!browserDetector.isIe8())
@@ -65,7 +73,9 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings = function() {
         }
 
         console.log("");
-        console.log("Border: " + me.getItemBorder() + "px; \nMargin: " + me.getItemMargin() + "px;");
+        console.log("Border: " + me.getBorderWidth() + "; " + me.getBorderHeight() + "; \n");
+        console.log("Margin: " + me.getMarginWidth() + "; " + me.getMarginHeight() + "; \n");
+        console.log("Padding: " + me.getPaddingWidth() + "; " + me.getPaddingHeight() + "; \n");
         var borderBoxValue = (me.isBorderBoxBoxSizing()) ? "border-box" : "content-box";
         console.log("Box-sizing: " + borderBoxValue);
 
@@ -190,24 +200,54 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getItemHeight = 
 }
 
 /* Item border */
-DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setItemBorder = function(itemBorder) {
-    this._itemBorder = itemBorder;
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setMarginWidth = function(marginWidth) {
+    this._marginWidth = marginWidth;
 }
 
-DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getItemBorder = function() {
-    return this._itemBorder;
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getMarginWidth = function() {
+    return this._marginWidth;
 }
 
-/* Item margin */
-DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setItemMargin = function(itemMargin) {
-    this._itemMargin = itemMargin;
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setMarginHeight = function(marginHeight) {
+    this._marginHeight = marginHeight;
 }
 
-DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getItemMargin = function() {
-    return this._itemMargin;
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getMarginHeight = function() {
+    return this._marginHeight;
 }
 
-/* Box sizing */
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setPaddingWidth = function(paddingWidth) {
+    this._paddingWidth = paddingWidth;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getPaddingWidth = function() {
+    return this._paddingWidth;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setPaddingHeight = function(paddingHeight) {
+    this._paddingHeight = paddingHeight;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getPaddingHeight = function() {
+    return this._paddingHeight;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setBorderWidth = function(borderWidth) {
+    this._borderWidth = borderWidth;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getBorderWidth = function() {
+    return this._borderWidth;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setBorderHeight = function(borderHeight) {
+    this._borderHeight = borderHeight;
+}
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getBorderHeight = function() {
+    return this._borderHeight;
+}
+
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setBorderBoxBoxSizing = function() {
     this._boxSizing = DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.BOX_SIZINGS.BORDER_BOX;
 }

@@ -75,6 +75,7 @@ DemoLayoutBuilder.DemoLayout.VerticalGrid = function($targetEl) {
             me._recalculateGridWidthOnResizerResize(event);
             me._adjustGridBgFontSize(event);
             me._triggerGridSizesChangeEvent();
+            $(window).trigger("resize"); // @todo -> Replace with nice event
         });
 
         $("body").on(DemoLayoutBuilder.DemoLayout.VerticalGrid.EVENT_BODY_MOUSELEAVE, function() {

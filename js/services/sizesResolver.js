@@ -56,10 +56,17 @@ var SizesResolver = {
                                                  disableBordersCalc) {
         return this.outerWidth(DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc);
     },
-    recalculatePercentageHeightFunction: function(DOMElem, includeMargins) {
-        return this.outerHeight(DOMElem, includeMargins);
+    recalculatePercentageHeightFunction: function(DOMElem,
+                                                  includeMargins,
+                                                  disablePercentageCSSRecalc,
+                                                  disableBordersCalc) {
+        return this.outerHeight(DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc);
     },
     lastRecalculatedDOMElRawWidth: null,
+    lastRecalculatedDOMElRawHeight: null,
+    lastRecalculatedDOMElBorderWidth: null,
+    lastRecalculatedDOMElBorderHeight: null,
+    hasLastRecalculatedDOMElBorderBoxBS: false,
 
     init: function()
     {
@@ -110,7 +117,7 @@ var SizesResolver = {
         rootElement.appendChild(testerDiv);
 
         var testerDivComputedCSS = this.getComputedCSS(testerDiv);
-        if(this.normalizeComputedCSSSizeValue(testerDivComputedCSS.width) === 100)
+        if(this.normalizeComputedCSSSizeValue(testerDivComputedCSS.width) === 100) 
             this.borderBoxSizingStrategy = this.borderBoxSizingStrategies.OUTER;
         else
             this.borderBoxSizingStrategy = this.borderBoxSizingStrategies.INNER;
@@ -167,37 +174,46 @@ var SizesResolver = {
 
         parentDOMElemClone.appendChild(DOMElemClone);
         parentDOMElemClone.style.display = "none";
-
+        
         if(DOMElem.parentNode.nodeName == "HTML")
             var parentDOMElemParentNode = DOMElem.parentNode;
         else
             var parentDOMElemParentNode = DOMElem.parentNode.parentNode;
 
         parentDOMElemParentNode.appendChild(parentDOMElemClone);
-
-        var unrenderedComputedCSSSource = this.getComputedCSS(DOMElemClone);
-        var additionalComputedCSS = {};
-
-        if(typeof unrenderedComputedCSSSource.getPropertyCSSValue != "undefined") {
-            additionalComputedCSS.paddingLeft = unrenderedComputedCSSSource.getPropertyCSSValue("padding-left").cssText;
-            additionalComputedCSS.paddingRight = unrenderedComputedCSSSource.getPropertyCSSValue("padding-right").cssText;
-            additionalComputedCSS.marginLeft = unrenderedComputedCSSSource.getPropertyCSSValue("margin-left").cssText;
-            additionalComputedCSS.marginRight = unrenderedComputedCSSSource.getPropertyCSSValue("margin-right").cssText;
-            additionalComputedCSS.paddingTop = unrenderedComputedCSSSource.getPropertyCSSValue("padding-top").cssText;
-            additionalComputedCSS.paddingBottom = unrenderedComputedCSSSource.getPropertyCSSValue("padding-bottom").cssText;
-            additionalComputedCSS.marginTop = unrenderedComputedCSSSource.getPropertyCSSValue("margin-top").cssText;
-            additionalComputedCSS.marginBottom = unrenderedComputedCSSSource.getPropertyCSSValue("margin-bottom").cssText;
-            additionalComputedCSS.width = unrenderedComputedCSSSource.getPropertyCSSValue("width").cssText;
-            additionalComputedCSS.height = unrenderedComputedCSSSource.getPropertyCSSValue("height").cssText;
-        }
         
+        var unrenderedComputedCSSSource = this.getComputedCSS(DOMElemClone);
+
+        // @todo -> Determine, if this is still required. Looks like percentage values
+        //          are returned correctly now.(Probably bug was in Safari 5.1.7)
+        // var additionalComputedCSS = {};
+
+        // if(typeof unrenderedComputedCSSSource.getPropertyCSSValue != "undefined") {
+        //     msProfiler.stop();
+        //     msProfiler.start("rest2");
+        //     additionalComputedCSS.paddingLeft = unrenderedComputedCSSSource.getPropertyCSSValue("padding-left").cssText;
+        //     additionalComputedCSS.paddingRight = unrenderedComputedCSSSource.getPropertyCSSValue("padding-right").cssText;
+        //     additionalComputedCSS.marginLeft = unrenderedComputedCSSSource.getPropertyCSSValue("margin-left").cssText;
+        //     additionalComputedCSS.marginRight = unrenderedComputedCSSSource.getPropertyCSSValue("margin-right").cssText;
+        //     additionalComputedCSS.paddingTop = unrenderedComputedCSSSource.getPropertyCSSValue("padding-top").cssText;
+        //     additionalComputedCSS.paddingBottom = unrenderedComputedCSSSource.getPropertyCSSValue("padding-bottom").cssText;
+        //     additionalComputedCSS.marginTop = unrenderedComputedCSSSource.getPropertyCSSValue("margin-top").cssText;
+        //     additionalComputedCSS.marginBottom = unrenderedComputedCSSSource.getPropertyCSSValue("margin-bottom").cssText;
+        //     additionalComputedCSS.width = unrenderedComputedCSSSource.getPropertyCSSValue("width").cssText;
+        //     additionalComputedCSS.height = unrenderedComputedCSSSource.getPropertyCSSValue("height").cssText;
+        // }
+
         var unrenderedComputedCSS = {};
 
-        for(var key in unrenderedComputedCSSSource)
-            unrenderedComputedCSS[key] = unrenderedComputedCSSSource[key];
+        var props = ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom",
+                     "marginLeft", "marginRight", "marginTop", "marginBottom",
+                     "width", "height"];
+        for(var i = 0; i < props.length; i++) {
+            unrenderedComputedCSS[props[i]] = unrenderedComputedCSSSource[props[i]];
+        }
 
-        for(var key in additionalComputedCSS)
-            unrenderedComputedCSS[key] = additionalComputedCSS[key];
+        // for(var key in additionalComputedCSS)
+        //     unrenderedComputedCSS[key] = additionalComputedCSS[key];
         
         parentDOMElemParentNode.removeChild(parentDOMElemClone);
         
@@ -217,7 +233,8 @@ var SizesResolver = {
     },
 
     _ensureComputedCSSHasProperty: function(elementComputedCSS, cssProperty) {
-        if(!Object.prototype.hasOwnProperty.call(elementComputedCSS, cssProperty)) {
+        //if(!Object.prototype.hasOwnProperty.call(elementComputedCSS, cssProperty)) {
+        if(!(cssProperty in elementComputedCSS)) {
             var msg = "";
 
             msg += "SizesResolver error: ";
@@ -343,8 +360,8 @@ var SizesResolver = {
         // The HTMLElement.offsetWidth read-only property returns the layout width of an element. Typically, 
         // an element's offsetWidth is a measurement which includes the element borders, the element horizontal padding, 
         // the element vertical scrollbar (if present, if rendered) and the element CSS width.
-        var outerWidth = DOMElem.offsetWidth; // @todo -> Check all cases, looks like outerWidth here s redundant
-        //var outerWidth = 0;
+        //var outerWidth = DOMElem.offsetWidth; // @todo -> Check all cases, looks like outerWidth here s redundant
+        var outerWidth = 0;
         var normalizedComputedWidth = this.normalizeComputedCSSSizeValue(elementComputedCSS.width);
         
         if(normalizedComputedWidth !== false)
@@ -365,6 +382,11 @@ var SizesResolver = {
             parentDOMElemWidth = this.recalculatePercentageWidthFunction.call(
                 this, DOMElem.parentNode, false, disablePercentageCSSRecalcPerHTMLNode, true
             );
+
+            if(this.hasLastRecalculatedDOMElBorderBoxBS
+                && this.hasPercentageCSSValue("width", DOMElem, recalculatedDOMElemComputedCSS)) {
+                parentDOMElemWidth -= this.lastRecalculatedDOMElBorderWidth;
+            }
             // console.log("End of recursive call"); msProfiler.start("Ending after recursive call");
         }
 
@@ -397,9 +419,14 @@ var SizesResolver = {
             this.lastRecalculatedDOMElRawWidth = outerWidth;
             outerWidth += paddingWidth;
             if(!disableBordersCalc) outerWidth += borderWidth;
+            this.hasLastRecalculatedDOMElBorderBoxBS = false;
         }
         else {
+            this.hasLastRecalculatedDOMElBorderBoxBS = true;
             this.lastRecalculatedDOMElRawWidth = outerWidth;
+            // If parent el has BorderBox BS, children percentage element width
+            // should be calculated without borderWidth. 
+            this.lastRecalculatedDOMElBorderWidth = borderWidth;
         }
 
         if(includeMargins) {
@@ -418,11 +445,36 @@ var SizesResolver = {
         return outerWidth;
     },
 
-    outerHeight: function(DOMElem, includeMargins)
-    {
-        includeMargins = includeMargins || false;
+    _recalculateHeightWithPercentageValue: function(DOMElem,
+                                                    parentDOMElemHeight,
+                                                    computedPropertiesWithMaybePercentageSizes) {
+        var percentageHeight = parseFloat(this.getPercentageCSSValue(
+            "height", DOMElem, computedPropertiesWithMaybePercentageSizes
+        ));
+        return parentDOMElemHeight / 100 * percentageHeight;
+    },
 
+    // @disablePercentageCSSRecalc -> HTML node can't have size with fractional value,
+    //                         so we should supress this calculation in IE8/Safari 5.1.7, etc...
+    outerHeight: function(DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc)
+    {
+        var includeMargins = includeMargins || false;
+        var disablePercentageCSSRecalc = disablePercentageCSSRecalc || false;
+        var disableBordersCalc = disableBordersCalc || false;
         var elementComputedCSS = this.getComputedCSS(DOMElem);
+
+        if(disablePercentageCSSRecalc)
+            var recalculatePercentageCSSValues = false;
+        else if(this.isBrowserNativePercentageCSSValuesCalcStrategy())
+            var recalculatePercentageCSSValues = false;
+        else if(this.isRecalculatePercentageCSSValuesCalcStrategy()) {
+            this._ensureHasParentNode(DOMElem);
+
+            if(this.hasPercentageCSSValue("height", DOMElem))
+                var recalculatePercentageCSSValues = true;
+            else
+                var recalculatePercentageCSSValues = false;
+        }
 
         if(elementComputedCSS.display === "none")
             return 0;
@@ -433,31 +485,90 @@ var SizesResolver = {
         var marginHeight = computedProperties.marginTop + computedProperties.marginBottom;
         var borderHeight = computedProperties.borderTopWidth + computedProperties.borderBottomWidth;
 
-        // @todo -> On horizontals grids, do percentage margins and paddings should be calculated from wrapper width?
-
-        var outerHeight = DOMElem.offsetHeight;
+        //var outerHeight = DOMElem.offsetHeight;
+        var outerHeight = 0;
         var normalizedComputedHeight = this.normalizeComputedCSSSizeValue(elementComputedCSS.height);
 
         if(normalizedComputedHeight !== false)
-            outerHeight = normalizedComputedHeight + ((this.isBoxSizingBorderBox(elementComputedCSS) && this.isOuterBorderBoxSizing()) ? 0 : paddingHeight + borderHeight);
-        else {
-            if(this.hasPercentageHeight(DOMElem)) {
-                var parentDOMElemHeight = this.outerHeight(DOMElem.parentNode);
-                var DOMElemPercentageHeight = parseFloat(this.getPercentageHeight(DOMElem));
-                var maybeFractionalDOMElemRealHeight = parentDOMElemWidth / 100 * DOMElemPercentageHeight;
+            outerHeight = normalizedComputedHeight;
 
-                if(maybeFractionalDOMElemRealHeight % 1 != 0) {
-                    outerHeight = Math.floor(maybeFractionalDOMElemRealHeight);
-                }
+        var recalculatedDOMElemComputedCSS = null;
+        var parentDOMElemWidth = null;
+        var parentDOMElemHeight = null;
+
+        if(recalculatePercentageCSSValues) {
+            recalculatedDOMElemComputedCSS = this._getComputedCSSWithMaybePercentageSizes(DOMElem);
+
+            if(DOMElem.parentNode.nodeName == "HTML")
+                var disablePercentageCSSRecalcPerHTMLNode = true;
+            else
+                var disablePercentageCSSRecalcPerHTMLNode = false;
+
+            parentDOMElemWidth = this.recalculatePercentageWidthFunction.call(
+                this, DOMElem.parentNode, false, disablePercentageCSSRecalcPerHTMLNode, true
+            );
+
+            if(this.hasLastRecalculatedDOMElBorderBoxBS) {
+                parentDOMElemWidth -= this.lastRecalculatedDOMElBorderWidth;
             }
 
-            outerHeight += ((this.isBoxSizingBorderBox(elementComputedCSS) && this.isOuterBorderBoxSizing())) ? 0 : paddingHeight + borderHeight;
+            parentDOMElemHeight = this.recalculatePercentageHeightFunction.call(
+                this, DOMElem.parentNode, false, disablePercentageCSSRecalcPerHTMLNode, true
+            );
+
+            if(this.hasLastRecalculatedDOMElBorderBoxBS
+                && this.hasPercentageCSSValue("height", DOMElem, recalculatedDOMElemComputedCSS)) {
+                parentDOMElemHeight -= this.lastRecalculatedDOMElBorderHeight;
+            }
         }
 
-        if(includeMargins) outerHeight += marginHeight;
+        if(recalculatePercentageCSSValues &&
+            (this.hasPercentageCSSValue("paddingTop", DOMElem, recalculatedDOMElemComputedCSS) ||
+             this.hasPercentageCSSValue("paddingBottom", DOMElem, recalculatedDOMElemComputedCSS))) {
+            paddingHeight = this._recalculateTwoSidePropertyWithPercentageValues(
+                DOMElem,
+                parentDOMElemWidth,
+                computedProperties,
+                recalculatedDOMElemComputedCSS,
+                "padding",
+                "vertical"
+            );
+        }
 
-        //return Math.round(outerHeight);
-        return Math.floor(outerHeight);
+        if(recalculatePercentageCSSValues && this.hasPercentageCSSValue("height", DOMElem, recalculatedDOMElemComputedCSS)) {
+            outerHeight = this._recalculateHeightWithPercentageValue(
+                DOMElem, parentDOMElemHeight, recalculatedDOMElemComputedCSS
+            );
+        }
+
+        if(!this.isBoxSizingBorderBox(elementComputedCSS)
+            || (this.isBoxSizingBorderBox(elementComputedCSS) && !this.isOuterBorderBoxSizing())) {
+            this.lastRecalculatedDOMElRawHeight = outerHeight;
+            outerHeight += paddingHeight;
+            if(!disableBordersCalc) outerHeight += borderHeight;
+            this.hasLastRecalculatedDOMElBorderBoxBS = false;
+        }
+        else {
+            this.hasLastRecalculatedDOMElBorderBoxBS = true;
+            this.lastRecalculatedDOMElRawHeight = outerHeight;
+            // If parentEl has BorderBox BS, children percentage element height
+            // should be calculated without borderHeight.
+            this.lastRecalculatedDOMElBorderHeight = borderHeight;
+        }
+
+        if(includeMargins) {
+            if(recalculatePercentageCSSValues &&
+                (this.hasPercentageCSSValue("marginTop", DOMElem, recalculatedDOMElemComputedCSS) ||
+                 this.hasPercentageCSSValue("marginBottom", DOMElem, recalculatedDOMElemComputedCSS))) {
+                marginHeight = this._recalculateTwoSidePropertyWithPercentageValues(
+                    DOMElem, parentDOMElemWidth, computedProperties, recalculatedDOMElemComputedCSS, "margin", "vertical"
+                );
+            }
+
+            outerHeight += marginHeight;
+        }
+
+        return outerHeight;
     },
 
     positionLeft: function(DOMElem)

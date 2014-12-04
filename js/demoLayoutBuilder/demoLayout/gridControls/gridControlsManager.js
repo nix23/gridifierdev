@@ -71,27 +71,51 @@ DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype._setItemCssControlVal
     }
 }
 
-DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setItemCssControlBorder = function(newBorderVal) {
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setMarginWidth = function(marginWidth) {
     this._setItemCssControlValue(
-        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BORDER, newBorderVal + "px"
+        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.MARGIN_WIDTH, marginWidth
     );
 }
 
-DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setItemCssControlMargin = function(newMargin) {
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setMarginHeight = function(marginHeight) {
     this._setItemCssControlValue(
-        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.MARGIN, newMargin + "px"
+        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.MARGIN_HEIGHT, marginHeight
+    );
+}
+
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setPaddingWidth = function(paddingWidth) {
+    this._setItemCssControlValue(
+        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.PADDING_WIDTH, paddingWidth
+    );
+}
+
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setPaddingHeight = function(paddingHeight) {
+    this._setItemCssControlValue(
+        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.PADDING_HEIGHT, paddingHeight
+    );
+}
+
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setBorderWidth = function(borderWidth) {
+    this._setItemCssControlValue(
+        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BORDER_WIDTH, borderWidth
+    );
+}
+
+DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setBorderHeight = function(borderHeight) {
+    this._setItemCssControlValue(
+        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BORDER_HEIGHT, borderHeight
     );
 }
 
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setBoxSizingItemCssControlBorderBoxOption = function() {
     this._setItemCssControlValue(
-        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BOX_SIZING, "Border"
+        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BOX_SIZING, "Border-box"
     );
 }
 
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.setBoxSizingItemCssControlContentBoxOption = function() {
     this._setItemCssControlValue(
-        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BOX_SIZING, "Content"
+        DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BOX_SIZING, "Content-box"
     );
 }
 

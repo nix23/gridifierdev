@@ -1,6 +1,6 @@
 $(document).ready(function() {
-    window.outerWidthTesterPercentageWidthPercentageMarginGrid = {
-        testCallContentBoxPtWidthPtMarginGridPerAllContentBoxItems: function() {
+    window.outerWidthTesterPercentageWidthGrid = {
+        testCallOnPtWidthGridPerAllContentBoxItems: function() {
             var gridWrapperPxWidths = [1071, 1333];
 
             for(var i = 0; i < gridWrapperPxWidths.length; i++) {
@@ -11,11 +11,10 @@ $(document).ready(function() {
                     var gridPercentageWidth = gridPercentageWidths[j];
                     var gridPxWidth = gridWrapperPxWidth / 100 * gridPercentageWidth;
 
-                    var $grid = this._grids.createGridWithPercentageWidthAndPercentageMargin(
+                    var $grid = this._grids.createGridWithPercentageWidth(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
-                    var gridLabel = gridPercentageWidth + "%; Grid wrapper width = " + gridWrapperPxWidth;
-                    gridLabel += "; Margin: " + this._grids.MARGIN_PERCENTS_SIZE;
+                    var gridLabel = gridPercentageWidth + "%; Grid Wrapper width = " + gridWrapperPxWidth;
 
                     this._gridItemTests.setBoxSizing(this._gridItemTests.BOX_SIZINGS.CONTENT_BOX);
 
@@ -50,7 +49,7 @@ $(document).ready(function() {
                     );
 
                     clearTestData();
-                    var $grid = this._grids.createGridWithPercentageWidthAndPercentageMargin(
+                    var $grid = this._grids.createGridWithPercentageWidth(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
@@ -61,7 +60,7 @@ $(document).ready(function() {
                     );
 
                     clearTestData();
-                    var $grid = this._grids.createGridWithPercentageWidthAndPercentageMargin(
+                    var $grid = this._grids.createGridWithPercentageWidth(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
@@ -74,7 +73,7 @@ $(document).ready(function() {
                     );
 
                     clearTestData();
-                    var $grid = this._grids.createGridWithPercentageWidthAndPercentageMargin(
+                    var $grid = this._grids.createGridWithPercentageWidth(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
@@ -87,7 +86,7 @@ $(document).ready(function() {
                     );
 
                     clearTestData();
-                    var $grid = this._grids.createGridWithPercentageWidthAndPercentageMargin(
+                    var $grid = this._grids.createGridWithPercentageWidth(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
@@ -102,7 +101,7 @@ $(document).ready(function() {
             }
         },
 
-        testCallContentBoxPtWidthPtMarginGridPerAllBorderBoxItems: function() {
+        testCallOnPtWidthGridPerAllBorderBoxItems: function() {
             var gridWrapperPxWidths = [1071, 1333];
 
             for(var i = 0; i < gridWrapperPxWidths.length; i++) {
@@ -113,11 +112,10 @@ $(document).ready(function() {
                     var gridPercentageWidth = gridPercentageWidths[j];
                     var gridPxWidth = gridWrapperPxWidth / 100 * gridPercentageWidth;
 
-                    var $grid = this._grids.createGridWithPercentageWidthAndPercentageMargin(
+                    var $grid = this._grids.createGridWithPercentageWidth(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     var gridLabel = gridPercentageWidth + "%; Grid wrapper width = " + gridWrapperPxWidth;
-                    gridLabel += "; Margin: " + this._grids.MARGIN_PERCENTS_SIZE;
 
                     this._gridItemTests.setBoxSizing(this._gridItemTests.BOX_SIZINGS.BORDER_BOX);
 
@@ -128,7 +126,7 @@ $(document).ready(function() {
                     this._gridItemTests.callPerItemWithPxWidth($grid, gridLabel, itemWidth, expectedItemWidth);
 
                     clearTestData();
-                    var $grid = this._grids.createGridWithPercentageWidthAndPercentageMargin(
+                    var $grid = this._grids.createGridWithPercentageWidth(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
@@ -147,7 +145,7 @@ $(document).ready(function() {
                     );
 
                     clearTestData();
-                    var $grid = this._grids.createGridWithPercentageWidthAndPercentageMargin(
+                    var $grid = this._grids.createGridWithPercentageWidth(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
@@ -158,7 +156,7 @@ $(document).ready(function() {
                     );
 
                     clearTestData();
-                    var $grid = this._grids.createGridWithPercentageWidthAndPercentageMargin(
+                    var $grid = this._grids.createGridWithPercentageWidth(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
@@ -169,7 +167,7 @@ $(document).ready(function() {
                     );
 
                     clearTestData();
-                    var $grid = this._grids.createGridWithPercentageWidthAndPercentageMargin(
+                    var $grid = this._grids.createGridWithPercentageWidth(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
@@ -180,7 +178,7 @@ $(document).ready(function() {
                     );
 
                     clearTestData();
-                    var $grid = this._grids.createGridWithPercentageWidthAndPercentageMargin(
+                    var $grid = this._grids.createGridWithPercentageWidth(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());
@@ -193,7 +191,7 @@ $(document).ready(function() {
                     );
 
                     clearTestData();
-                    var $grid = this._grids.createGridWithPercentageWidthAndPercentageMargin(
+                    var $grid = this._grids.createGridWithPercentageWidth(
                         gridWrapperPxWidth, gridPercentageWidth
                     );
                     $testContent.append($grid.parent());

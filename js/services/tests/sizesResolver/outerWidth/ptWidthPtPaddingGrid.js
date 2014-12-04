@@ -1,6 +1,6 @@
 $(document).ready(function() {
     window.outerWidthTesterPercentageWidthPercentagePaddingGrid = {
-        testCallContentBoxPtWidthPtPaddingGridPerAllContentBoxItems: function() {
+        testCallOnPtWidthPtPaddingGridPerAllContentBoxItems: function() {
             var gridWrapperPxWidths = [1071, 1333];
 
             for(var i = 0; i < gridWrapperPxWidths.length; i++) {
@@ -56,7 +56,10 @@ $(document).ready(function() {
                     $testContent.append($grid.parent());
                     var itemWidth = 33;
                     var gridPadding = parseFloat(this._grids.PADDING_PERCENTS_SIZE) * 2;
-                    var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
+                    if(this._grids.isContentBoxBSGrid())
+                        var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
+                    else if(this._grids.isBorderBoxBSGrid())
+                        var gridPxPadding = 0;
                     var expectedItemWidth = (gridPxWidth + gridPxPadding) / 100 * itemWidth;
                     this._gridItemTests.callPerItemWithPercentageWidth(
                         $grid, gridLabel, itemWidth, expectedItemWidth
@@ -104,7 +107,10 @@ $(document).ready(function() {
                     $testContent.append($grid.parent());
                     var itemWidth = 33;
                     var gridPadding = parseFloat(this._grids.PADDING_PERCENTS_SIZE) * 2;
-                    var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
+                    if(this._grids.isContentBoxBSGrid())
+                        var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
+                    else if(this._grids.isBorderBoxBSGrid())
+                        var gridPxPadding = 0;
                     var expectedItemWidth = (gridPxWidth + gridPxPadding) / 100 * itemWidth;
                     var borderWidth = parseInt(this._gridItemTests.BORDER_PX_SIZE) * 2;
                     expectedItemWidth += borderWidth;
@@ -115,7 +121,7 @@ $(document).ready(function() {
             }
         },
 
-        testCallContentBoxPtWidthPtPaddingGridPerAllBorderBoxItems: function() {
+        testCallOnPtWidthPtPaddingGridPerAllBorderBoxItems: function() {
             var gridWrapperPxWidths = [1071, 1333];
 
             for(var i = 0; i < gridWrapperPxWidths.length; i++) {
@@ -177,7 +183,10 @@ $(document).ready(function() {
                     $testContent.append($grid.parent());
                     var itemWidth = 33;
                     var gridPadding = parseFloat(this._grids.PADDING_PERCENTS_SIZE) * 2;
-                    var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
+                    if(this._grids.isContentBoxBSGrid())
+                        var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
+                    else if(this._grids.isBorderBoxBSGrid())
+                        var gridPxPadding = 0;
                     var expectedItemWidth = (gridPxWidth + gridPxPadding) / 100 * itemWidth;
                     this._gridItemTests.callPerItemWithPercentageWidth(
                         $grid, gridLabel, itemWidth, expectedItemWidth
@@ -222,7 +231,10 @@ $(document).ready(function() {
                     $testContent.append($grid.parent());
                     var itemWidth = 33;
                     var gridPadding = parseFloat(this._grids.PADDING_PERCENTS_SIZE) * 2;
-                    var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
+                    if(this._grids.isContentBoxBSGrid())
+                        var gridPxPadding = gridWrapperPxWidth / 100 * gridPadding;
+                    else if(this._grids.isBorderBoxBSGrid())
+                        var gridPxPadding = 0;
                     var expectedItemWidth = (gridPxWidth + gridPxPadding) / 100 * itemWidth;
                     this._gridItemTests.callPerItemWithPercentageWidthAndPxBorder(
                         $grid, gridLabel, itemWidth, expectedItemWidth

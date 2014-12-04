@@ -1,8 +1,12 @@
 DemoLayoutBuilder.DemoLayout.GridItem = function($targetEl,
                                                  gridifier,
                                                  itemSizes,
-                                                 itemBorder,
-                                                 itemMargin,
+                                                 marginWidth,
+                                                 marginHeight,
+                                                 paddingWidth,
+                                                 paddingHeight,
+                                                 borderWidth,
+                                                 borderHeight,
                                                  isBorderBoxBoxSizing,
                                                  isContentBoxBoxSizing,
                                                  itemBgClass) {
@@ -23,8 +27,12 @@ DemoLayoutBuilder.DemoLayout.GridItem = function($targetEl,
         me._$gridItem = me._$view;
         me._adjustGridItem(
             itemSizes,
-            itemBorder,
-            itemMargin,
+            marginWidth,
+            marginHeight,
+            paddingWidth,
+            paddingHeight,
+            borderWidth,
+            borderHeight,
             isBorderBoxBoxSizing,
             isContentBoxBoxSizing,
             itemBgClass
@@ -51,8 +59,12 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype.getView = function() {
 
 // @todo -> Set grid item params(BS/Mar/Pad/Border,etc...)
 DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemSizes,
-                                                                           itemBorder,
-                                                                           itemMargin,
+                                                                           marginWidth,
+                                                                           marginHeight,
+                                                                           paddingWidth,
+                                                                           paddingHeight,
+                                                                           borderWidth,
+                                                                           borderHeight,
                                                                            isBorderBoxBoxSizing,
                                                                            isContentBoxBoxSizing,
                                                                            itemBgClass) {
@@ -76,20 +88,20 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         var borderColor = "blue";
 
     this._$gridItem.css({
-        //width: itemSizes.width,
-        //height: itemSizes.height,
-        width: "10%",
-        //height: "100px",
+        // width: itemSizes.width,
+        // height: itemSizes.height,
+        width: "200px",
         height: "200px",
         //border: itemBorder + "px rgb(60,60,60) solid",
-        //border: "1px " + borderColor + " solid",
+        border: "3px " + borderColor + " solid",
         //margin: itemMargin + "px",
         // "margin-left": "1.66%",
         // "margin-right": "1.66%",
         // "padding-left": "1.66%",
         // "padding-right": "1.66%",
+        //"margin": "20px",
         //"box-sizing": (isBorderBoxBoxSizing) ? "border-box" : "content-box",
-        //"box-sizing": "border-box",
+        "box-sizing": "border-box",
 
         // "-webkit-box-shadow": "2px 2px 2px rgb(60,60,60)",
         // "box-shadow": "2px 2px 2px rgb(60,60,60)",

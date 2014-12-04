@@ -75,7 +75,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             me._gridBottomHeading = new DemoLayoutBuilder.DemoLayout.HorizontalGridHeading(me._$gridBottomHeadingView, me._grid);
         }
         
-       me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
+        me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
 
         me._gridControlsManager = new DemoLayoutBuilder.DemoLayout.GridControlsManager(me._gridifier);
         me._gridTopControls = new DemoLayoutBuilder.DemoLayout.GridControls(
@@ -97,8 +97,12 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
         me._gridControlsManager.setAllItemSizes("100px", "100px");
 
-        me._gridControlsManager.setItemCssControlBorder(3);
-        me._gridControlsManager.setItemCssControlMargin(0);
+        me._gridControlsManager.setMarginWidth("0px");
+        me._gridControlsManager.setMarginHeight("0px");
+        me._gridControlsManager.setPaddingWidth("0px");
+        me._gridControlsManager.setPaddingHeight("0px");
+        me._gridControlsManager.setBorderWidth("3px");
+        me._gridControlsManager.setBorderHeight("3px");
         me._gridControlsManager.setBoxSizingItemCssControlBorderBoxOption();
 
         if(!browserDetector.isIe8())
@@ -160,11 +164,13 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._$view.on("click", ".gridItem", function() {
             if($(this).hasClass("transformedItem")) {
                 $(this).removeClass("transformedItem");
-                me._gridifier.transformSizes($(this), "25%", "200px");
+                //me._gridifier.transformSizes($(this), "10%", "200px");
+               me._gridifier.transformSizes($(this), "200px", "200px");
             }
             else {
                 $(this).addClass("transformedItem");
-                me._gridifier.transformSizes($(this), "50%", "400px");
+                //me._gridifier.transformSizes($(this), "50%", "400px");
+                me._gridifier.transformSizes($(this), "400px", "400px");
             }
         });
     }
@@ -206,8 +212,12 @@ DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
             this._grid.getGrid(),
             this._gridifier,
             itemSizes[i],
-            this._gridifierDynamicSettings.getItemBorder(),
-            this._gridifierDynamicSettings.getItemMargin(),
+            this._gridifierDynamicSettings.getMarginWidth(),
+            this._gridifierDynamicSettings.getMarginHeight(),
+            this._gridifierDynamicSettings.getPaddingWidth(),
+            this._gridifierDynamicSettings.getPaddingHeight(),
+            this._gridifierDynamicSettings.getBorderWidth(),
+            this._gridifierDynamicSettings.getBorderHeight(),
             this._gridifierDynamicSettings.isBorderBoxBoxSizing(),
             this._gridifierDynamicSettings.isContentBoxBoxSizing(),
             this._gridifierDynamicSettings.getNextAppendedItemBgClass()
@@ -226,12 +236,17 @@ DemoLayoutBuilder.DemoLayout.prototype._prependNextItems = function() {
             this._grid.getGrid(),
             this._gridifier,
             itemSizes[i],
-            this._gridifierDynamicSettings.getItemBorder(),
-            this._gridifierDynamicSettings.getItemMargin(),
+            this._gridifierDynamicSettings.getMarginWidth(),
+            this._gridifierDynamicSettings.getMarginHeight(),
+            this._gridifierDynamicSettings.getPaddingWidth(),
+            this._gridifierDynamicSettings.getPaddingHeight(),
+            this._gridifierDynamicSettings.getBorderWidth(),
+            this._gridifierDynamicSettings.getBorderHeight(),
             this._gridifierDynamicSettings.isBorderBoxBoxSizing(),
             this._gridifierDynamicSettings.isContentBoxBoxSizing(),
             this._gridifierDynamicSettings.getNextPrependedItemBgClass()
         );
+
         var $gridItem = gridItem.getView();
         this._gridifier.prepend($gridItem);
         gridItem.renderGUID();

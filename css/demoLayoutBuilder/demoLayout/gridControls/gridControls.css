@@ -1,6 +1,6 @@
 #demoLayout .gridControlsView .controls {
     width: 100%;
-    height: 275px;
+    height: 345px;
     background: rgb(235,235,235);
 }
 
@@ -11,8 +11,8 @@
 
 #demoLayout .gridControlsView .controls .controlsHeading .legend {
     float: left; 
-    height: 60px; 
-    line-height: 63px; 
+    height: 67px; 
+    line-height: 70px; 
     margin-left: 25px; 
     font-size: 24px; 
     letter-spacing: -1px;
@@ -21,16 +21,125 @@
 #demoLayout .gridControlsView .controls .controlsHeading .button,
 #demoLayout .gridControlsView .controls .controlsHeading .selector {
     position: absolute;
-    width: 140px;
-    height: 35px;
-    line-height: 32px;
+    width: 220px;
+    height: 42px;
+    line-height: 39px;
     background: rgb(220,220,220);
     box-sizing: border-box;
     border: 1px rgb(150,150,150) solid;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: bold;
     letter-spacing: -1px;
     color: rgb(60,60,60);
+}
+
+#demoLayout .gridControlsView .controls .controlsHeading .gridControlsHeadingMenuWrapper {
+    width: 100%; 
+    height: 58px; 
+    box-sizing: border-box; 
+    margin-top: 71px;
+    border-left: 5px rgb(235,235,235) solid;
+    border-right: 5px rgb(235,235,235) solid;
+}
+
+#demoLayout .gridControlsView .controls .controlsHeading .itemControlsHeadingMenuWrapper {
+    width: calc(100% - 5px); 
+    width: -moz-calc(100% - 5px);
+    width: -webkit-calc(100% - 5px);
+    height: 58px;
+    overflow-y: scroll;
+    margin-top: 71px;
+}
+
+#demoLayout .gridControlsView .controls .controlsHeading .itemControlsHeadingMenuScrollHider {
+    position: absolute;
+    right: 0px;
+    top: 71px;
+    width: 22px;
+    height: 58px;
+    background: rgb(235,235,235);
+}
+
+#demoLayout .gridControlsView .controls .controlsHeading .gridControlsHeadingMenu {
+    clear: both;
+    width: 100%;
+    height: 58px;
+    border: 1px rgb(150,150,150) solid;
+    box-sizing: border-box;
+    background: rgb(220,220,220);
+}
+
+#demoLayout .gridControlsView .controls .controlsHeading .itemControlsHeadingMenu {
+    clear: both;
+    width: 99%;
+    height: 58px;
+}
+
+#demoLayout .gridControlsView .controls .controlsHeading .itemControlsMenu .itemWrapper {
+    width: 33.33%;
+    height: 58px;
+    box-sizing: border-box;
+}
+
+#demoLayout .gridControlsView .controls .controlsHeading .itemControlsMenu .leftItemWrapper {
+    float: left;
+    border-right: 3px rgb(235,235,235) solid;
+}
+
+#demoLayout .gridControlsView .controls .controlsHeading .itemControlsMenu .middleItemWrapper {
+    float: left;
+    border-left: 2px rgb(235,235,235) solid;
+    border-right: 2px rgb(235,235,235) solid;
+}
+
+#demoLayout .gridControlsView .controls .controlsHeading .itemControlsMenu .rightItemWrapper {
+    float: right;
+    border-left: 3px rgb(235,235,235) solid;
+}
+
+#demoLayout .gridControlsView .controls .controlsHeading .itemControlsMenu .item {
+    width: 100%;
+    height: 58px;
+    line-height: 58px;
+    font-size: 14px;
+    background: rgb(220,220,220);
+    font-weight: bold;
+    letter-spacing: -1px;
+    color: rgb(60,60,60);
+    box-sizing: border-box;
+    border: 1px rgb(150,150,150) solid;
+    position: relative;
+}
+
+#demoLayout .gridControlsView .controls .controlsHeading .itemControlsMenu .item .selectorIcon {
+    position: absolute;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 9px 9px 0 9px;
+    right: 4%;
+    top: 50%;
+    margin-top: -6px;
+    border-color: rgb(60,60,60) transparent transparent transparent;
+}
+
+#demoLayout .gridControlsView .controls .controlsHeading .itemControlsMenu .item .top {
+    width: 100%;
+    height: 34px;
+    line-height: 34px;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: -1px;
+    margin-top: 2px;
+}
+
+#demoLayout .gridControlsView .controls .controlsHeading .itemControlsMenu .item .bottom {
+    width: 100%;
+    height: 20px;
+    line-height: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: -1px;
 }
 
 #demoLayout .gridControlsView .controls .controlsHeading .button:hover,
@@ -40,18 +149,17 @@
 
 #demoLayout .gridControlsView .controls .controlsHeading .clearGridControl {
     top: 15px;
-    right: 20px;
+    right: 5px;
 }
 
-#demoLayout .gridControlsView .controls .controlsHeading .selectItemCssControl {
+#demoLayout .gridControlsView .controls .controlsHeading .boxSizingControl {
     top: 15px;
-    right: 20px;
-    width: 260px
+    right: 10px;
+    width: 220px;
 }
 
-#demoLayout .gridControlsView .controls .controlsHeading .selectItemCssControl .text {
-    text-align: left;
-    margin-left: 13px;
+#demoLayout .gridControlsView .controls .controlsHeading .boxSizingControl .text {
+    text-align: center;
 }
 
 #demoLayout .gridControlsView .controls .controlsHeading .selector .selectorIcon {
@@ -82,14 +190,14 @@
     position: relative;
     float: left;
     width: 50%;
-    height: 60px;
+    height: 130px;
 }
 
 #demoLayout .gridControlsView .controls .controlsHeading .rightSide {
     position: relative;
     float: left;
     width: 50%;
-    height: 60px;
+    height: 130px;
 }
 
 #demoLayout .gridControlsView .controls .controlsContent .leftSide,

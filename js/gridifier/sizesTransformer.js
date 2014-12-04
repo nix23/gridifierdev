@@ -125,6 +125,7 @@ Gridifier.SizesTransformer.prototype._markAsTransformed = function(connection, t
 Gridifier.SizesTransformer.prototype._createTransformedConnectionItemClone = function(connection,
                                                                                       targetWidth,
                                                                                       targetHeight) {
+    // @todo -> Test performance with/without first cloneNode parameter
     var transformedItemClone = connection.item.cloneNode(true);
     transformedItemClone.setAttribute(
         Gridifier.SizesTransformer.TRANSFORMED_ITEM_CLONE_DATA_ATTR,
@@ -232,7 +233,7 @@ Gridifier.SizesTransformer.prototype._reappendDependedItemWithReversedAppend = f
         this._storeHowNextReappendedItemWasInserted(dependedItem);
         this._reversedAppender.recreateConnectorsPerAllConnectedItems();
 
-        var connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(this._connectors, this._guid);
+        var connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(this._connectors.get(), this._guid);
         if(this._settings.isVerticalGrid())
             var selectedConnectorsSide = Gridifier.Connectors.SIDES.BOTTOM.LEFT;
         else if(this._settings.isHorizontalGrid())
@@ -241,6 +242,7 @@ Gridifier.SizesTransformer.prototype._reappendDependedItemWithReversedAppend = f
         connectorsSelector.selectOnlySpecifiedSideConnectorsOnPrependedItemsExceptFirst(
             selectedConnectorsSide
         );
+        this._connectors.set(connectorsSelector.getSelectedConnectors());
 
         if(this._guid.isFirstPrependedItem(lastReappendedItemGUID))
             this._transformerConnectors.addGluingReversedAppendConnectorOnFirstPrependedConnection();
@@ -260,7 +262,7 @@ Gridifier.SizesTransformer.prototype._reappendDependedItemWithDefaultAppend = fu
         this._storeHowNextReappendedItemWasInserted(dependedItem);
         this._appender.recreateConnectorsPerAllConnectedItems();
 
-        var connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(this._connectors, this._guid);
+        var connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(this._connectors.get(), this._guid);
         if(this._settings.isVerticalGrid())
             var selectedConnectorsSide = Gridifier.Connectors.SIDES.BOTTOM.RIGHT;
         else if(this._settings.isHorizontalGrid())
@@ -269,6 +271,7 @@ Gridifier.SizesTransformer.prototype._reappendDependedItemWithDefaultAppend = fu
         connectorsSelector.selectOnlySpecifiedSideConnectorsOnPrependedItemsExceptFirst(
             selectedConnectorsSide
         );
+        this._connectors.set(connectorsSelector.getSelectedConnectors());
 
         if(this._guid.isFirstPrependedItem(lastReappendedItemGUID))
             this._transformerConnectors.addGluingDefaultAppendConnectorOnFirstPrependedConnection();
@@ -355,7 +358,7 @@ Gridifier.SizesTransformer.prototype._makeNoIntersectionsStrategyFakeCallToFixPr
     else {
         this.transformConnectionSizes(
             lastPrependedConnection,
-            SizesResolverManager.outerWidth(connection.item) + "px",
+            SizesResolverManager.outerWidth(connection.item) + "px", //@todo -> pass correct sizes, as in initConnectionTransform
             SizesResolverManager.outerHeight(connection.item) + "px"
         );
     }

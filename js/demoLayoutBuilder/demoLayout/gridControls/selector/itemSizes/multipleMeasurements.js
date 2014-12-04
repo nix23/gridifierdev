@@ -1,8 +1,8 @@
 DemoLayoutBuilder.DemoLayout.GridControls.Selector.MultipleMeasurementsItemSize = function($selectorRightSide, 
-                                                                                                                                                  demoLayout, 
-                                                                                                                                                  sliderChangeHandler,
-                                                                                                                                                  measurementValue,
-                                                                                                                                                  measurementType) {
+                                                                                           demoLayout, 
+                                                                                           sliderChangeHandler,
+                                                                                           measurementValue,
+                                                                                           measurementType) {
     var me = this;
 
     this._$view = null;

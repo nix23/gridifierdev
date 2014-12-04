@@ -66,18 +66,19 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerRev
         var transformedItemCloneWidth = SizesResolverManager.outerWidth(transformedItemClone, true);
         this._connectors.flush();
 
+        // @todo -> Check if normalizeLowRounding(0) is required
         if(transformedConnection.x2 - transformedItemCloneWidth + 1 >= 0
            && transformedConnection.x2 <= this._gridifier.getGridX2()) {
             this._connectors.addAppendConnector(
                 Gridifier.Connectors.SIDES.RIGHT.TOP,
-                Dom.toInt(transformedConnection.x2 - transformedItemCloneWidth + 1),
+                parseFloat(transformedConnection.x2 - transformedItemCloneWidth + 1),
                 Dom.toInt(transformedConnection.y1)
             );
         }
         else if(this._gridifier.getGridX2() - transformedItemCloneWidth + 1 >= 0) {
             this._connectors.addAppendConnector(
                 Gridifier.Connectors.SIDES.RIGHT.TOP,
-                Dom.toInt(this._gridifier.getGridX2() - transformedItemCloneWidth + 1),
+                parseFloat(this._gridifier.getGridX2() - transformedItemCloneWidth + 1),
                 Dom.toInt(transformedConnection.y1)
             );
         }
@@ -99,10 +100,12 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerDef
         var transformedItemCloneWidth = SizesResolverManager.outerWidth(transformedItemClone, true);
         this._connectors.flush();
 
+        // @todo -> Check if normalizeHighRounding required
+        // @todo -> Should it be left top connector???
         if(transformedConnection.x1 + transformedItemCloneWidth - 1 <= this._gridifier.getGridX2()) {
             this._connectors.addAppendConnector(
                 Gridifier.Connectors.SIDES.LEFT.TOP,
-                Dom.toInt(transformedConnection.x1 + transformedItemCloneWidth - 1),
+                parseFloat(transformedConnection.x1 + transformedItemCloneWidth - 1),
                 Dom.toInt(transformedConnection.y1)
             );
         }
@@ -119,10 +122,10 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerDef
 Gridifier.VerticalGrid.TransformerConnectors.prototype.addGluingDefaultAppendConnectorOnFirstPrependedConnection = function() {
     var connections = this._connections.get();
     for(var i = 0; i < connections.length; i++) {
-        if(this._guid.isFirstPrependedItem(connections[i].itemGUID)) {
+        if(this._guid.isFirstPrependedItem(Dom.toInt(connections[i].itemGUID))) {
             this._connectors.addAppendConnector(
                 Gridifier.Connectors.SIDES.LEFT.TOP,
-                Dom.toInt(this._gridifier.getGridX2()),
+                parseFloat(this._gridifier.getGridX2()),
                 Dom.toInt(connections[i].y1)
             );
             break;

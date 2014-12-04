@@ -48,7 +48,7 @@ Gridifier.VerticalGrid.Appender = function(gridifier, settings, connectors, conn
     return this;
 }
 
-Gridifier.VerticalGrid.Appender.prototype.append = function(item) { //console.log("connections: ", this._connections.get());
+Gridifier.VerticalGrid.Appender.prototype.append = function(item) {
     this._guid.markIfIsFirstAppendedItem(item);
     this._initConnectors();
     var connection = this._createConnectionPerItem(item);
@@ -111,8 +111,6 @@ Gridifier.VerticalGrid.Appender.prototype._addItemConnectors = function(itemCoor
 }
 
 Gridifier.VerticalGrid.Appender.prototype._createConnectionPerItem = function(item) {
-    //console.log("");
-    //console.log("Creating connection per item: ", item);
     var sortedConnectors = this._filterConnectorsPerNextConnection();
     var itemConnectionCoords = this._findItemConnectionCoords(item, sortedConnectors);
     
@@ -151,15 +149,13 @@ Gridifier.VerticalGrid.Appender.prototype._findItemConnectionCoords = function(i
     
     for(var i = 0; i < sortedConnectors.length; i++) {
         var itemCoords = this._itemCoordsExtractor.connectorToAppendedItemCoords(item, sortedConnectors[i]);
-        //console.log("sortedConnector: ", sortedConnectors[i]);
-        //console.log("itemCoords: ", itemCoords);
         if(itemCoords.x1 < this._normalizer.normalizeLowRounding(0))
             continue;
-        //console.log("x1 passed");
+        
         var maybeIntersectableConnections = this._connectionsIntersector.findAllMaybeIntersectableConnectionsOnAppend(sortedConnectors[i]);
         if(this._connectionsIntersector.isIntersectingAnyConnection(maybeIntersectableConnections, itemCoords))
             continue;
-        //console.log("intersections passed");
+        
         itemConnectionCoords = itemCoords;
 
         var connectionsBelowCurrent = this._connections.getAllConnectionsBelowY(itemCoords.y2);

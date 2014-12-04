@@ -26,10 +26,6 @@ Gridifier.VerticalGrid.ItemCoordsExtractor = function(gridifier) {
 }
 
 Gridifier.VerticalGrid.ItemCoordsExtractor.prototype.connectorToAppendedItemCoords = function(item, connector) {
-    //msProfiler.start("outerWidth: ");
-    //SizesResolver.outerWidth(item, true);
-    //msProfiler.stop();
-
     return {
         x1: parseFloat(connector.x - SizesResolverManager.outerWidth(item, true) + 1),
         x2: parseFloat(connector.x),

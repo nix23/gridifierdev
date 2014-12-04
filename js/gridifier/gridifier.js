@@ -41,7 +41,7 @@ Gridifier = function(grid, settings) {
         }
 
         me._connectors = new Gridifier.Connectors(me._guid, me._connections);
-        me._renderer = new Gridifier.Renderer(me, me._connections, me._settings);
+        me._renderer = new Gridifier.Renderer(me, me._connections, me._settings, me._normalizer);
 
         if(me._settings.isVerticalGrid()) {
             me._mirroredPrepender = new Gridifier.VerticalGrid.MirroredPrepender(
@@ -87,6 +87,37 @@ Gridifier = function(grid, settings) {
             me._appender,
             me._reversedAppender
         );
+
+        // @tmp, replace this :)
+        var processResizeEventTimeout = null;
+        var processResizeEvent = 100;
+        $(window).resize(function() {
+            var $firstItem = null;
+            var $gridItems = $(".grid .gridItem");
+            if($gridItems.length == 0)
+                return;
+            
+            $.each($gridItems, function() {
+                var currItemGUID = parseInt($(this).attr("data-gridifier-item-id"), 10);
+
+                if($firstItem == null)
+                    $firstItem = $(this);
+                else {
+                    var firstItemGUID = parseInt($firstItem.attr("data-gridifier-item-id"), 10);
+                    if(currItemGUID < firstItemGUID)
+                        $firstItem = $(this);
+                }
+            });
+            
+            if(processResizeEventTimeout != null) {
+                clearTimeout(processResizeEventTimeout);
+                processResizeEventTimeout = null;
+            }
+            
+            processResizeEventTimeout = setTimeout(function() {
+                me.transformSizes($firstItem, "25%", "200px");
+            }, processResizeEvent);
+        });
 
         // @todo -> run first iteration?(Process items that were at start)
     };

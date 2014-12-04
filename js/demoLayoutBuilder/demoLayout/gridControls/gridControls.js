@@ -23,7 +23,10 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
     this._$itemSizesControl = null;
 
     this._$clearGridControl = null;
-    this._$itemCssControl = null;
+    this._$boxSizingControl = null;
+    this._$marginControl = null;
+    this._$paddingControl = null;
+    this._$borderControl = null;
 
     this._controls = [];
 
@@ -52,11 +55,18 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
         controlsHeadingSelectorTextHighlightClass: "selectorTextHighlight",
 
         controlsHeadingClearGridControlClass: "clearGridControl",
-        controlsHeadingItemCssControlClass: "selectItemCssControl",
+        controlsHeadingBoxSizingControlClass: "boxSizingControl",
+        controlsHeadingMarginControlClass: "marginControl",
+        controlsHeadingPaddingControlClass: "paddingControl",
+        controlsHeadingBorderControlClass: "borderControl",
 
-        controlsHeadingBorderValueClass: "borderValue",
-        controlsHeadingMarginValueClass: "marginValue",
         controlsHeadingBoxSizingValueClass: "boxSizingValue",
+        controlsHeadingMarginWidthValueClass: "marginWidthValue",
+        controlsHeadingMarginHeightValueClass: "marginHeightValue",
+        controlsHeadingPaddingWidthValueClass: "paddingWidthValue",
+        controlsHeadingPaddingHeightValueClass: "paddingHeightValue",
+        controlsHeadingBorderWidthValueClass: "borderWidthValue",
+        controlsHeadingBorderHeightValueClass: "borderHeightValue",
 
         controlsHeadingGridItemsSettingSelectorClass: "gridItemSettingsSelector",
         controlsHeadingGridItemsSettingSelectorItemWidthClass: "itemWidth",
@@ -131,10 +141,16 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
         me._$itemSizesControl = me._$gridItemSettingsSelector;
 
         me._$clearGridControl = me._$view.find("." + me._css.controlsHeadingClearGridControlClass);
-        me._$itemCssControl = me._$view.find("." + me._css.controlsHeadingItemCssControlClass);
+        me._$boxSizingControl = me._$view.find("." + me._css.controlsHeadingBoxSizingControlClass);
+        me._$marginControl = me._$view.find("." + me._css.controlsHeadingMarginControlClass);
+        me._$paddingControl = me._$view.find("." + me._css.controlsHeadingPaddingControlClass);
+        me._$borderControl = me._$view.find("." + me._css.controlsHeadingBorderControlClass);
 
         me._headingControls.push(me._$clearGridControl);
-        me._headingControls.push(me._$itemCssControl);
+        me._headingControls.push(me._$boxSizingControl);
+        me._headingControls.push(me._$marginControl);
+        me._headingControls.push(me._$paddingControl);
+        me._headingControls.push(me._$borderControl);
 
         if(me.areTopControls())
         {
@@ -170,7 +186,10 @@ DemoLayoutBuilder.DemoLayout.GridControls = function($targetEl,
             me._gridControlsManager,
             me._demoLayout, 
             me._$itemSizesControl,
-            me._$itemCssControl,
+            me._$boxSizingControl,
+            me._$marginControl,
+            me._$paddingControl,
+            me._$borderControl,
             me._$toggleControl, 
             me._$filterControl, 
             me._$sortControl, 
@@ -323,7 +342,8 @@ DemoLayoutBuilder.DemoLayout.GridControls.EVENT_CONTROL_SELECT = "DemoLayoutBuil
 
 DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS_TYPES = {TOP: 0, BOTTOM: 1};
 DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES = {
-    BORDER: 0, MARGIN: 1, BOX_SIZING: 2
+    BOX_SIZING: 0, MARGIN_WIDTH: 1, MARGIN_HEIGHT: 2, PADDING_WIDTH: 3,
+    PADDING_HEIGHT: 4, BORDER_WIDTH: 5, BORDER_HEIGHT: 6
 };
 DemoLayoutBuilder.DemoLayout.GridControls.CONTROLS = {
     APPEND: 0, PREPEND: 1, FILTER: 2, SORT: 3, TOGGLE: 4, BATCH_SIZE: 5
@@ -368,6 +388,7 @@ DemoLayoutBuilder.DemoLayout.GridControls.prototype.unsetSelectedGridItemSetting
 DemoLayoutBuilder.DemoLayout.GridControls.prototype._setSelectedHeadingControl = function($headingControl) {
     var me = this;
     $headingControl.addClass(this._viewParams.selectedControlItemBgClass);
+    $headingControl.css("cursor", "pointer");
     $headingControl.addClass(me._css.selectedControlItemColor);
     $.each($headingControl.find("span"), function() {
         $(this).addClass(me._css.selectedControlItemColor);
@@ -439,14 +460,26 @@ DemoLayoutBuilder.DemoLayout.GridControls.prototype._getControlByConst = functio
 }
 
 DemoLayoutBuilder.DemoLayout.GridControls.prototype._getHeaderControlByConst = function(controlType) {
-    if(controlType == DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BORDER)
-        return this._$itemCssControl.find("." + this._css.controlsHeadingBorderValueClass);
-    else if(controlType == DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.MARGIN)
-        return this._$itemCssControl.find("." + this._css.controlsHeadingMarginValueClass);
-    else if(controlType == DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES.BOX_SIZING)
-        return this._$itemCssControl.find("." + this._css.controlsHeadingBoxSizingValueClass);
+    var headerControlTypes = DemoLayoutBuilder.DemoLayout.GridControls.HEADER_CONTROL_TYPES;
+
+    if(controlType == headerControlTypes.BOX_SIZING)
+        var className = this._css.controlsHeadingBoxSizingValueClass;
+    else if(controlType == headerControlTypes.MARGIN_WIDTH)
+        var className = this._css.controlsHeadingMarginWidthValueClass;
+    else if(controlType == headerControlTypes.MARGIN_HEIGHT)
+        var className = this._css.controlsHeadingMarginHeightValueClass;
+    else if(controlType == headerControlTypes.PADDING_WIDTH)
+        var className = this._css.controlsHeadingPaddingWidthValueClass;
+    else if(controlType == headerControlTypes.PADDING_HEIGHT)
+        var className = this._css.controlsHeadingPaddingHeightValueClass;
+    else if(controlType == headerControlTypes.BORDER_WIDTH)
+        var className = this._css.controlsHeadingBorderWidthValueClass;
+    else if(controlType == headerControlTypes.BORDER_HEIGHT)
+        var className = this._css.controlsHeadingBorderHeightValueClass;
     else
-        throw new Error("GridControls: Unknown control conts: " + control);
+        throw new Error("GridControls: Unknown control const '" + controlType + "'");
+
+    return this._$controlsHeading.find("." + className);
 }
 
 DemoLayoutBuilder.DemoLayout.GridControls.prototype.setHeadingControlLabel = function(controlType, newLabel) {
