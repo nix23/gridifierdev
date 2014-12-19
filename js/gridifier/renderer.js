@@ -52,14 +52,23 @@ Gridifier.Renderer.prototype._getCssLeftPropertyValuePerConnection = function(co
 }
 
 Gridifier.Renderer.prototype._getCssTopPropertyValuePerConnection = function(connection) {
-    if(this._settings.isVerticalGrid()) 
-        var top = connection.y1 + "px"; 
+    if(this._settings.isVerticalGrid()) {
+        if(this._settings.isDefaultIntersectionStrategy())
+            var top = connection.y1 + "px";
+        else if(this._settings.isNoIntersectionsStrategy())
+            var top = (connection.y1 + connection.verticalOffset) + "px";
+    }
     else if(this._settings.isHorizontalGrid()) {
         var top = connection.y1 / (this._gridifier.getGridY2() + 1) * 100;
         top = this._normalizer.normalizeFractionalValueForRender(top) + "%";
     }
 
     return top;
+}
+
+Gridifier.Renderer.prototype._saveLastCalculatedConnectionOffsets = function(connection, left, top) {
+    connection.lastRenderedLeftOffset = left;
+    connection.lastRenderedTopOffset = top;
 }
 
 Gridifier.Renderer.prototype.showConnections = function(connections) {
@@ -70,10 +79,14 @@ Gridifier.Renderer.prototype.showConnections = function(connections) {
         if(this._isConnectionItemRendered(connections[i]))
             continue;
 
+        var left = this._getCssLeftPropertyValuePerConnection(connections[i]);
+        var top = this._getCssTopPropertyValuePerConnection(connections[i]);
+        this._saveLastCalculatedConnectionOffsets(connections[i], left, top);
+
         Dom.css.set(connections[i].item, {
             position: "absolute",
-            left: this._getCssLeftPropertyValuePerConnection(connections[i]),
-            top: this._getCssTopPropertyValuePerConnection(connections[i])
+            left: left,
+            top: top
         });
 
         this._markConnectionItemAsRendered(connections[i]);
@@ -94,7 +107,11 @@ Gridifier.Renderer.prototype.renderTransformedGrid = function() {
             return;
         }
 
-        if(Dom.hasAttribute(connections[i].item, st.TRANSFORMED_ITEM_DATA_ATTR)) {
+        var left = me._getCssLeftPropertyValuePerConnection(connections[i]);
+        var top = me._getCssTopPropertyValuePerConnection(connections[i]);
+        me._saveLastCalculatedConnectionOffsets(connections[i], left, top);
+
+        if(Dom.hasAttribute(connections[i].item, st.TRANSFORMED_ITEM_DATA_ATTR)) { 
             connections[i].item.removeAttribute(st.TRANSFORMED_ITEM_DATA_ATTR);
             // @todo -> Move to separate function
             Dom.css3.transition(connections[i].item, "All 600ms ease");
@@ -108,8 +125,8 @@ Gridifier.Renderer.prototype.renderTransformedGrid = function() {
                 connections[i].item.style.width = targetWidth;
                 connections[i].item.style.height = targetHeight;
                 //connections[i].item.style.left = connections[i].x1 + "px";
-                connections[i].item.style.left = me._getCssLeftPropertyValuePerConnection(connections[i]);
-                connections[i].item.style.top = me._getCssTopPropertyValuePerConnection(connections[i]);
+                connections[i].item.style.left = left;
+                connections[i].item.style.top = top;
             //}, 0);
         }
         else if(Dom.hasAttribute(connections[i].item, st.DEPENDED_ITEM_DATA_ATTR)) {
@@ -118,8 +135,8 @@ Gridifier.Renderer.prototype.renderTransformedGrid = function() {
 
             //setTimeout(function() {
                 //connections[i].item.style.left = connections[i].x1 + "px";
-                connections[i].item.style.left = me._getCssLeftPropertyValuePerConnection(connections[i]);
-                connections[i].item.style.top = me._getCssTopPropertyValuePerConnection(connections[i]);
+                connections[i].item.style.left = left;
+                connections[i].item.style.top = top;
             //}, 0);
         }
 
@@ -132,6 +149,26 @@ Gridifier.Renderer.prototype.renderTransformedGrid = function() {
     // all DOM nodes up through DOM-Tree, until reaching root node.
 }
 
+Gridifier.Renderer.prototype.renderConnections = function(connections) {
+    var me = this;
+
+    var renderNextConnection = function(i) {
+        if(i == connections.length)
+            return;
+
+        var left = me._getCssLeftPropertyValuePerConnection(connections[i]);
+        var top = me._getCssTopPropertyValuePerConnection(connections[i]);
+        me._saveLastCalculatedConnectionOffsets(connections[i], left, top);
+
+        connections[i].item.style.left = left;
+        connections[i].item.style.top = top;
+
+        renderNextConnection(i + 1);
+    }
+
+    renderNextConnection(0);
+}
+
 Gridifier.Renderer.prototype.renderConnectionsAfterPrependNormalization = function(prependedConnection, connections) {
     var me = this;
 
@@ -140,16 +177,20 @@ Gridifier.Renderer.prototype.renderConnectionsAfterPrependNormalization = functi
             return;
 
         if(connections[i].itemGUID != prependedConnection.itemGUID) {
+            var left = me._getCssLeftPropertyValuePerConnection(connections[i]);
+            var top = me._getCssTopPropertyValuePerConnection(connections[i]);
+            me._saveLastCalculatedConnectionOffsets(connections[i], left, top);
             // @todo -> Remove set timeout
             //          Where id Dom.css.transition???
             //setTimeout(function() { 
-                connections[i].item.style.left = me._getCssLeftPropertyValuePerConnection(connections[i]);
-                connections[i].item.style.top = me._getCssTopPropertyValuePerConnection(connections[i]);
+                connections[i].item.style.left = left;
+                connections[i].item.style.top = top;
             //}, 0);
         }
 
         renderNextConnection(i + 1);
     }
 
-    setTimeout(function() { renderNextConnection(0); }, 0);
+    renderNextConnection(0);
+    //setTimeout(function() { renderNextConnection(0); }, 0); // @todo no Timeout?
 }

@@ -39,3 +39,7 @@ Gridifier.Normalizer.prototype.normalizeHighRounding = function(valueToNormalize
 Gridifier.Normalizer.prototype.normalizeFractionalValueForRender = function(valueToNormalize) {
     return valueToNormalize - this._renderNormalizationValue;
 }
+
+Gridifier.Normalizer.prototype.unnormalizeFractionalValueForRender = function(valueToUnnormalize) {
+    return valueToUnnormalize + this._renderNormalizationValue;
+}

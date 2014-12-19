@@ -11,6 +11,8 @@ Gridifier.Settings = function(settings) {
     this._appendType = null;
 
     this._intersectionStrategy = null;
+    this._alignmentType = null;
+    
     this._sortDispersionMode = null;
     this._sortDispersionValue = null;
 
@@ -272,6 +274,7 @@ Gridifier.Settings.prototype._parse = function() {
     this._parsePrependType();
     this._parseAppendType();
     this._parseIntersectionStrategy();
+    this._parseIntersectionStrategyAlignmentType();
     this._parseSortDispersionMode();
     this._parseToggleOptions();
     this._parseSortOptions();
@@ -344,6 +347,46 @@ Gridifier.Settings.prototype._parseIntersectionStrategy = function() {
     this._intersectionStrategy = this._settings.intersectionStrategy;
 }
 
+Gridifier.Settings.prototype._parseIntersectionStrategyAlignmentType = function() {
+    var alignmentTypes = Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES;
+
+    if(!this._settings.hasOwnProperty("alignmentType")) {
+        if(this.isVerticalGrid())
+            this._alignmentType = alignmentTypes.FOR_VERTICAL_GRID.TOP;
+        else if(this.isHorizontalGrid()) 
+            this._alignmentType = alignmentTypes.FOR_HORIZONTAL_GRID.LEFT;
+        return;
+    }
+
+    if(this._settings.isVerticalGrid()) {
+        var validAlignmentTypes = [
+            alignmentTypes.FOR_VERTICAL_GRID.TOP,
+            alignmentTypes.FOR_VERTICAL_GRID.CENTER,
+            alignmentTypes.FOR_VERTICAL_GRID.BOTTOM
+        ];
+    }
+    else if(this._settings.isHorizontalGrid()) {
+        var validAlignmentTypes = [
+            alignmentTypes.FOR_HORIZONTAL_GRID.LEFT,
+            alignmentTypes.FOR_HORIZONTAL_GRID.CENTER,
+            alignmentTypes.FOR_HORIZONTAL_GRID.RIGHT
+        ];
+    }
+
+    var isValidAlignmentType = false;
+    for(var i = 0; i < validAlignmentTypes.length; i++) {
+        if(validAlignmentTypes[i] == this._settings.alignmentType)
+            isValidAlignmentType = true;
+    }
+
+    if(isValidAlignmentType) return;
+
+    new Gridifier.Error(
+        Gridifier.Error.ERROR_TYPES.INVALID_ALIGNMENT_TYPE,
+        this._settings.alignmentType
+    );
+}
+
 Gridifier.Settings.prototype._parseSortDispersionMode = function() {
     if(!this._settings.hasOwnProperty("sortDispersionMode")) {
         this._sortDispersionMode = Gridifier.SORT_DISPERSION_MODES.DISABLED;
@@ -410,6 +453,30 @@ Gridifier.Settings.prototype.isDefaultIntersectionStrategy = function() {
 
 Gridifier.Settings.prototype.isNoIntersectionsStrategy = function() {
     return this._intersectionStrategy == Gridifier.INTERSECTION_STRATEGIES.NO_INTERSECTIONS;
+}
+
+Gridifier.Settings.prototype.isVerticalGridTopAlignmentType = function() {
+    return this._alignmentType == Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES.FOR_VERTICAL_GRID.TOP;
+}
+
+Gridifier.Settings.prototype.isVerticalGridCenterAlignmentType = function() {
+    return this._alignmentType == Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES.FOR_VERTICAL_GRID.CENTER;
+}
+
+Gridifier.Settings.prototype.isVerticalGridBottomAlignmentType = function() {
+    return this._alignmentType == Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES.FOR_VERTICAL_GRID.BOTTOM;
+}
+
+Gridifier.Settings.prototype.isHorizontalGridLeftAlignmentType = function() {
+    return this._alignmentType == Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES.FOR_HORIZONTAL_GRID.LEFT;
+}
+
+Gridifier.Settings.prototype.isHorizontalGridCenterAlignmentType = function() {
+    return this._alignmentType == Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES.FOR_HORIZONTAL_GRID.CENTER;
+}
+
+Gridifier.Settings.prototype.isHorizontalGridRightAlignmentType = function() {
+    return this._alignmentType == Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES.FOR_HORIZONTAL_GRID.RIGHT;
 }
 
 Gridifier.Settings.prototype.isDisabledSortDispersion = function() {

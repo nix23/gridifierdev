@@ -1,0 +1,223 @@
+.gridDebuggerToggle {
+    position: absolute;
+    left: 0px;
+    width: 300px;
+    height: 50px;
+    line-height: 50px;
+    background: rgb(210,210,210);
+    border: 5px rgb(190,190,190) solid;
+    font-weight: bold;
+    font-size: 18px;
+    letter-spacing: -1px;
+}
+
+.gridDebuggerToggleSelected {
+    color: white;
+    cursor: pointer;
+}
+
+.gridDebuggerDebugWindow {
+    position: absolute;
+    left: 100px;
+    top: 20px;
+    width: 740px;
+    height: 400px;
+    background: rgb(210,210,210);
+    border: 5px rgb(190,190,190) solid;
+    z-index: 100;
+}
+
+.gridDebuggerDebugWindow .debugWindowHeader {
+    position: relative;
+    background: rgb(190,190,190);
+    width: 100%;
+    height: 60px;
+    line-height: 50px;
+    box-sizing: border-box;
+    padding-left: 25px;
+    text-align: left;
+    font-size: 24px;
+    letter-spacing: -1px;
+}
+
+.gridDebuggerDebugWindow .debugWindowHeader .button {
+    text-align: center;
+    line-height: 54px;
+    font-size: 20px;
+}
+
+.gridDebuggerDebugWindow .debugWindowHeader .buttonSelected {
+    cursor: pointer;
+    color: white;
+}
+
+.gridDebuggerDebugWindow .debugWindowHeader .moveButton {
+    position: absolute;
+    top: 0px;
+    right: 100px;
+    width: 100px;
+    height: 60px;
+}
+
+.gridDebuggerDebugWindow .debugWindowHeader .moveButton:hover {
+    cursor: move;
+}
+
+.gridDebuggerDebugWindow .debugWindowHeader .closeButton {
+    position: absolute;
+    top: 0px;
+    right: 0px;
+    width: 100px;
+    height: 60px;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody {
+    width: 100%;
+    height: 340px;
+    overflow-y: scroll;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .operationRow {
+    width: 100%;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .selectedOperationRow {
+    color: white;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .operationRow:hover {
+    cursor: pointer;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .evenOperationRowBg {
+    background: rgb(235,235,235);
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .operationRow .leftSide {
+    float: left;
+    width: 70%;
+    padding-top: 10px;
+    padding-bottom: 20px;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .operationRow .leftSide .heading {
+    width: 68%;
+    margin-left: 15%;
+    height: 45px;
+    line-height: 45px;
+    color: white;
+    font-size: 20px;
+    letter-spacing: -2px;
+    font-weight: bold;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .operationRow .rightSide {
+    float: left;
+    width: 30%;
+    padding-top: 10px;
+    padding-bottom: 20px;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .operationRow .rightSide .heading {
+    width: 80%;
+    line-height: 45px;
+    font-size: 20px;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .operationRow .operationSubheading {
+    width: 70%;
+    margin-left: 15%;
+    font-size: 20px;
+    margin-top: 10px;
+    text-align: left;
+}
+
+.gridDebuggerDebugWindow .deguwWindowBody .actionRow {
+    clear: both;
+    width: 100%;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .actionRow .leftSide {
+    float: left;
+    width: 70%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .actionRow .leftSide .heading {
+    font-size: 18px;
+    width: 90%;
+    margin-left: 5%;
+    word-wrap: break-word;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .actionRow .leftSide .subheading {
+    font-size: 14px;
+    width: 90%;
+    margin-left: 5%;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .actionRow .rightSide {
+    float: left;
+    width: 30%;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    box-sizing: border-box;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .actionRow .rightSide .showGridButton {
+    width: 150px;
+    height: 35px;
+    line-height: 35px;
+    background: rgb(235,235,235);
+    border: 1px rgb(190,190,190) solid;
+    font-size: 14px;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .actionRowLeftBorder {
+    border-left: 5px solid;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .actionRowRightBorder {
+    border-right: 5px solid;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .actionRowBottomBorder {
+    border-bottom: 5px solid;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .listRoot {
+    width: 100%;
+    line-height: 40px;
+    clear: both;
+    box-sizing: border-box;
+    background: rgb(235,235,235);
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .listRoot:hover {
+    cursor: pointer;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .listRootBorder {
+    border: 5px rgb(190,190,190) solid;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .selectedListRootBorder {
+    border-top: 5px solid;
+    border-left: 5px solid;
+    border-right: 5px solid;
+    border-bottom: 0px;
+}
+
+.gridDebuggerDebugWindow .debugWindowBody .list {
+    clear: both;
+    width: 100%;
+    box-sizing: border-box;
+    border: 5px rgb(190,190,190) solid;
+}
+
+.gridDebuggerGridDemonstrator {
+    z-index: 100;
+    position: absolute;
+}

@@ -25,6 +25,9 @@ Gridifier.Error = function(errorType, errorParam) {
         else if(errorType == errors.SETTINGS.INVALID_INTERSECTION_STRATEGY) {
             var errorMsg = me._getSettingsInvalidIntersectionStrategyErrorMsg();
         }
+        else if(errorType == errors.SETTINGS.INVALID_ALIGNMENT_TYPE) {
+            var errorMsg = me._getSettingsInvalidAlignmentTypeErrorMsg();
+        }
         else if(errorType == errors.SETTINGS.INVALID_SORT_DISPERSION_MODE) {
             var errorMsg = me._getSettingsInvalidSortDispersionModeErrorMsg();
         }
@@ -133,31 +136,32 @@ Gridifier.Error.ERROR_TYPES = {
         INVALID_PREPEND_TYPE: 2,
         INVALID_APPEND_TYPE: 3,
         INVALID_INTERSECTION_STRATEGY: 4,
-        INVALID_SORT_DISPERSION_MODE: 5,
-        MISSING_SORT_DISPERSION_VALUE: 6,
-        INVALID_SORT_DISPERSION_VALUE: 7,
-        INVALID_SORT_PARAM_VALUE: 8,
-        INVALID_ONE_OF_SORT_FUNCTION_TYPES: 9,
-        INVALID_FILTER_PARAM_VALUE: 10,
-        INVALID_ONE_OF_FILTER_FUNCTION_TYPES: 11,
-        INVALID_TOGGLE_PARAM_VALUE: 12,
-        INVALID_ONE_OF_TOGGLE_PARAMS: 13,
-        SET_TOGGLE_INVALID_PARAM: 14,
-        SET_FILTER_INVALID_PARAM: 15,
-        SET_SORT_INVALID_PARAM: 16
+        INVALID_ALIGNMENT_TYPE: 5,
+        INVALID_SORT_DISPERSION_MODE: 6,
+        MISSING_SORT_DISPERSION_VALUE: 7,
+        INVALID_SORT_DISPERSION_VALUE: 8,
+        INVALID_SORT_PARAM_VALUE: 9,
+        INVALID_ONE_OF_SORT_FUNCTION_TYPES: 10,
+        INVALID_FILTER_PARAM_VALUE: 11,
+        INVALID_ONE_OF_FILTER_FUNCTION_TYPES: 12,
+        INVALID_TOGGLE_PARAM_VALUE: 13,
+        INVALID_ONE_OF_TOGGLE_PARAMS: 14,
+        SET_TOGGLE_INVALID_PARAM: 15,
+        SET_FILTER_INVALID_PARAM: 16,
+        SET_SORT_INVALID_PARAM: 17
     },
     COLLECTOR: {
-        NOT_DOM_ELEMENT: 17,
-        ITEM_NOT_ATTACHED_TO_GRID: 18,
-        ITEM_WIDER_THAN_GRID_WIDTH: 19,
-        ITEM_TALLER_THAN_GRID_HEIGHT: 20
+        NOT_DOM_ELEMENT: 18,
+        ITEM_NOT_ATTACHED_TO_GRID: 19,
+        ITEM_WIDER_THAN_GRID_WIDTH: 20,
+        ITEM_TALLER_THAN_GRID_HEIGHT: 21
     },
     CONNECTIONS: {
-        NO_CONNECTIONS: 21,
-        CONNECTION_BY_ITEM_NOT_FOUND: 22
+        NO_CONNECTIONS: 22,
+        CONNECTION_BY_ITEM_NOT_FOUND: 23
     },
     SIZES_TRANSFORMER: {
-        WRONG_TARGET_TRANSFORMATION_SIZES: 23
+        WRONG_TARGET_TRANSFORMATION_SIZES: 24
     }
 }
 
@@ -223,6 +227,25 @@ Gridifier.Error.prototype._getSettingsInvalidIntersectionStrategyErrorMsg = func
     msg += "Wrong 'intersectionStrategy' param value. Got: '" + this._getErrorParam() + "'.";
     msg += "Available strategies: " + Gridifier.INTERSECTION_STRATEGIES.DEFAULT;
     msg += " , " + Gridifier.INTERSECTION_STRATEGIES.REVERSED;
+
+    return msg;
+}
+
+Gridifier.Error.prototype._getSettingsInvalidAlignmentTypeErrorMsg = function() {
+    var msg = this._getErrorMsgPrefix();
+
+    var alignmentTypes = Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES;
+    var verticalAlignmentTypes = alignmentTypes.FOR_VERTICAL_GRID;
+    var horizontalAlignmentTypes = alignmentTypes.FOR_HORIZONTAL_GRID;
+
+    msg += "Wrong 'alignmentType' param value. Got: '" + this._getErrorParam() + "'.";
+    msg += "Available values: ";
+    msg += verticalAlignmentTypes.TOP + ", ";
+    msg += verticalAlignmentTypes.CENTER + ", ";
+    msg += verticalAlignmentTypes.BOTTOM + "(For vertical grids), ";
+    msg += horizontalAlignmentTypes.LEFT + ", ";
+    msg += horizontalAlignmentTypes.CENTER + ", ";
+    msg += horizontalAlignmentTypes.RIGHT + "(For horizontal grids). ";
 
     return msg;
 }
@@ -348,9 +371,10 @@ Gridifier.Error.prototype._getWrongTargetTransformationSizesErrorMsg = function(
     var msg = this._getErrorMsgPrefix();
     var error = this._getErrorParam();
 
-    msg += "Wrong target transformation sizes. 'transformSizes' function accepts 3 types of values:\n";
+    msg += "Wrong target transformation sizes. 'transformSizes' and 'toggleSizes' functions accepts 4 types of values:\n";
     msg += "    gridifier.transformSizes(item, '100px', '60%'); // px or % values\n";
-    msg += "    gridifier.transformSizes(item, 100, 200); // values without postfix will be parsed as px value.";
+    msg += "    gridifier.transformSizes(item, 100, 200.5); // values without postfix will be parsed as px value.";
+    msg += "    gridifier.transformSizes(item, '*2', '/0.5'); // values with multiplication or division expressions.";
 
     return msg;
 }

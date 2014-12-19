@@ -34,10 +34,10 @@ Gridifier = function(grid, settings) {
         me._normalizer = new Gridifier.Normalizer();
 
         if(me._settings.isVerticalGrid()) {
-            me._connections = new Gridifier.VerticalGrid.Connections(me._guid);
+            me._connections = new Gridifier.VerticalGrid.Connections(me._guid, me._settings);
         }
         else if(me._settings.isHorizontalGrid()) {
-            me._connections = new Gridifier.HorizontalGrid.Connections(me._guid);
+            me._connections = new Gridifier.HorizontalGrid.Connections(me._guid, me._settings);
         }
 
         me._connectors = new Gridifier.Connectors(me._guid, me._connections);
@@ -85,10 +85,12 @@ Gridifier = function(grid, settings) {
             me._connections,
             me._guid,
             me._appender,
-            me._reversedAppender
+            me._reversedAppender,
+            me._normalizer
         );
 
         // @tmp, replace this :)
+        // @todo -> Log this action???
         var processResizeEventTimeout = null;
         var processResizeEvent = 100;
         $(window).resize(function() {
@@ -115,7 +117,7 @@ Gridifier = function(grid, settings) {
             }
             
             processResizeEventTimeout = setTimeout(function() {
-                me.transformSizes($firstItem, "25%", "200px");
+                me.transformSizes($firstItem);
             }, processResizeEvent);
         });
 
@@ -267,7 +269,7 @@ Gridifier.prototype.setLastOperation = function(lastOperation) {
     this._lastOperation = lastOperation;
 }
 
-Gridifier.prototype._findConnectionByItem = function(item) {
+Gridifier.prototype.findConnectionByItem = function(item) {
     var connections = this._connections.get();
     if(connections.length == 0) 
         new Gridifier.Error(Gridifier.Error.ERROR_TYPES.CONNECTIONS.NO_CONNECTIONS);
@@ -292,8 +294,14 @@ Gridifier.prototype._findConnectionByItem = function(item) {
 Gridifier.prototype._applyPrepend = function(item) {
     if(this._settings.isMirroredPrepend())
         this._mirroredPrepender.mirroredPrepend(item);
-    else if(this._settings.isDefaultPrepend())
+    else if(this._settings.isDefaultPrepend()) {
+        Logger.startLoggingOperation(       // @system-log-start
+            Logger.OPERATION_TYPES.PREPEND,
+            "Item GUID: " + this._guid.getItemGUID(item)
+        );                                  // @system-log-end
         this._prepender.prepend(item);
+        Logger.stopLoggingOperation(); // @system-log
+    }
     else if(this._settings.isReversedPrepend())
         this._reversedPrepender.reversedPrepend(item);
 }
@@ -324,10 +332,17 @@ Gridifier.prototype.prepend = function(items) {
 
 // @todo -> Render connectors and debug after each step
 Gridifier.prototype._applyAppend = function(item) {
-    if(this._settings.isDefaultAppend())
+    if(this._settings.isDefaultAppend()) {
+        Logger.startLoggingOperation(                   // @system-log-start
+            Logger.OPERATION_TYPES.APPEND,
+            "Item GUID: " + this._guid.getItemGUID(item)
+        );                                              // @system-log-end
         this._appender.append(item);
-    else if(this._settings.isReversedAppend())
+        Logger.stopLoggingOperation();// @system-log
+    }
+    else if(this._settings.isReversedAppend()) {
         this._reversedAppender.reversedAppend(item);
+    }
 }
 
 Gridifier.prototype.append = function(items) { 
@@ -354,6 +369,40 @@ Gridifier.prototype.append = function(items) {
     return this;
 }
 
+Gridifier.prototype.toggleSizes = function(item, newWidth, newHeight) {
+    var items = this._collector.toDOMCollection(item);
+    SizesResolverManager.startCachingTransaction();
+
+    this._collector.ensureAllItemsAreAttachedToGrid(items);
+    this._collector.ensureAllItemsCanBeAttachedToGrid(items);
+
+    var item = items[0];
+    var connection = this.findConnectionByItem(item);
+
+    if(this._sizesTransformer.areConnectionSizesToggled(connection)) {
+        var targetSizes = this._sizesTransformer.getConnectionSizesPerUntoggle(connection);
+        this._sizesTransformer.unmarkConnectionPerToggle(connection);
+    }
+    else {
+        this._sizesTransformer.markConnectionPerToggle(connection);
+        var targetSizes = this._sizesTransformer.initConnectionTransform(connection, newWidth, newHeight);
+    }
+
+    Logger.startLoggingOperation(   // @system-log-start
+        Logger.OPERATION_TYPES.TOGGLE_SIZES,
+        "Item GUID: " + this._guid.getItemGUID(item) +
+        " target width: " + targetSizes.targetWidth + " target height: " + targetSizes.targetHeight
+    );                              // @system-log-end
+    this._sizesTransformer.transformConnectionSizes(
+        connection, targetSizes.targetWidth, targetSizes.targetHeight
+    );
+    Logger.stopLoggingOperation(); // @system-log
+
+    this._renderer.renderTransformedGrid();
+    SizesResolverManager.stopCachingTransaction();
+    // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
+}
+
 Gridifier.prototype.transformSizes = function(item, newWidth, newHeight) {
     var items = this._collector.toDOMCollection(item);
     SizesResolverManager.startCachingTransaction();
@@ -362,12 +411,19 @@ Gridifier.prototype.transformSizes = function(item, newWidth, newHeight) {
     this._collector.ensureAllItemsCanBeAttachedToGrid(items);
 
     var item = items[0];
-    var connection = this._findConnectionByItem(item);
+    var connection = this.findConnectionByItem(item);
 
     var targetSizes = this._sizesTransformer.initConnectionTransform(connection, newWidth, newHeight);
+    Logger.startLoggingOperation( // @system-log-start
+        Logger.OPERATION_TYPES.TRANSFORM_SIZES,
+        "Item GUID: " + this._guid.getItemGUID(item) + 
+        " new width: " + newWidth + " new height: " + newHeight +
+        " target width: " + targetSizes.targetWidth + " target height: " + targetSizes.targetHeight
+    );                            // @system-log-end
     this._sizesTransformer.transformConnectionSizes(
         connection, targetSizes.targetWidth, targetSizes.targetHeight
     );
+    Logger.stopLoggingOperation(); // @system-log
 
     this._renderer.renderTransformedGrid();
     SizesResolverManager.stopCachingTransaction();
@@ -389,6 +445,14 @@ Gridifier.PREPEND_TYPES = {MIRRORED_PREPEND: "mirroredPrepend", DEFAULT_PREPEND:
 Gridifier.APPEND_TYPES = {DEFAULT_APPEND: "defaultAppend", REVERSED_APPEND: "reversedAppend"};
 
 Gridifier.INTERSECTION_STRATEGIES = {DEFAULT: "default", NO_INTERSECTIONS: "noIntersections"};
+Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES = {
+    FOR_VERTICAL_GRID: {
+        TOP: "top", CENTER: "center", BOTTOM: "bottom"
+    },
+    FOR_HORIZONTAL_GRID: {
+        LEFT: "left", CENTER: "center", RIGHT: "right"
+    }
+};
 
 Gridifier.SORT_DISPERSION_MODES = {DISABLED: "disabled", CUSTOM: "custom", CUSTOM_ALL_EMPTY_SPACE: "customAllEmptySpace"};
 

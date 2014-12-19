@@ -25,6 +25,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
     this._$gridView = null;
     this._$gridBottomControlsView = null;
     this._$gridSourcesDumperView = null;
+    this._gridDebugger = null;
 
     this._css = {
         verticalGridThemeBgClass: "gridFifthBg",
@@ -52,9 +53,44 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._demoLayoutBuilder = demoLayoutBuilder;
         me._gridType = gridType;
         me._gridifierSettings = gridifierSettings;
+        
+        //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
+        //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
+        me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
 
         me._attachView();
         me._gridifierDynamicSettings = new DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings();
+
+        me._gridifierDynamicSettings._batchSize = 5; // @todo -> Delete, tmp
+        // me._gridifierDynamicSettings._itemSizes[0].width = "100px";
+        // me._gridifierDynamicSettings._itemSizes[0].height = "100px";
+
+        // me._gridifierDynamicSettings._itemSizes[1].width = "100px";
+        // me._gridifierDynamicSettings._itemSizes[1].height = "200px";
+
+        // me._gridifierDynamicSettings._itemSizes[2].width = "100px";
+        // me._gridifierDynamicSettings._itemSizes[2].height = "300px";
+
+        // me._gridifierDynamicSettings._itemSizes[3].width = "200px";
+        // me._gridifierDynamicSettings._itemSizes[3].height = "100px";
+
+        // me._gridifierDynamicSettings._itemSizes[4].width = "100px";
+        // me._gridifierDynamicSettings._itemSizes[4].height = "200px"; // @todo -> Delete, tmp
+
+        me._gridifierDynamicSettings._itemSizes[0].width = "5%";  // @todo -> Delete, tmp
+        me._gridifierDynamicSettings._itemSizes[0].height = "100px";
+
+        me._gridifierDynamicSettings._itemSizes[1].width = "20%";
+        me._gridifierDynamicSettings._itemSizes[1].height = "200px";
+
+        me._gridifierDynamicSettings._itemSizes[2].width = "25%";
+        me._gridifierDynamicSettings._itemSizes[2].height = "300px";
+
+        me._gridifierDynamicSettings._itemSizes[3].width = "5%";
+        me._gridifierDynamicSettings._itemSizes[3].height = "100px";
+
+        me._gridifierDynamicSettings._itemSizes[4].width = "5%";
+        me._gridifierDynamicSettings._itemSizes[4].height = "200px"; // @todo -> Delete, tmp
 
         me._$loadGridConfiguratorButton = me._$view.find("." + me._css.loadGridConfiguratorButtonClass);
         me._$gridTopHeadingView = me._$view.find("." + me._css.gridTopHeadingViewClass);
@@ -63,6 +99,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._$gridView = me._$view.find("." + me._css.gridViewClass);
         me._$gridBottomControlsView = me._$view.find("." + me._css.gridBottomControlsViewClass);
         me._$gridSourcesDumperView = me._$view.find("." + me._css.gridSourcesDumperClass);
+        me._gridDebugger = new DemoLayoutBuilder.DemoLayout.GridDebugger(me);
 
         if(me.isVerticalGrid()) {
             me._grid = new DemoLayoutBuilder.DemoLayout.VerticalGrid(me._$gridView);
@@ -162,16 +199,17 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
         // @todo -> Replace this.(Tmp for testing)
         me._$view.on("click", ".gridItem", function() {
-            if($(this).hasClass("transformedItem")) {
-                $(this).removeClass("transformedItem");
-                //me._gridifier.transformSizes($(this), "10%", "200px");
-               me._gridifier.transformSizes($(this), "200px", "200px");
-            }
-            else {
-                $(this).addClass("transformedItem");
-                //me._gridifier.transformSizes($(this), "50%", "400px");
-                me._gridifier.transformSizes($(this), "400px", "400px");
-            }
+            me._gridifier.toggleSizes($(this), "*2", "*2");
+            // if($(this).hasClass("transformedItem")) {
+            //     $(this).removeClass("transformedItem");
+            //     me._gridifier.transformSizes($(this), "25%", "200px");
+            //    //me._gridifier.transformSizes($(this), "200px", "200px");
+            // }
+            // else {
+            //     $(this).addClass("transformedItem");
+            //     me._gridifier.transformSizes($(this), "50%", "400px");
+            //     //me._gridifier.transformSizes($(this), "400px", "400px");
+            // }
         });
     }
 

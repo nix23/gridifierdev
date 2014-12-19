@@ -1,15 +1,18 @@
-Gridifier.VerticalGrid.Connections = function(guid) {
+Gridifier.VerticalGrid.Connections = function(guid, settings) {
     var me = this;
 
-    this._guid = guid;
+    this._guid = null;
+    this._settings = null;
 
     this._connections = [];
+    this._lastRowVerticallyExpandedConnections = null;
 
     this._css = {
     };
 
     this._construct = function() {
         me._guid = guid;
+        me._settings = settings;
     };
 
     this._bindEvents = function() {
@@ -27,6 +30,10 @@ Gridifier.VerticalGrid.Connections = function(guid) {
     return this;
 }
 
+Gridifier.VerticalGrid.Connections.prototype.getLastRowVerticallyExpandedConnections = function() {
+    return this._lastRowVerticallyExpandedConnections;
+}
+
 Gridifier.VerticalGrid.Connections.prototype.get = function() {
     return this._connections;
 }
@@ -39,6 +46,12 @@ Gridifier.VerticalGrid.Connections.prototype.add = function(item, itemConnection
     var connection = itemConnectionCoords;
     connection.item = item;
     connection.itemGUID = Dom.toInt(this._guid.getItemGUID(item));
+    if(!connection.hasOwnProperty("verticalOffset"))
+        connection.verticalOffset = 0; // Used with noIntersections strategy
+
+    if(this._settings.isNoIntersectionsStrategy()) {
+        connection.itemHeightWithMargins = SizesResolverManager.outerHeight(item, true);
+    }
 
     this._connections.push(connection);
     return connection;
@@ -102,7 +115,7 @@ Gridifier.VerticalGrid.Connections.prototype.isAnyConnectionItemGUIDBiggerThan =
 Gridifier.VerticalGrid.Connections.prototype.isIntersectingMoreThanOneConnectionItemVertically = function(itemCoords) {
     var me = this;
     var intersectedConnectionItemIndexes = [];
-
+    
     var isIntersectingVerticallyAnyFromAlreadyIntersectedItems = function(connection) {
         if(intersectedConnectionItemIndexes.length == 0)
             return false;
@@ -132,6 +145,80 @@ Gridifier.VerticalGrid.Connections.prototype.isIntersectingMoreThanOneConnection
     }
 
     return intersectedConnectionItemsCount > 1;
+}
+
+Gridifier.VerticalGrid.Connections.prototype.getMostTallFromAllVerticallyIntersectedConnections = function(itemCoords) {
+    var me = this;
+    var mostTallVerticallyIntersectedConnection = null;
+
+    for(var i = 0; i < this._connections.length; i++) {
+        var maybeIntersectableConnection = this._connections[i];
+        var isAbove = (itemCoords.y1 < maybeIntersectableConnection.y1 && itemCoords.y2 < maybeIntersectableConnection.y1);
+        var isBelow = (itemCoords.y1 > maybeIntersectableConnection.y2 && itemCoords.y2 > maybeIntersectableConnection.y2);
+
+        if(!isAbove && !isBelow) {
+            if(mostTallVerticallyIntersectedConnection == null)
+                mostTallVerticallyIntersectedConnection = maybeIntersectableConnection;
+            else {
+                var maybeIntersectableConnectionHeight = Math.abs(
+                    maybeIntersectableConnection.y2 - maybeIntersectableConnection.y1
+                );
+                var mostTallVerticallyIntersectedConnectionHeight = Math.abs(
+                    mostTallVerticallyIntersectedConnection.y2 - mostTallVerticallyIntersectedConnection.y1
+                );
+
+                if(maybeIntersectableConnectionHeight > mostTallVerticallyIntersectedConnectionHeight)
+                    mostTallVerticallyIntersectedConnection = maybeIntersectableConnection;
+            }
+        }
+    }
+
+    return mostTallVerticallyIntersectedConnection;
+}
+
+Gridifier.VerticalGrid.Connections.prototype.getAllVerticallyIntersectedConnections = function(itemCoords) {
+    var me = this;
+    var verticallyIntersectedConnections = [];
+
+    for(var i = 0; i < this._connections.length; i++) {
+        var maybeIntersectableConnection = this._connections[i];
+        var isAbove = (itemCoords.y1 < maybeIntersectableConnection.y1 && itemCoords.y2 < maybeIntersectableConnection.y1);
+        var isBelow = (itemCoords.y1 > maybeIntersectableConnection.y2 && itemCoords.y2 > maybeIntersectableConnection.y2);
+
+        if(!isAbove && !isBelow) 
+            verticallyIntersectedConnections.push(maybeIntersectableConnection);
+    }
+
+    return verticallyIntersectedConnections;
+}
+
+Gridifier.VerticalGrid.Connections.prototype.expandVerticallyAllRowConnectionsToMostTall = function(newConnection) {
+    var mostTallConnection = this.getMostTallFromAllVerticallyIntersectedConnections(newConnection);
+    if(mostTallConnection == null)
+        return;
+    
+    var rowConnectionsToExpand = this.getAllVerticallyIntersectedConnections(newConnection);
+    this._lastRowVerticallyExpandedConnections = rowConnectionsToExpand;
+
+    for(var i = 0; i < rowConnectionsToExpand.length; i++) {
+        rowConnectionsToExpand[i].y1 = mostTallConnection.y1;
+        rowConnectionsToExpand[i].y2 = mostTallConnection.y2;
+
+        if(this._settings.isVerticalGridTopAlignmentType())
+            rowConnectionsToExpand[i].verticalOffset = 0;
+        else if(this._settings.isVerticalGridCenterAlignmentType()) {
+            var y1 = rowConnectionsToExpand[i].y1;
+            var y2 = rowConnectionsToExpand[i].y2;
+            var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
+            rowConnectionsToExpand[i].verticalOffset = Math.round(Math.abs(y2 - y1) / 2) - Math.round(itemHeight / 2);
+        }
+        else if(this._settings.isVerticalGridBottomAlignmentType()) {
+            var y1 = rowConnectionsToExpand[i].y1;
+            var y2 = rowConnectionsToExpand[i].y2;
+            var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
+            rowConnectionsToExpand[i].verticalOffset = Math.abs(y2 - y1) - itemHeight;
+        }
+    }
 }
 
 Gridifier.VerticalGrid.Connections.prototype.getLastPrependedConnection = function() {

@@ -3,7 +3,7 @@ $(document).ready(function() {
 
     var hasPercentageCSSValueTester = {
         _before: function() {
-
+            
         },
 
         _after: function() {

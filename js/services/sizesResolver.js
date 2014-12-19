@@ -168,6 +168,10 @@ var SizesResolver = {
         return false;
     },
 
+    getComputedCSSWithMaybePercentageSizes: function(DOMElem) {
+        return this._getComputedCSSWithMaybePercentageSizes(DOMElem);
+    },
+
     _getComputedCSSWithMaybePercentageSizes: function(DOMElem) {
         var parentDOMElemClone = DOMElem.parentNode.cloneNode();
         var DOMElemClone = DOMElem.cloneNode();
@@ -245,7 +249,6 @@ var SizesResolver = {
         }
     },
 
-    // @todo -> private method
     hasPercentageCSSValue: function(cssProperty, DOMElem, elementComputedCSS) {
         this._ensureHasParentNode(DOMElem);
 
@@ -255,7 +258,6 @@ var SizesResolver = {
         return this._isPercentageCSSValue(elementComputedCSS[cssProperty]);
     },
 
-    // @todo -> private method
     getPercentageCSSValue: function(cssProperty, DOMElem, elementComputedCSS) {
         this._ensureHasParentNode(DOMElem);
 
