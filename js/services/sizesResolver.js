@@ -364,6 +364,19 @@ var SizesResolver = {
         // the element vertical scrollbar (if present, if rendered) and the element CSS width.
         //var outerWidth = DOMElem.offsetWidth; // @todo -> Check all cases, looks like outerWidth here s redundant
         var outerWidth = 0;
+        //if(Dom.css.hasClass(DOMElem, "gridItem")) {
+            timer.start();
+            //elementComputedCSS.getPropertyCSSValue("width");
+            //elementComputedCSS.getPropertyValue("width");
+            //var elementComputedCSS = elementComputedCSS.
+            var elementWidth = elementComputedCSS.width;
+            var time = timer.get();
+            var message = "time = " + time + " class = " + DOMElem.getAttribute("class") + "<br>";
+            //if(time > 0.100) {
+                console.log(message);
+            //}
+        //}
+
         var normalizedComputedWidth = this.normalizeComputedCSSSizeValue(elementComputedCSS.width);
         
         if(normalizedComputedWidth !== false)

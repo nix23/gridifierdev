@@ -195,45 +195,77 @@ Gridifier.SizesTransformer.prototype.unmarkConnectionPerToggle = function(connec
     connection.item.removeAttribute(Gridifier.SizesTransformer.TOGGLE_SIZES_ORIGINAL_HEIGHT_DATA_ATTR);
 }
 
-Gridifier.SizesTransformer.prototype._markAsTransformed = function(connection, targetWidth, targetHeight) {
-    var transformedItem = connection.item;
-    transformedItem.setAttribute(
-        Gridifier.SizesTransformer.TRANSFORMED_ITEM_DATA_ATTR,
-        Gridifier.SizesTransformer.TRANSFORMER_EMPTY_DATA_ATTR_VALUE
-    );
-    transformedItem.setAttribute(Gridifier.SizesTransformer.TARGET_WIDTH_DATA_ATTR, targetWidth);
-    transformedItem.setAttribute(Gridifier.SizesTransformer.TARGET_HEIGHT_DATA_ATTR, targetHeight);
-}
+// @todo -> Should transformed connection be sorted only by order of the GUIDS,
+//          or when Custom Sort Dispersion is used, it will be more logical to sort by Y???
+Gridifier.SizesTransformer.prototype._sortConnectionsToTransform = function(transformationData) {
+    var me = this;
+    transformationData.sort(function(firstTransformationData, secondTransformationData) {
+        if(firstTransformationData.connectionToTransform.itemGUID >
+            secondTransformationData.connectionToTransform.itemGUID)
+            return 1;
 
-Gridifier.SizesTransformer.prototype._createTransformedConnectionItemClone = function(connection,
-                                                                                      targetWidth,
-                                                                                      targetHeight) {
-    // @todo -> Test performance with/without first cloneNode parameter
-    var transformedItemClone = connection.item.cloneNode(true);
-    transformedItemClone.setAttribute(
-        Gridifier.SizesTransformer.TRANSFORMED_ITEM_CLONE_DATA_ATTR,
-        Gridifier.SizesTransformer.TRANSFORMED_ITEM_CLONE_DATA_ATTR_VALUE
-    );
-    SizesResolverManager.unmarkAsCached(transformedItemClone);
-
-    Dom.css.set(transformedItemClone, {
-        position: "absolute", 
-        top: "0px", 
-        left: "-90000px", 
-        visibility: "hidden", 
-        width: targetWidth,
-        height: targetHeight
+        return -1;
     });
 
-    this._gridifier.getGrid().appendChild(transformedItemClone);
-    return transformedItemClone;
+    return transformationData;
+}
+
+Gridifier.SizesTransformer.prototype._markEachConnectionAsTransformed = function(transformationData) {
+    for(var i = 0; i < transformationData.length; i++) {
+        var itemToTransform = transformationData[i].connectionToTransform.item;
+        itemToTransform.setAttribute(
+            Gridifier.SizesTransformer.TRANSFORMED_ITEM_DATA_ATTR,
+            Gridifier.SizesTransformer.TRANSFORMER_EMPTY_DATA_ATTR_VALUE
+        );
+        itemToTransform.setAttribute(
+            Gridifier.SizesTransformer.TARGET_WIDTH_DATA_ATTR,
+            transformationData[i].widthToTransform
+        );
+        itemToTransform.setAttribute(
+            Gridifier.SizesTransformer.TARGET_HEIGHT_DATA_ATTR,
+            transformationData[i].heightToTransform
+        );
+    }
+}
+
+Gridifier.SizesTransformer.prototype._createAllTransformedConnectionItemClones = function(transformationData) {
+    var transformedItemClones = [];
+
+    for(var i = 0; i < transformationData.length; i++) {
+        // @todo -> Test performance with/without first cloneNode parameter
+        var transformedItemClone = transformationData[i].connectionToTransform.item.cloneNode(true);
+        transformedItemClone.setAttribute(
+            Gridifier.SizesTransformer.TRANSFORMED_ITEM_CLONE_DATA_ATTR,
+            Gridifier.SizesTransformer.TRANSFORMED_ITEM_CLONE_DATA_ATTR_VALUE
+        );
+        SizesResolverManager.unmarkAsCached(transformedItemClone);
+
+        Dom.css.set(transformedItemClone, {
+            position: "absolute",
+            top: "0px",
+            left: "-90000px",
+            visibility: "hidden",
+            width: transformationData[i].widthToTransform,
+            height: transformationData[i].heightToTransform
+        });
+
+        this._gridifier.getGrid().appendChild(transformedItemClone);
+        transformedItemClones.push(transformedItemClone);
+    }
+
+    return transformedItemClones;
 }
 
 // @todo -> Check Custom Sort Dispersion mode, maybe we should take only items with > GUID and Y >= tritemY1??
 // Or item with shifted dispersion will be moved in same place???? Please check this, Mr. Eduard :D
-Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTransformedConnection, transformedItemClone) {
+Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTransformedConnection, transformedItemClones) {
     var itemsToReappend = [];
-    itemsToReappend.push(transformedItemClone);
+    var exceptItemGUIDS = [];
+
+    for(var i = 0; i < transformedItemClones.length; i++) {
+        itemsToReappend.push(transformedItemClones[i]);
+        exceptItemGUIDS.push(this._guid.getItemGUID(transformedItemClones[i]));
+    }
 
     var me = this;
     var iteratorTypes = {COLLECT_ITEMS_TO_REAPPEND: 0, CLEAR_COLLECTED_ITEMS: 1};
@@ -273,7 +305,6 @@ Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTra
         }
     }
 
-    var exceptItemGUIDS = []; exceptItemGUIDS.push(firstTransformedConnection.itemGUID);
     var connections = this._connections.get();
     iterateConnections(iteratorTypes.COLLECT_ITEMS_TO_REAPPEND);
 
@@ -555,8 +586,7 @@ Gridifier.SizesTransformer.prototype._reappendTransformedItem = function(transfo
 }
 
 Gridifier.SizesTransformer.prototype._reappendItems = function(itemsToReappend, 
-                                                               transformedItemClone,
-                                                               transformedConnection) {
+                                                               transformedConnections) {
     var st = Gridifier.SizesTransformer; 
     var lastReappendedItemGUID = null;
 
@@ -565,16 +595,22 @@ Gridifier.SizesTransformer.prototype._reappendItems = function(itemsToReappend,
            || Dom.hasAttribute(itemsToReappend[i], st.ORIGINAL_TRANSFORMED_ITEM_FOR_FAKE_CALL_DATA_ATTR)) {
             itemsToReappend[i].removeAttribute(st.ORIGINAL_TRANSFORMED_ITEM_FOR_FAKE_CALL_DATA_ATTR);
             itemsToReappend[i].setAttribute(st.DEPENDED_ITEM_DATA_ATTR, st.TRANSFORMER_EMPTY_DATA_ATTR_VALUE);
-
+            
             if(this.isReversedAppendShouldBeUsedPerItemInsert(itemsToReappend[i]))
                 this._reappendDependedItemWithReversedAppend(itemsToReappend[i], lastReappendedItemGUID);
             else
                 this._reappendDependedItemWithDefaultAppend(itemsToReappend[i], lastReappendedItemGUID);
         }
         else {
+            var transformedConnection = null;
+            for(var j = 0; j < transformedConnections.length; j++) {
+                if(transformedConnections[j].itemGUID == this._guid.getItemGUID(itemsToReappend[i]))
+                    transformedConnection = transformedConnections[j];
+            }
+
             this._reappendTransformedItem(itemsToReappend[i], transformedConnection.item);
         }
-
+        
         if(this._settings.isVerticalGrid())
             this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
         else if(this._settings.isHorizontalGrid())
@@ -585,7 +621,7 @@ Gridifier.SizesTransformer.prototype._reappendItems = function(itemsToReappend,
             this._connectors.get(),
             this._connections.get()
         );          // @system-log-end
-
+        
         lastReappendedItemGUID = this._guid.getItemGUID(itemsToReappend[i]);
     }
 }
@@ -695,26 +731,40 @@ Gridifier.SizesTransformer.prototype._applyNoIntersectionsStrategyLeftFreeSpaceF
     // @todo -> Implement horizontal fix here
 }
 
-Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(connection, targetWidth, targetHeight) {
-    this._markAsTransformed(connection, targetWidth, targetHeight);
+Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transformationData) {
+    transformationData = this._sortConnectionsToTransform(transformationData);
+    this._markEachConnectionAsTransformed(transformationData);
 
-    var transformedItemClone = this._createTransformedConnectionItemClone(connection, targetWidth, targetHeight);
-    var itemsToReappendData = this._findAllItemsToReappend(connection, transformedItemClone);
+    var transformedConnections = [];
+    for(var i = 0; i < transformationData.length; i++)
+        transformedConnections.push(transformationData[i].connectionToTransform);
+
+    var transformedItemClones = this._createAllTransformedConnectionItemClones(transformationData);
+    var itemsToReappendData = this._findAllItemsToReappend(
+        transformationData[0].connectionToTransform, transformedItemClones
+    );
     var itemsToReappend = itemsToReappendData.itemsToReappend;
     var firstConnectionToReappend = itemsToReappendData.firstConnectionToReappend;
 
-    if(firstConnectionToReappend.itemGUID == this._guid.getItemGUID(transformedItemClone))
-        firstConnectionToReappend.transformedItemClone = transformedItemClone;
+    for(var i = 0; i < transformedItemClones.length; i++) {
+        if(firstConnectionToReappend.itemGUID == this._guid.getItemGUID(transformedItemClones[i])) {
+            firstConnectionToReappend.transformedItemClone = transformedItemClones[i];
+            break;
+        }
+    }
 
-    this._connections.removeConnection(connection);
+    for(var i = 0; i < transformationData.length; i++)
+        this._connections.removeConnection(transformationData[i].connectionToTransform);
 
     this._storeHowNextReappendedItemWasInserted(itemsToReappend[0]);
     this._transformerConnectors.recreateConnectorsPerConnectionTransform(firstConnectionToReappend);
-    this._maybeAddGluingConnectorOnFirstPrependedConnection(connection);
-
-    this._determineIfNoIntersectionsStrategySpecialFixIsRequired(connection);
-    this._reappendItems(itemsToReappend, transformedItemClone, connection);
-
+    this._maybeAddGluingConnectorOnFirstPrependedConnection(transformedConnections[0]);
+    
+    //this._determineIfNoIntersectionsStrategySpecialFixIsRequired(connection);
+    this._reappendItems(itemsToReappend, transformedConnections);
+    
+    // @TODO -> WARNING!!! THIS SHOULD BE USED WHEN !NO_INTERSECTIONS STRATEGY TO FIX PREPENDED TRANSFORMS
+    //  (FIX THIS!!!!)
     // @todo -> Check if this fix should be made always
     // if(this._settings.isNoIntersectionsStrategy()) {
     //     if(this._settings.isVerticalGrid())
@@ -725,19 +775,19 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(connect
 
     // Special fix for prepended items, when noIntersectionsStrategy is used.(All items should be
     // reappended and moved up, if there is any empty space).
-    if(this._settings.isNoIntersectionsStrategy()
-       && !this._isNoIntersectionsStrategyFakeCallToFixPrependedTransform
-       && this._guid.wasItemPrepended(this._guid.getItemGUID(connection.item))) {
+    // if(this._settings.isNoIntersectionsStrategy()
+    //    && !this._isNoIntersectionsStrategyFakeCallToFixPrependedTransform
+    //    && this._guid.wasItemPrepended(this._guid.getItemGUID(connection.item))) {
         // this._makeNoIntersectionsStrategyFakeCallToFixPrependedTransform(
         //     connection, transformedItemClone, targetWidth, targetHeight
         // );
-    }
-    else if(this._settings.isNoIntersectionsStrategy()
-            && this._isNoIntersectionsStrategyFakeCallToFixPrependedTransform) {
-        if(this._settings.isVerticalGrid())
-            this._applyNoIntersectionsStrategyTopFreeSpaceFixOnPrependedItemTransform();
-        else if(this._settings.isHorizontalGrid())
-            this._applyNoIntersectionsStrategyLeftFreeSpaceFixOnPrependedItemTransform();
-        return;
-    }
+    // }
+    // else if(this._settings.isNoIntersectionsStrategy()
+    //         && this._isNoIntersectionsStrategyFakeCallToFixPrependedTransform) {
+    //     if(this._settings.isVerticalGrid())
+    //         this._applyNoIntersectionsStrategyTopFreeSpaceFixOnPrependedItemTransform();
+    //     else if(this._settings.isHorizontalGrid())
+    //         this._applyNoIntersectionsStrategyLeftFreeSpaceFixOnPrependedItemTransform();
+    //     return;
+    // }
 }

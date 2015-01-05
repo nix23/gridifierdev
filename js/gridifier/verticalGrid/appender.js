@@ -52,9 +52,19 @@ Gridifier.VerticalGrid.Appender.prototype.append = function(item, disableMarking
     var disableMarking = disableMarking || false;
     if(!disableMarking)
         this._guid.markIfIsFirstAppendedItem(item);
-
-    this._initConnectors();
+    
+    this._initConnectors(); 
     var connection = this._createConnectionPerItem(item);
+    // var result = timer.get();
+    // if(typeof window.appendsCount == "undefined") {
+    //     window.appendsCount = 1;
+    //     window.totalTime = result;
+    // }
+    // else {
+    //     window.appendsCount++;
+    //     window.totalTime += result;
+    // }
+
     this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
     Logger.log( // @system-log-start
         "deleteAllIntersectedFromBottomConnectors",
@@ -165,10 +175,16 @@ Gridifier.VerticalGrid.Appender.prototype._addItemConnectors = function(itemCoor
 }
 
 Gridifier.VerticalGrid.Appender.prototype._createConnectionPerItem = function(item) {
+    //timer.start("filter connectors = ");
     var sortedConnectors = this._filterConnectorsPerNextConnection();
+    //timer.stop();
+    //timer.start("findItemConnectionCoords");
     var itemConnectionCoords = this._findItemConnectionCoords(item, sortedConnectors);
-    
+    //timer.stop();
+    //timer.start("add");
     var connection = this._connections.add(item, itemConnectionCoords);
+    //timer.stop();
+    //timer.start("expandVerticallyAllRowConnections");
     if(this._settings.isNoIntersectionsStrategy()) {
         this._connections.expandVerticallyAllRowConnectionsToMostTall(connection);
         Logger.log(  // @system-log-start
@@ -179,7 +195,7 @@ Gridifier.VerticalGrid.Appender.prototype._createConnectionPerItem = function(it
         );          // @system-log-end
     }
     this._addItemConnectors(itemConnectionCoords, this._guid.getItemGUID(item));
-
+    // timer.stop();
     return connection;
 }
 
@@ -200,7 +216,7 @@ Gridifier.VerticalGrid.Appender.prototype._filterConnectorsPerNextConnection = f
     else if(this._settings.isNoIntersectionsStrategy()) {
         var connectorsSide = Gridifier.Connectors.SIDES.BOTTOM.RIGHT;
 
-        var connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(connectors);
+        var connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(connectors, this._guid);
         connectorsSelector.selectOnlyMostBottomConnectorFromSide(connectorsSide);
         connectors = connectorsSelector.getSelectedConnectors();
         Logger.log(                     // @system-log-start
@@ -209,7 +225,7 @@ Gridifier.VerticalGrid.Appender.prototype._filterConnectorsPerNextConnection = f
             connectors,
             this._connections.get()
         );                              // @system-log-end
-
+        
         var connectorsShifter = new Gridifier.ConnectorsShifter(this._gridifier, connectors, this._connections);
         connectorsShifter.shiftAllWithSpecifiedSideToRightGridCorner(connectorsSide);
         connectors = connectorsShifter.getAllConnectors();
@@ -220,10 +236,10 @@ Gridifier.VerticalGrid.Appender.prototype._filterConnectorsPerNextConnection = f
             this._connections.get()
         );                              // @system-log-end
     }
-
+    
     var connectorsSorter = new Gridifier.VerticalGrid.ConnectorsSorter(connectors);
     connectorsSorter.sortConnectorsForAppend(Gridifier.APPEND_TYPES.DEFAULT_APPEND);
-
+    
     return connectorsSorter.getConnectors();
 }
 
@@ -234,6 +250,7 @@ Gridifier.VerticalGrid.Appender.prototype._findItemConnectionCoords = function(i
     for(var i = 0; i < sortedConnectors.length; i++) {
         Logger.logFindItemConnectionCoordsInspectConnector(sortedConnectors[i], this._connections.get()); // @system-log
         var itemCoords = this._itemCoordsExtractor.connectorToAppendedItemCoords(item, sortedConnectors[i]);
+
         if(itemCoords.x1 < this._normalizer.normalizeLowRounding(0)) {
             Logger.logFindItemConnectionCoordsOutOfLayoutBounds(   // @system-log-start
                 sortedConnectors[i], itemCoords, this._connections.get()
@@ -269,7 +286,7 @@ Gridifier.VerticalGrid.Appender.prototype._findItemConnectionCoords = function(i
                 itemConnectionCoords = null;
             }
         }
-
+        
         if(itemConnectionCoords != null)
             break;
     }

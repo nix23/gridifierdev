@@ -72,7 +72,55 @@ var SizesResolverManager = {
             DOMElem.removeAttribute(SizesResolverManager.CACHED_PER_OUTERHEIGHT_DATA_ATTR);
 
         if(Dom.hasAttribute(DOMElem, SizesResolverManager.CACHED_PER_OUTERHEIGHT_ITEM_GUID_DATA_ATTR))
-            DOMElem.removeAttribute(SizesResolverManager.CACHED_PER_OUTERWIDTH_ITEM_GUID_DATA_ATTR);
+            DOMElem.removeAttribute(SizesResolverManager.CACHED_PER_OUTERHEIGHT_ITEM_GUID_DATA_ATTR);
+    },
+
+    changeCachedDOMElem: function(sourceDOMElem, targetDOMElem) {
+        if(sourceDOMElem.hasAttribute(SizesResolverManager.CACHED_PER_OUTERWIDTH_DATA_ATTR)) {
+            targetDOMElem.setAttribute(
+                SizesResolverManager.CACHED_PER_OUTERWIDTH_DATA_ATTR,
+                sourceDOMElem.getAttribute(SizesResolverManager.CACHED_PER_OUTERWIDTH_DATA_ATTR)
+            );
+        }
+
+        if(sourceDOMElem.hasAttribute(SizesResolverManager.CACHED_PER_OUTERWIDTH_ITEM_GUID_DATA_ATTR)) {
+            var cachedItemGUID = sourceDOMElem.getAttribute(
+                SizesResolverManager.CACHED_PER_OUTERWIDTH_ITEM_GUID_DATA_ATTR
+            );
+            targetDOMElem.setAttribute(
+                SizesResolverManager.CACHED_PER_OUTERWIDTH_ITEM_GUID_DATA_ATTR, cachedItemGUID
+            );
+
+            for(var i = 0; i < this._outerWidthCache.length; i++) {
+                if(this._outerWidthCache[i].cachedItemGUID == cachedItemGUID) {
+                    this._outerWidthCache[i].DOMElem = targetDOMElem;
+                    break;
+                }
+            }
+        }
+
+        if(sourceDOMElem.hasAttribute(SizesResolverManager.CACHED_PER_OUTERHEIGHT_DATA_ATTR)) {
+            targetDOMElem.setAttribute(
+                SizesResolverManager.CACHED_PER_OUTERHEIGHT_DATA_ATTR,
+                sourceDOMElem.getAttribute(SizesResolverManager.CACHED_PER_OUTERHEIGHT_DATA_ATTR)
+            );
+        }
+
+        if(sourceDOMElem.hasAttribute(SizesResolverManager.CACHED_PER_OUTERHEIGHT_ITEM_GUID_DATA_ATTR)) {
+            var cachedItemGUID = sourceDOMElem.getAttribute(
+                SizesResolverManager.CACHED_PER_OUTERHEIGHT_ITEM_GUID_DATA_ATTR
+            );
+            targetDOMElem.setAttribute(
+                SizesResolverManager.CACHED_PER_OUTERHEIGHT_ITEM_GUID_DATA_ATTR, cachedItemGUID
+            );
+
+            for(var i = 0; i < this._outerHeightCache.length; i++) {
+                if(this._outerHeightCache[i].cachedItemGUID == cachedItemGUID) {
+                    this._outerHeightCache[i].DOMElem = targetDOMElem;
+                    break;
+                }
+            }
+        }
     },
 
     _getOuterWidthCachedItemEntry: function(DOMElem) {

@@ -21,12 +21,44 @@ Gridifier = function(grid, settings) {
 
     this._lastOperation = null;
 
+    this._gridSizesUpdateTimeout = null;
+
     this._css = {
     };
 
     this._construct = function() {
         me._extractGrid(grid);
         me._adjustGridCss();
+
+        // var count = 10000;
+        // // var testArr = [];
+        // // for(var i = 0; i <= count; i++) {
+        // //     testArr.push({
+        // //         type: 'x',
+        // //         x: '111',
+        // //         y: '222'
+        // //     });
+        // // }
+        // timer.start("Creating object = ");
+        // var arr2 = [];
+        // for(var i = 0; i < count; i++) {
+        //     arr2[i] = {
+        //         x1: 10,
+        //         x2: 20,
+        //         y1: 10,
+        //         y2: 'af'
+        //     };
+        // }
+        // timer.stop();
+
+        // timer.start("creating array = ");
+        // var arr2 = [];
+        // for(var i = 0; i < count; i++) {
+        //     arr2[i] = [
+        //         10, 20, 10, 'af'
+        //     ];
+        // }
+        // timer.stop();
 
         me._settings = new Gridifier.Settings(settings);
         me._collector = new Gridifier.Collector(me._settings,  me._grid);
@@ -200,6 +232,10 @@ Gridifier.prototype.updateGridSizes = function() {
         if(this.getGridY2() < gridHeight)
             Dom.css.set(this._grid, {"height": gridHeight + "px"});
         // @todo -> Fire event here
+        // @todo -> Remove event from append/prepend methods
+        // @todo after each operation update grid width/height(Also when width height is decreasing)
+        // @todo also update demo layout builder heading height label
+        $(this).trigger("gridifier.gridSizesChange");
     }
     else if(this._settings.isHorizontalGrid()) {
         var gridWidth = connections[0].x2;
@@ -211,7 +247,22 @@ Gridifier.prototype.updateGridSizes = function() {
         if(this.getGridX2() < gridWidth)
             Dom.css.set(this._grid, {"width": gridWidth + "px"});
         // @todo -> Fire event here
+        // @todo after each operation update grid width/height(Also when width height is decreasing)
+        // @todo also update demo layout builder heading height label
+        $(this).trigger("gridifier.gridSizesChange");
     }
+}
+
+Gridifier.prototype._scheduleGridSizesUpdate = function() {
+    if(this._gridSizesUpdateTimeout != null) {
+        clearTimeout(this._gridSizesUpdateTimeout);
+        this._gridSizesUpdateTimeout = null;
+    }
+
+    var me = this;
+    this._gridSizesUpdateTimeout = setTimeout(function() {
+        me.updateGridSizes.call(me);
+    }, Gridifier.GRID_SIZES_UPDATE_TIMEOUT);
 }
 
 // Write tests soon per everything :}
@@ -291,6 +342,33 @@ Gridifier.prototype.findConnectionByItem = function(item) {
     return connectionItem;
 }
 
+Gridifier.prototype._applyChromeGetComputedStylePerformanceFix = function(items, gridClone) {
+    var gridClone = this._grid.cloneNode();
+    this._grid.parentNode.appendChild(gridClone);
+
+    Dom.css.set(gridClone, {
+        visibility: "hidden",
+        position: "absolute",
+        left: "0px",
+        top: "0px",
+        width: SizesResolverManager.outerWidth(this._grid) + "px",
+        height: SizesResolverManager.outerHeight(this._grid) + "px"
+    });
+
+    for(var i = 0; i < items.length; i++) {
+        var itemClone = items[i].cloneNode();
+        gridClone.appendChild(itemClone);
+
+        // This will set item values to cache per current transaction.
+        SizesResolverManager.outerWidth(itemClone, true);
+        SizesResolverManager.outerHeight(itemClone, true);
+        SizesResolverManager.changeCachedDOMElem(itemClone, items[i]);
+    }
+
+    gridClone.parentNode.removeChild(gridClone);
+    return items;
+}
+
 Gridifier.prototype._applyPrepend = function(item) {
     if(this._settings.isMirroredPrepend())
         this._mirroredPrepender.mirroredPrepend(item);
@@ -343,11 +421,67 @@ Gridifier.prototype._applyAppend = function(item) {
     else if(this._settings.isReversedAppend()) {
         this._reversedAppender.reversedAppend(item);
     }
+    // @todo -> replace with real event
+    //$(item).trigger("gridifier.appendFinished");
 }
 
-Gridifier.prototype.append = function(items) { 
+Gridifier.prototype.append = function(items) {
+    // var gridClone = this._grid.cloneNode();
+    // this._grid.parentNode.appendChild(gridClone);
+    // var fakerDiv = document.createElement("div");
+    // var frag = document.createDocumentFragment();
+    // frag.appendChild(fakerDiv);
+    // SizesResolver.outerWidth(fakerDiv);
+    // SizesResolver.outerHeight(fakerDiv);
+
+    var me = this;
+    (function(items, fakerDiv) {
+        setTimeout(function() { 
+            me._append.call(me, items, fakerDiv);
+        }, 0);
+    })(items, {});
+    //this._append(items);
+}
+
+Gridifier.prototype._append = function(items, fakerDiv) { //timer.start();
     var items = this._collector.toDOMCollection(items);
     SizesResolverManager.startCachingTransaction();
+    //items = this._applyChromeGetComputedStylePerformanceFix(items, 'fhf');
+
+    var fakerDiv = document.createElement("div");
+    fakerDiv.style.width = "0px";
+    fakerDiv.style.height = "0px";
+    fakerDiv.style.position = "absolute";
+    fakerDiv.style.left = "-90000px";
+    fakerDiv.style.top = "100px";
+    fakerDiv.style.display = "none";
+    fakerDiv.style.visibility = "none";
+    var frag = document.createDocumentFragment();
+    frag.appendChild(fakerDiv);
+
+    var wrapperDiv = document.createElement("div");
+    wrapperDiv.style.position = "absolute";
+    wrapperDiv.style.left = "-90000px";
+    wrapperDiv.style.top = "0px";
+    wrapperDiv.style.width = "0px";
+    wrapperDiv.style.height = "0px";
+    wrapperDiv.style.visibility = "hidden";
+    wrapperDiv.style.display = "none";
+    document.body.parentNode.appendChild(wrapperDiv);
+
+    wrapperDiv.appendChild(fakerDiv);
+
+    // SizesResolver.outerWidth(fakerDiv);
+    // SizesResolver.outerHeight(fakerDiv);
+    timer.start();
+    var elementComputedCSS = window.getComputedStyle(fakerDiv, null);
+    var elementWidth = elementComputedCSS.width;
+    var time = timer.get();
+    var message = "time = " + time + " class = " + fakerDiv.getAttribute("class") + "<br>";
+    //if(time > 0.100) {
+        console.log(message);
+    //}
+    //document.body.parentNode.removeChild(wrapperDiv);
 
     this._collector.ensureAllItemsAreAttachedToGrid(items);
     this._collector.ensureAllItemsCanBeAttachedToGrid(items);
@@ -358,71 +492,148 @@ Gridifier.prototype.append = function(items) {
     for(var i = 0; i < items.length; i++) {
         this._guid.markNextAppendedItem(items[i]);
         this._applyAppend(items[i]);
+
         // @todo after each operation update grid width/height(Also when width height is decreasing)
         // @todo also update demo layout builder heading height label
-        $(this).trigger("gridifier.gridSizesChange");
+        //$(this).trigger("gridifier.gridSizesChange");
     }
-    
-    SizesResolverManager.stopCachingTransaction();
-    this.updateGridSizes();
 
+    SizesResolverManager.stopCachingTransaction();
+    //this._scheduleGridSizesUpdate();
+    //console.log("full reappend call = " + timer.get());
     return this;
 }
 
-Gridifier.prototype.toggleSizes = function(item, newWidth, newHeight) {
-    var items = this._collector.toDOMCollection(item);
-    SizesResolverManager.startCachingTransaction();
+// @todo -> Apply check that item is < than grid
+// @todo -> Update grid sizes after toggle and transform
+Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {
+    var itemsToTransform = [];
+    var sizesToTransform = [];
 
-    this._collector.ensureAllItemsAreAttachedToGrid(items);
-    this._collector.ensureAllItemsCanBeAttachedToGrid(items);
-
-    var item = items[0];
-    var connection = this.findConnectionByItem(item);
-
-    if(this._sizesTransformer.areConnectionSizesToggled(connection)) {
-        var targetSizes = this._sizesTransformer.getConnectionSizesPerUntoggle(connection);
-        this._sizesTransformer.unmarkConnectionPerToggle(connection);
+    if(Dom.isArray(maybeItem)) {
+        for(var i = 0; i < maybeItem.length; i++) {
+            itemsToTransform.push(maybeItem[i][0]);
+            sizesToTransform.push([
+                maybeItem[i][1],
+                maybeItem[i][2]
+            ]);
+        }
     }
     else {
-        this._sizesTransformer.markConnectionPerToggle(connection);
-        var targetSizes = this._sizesTransformer.initConnectionTransform(connection, newWidth, newHeight);
+        itemsToTransform.push(maybeItem);
+        sizesToTransform.push([newWidth, newHeight]);
     }
 
-    Logger.startLoggingOperation(   // @system-log-start
-        Logger.OPERATION_TYPES.TOGGLE_SIZES,
-        "Item GUID: " + this._guid.getItemGUID(item) +
-        " target width: " + targetSizes.targetWidth + " target height: " + targetSizes.targetHeight
-    );                              // @system-log-end
-    this._sizesTransformer.transformConnectionSizes(
-        connection, targetSizes.targetWidth, targetSizes.targetHeight
-    );
-    Logger.stopLoggingOperation(); // @system-log
-
-    this._renderer.renderTransformedGrid();
-    SizesResolverManager.stopCachingTransaction();
-    // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
-}
-
-Gridifier.prototype.transformSizes = function(item, newWidth, newHeight) {
-    var items = this._collector.toDOMCollection(item);
+    var itemsToTransform = this._collector.toDOMCollection(itemsToTransform);
     SizesResolverManager.startCachingTransaction();
 
-    this._collector.ensureAllItemsAreAttachedToGrid(items);
-    this._collector.ensureAllItemsCanBeAttachedToGrid(items);
+    this._collector.ensureAllItemsAreAttachedToGrid(itemsToTransform);
+    this._collector.ensureAllItemsCanBeAttachedToGrid(itemsToTransform);
 
-    var item = items[0];
-    var connection = this.findConnectionByItem(item);
+    var connectionsToTransform = [];
+    var targetSizesToTransform = [];
+    var loggerLegend = ""; // @system-log
+    for(var i = 0; i < itemsToTransform.length; i++) {
+        connectionsToTransform.push(this.findConnectionByItem(itemsToTransform[i]));
 
-    var targetSizes = this._sizesTransformer.initConnectionTransform(connection, newWidth, newHeight);
+        if(this._sizesTransformer.areConnectionSizesToggled(connectionsToTransform[i])) {
+            targetSizesToTransform[i] = this._sizesTransformer.getConnectionSizesPerUntoggle(
+                connectionsToTransform[i]
+            );
+            this._sizesTransformer.unmarkConnectionPerToggle(connectionsToTransform[i]);
+        }
+        else {
+            this._sizesTransformer.markConnectionPerToggle(connectionsToTransform[i]);
+            targetSizesToTransform[i] = this._sizesTransformer.initConnectionTransform(
+                connectionsToTransform[i],
+                sizesToTransform[i][0],
+                sizesToTransform[i][1]
+            );
+        }
+        loggerLegend += "Item GUID: " + this._guid.getItemGUID(connectionsToTransform[i].item); // @system-log-start
+        loggerLegend += " new width: " + sizesToTransform[i][0] + " new height: " + sizesToTransform[i][1];
+        loggerLegend += " targetWidth: " + targetSizesToTransform[i].targetWidth;
+        loggerLegend += " targetHeight: " + targetSizesToTransform[i].targetHeight;
+        loggerLegend += "<br><br>";                                                             // @system-log-end
+    }
+
+    var transformationData = [];
+    for(var i = 0; i < connectionsToTransform.length; i++) {
+        transformationData.push({
+            connectionToTransform: connectionsToTransform[i],
+            widthToTransform: targetSizesToTransform[i].targetWidth,
+            heightToTransform: targetSizesToTransform[i].targetHeight
+        });
+    }
+    
+    Logger.startLoggingOperation(   // @system-log-start
+        Logger.OPERATION_TYPES.TOGGLE_SIZES,
+        loggerLegend
+    );                              // @system-log-end
+    this._sizesTransformer.transformConnectionSizes(transformationData);
+    Logger.stopLoggingOperation(); // @system-log
+    
+    this._renderer.renderTransformedGrid();
+    SizesResolverManager.stopCachingTransaction();
+    // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
+}
+
+// @todo -> Apply check that item is < than grid
+Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
+    var itemsToTransform = [];
+    var sizesToTransform = [];
+
+    if(Dom.isArray(maybeItem)) {
+        for(var i = 0; i < maybeItem.length; i++) {
+            itemsToTransform.push(maybeItem[i][0]);
+            sizesToTransform.push([
+                maybeItem[i][1],
+                maybeItem[i][2]
+            ]);
+        }
+    }
+    else {
+        itemsToTransform.push(maybeItem);
+        sizesToTransform.push([newWidth, newHeight]);
+    }
+    
+    var itemsToTransform = this._collector.toDOMCollection(itemsToTransform);
+    SizesResolverManager.startCachingTransaction();
+
+    this._collector.ensureAllItemsAreAttachedToGrid(itemsToTransform);
+    this._collector.ensureAllItemsCanBeAttachedToGrid(itemsToTransform);
+
+    var connectionsToTransform = [];
+    var targetSizesToTransform = [];
+    var loggerLegend = ""; // @system-log
+    for(var i = 0; i < itemsToTransform.length; i++) {
+        connectionsToTransform.push(this.findConnectionByItem(itemsToTransform[i]));
+        targetSizesToTransform[i] = this._sizesTransformer.initConnectionTransform(
+            connectionsToTransform[i],
+            sizesToTransform[i][0],
+            sizesToTransform[i][1]
+        );
+        loggerLegend += "Item GUID: " + this._guid.getItemGUID(connectionsToTransform[i].item); // @system-log-start
+        loggerLegend += " new width: " + sizesToTransform[i][0] + " new height: " + sizesToTransform[i][1];
+        loggerLegend += " targetWidth: " + targetSizesToTransform[i].targetWidth;
+        loggerLegend += " targetHeight: " + targetSizesToTransform[i].targetHeight;
+        loggerLegend += "<br><br>";                                                             // @system-log-end
+    }
+
+    var transformationData = [];
+    for(var i = 0; i < connectionsToTransform.length; i++) {
+        transformationData.push({
+            connectionToTransform: connectionsToTransform[i],
+            widthToTransform: targetSizesToTransform[i].targetWidth,
+            heightToTransform: targetSizesToTransform[i].targetHeight
+        });
+    }
+
     Logger.startLoggingOperation( // @system-log-start
         Logger.OPERATION_TYPES.TRANSFORM_SIZES,
-        "Item GUID: " + this._guid.getItemGUID(item) + 
-        " new width: " + newWidth + " new height: " + newHeight +
-        " target width: " + targetSizes.targetWidth + " target height: " + targetSizes.targetHeight
+        loggerLegend
     );                            // @system-log-end
-    this._sizesTransformer.transformConnectionSizes(
-        connection, targetSizes.targetWidth, targetSizes.targetHeight
-    );
+    this._sizesTransformer.transformConnectionSizes(transformationData);
     Logger.stopLoggingOperation(); // @system-log
 
     this._renderer.renderTransformedGrid();
@@ -430,10 +641,7 @@ Gridifier.prototype.transformSizes = function(item, newWidth, newHeight) {
     // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
 }
 
-// @todo -> transformBatchSizes = f([{i,w,h},{i,w,h},...]) First process all one after one,
-// than renderTransformedLayout
-
-// @todo -> Add to items numbers besides GUIDS, and rebuild them on item deletes
+// @todo -> Add to items numbers besides GUIDS, and rebuild them on item deletes(Also use in sorting per drag?)
 // @todo -> Add methods appendAfter, prependBefore or insertBefore, insertAfter(item)
 
 Gridifier.HorizontalGrid = {};
@@ -460,3 +668,4 @@ Gridifier.GRID_ITEM_MARKING_STRATEGIES = {BY_CLASS: "class", BY_DATA_ATTR: "data
 Gridifier.GRID_ITEM_MARKING_DEFAULTS = {CLASS: "gridifier-item", DATA_ATTR: "data-gridifier-item"};
 
 Gridifier.OPERATIONS = {PREPEND: 0, REVERSED_PREPEND: 1, APPEND: 2, REVERSED_APPEND: 3, MIRRORED_PREPEND: 4};
+Gridifier.GRID_SIZES_UPDATE_TIMEOUT = 100;

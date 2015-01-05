@@ -35,23 +35,25 @@ Gridifier.VerticalGrid.ConnectorsSelector.prototype.getSelectedConnectors = func
 // @todo -> Refactor this 2 methods in 1??? (Dynamic conds)
 Gridifier.VerticalGrid.ConnectorsSelector.prototype.selectOnlyMostBottomConnectorFromSide = function(side) {
     var mostBottomConnectorItemGUID = null;
-    var mostBottomConnectorY = -1;
+    var mostBottomConnectorY = null;
 
-    for(var i = 0; i < this._connectors.length; i++) {
-        if(this._connectors[i].side == side && this._connectors[i].y > mostBottomConnectorY) {
-            mostBottomConnectorItemGUID = this._connectors[i].itemGUID;
-            mostBottomConnectorY = this._connectors[i].y;
+    var i = this._connectors.length;
+    while(i--) {
+        if(this._connectors[i].side == side) {
+            if(mostBottomConnectorItemGUID == null || this._connectors[i].y > mostBottomConnectorY) {
+                mostBottomConnectorItemGUID = this._connectors[i].itemGUID;
+                mostBottomConnectorY = this._connectors[i].y;
+            }
         }
     }
 
     if(mostBottomConnectorItemGUID == null)
         return;
 
-    for(var i = 0; i < this._connectors.length; i++) {
-        if(this._connectors[i].side == side && this._connectors[i].itemGUID != mostBottomConnectorItemGUID) {
+    var i = this._connectors.length;
+    while(i--) {
+        if(this._connectors[i].side == side && this._connectors[i].itemGUID != mostBottomConnectorItemGUID)
             this._connectors.splice(i, 1);
-            i--;
-        }
     }
 }
 
@@ -59,27 +61,23 @@ Gridifier.VerticalGrid.ConnectorsSelector.prototype.selectOnlyMostTopConnectorFr
     var mostTopConnectorItemGUID = null;
     var mostTopConnectorY = null;
 
-    for(var i = 0; i < this._connectors.length; i++) {
-        if(mostTopConnectorItemGUID == null
-            && this._connectors[i].side == side) {
-            mostTopConnectorItemGUID = this._connectors[i].itemGUID;
-            mostTopConnectorY = this._connectors[i].y;
-        }
-        else if(this._connectors[i].side == side 
-                && this._connectors[i].y < mostTopConnectorY) {
-            mostTopConnectorItemGUID = this._connectors[i].itemGUID;
-            mostTopConnectorY = this._connectors[i].y;
+    var i = this._connectors.length;
+    while(i--) {
+        if(this._connectors[i].side == side) {
+            if(mostTopConnectorItemGUID == null || this._connectors[i].y < mostTopConnectorY) {
+                mostTopConnectorItemGUID = this._connectors[i].itemGUID;
+                mostTopConnectorY = this._connectors[i].y;
+            }
         }
     }
 
     if(mostTopConnectorItemGUID == null)
         return;
 
-    for(var i = 0; i < this._connectors.length; i++) {
-        if(this._connectors[i].side == side && this._connectors[i].itemGUID != mostTopConnectorItemGUID) {
+    var i = this._connectors.length;
+    while(i--) {
+        if(this._connectors[i].side == side && this._connectors[i].itemGUID != mostTopConnectorItemGUID) 
             this._connectors.splice(i, 1);
-            i--;
-        }
     }
 }
 

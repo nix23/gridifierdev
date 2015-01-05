@@ -228,7 +228,7 @@ Gridifier.VerticalGrid.Prepender.prototype._filterConnectorsPerNextConnection = 
             connectors,
             this._connections.get()
         );                              // @system-log-end
-
+        
         var connectorsShifter = new Gridifier.ConnectorsShifter(this._gridifier, connectors, this._connections);
         connectorsShifter.shiftAllWithSpecifiedSideToLeftGridCorner(connectorsSide);
         connectors = connectorsShifter.getAllConnectors();
