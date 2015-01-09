@@ -20,6 +20,9 @@ Gridifier.SizesTransformer = function(gridifier,
     this._connectorsCleaner = null;
     this._transformerConnectors = null;
 
+    this._transformedItemClonesToDelete = [];
+    this._deleteTransformedItemClonesTimeout = null;
+
     this._lastReappendedItemInsertType = null;
     this._isNoIntersectionsStrategyPrependedTransformedItemSpecialFix = false;
     this._isNoIntersectionsStrategyFakeCallToFixPrependedTransform = false;
@@ -84,6 +87,7 @@ Gridifier.SizesTransformer.TRANSFORMED_ITEM_CLONE_DATA_ATTR_VALUE = "item-clone"
 Gridifier.SizesTransformer.TOGGLE_SIZES_TOGGLED_ITEM_SIZES_DATA_ATTR = "data-toggle-sizes-item-sizes-are-toggled";
 Gridifier.SizesTransformer.TOGGLE_SIZES_ORIGINAL_WIDTH_DATA_ATTR = "data-toggle-sizes-original-width";
 Gridifier.SizesTransformer.TOGGLE_SIZES_ORIGINAL_HEIGHT_DATA_ATTR = "data-toggle-sizes-original-height";
+Gridifier.SizesTransformer.DELETE_TRANSFORMED_ITEM_CLONES_DELAY = 100;
 
 Gridifier.SizesTransformer.prototype.initConnectionTransform = function(connection, newWidth, newHeight) {
     this._isNoIntersectionsStrategyFakeCallToFixPrependedTransform = false; // @todo -> remove this???
@@ -233,7 +237,7 @@ Gridifier.SizesTransformer.prototype._createAllTransformedConnectionItemClones =
 
     for(var i = 0; i < transformationData.length; i++) {
         // @todo -> Test performance with/without first cloneNode parameter
-        var transformedItemClone = transformationData[i].connectionToTransform.item.cloneNode(true);
+        var transformedItemClone = transformationData[i].connectionToTransform.item.cloneNode();
         transformedItemClone.setAttribute(
             Gridifier.SizesTransformer.TRANSFORMED_ITEM_CLONE_DATA_ATTR,
             Gridifier.SizesTransformer.TRANSFORMED_ITEM_CLONE_DATA_ATTR_VALUE
@@ -251,6 +255,7 @@ Gridifier.SizesTransformer.prototype._createAllTransformedConnectionItemClones =
 
         this._gridifier.getGrid().appendChild(transformedItemClone);
         transformedItemClones.push(transformedItemClone);
+        this._transformedItemClonesToDelete.push(transformedItemClone);
     }
 
     return transformedItemClones;
@@ -582,7 +587,7 @@ Gridifier.SizesTransformer.prototype._reappendTransformedItem = function(transfo
         this._connections.get()
     );          // @system-log-end
 
-    transformedItemClone.parentNode.removeChild(transformedItemClone);
+    //transformedItemClone.parentNode.removeChild(transformedItemClone);
 }
 
 Gridifier.SizesTransformer.prototype._reappendItems = function(itemsToReappend, 
@@ -731,6 +736,27 @@ Gridifier.SizesTransformer.prototype._applyNoIntersectionsStrategyLeftFreeSpaceF
     // @todo -> Implement horizontal fix here
 }
 
+Gridifier.SizesTransformer.prototype._deleteTransformedItemClones = function() {
+    for(var i = 0; i < this._transformedItemClonesToDelete.length; i++) {
+        var cloneToDelete = this._transformedItemClonesToDelete[i];
+        cloneToDelete.parentNode.removeChild(cloneToDelete);
+    }
+
+    this._transformedItemClonesToDelete = [];
+}
+
+Gridifier.SizesTransformer.prototype._scheduleTransformedItemClonesDelete = function() {
+    if(this._deleteTransformedItemClonesTimeout != null) {
+        clearTimeout(this._deleteTransformedItemClonesTimeout);
+        this._deleteTransformedItemClonesTimeout = null;
+    }
+
+    var me = this;
+    this._deleteTransformedItemClonesTimeout = setTimeout(function() {
+        me._deleteTransformedItemClones.call(me);
+    }, Gridifier.SizesTransformer.DELETE_TRANSFORMED_ITEM_CLONES_DELAY);
+}
+
 Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transformationData) {
     transformationData = this._sortConnectionsToTransform(transformationData);
     this._markEachConnectionAsTransformed(transformationData);
@@ -740,6 +766,8 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transfo
         transformedConnections.push(transformationData[i].connectionToTransform);
 
     var transformedItemClones = this._createAllTransformedConnectionItemClones(transformationData);
+
+    var processor = function() {
     var itemsToReappendData = this._findAllItemsToReappend(
         transformationData[0].connectionToTransform, transformedItemClones
     );
@@ -762,7 +790,14 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transfo
     
     //this._determineIfNoIntersectionsStrategySpecialFixIsRequired(connection);
     this._reappendItems(itemsToReappend, transformedConnections);
-    
+    this._gridifier.getRenderer().renderTransformedConnections();
+    this._scheduleTransformedItemClonesDelete();
+    }
+
+    var me = this;
+    setTimeout(function() { processor.call(me); }, 0);
+    //processor.call(me);
+
     // @TODO -> WARNING!!! THIS SHOULD BE USED WHEN !NO_INTERSECTIONS STRATEGY TO FIX PREPENDED TRANSFORMS
     //  (FIX THIS!!!!)
     // @todo -> Check if this fix should be made always

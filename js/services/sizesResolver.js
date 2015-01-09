@@ -372,9 +372,9 @@ var SizesResolver = {
             var elementWidth = elementComputedCSS.width;
             var time = timer.get();
             var message = "time = " + time + " class = " + DOMElem.getAttribute("class") + "<br>";
-            //if(time > 0.100) {
+            if(time > 0.100) {
                 console.log(message);
-            //}
+            }
         //}
 
         var normalizedComputedWidth = this.normalizeComputedCSSSizeValue(elementComputedCSS.width);

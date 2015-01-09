@@ -94,7 +94,8 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         // width: "25%",
         // height: "200px",
         //border: itemBorder + "px rgb(60,60,60) solid",
-        border: "3px " + borderColor + " solid",
+        //border: "3px " + borderColor + " solid",
+        border: "3px black solid",
         //margin: itemMargin + "px",
         // "margin-left": "1.66%",
         // "margin-right": "1.66%",
@@ -115,6 +116,12 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
     });
     this._$gridItem.addClass(itemBgClass);
 
+    // var res = Math.floor(Math.random()*(2-1+1)+1);
+    // if(res == 1) 
+    //     var bgs = "url(img/Cars1.jpg)";
+    // else
+    //     var bgs = "url(img/Cars2.jpg)";
+
     var $gridItemBg = $("<div/>");
     $gridItemBg.css({
         position: "absolute",
@@ -126,7 +133,8 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         height: "100%",
         // @todo -> Make Crossbrowser
         //background: "url(img/gridItemBg9.png)",
-        background: "url(img/test3.jpg)",
+        //background: "url(img/test2.png)",
+        //background: bgs,
         "background-size": "cover",
         "background-repeat": "no-repeat",
         "background-position": "center center"

@@ -65,7 +65,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         // me._gridifierDynamicSettings._itemSizes[0].width = "100px";
         // me._gridifierDynamicSettings._itemSizes[0].height = "100px";
 
-        // me._gridifierDynamicSettings._itemSizes[1].width = "100px";
+        // me._gridifierDynamicSettings._itemSizes[1].width = "200px";
         // me._gridifierDynamicSettings._itemSizes[1].height = "200px";
 
         // me._gridifierDynamicSettings._itemSizes[2].width = "100px";
@@ -76,6 +76,25 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
         // me._gridifierDynamicSettings._itemSizes[4].width = "100px";
         // me._gridifierDynamicSettings._itemSizes[4].height = "200px"; // @todo -> Delete, tmp
+
+
+
+        // me._gridifierDynamicSettings._itemSizes[0].width = "200px"; // cars tmp
+        // me._gridifierDynamicSettings._itemSizes[0].height = "200px";
+
+        // me._gridifierDynamicSettings._itemSizes[1].width = "400px";
+        // me._gridifierDynamicSettings._itemSizes[1].height = "400px";
+
+        // me._gridifierDynamicSettings._itemSizes[2].width = "200px";
+        // me._gridifierDynamicSettings._itemSizes[2].height = "200px";
+
+        // me._gridifierDynamicSettings._itemSizes[3].width = "400px";
+        // me._gridifierDynamicSettings._itemSizes[3].height = "400px";
+
+        // me._gridifierDynamicSettings._itemSizes[4].width = "200px";
+        // me._gridifierDynamicSettings._itemSizes[4].height = "200px"; // cars tmp
+
+
 
         me._gridifierDynamicSettings._itemSizes[0].width = "5%";  // @todo -> Delete, tmp
         me._gridifierDynamicSettings._itemSizes[0].height = "100px";
@@ -311,7 +330,9 @@ DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
         // @todo -> Check if batch processing of appended items is required
         (function($gridItem, gridItem) {
             $gridItem.on("gridifier.appendFinished", function() {
-                gridItem.renderGUID();
+                //setTimeout(function() {
+                   // gridItem.renderGUID();
+                //}, 0);
             });
         })($gridItem, gridItem);
     }
@@ -337,7 +358,14 @@ DemoLayoutBuilder.DemoLayout.prototype._prependNextItems = function() {
 
         var $gridItem = gridItem.getView();
         this._gridifier.prepend($gridItem);
-        gridItem.renderGUID();
+        // @todo -> Replace with real event
+        (function($gridItem, gridItem) {
+            $gridItem.on("gridifier.prependFinished", function() {
+                //setTimeout(function() {
+                    // gridItem.renderGUID();
+                //}, 0);
+            });
+        })($gridItem, gridItem);
     }
 }
 

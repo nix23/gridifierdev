@@ -208,6 +208,10 @@ Gridifier.prototype.getGrid = function() {
     return this._grid;
 }
 
+Gridifier.prototype.getRenderer = function() {
+    return this._renderer;
+}
+
 Gridifier.prototype.markAsGridItem = function(items) {
     var items = this._collector.toDOMCollection(items);
     this._collector.attachToGrid(items);
@@ -217,7 +221,7 @@ Gridifier.prototype.markAsGridItem = function(items) {
 
 // @todo After SizesTransforms maybe should decrease grid height,
 // if elements become smaller?
-Gridifier.prototype.updateGridSizes = function() {
+Gridifier.prototype._updateGridSizes = function() {
     var connections = this._connections.get();
     if(connections.length == 0)
         return;
@@ -253,7 +257,7 @@ Gridifier.prototype.updateGridSizes = function() {
     }
 }
 
-Gridifier.prototype._scheduleGridSizesUpdate = function() {
+Gridifier.prototype.scheduleGridSizesUpdate = function() {
     if(this._gridSizesUpdateTimeout != null) {
         clearTimeout(this._gridSizesUpdateTimeout);
         this._gridSizesUpdateTimeout = null;
@@ -261,7 +265,7 @@ Gridifier.prototype._scheduleGridSizesUpdate = function() {
 
     var me = this;
     this._gridSizesUpdateTimeout = setTimeout(function() {
-        me.updateGridSizes.call(me);
+        me._updateGridSizes.call(me);
     }, Gridifier.GRID_SIZES_UPDATE_TIMEOUT);
 }
 
@@ -382,10 +386,21 @@ Gridifier.prototype._applyPrepend = function(item) {
     }
     else if(this._settings.isReversedPrepend())
         this._reversedPrepender.reversedPrepend(item);
+    // @todo -> replace with real event
+    $(item).trigger("gridifier.prependFinished");
+}
+
+Gridifier.prototype.prepend = function(items) {
+    var me = this;
+    (function(items) {
+        setTimeout(function() {
+            me._prepend.call(me, items);
+        }, 0)
+    })(items);
 }
 
 // @todo -> append, prepend, delete, insert
-Gridifier.prototype.prepend = function(items) {
+Gridifier.prototype._prepend = function(items) {
     var items = this._collector.toDOMCollection(items);
     SizesResolverManager.startCachingTransaction();
 
@@ -399,11 +414,11 @@ Gridifier.prototype.prepend = function(items) {
         this._guid.markNextPrependedItem(items[i]);
         this._applyPrepend(items[i]);
         // @todo after each operation update grid width/height
-        $(this).trigger("gridifier.gridSizesChange");
+        //$(this).trigger("gridifier.gridSizesChange");
     }
 
-    this.updateGridSizes();
     SizesResolverManager.stopCachingTransaction();
+    this.scheduleGridSizesUpdate();
 
     return this;
 }
@@ -422,7 +437,7 @@ Gridifier.prototype._applyAppend = function(item) {
         this._reversedAppender.reversedAppend(item);
     }
     // @todo -> replace with real event
-    //$(item).trigger("gridifier.appendFinished");
+    $(item).trigger("gridifier.appendFinished");
 }
 
 Gridifier.prototype.append = function(items) {
@@ -434,10 +449,16 @@ Gridifier.prototype.append = function(items) {
     // SizesResolver.outerWidth(fakerDiv);
     // SizesResolver.outerHeight(fakerDiv);
 
+    // for(var i = 0; i < items.length; i++) {
+    //     items[i].style.position = "absolute";
+    //     items[i].style.left = "-90000px";
+    //     items[i].style.top = "0px";
+    // }
+
     var me = this;
     (function(items, fakerDiv) {
         setTimeout(function() { 
-            me._append.call(me, items, fakerDiv);
+            me._append.call(me, items);
         }, 0);
     })(items, {});
     //this._append(items);
@@ -448,38 +469,44 @@ Gridifier.prototype._append = function(items, fakerDiv) { //timer.start();
     SizesResolverManager.startCachingTransaction();
     //items = this._applyChromeGetComputedStylePerformanceFix(items, 'fhf');
 
-    var fakerDiv = document.createElement("div");
-    fakerDiv.style.width = "0px";
-    fakerDiv.style.height = "0px";
-    fakerDiv.style.position = "absolute";
-    fakerDiv.style.left = "-90000px";
-    fakerDiv.style.top = "100px";
-    fakerDiv.style.display = "none";
-    fakerDiv.style.visibility = "none";
-    var frag = document.createDocumentFragment();
-    frag.appendChild(fakerDiv);
+    // for(var i = 0; i < items.length; i++) {
+    //     items[i].style.position = "absolute";
+    //     items[i].style.left = "-90000px";
+    //     items[i].style.top = "0px";
+    // }
 
-    var wrapperDiv = document.createElement("div");
-    wrapperDiv.style.position = "absolute";
-    wrapperDiv.style.left = "-90000px";
-    wrapperDiv.style.top = "0px";
-    wrapperDiv.style.width = "0px";
-    wrapperDiv.style.height = "0px";
-    wrapperDiv.style.visibility = "hidden";
-    wrapperDiv.style.display = "none";
-    document.body.parentNode.appendChild(wrapperDiv);
+    // var fakerDiv = document.createElement("div");
+    // fakerDiv.style.width = "0px";
+    // fakerDiv.style.height = "0px";
+    // fakerDiv.style.position = "absolute";
+    // fakerDiv.style.left = "-90000px";
+    // fakerDiv.style.top = "100px";
+    // fakerDiv.style.display = "none";
+    // fakerDiv.style.visibility = "none";
+    // var frag = document.createDocumentFragment();
+    // frag.appendChild(fakerDiv);
 
-    wrapperDiv.appendChild(fakerDiv);
+    // var wrapperDiv = document.createElement("div");
+    // wrapperDiv.style.position = "absolute";
+    // wrapperDiv.style.left = "-90000px";
+    // wrapperDiv.style.top = "0px";
+    // wrapperDiv.style.width = "0px";
+    // wrapperDiv.style.height = "0px";
+    // wrapperDiv.style.visibility = "hidden";
+    // wrapperDiv.style.display = "none";
+    // document.body.parentNode.appendChild(wrapperDiv);
+
+    // wrapperDiv.appendChild(fakerDiv);
 
     // SizesResolver.outerWidth(fakerDiv);
     // SizesResolver.outerHeight(fakerDiv);
-    timer.start();
-    var elementComputedCSS = window.getComputedStyle(fakerDiv, null);
-    var elementWidth = elementComputedCSS.width;
-    var time = timer.get();
-    var message = "time = " + time + " class = " + fakerDiv.getAttribute("class") + "<br>";
+    // timer.start();
+    // var elementComputedCSS = window.getComputedStyle(fakerDiv, null);
+    // var elementWidth = elementComputedCSS.width;
+    // var time = timer.get();
+    // var message = "time = " + time + " class = " + fakerDiv.getAttribute("class") + "<br>";
     //if(time > 0.100) {
-        console.log(message);
+       // console.log(message);
     //}
     //document.body.parentNode.removeChild(wrapperDiv);
 
@@ -499,7 +526,7 @@ Gridifier.prototype._append = function(items, fakerDiv) { //timer.start();
     }
 
     SizesResolverManager.stopCachingTransaction();
-    //this._scheduleGridSizesUpdate();
+    this.scheduleGridSizesUpdate();
     //console.log("full reappend call = " + timer.get());
     return this;
 }
@@ -573,7 +600,6 @@ Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {
     this._sizesTransformer.transformConnectionSizes(transformationData);
     Logger.stopLoggingOperation(); // @system-log
     
-    this._renderer.renderTransformedGrid();
     SizesResolverManager.stopCachingTransaction();
     // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
 }
@@ -628,7 +654,7 @@ Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
             heightToTransform: targetSizesToTransform[i].targetHeight
         });
     }
-
+    
     Logger.startLoggingOperation( // @system-log-start
         Logger.OPERATION_TYPES.TRANSFORM_SIZES,
         loggerLegend
@@ -636,7 +662,6 @@ Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
     this._sizesTransformer.transformConnectionSizes(transformationData);
     Logger.stopLoggingOperation(); // @system-log
 
-    this._renderer.renderTransformedGrid();
     SizesResolverManager.stopCachingTransaction();
     // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
 }

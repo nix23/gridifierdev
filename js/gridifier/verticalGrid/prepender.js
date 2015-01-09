@@ -75,7 +75,7 @@ Gridifier.VerticalGrid.Prepender.prototype.prepend = function(item, disableMarki
     );          // @system-log-end
 
     if(wereItemsNormalized) {
-        this._renderer.renderConnectionsAfterPrependNormalization(connection, this._connections.get());
+        this._renderer.renderConnections(this._connections.get(), [connection]);
         Logger.log( // @system-log-start
             "renderConnectionsAfterPrependNormalization",
             "",

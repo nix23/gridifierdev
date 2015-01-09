@@ -128,7 +128,7 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerDef
             var firstItemToReappendWidth = SizesResolverManager.outerWidth(firstConnectionToReappend.transformedItemClone, true);
         else
             var firstItemToReappendWidth = SizesResolverManager.outerWidth(firstConnectionToReappend.item, true);
-
+        
         var lastRenderedLeftOffset = parseFloat(firstConnectionToReappend.lastRenderedLeftOffset);
         var transformedConnectionNewPtX1 = this._normalizer.unnormalizeFractionalValueForRender(lastRenderedLeftOffset);
         var transformedConnectionNewX1 = (this._gridifier.getGridX2() + 1) * (transformedConnectionNewPtX1 / 100);

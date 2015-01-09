@@ -53,8 +53,10 @@ Gridifier.VerticalGrid.Appender.prototype.append = function(item, disableMarking
     if(!disableMarking)
         this._guid.markIfIsFirstAppendedItem(item);
     
-    this._initConnectors(); 
+    this._initConnectors();
+    timer.start();
     var connection = this._createConnectionPerItem(item);
+    console.log("create connection = ", timer.get());
     // var result = timer.get();
     // if(typeof window.appendsCount == "undefined") {
     //     window.appendsCount = 1;
@@ -64,8 +66,10 @@ Gridifier.VerticalGrid.Appender.prototype.append = function(item, disableMarking
     //     window.appendsCount++;
     //     window.totalTime += result;
     // }
-
+    
+    timer.start();
     this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
+    console.log("delete intersected = ", timer.get());
     Logger.log( // @system-log-start
         "deleteAllIntersectedFromBottomConnectors",
         "",

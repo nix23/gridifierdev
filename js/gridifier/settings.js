@@ -94,7 +94,7 @@ Gridifier.Settings = function(settings) {
             setTimeout(function() {
                 Dom.css3.transform(backFrame, rotateProp + "(0deg)"); 
                 Dom.css3.transform(frontFrame, rotateProp + "(180deg)"); 
-            }, 0);
+            }, 20);
 
             setTimeout(function() {
                 scene.parentNode.removeChild(scene);
@@ -162,13 +162,15 @@ Gridifier.Settings = function(settings) {
                     return;
                 }
                 
+                // @todo -> Adjust timeout, and move to separate const
                 Dom.css3.transition(item, "All 0s ease");
-                Dom.css3.transform(item, "scale(0)");
+                Dom.css3.transform(item, "scale(0)"); 
+                item.style.visibility = "visible"; // Ie11 blinking fix(:))
                 setTimeout(function() {
                     item.style.visibility = "visible";
                     Dom.css3.transition(item, "All 1000ms ease");
                     Dom.css3.transform(item, "scale(1)");
-                }, 0); 
+                }, 20); 
             },
 
             "hide": function(item) {
@@ -184,7 +186,7 @@ Gridifier.Settings = function(settings) {
                     item.style.visibility = "hidden";
                     Dom.css3.transition(item, "All 0s ease");
                     Dom.css3.transform(item, "scale(1)");
-                }, 0);
+                }, 20);
                 // Send event through global Gridifier.Event Object
             }
         },
@@ -202,7 +204,7 @@ Gridifier.Settings = function(settings) {
                     item.style.visibility = "visible";
                     Dom.css3.transition(item, "All 1000ms ease");
                     Dom.css3.opacity(item, 1);
-                }, 0);
+                }, 20);
             },
             "hide": function(item) {
                 if(!Dom.isBrowserSupportingTransitions()) {
@@ -217,7 +219,7 @@ Gridifier.Settings = function(settings) {
                     item.style.visibility = "hidden";
                     Dom.css3.transition(item, "All 0ms ease");
                     Dom.css3.opacity(item, 1);
-                }, 0);
+                }, 20);
             }
         },
         "visibility": {
