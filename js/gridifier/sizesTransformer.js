@@ -18,6 +18,7 @@ Gridifier.SizesTransformer = function(gridifier,
     this._normalizer = null;
 
     this._connectorsCleaner = null;
+    this._connectorsSelector = null;
     this._transformerConnectors = null;
 
     this._transformedItemClonesToDelete = [];
@@ -60,6 +61,8 @@ Gridifier.SizesTransformer = function(gridifier,
         else if(me._settings.isHorizontalGrid()) {
             // @todo -> Implement here
         }
+
+        me._connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(me._guid);
     };
 
     this._bindEvents = function() {
@@ -433,16 +436,16 @@ Gridifier.SizesTransformer.prototype._reappendDependedItemWithReversedAppend = f
             this._connections.get()
         );          // @system-log-end
 
-        var connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(this._connectors.get(), this._guid);
+        this._connectorsSelector.attachConnectors(this._connectors.get());
         if(this._settings.isVerticalGrid())
             var selectedConnectorsSide = Gridifier.Connectors.SIDES.BOTTOM.LEFT;
         else if(this._settings.isHorizontalGrid())
             var selectedConnectorsSide = Gridifier.Connectors.SIDES.BOTTOM.LEFT; // @todo -> Replace with hor.grid side
 
-        connectorsSelector.selectOnlySpecifiedSideConnectorsOnPrependedItemsExceptFirst(
+        this._connectorsSelector.selectOnlySpecifiedSideConnectorsOnPrependedItemsExceptFirst(
             selectedConnectorsSide
         );
-        this._connectors.set(connectorsSelector.getSelectedConnectors());
+        this._connectors.set(this._connectorsSelector.getSelectedConnectors());
         var logSide = (this._settings.isVerticalGrid()) ? "BOTTOM.LEFT" : "BOTTOM.LEFT"; // @system-log-start
         Logger.log(
             "reappendDependedItemWithReversedAppend Depended item GUID: " + this._guid.getItemGUID(dependedItem),
@@ -498,16 +501,16 @@ Gridifier.SizesTransformer.prototype._reappendDependedItemWithDefaultAppend = fu
             this._connections.get()
         );          // @system-log-end
 
-        var connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(this._connectors.get(), this._guid);
+        this._connectorsSelector.attachConnectors(this._connectors.get());
         if(this._settings.isVerticalGrid())
             var selectedConnectorsSide = Gridifier.Connectors.SIDES.BOTTOM.RIGHT;
         else if(this._settings.isHorizontalGrid())
             var selectedConnectorsSide = Gridifier.Connectors.SIDES.BOTTOM.RIGHT; // @todo -> Replace with hor.grid side
 
-        connectorsSelector.selectOnlySpecifiedSideConnectorsOnPrependedItemsExceptFirst(
+        this._connectorsSelector.selectOnlySpecifiedSideConnectorsOnPrependedItemsExceptFirst(
             selectedConnectorsSide
         );
-        this._connectors.set(connectorsSelector.getSelectedConnectors());
+        this._connectors.set(this._connectorsSelector.getSelectedConnectors());
         var logSide = (this._settings.isVerticalGrid()) ? "BOTTOM.RIGHT" : "BOTTOM.RIGHT"; // @system-log-start
         Logger.log(
             "reappendDependedItemWithDefaultAppend Depended item GUID: " + this._guid.getItemGUID(dependedItem),

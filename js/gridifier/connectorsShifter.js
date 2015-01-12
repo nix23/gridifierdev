@@ -1,12 +1,11 @@
-Gridifier.ConnectorsShifter = function(gridifier, connectors, connections) {
+Gridifier.ConnectorsShifter = function(gridifier, connections) {
     var me = this;
 
     this._gridifier = null;
+    this._connections = null;
 
     this._connectorsIntersector = null;
     this._ci = null;
-
-    this._connections = null;
 
     this._connectors = null;
     this._shiftedConnectors = [];
@@ -17,9 +16,7 @@ Gridifier.ConnectorsShifter = function(gridifier, connectors, connections) {
 
     this._construct = function() {
         me._gridifier = gridifier;
-
         me._connections = connections;
-        me._connectors = connectors;
 
         me._connectorsIntersector = new Gridifier.ConnectorsIntersector(me._connections);
         me._ci = me._connectorsIntersector;
@@ -42,6 +39,12 @@ Gridifier.ConnectorsShifter = function(gridifier, connectors, connections) {
 
 Gridifier.ConnectorsShifter.SIDE = "shifted";
 
+Gridifier.ConnectorsShifter.prototype.attachConnectors = function(connectors) {
+    this._connectors = connectors;
+    this._shifterConnectors = [];
+    this._allConnectors = [];
+}
+
 Gridifier.ConnectorsShifter.prototype.getAllConnectors = function() {
     return this._allConnectors;
 }
@@ -54,7 +57,7 @@ Gridifier.ConnectorsShifter.prototype._createShiftedConnector = function(x, y, c
         y: Dom.toInt(y),
         itemGUID: Dom.toInt(connector.itemGUID)
     };
-
+    
     this._shiftedConnectors.push(shiftedConnector);
     this._allConnectors.push(shiftedConnector);
 }

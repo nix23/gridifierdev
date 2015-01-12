@@ -7,6 +7,9 @@ Gridifier.VerticalGrid.Prepender = function(gridifier, settings, connectors, con
     this._connectors = null;
     this._connections = null;
     this._connectorsCleaner = null;
+    this._connectorsShifter = null;
+    this._connectorsSelector = null;
+    this._connectorsSorter = null;
     this._itemCoordsExtractor = null;
     this._connectionsIntersector = null;
     this._guid = null;
@@ -26,6 +29,11 @@ Gridifier.VerticalGrid.Prepender = function(gridifier, settings, connectors, con
         me._connectorsCleaner = new Gridifier.VerticalGrid.ConnectorsCleaner(
             me._connectors, me._connections
         );
+        me._connectorsShifter = new Gridifier.ConnectorsShifter(
+            me._connectors, me._connections
+        );
+        me._connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(me._guid);
+        me._connectorsSorter = new Gridifier.VerticalGrid.ConnectorsSorter();
         me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor(me._gridifier);
         me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(me._connections);
 
@@ -221,9 +229,9 @@ Gridifier.VerticalGrid.Prepender.prototype._filterConnectorsPerNextConnection = 
     var connectors = this._connectors.getClone();
 
     if(this._settings.isDefaultIntersectionStrategy()) {
-        var connectorsShifter = new Gridifier.ConnectorsShifter(this._gridifier, connectors, this._connections);
-        connectorsShifter.shiftAllConnectors();
-        connectors = connectorsShifter.getAllConnectors();
+        this._connectorsShifter.attachConnectors(connectors);
+        this._connectorsShifter.shiftAllConnectors();
+        connectors = this._connectorsShifter.getAllConnectors();
         Logger.log(                     // @system-log-start
             "createConnectionPerItem",
             "filterConnectorsPerNextConnection -> isDefaultIntersectionStrategy() -> shiftAllConnectors",
@@ -234,9 +242,9 @@ Gridifier.VerticalGrid.Prepender.prototype._filterConnectorsPerNextConnection = 
     else if(this._settings.isNoIntersectionsStrategy()) {
         var connectorsSide = Gridifier.Connectors.SIDES.TOP.LEFT;
 
-        var connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(connectors);
-        connectorsSelector.selectOnlyMostTopConnectorFromSide(connectorsSide);
-        connectors = connectorsSelector.getSelectedConnectors();
+        this._connectorsSelector.attachConnectors(connectors);
+        this._connectorsSelector.selectOnlyMostTopConnectorFromSide(connectorsSide);
+        connectors = this._connectorsSelector.getSelectedConnectors();
         Logger.log(                     // @system-log-start
             "createConnectionPerItem",
             "filterConnectorsPerNextConnection -> isNoIntersectionsStrategy() -> selectOnlyMostTopConnectorFromSide(TOP.LEFT)",
@@ -244,9 +252,9 @@ Gridifier.VerticalGrid.Prepender.prototype._filterConnectorsPerNextConnection = 
             this._connections.get()
         );                              // @system-log-end
         
-        var connectorsShifter = new Gridifier.ConnectorsShifter(this._gridifier, connectors, this._connections);
-        connectorsShifter.shiftAllWithSpecifiedSideToLeftGridCorner(connectorsSide);
-        connectors = connectorsShifter.getAllConnectors();
+        this._connectorsShifter.attachConnectors(connectors);
+        this._connectorsShifter.shiftAllWithSpecifiedSideToLeftGridCorner(connectorsSide);
+        connectors = this._connectorsShifter.getAllConnectors();
         Logger.log(                     // @system-log-start
             "createConnectionPerItem",
             "filterConnectorsPerNextConnection -> isNoIntersectionsStrategy() -> shiftAllWithSpecifiedSideToLeftGridCorner(TOP.LEFT)",
@@ -255,10 +263,10 @@ Gridifier.VerticalGrid.Prepender.prototype._filterConnectorsPerNextConnection = 
         );                              // @system-log-end
     }
 
-    var connectorsSorter = new Gridifier.VerticalGrid.ConnectorsSorter(connectors);
-    connectorsSorter.sortConnectorsForPrepend(Gridifier.PREPEND_TYPES.DEFAULT_PREPEND);
+    this._connectorsSorter.attachConnectors(connectors);
+    this._connectorsSorter.sortConnectorsForPrepend(Gridifier.PREPEND_TYPES.DEFAULT_PREPEND);
 
-    return connectorsSorter.getConnectors();
+    return this._connectorsSorter.getConnectors();
 }
 
 Gridifier.VerticalGrid.Prepender.prototype._findItemConnectionCoords = function(item, sortedConnectors) {

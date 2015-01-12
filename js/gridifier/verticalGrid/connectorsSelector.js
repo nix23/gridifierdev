@@ -1,4 +1,4 @@
-Gridifier.VerticalGrid.ConnectorsSelector = function(connectors, guid) {
+Gridifier.VerticalGrid.ConnectorsSelector = function(guid) {
     var me = this;
 
     this._connectors = null;
@@ -9,7 +9,6 @@ Gridifier.VerticalGrid.ConnectorsSelector = function(connectors, guid) {
     };
 
     this._construct = function() {
-        me._connectors = connectors;
         me._guid = guid;
     };
 
@@ -26,6 +25,10 @@ Gridifier.VerticalGrid.ConnectorsSelector = function(connectors, guid) {
 
     this._construct();
     return this;
+}
+
+Gridifier.VerticalGrid.ConnectorsSelector.prototype.attachConnectors = function(connectors) {
+    this._connectors = connectors;
 }
 
 Gridifier.VerticalGrid.ConnectorsSelector.prototype.getSelectedConnectors = function() {

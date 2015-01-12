@@ -38,7 +38,7 @@ Gridifier.VerticalGrid.ConnectionsRanges.RANGE_PX_HEIGHT = 500;
 Gridifier.VerticalGrid.ConnectionsRanges.prototype.init = function() {
     this._ranges = [];
     this._ranges.push({
-        y1: 0,
+        y1: -1,
         y2: Gridifier.VerticalGrid.ConnectionsRanges.RANGE_PX_HEIGHT,
         connectionIndexes: []
     });
@@ -103,7 +103,7 @@ Gridifier.VerticalGrid.ConnectionsRanges.prototype.mapAllIntersectedAndUpperConn
         else
             var isCurrentConnectorRangeSameAsPrevious = true;
 
-        while(!currentConnectorRangeIndexFound) {
+        while(!currentConnectorRangeIndexFound) { 
             if(sortedConnectors[connectorIndex].y >= this._ranges[currentConnectorRangeIndex].y1 &&
                 sortedConnectors[connectorIndex].y <= this._ranges[currentConnectorRangeIndex].y2) {
                 currentConnectorRangeIndexFound = true;

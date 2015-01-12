@@ -1,4 +1,4 @@
-Gridifier.VerticalGrid.ConnectorsSorter = function(connectors) {
+Gridifier.VerticalGrid.ConnectorsSorter = function() {
     var me = this;
 
     this._connectors = null;
@@ -7,7 +7,6 @@ Gridifier.VerticalGrid.ConnectorsSorter = function(connectors) {
     };
 
     this._construct = function() {
-        me._connectors = connectors;
     };
 
     this._bindEvents = function() {
@@ -23,6 +22,10 @@ Gridifier.VerticalGrid.ConnectorsSorter = function(connectors) {
 
     this._construct();
     return this;
+}
+
+Gridifier.VerticalGrid.ConnectorsSorter.prototype.attachConnectors = function(connectors) {
+    this._connectors = connectors;
 }
 
 Gridifier.VerticalGrid.ConnectorsSorter.prototype.getConnectors = function() {

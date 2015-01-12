@@ -7,6 +7,9 @@ Gridifier.VerticalGrid.Appender = function(gridifier, settings, connectors, conn
     this._connectors = null;
     this._connections = null;
     this._connectorsCleaner = null;
+    this._connectorsShifter = null;
+    this._connectorsSelector = null;
+    this._connectorsSorter = null;
     this._itemCoordsExtractor = null;
     this._connectionsIntersector = null;
     this._guid = null;
@@ -26,6 +29,11 @@ Gridifier.VerticalGrid.Appender = function(gridifier, settings, connectors, conn
         me._connectorsCleaner = new Gridifier.VerticalGrid.ConnectorsCleaner(
             me._connectors, me._connections
         );
+        me._connectorsShifter = new Gridifier.ConnectorsShifter(
+            me._gridifier, me._connections
+        );
+        me._connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(me._guid);
+        me._connectorsSorter = new Gridifier.VerticalGrid.ConnectorsSorter();
         me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor(me._gridifier);
         me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(me._connections);
 
@@ -81,7 +89,7 @@ Gridifier.VerticalGrid.Appender.prototype.append = function(item, disableMarking
         this._connectors.get(),
         this._connections.get()
     );                          // @system-log-end
-   // timer.start();
+    //timer.start();
     this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
     // var deleteIntersected = timer.get();
     // if(deleteIntersected > 0.100)
@@ -210,7 +218,7 @@ Gridifier.VerticalGrid.Appender.prototype._createConnectionPerItem = function(it
      //timer.stop();
      //timer.start("findic = ");
     var itemConnectionCoords = this._findItemConnectionCoords(item, sortedConnectors);
-    //timer.stop();
+    //timer.stop(); console.log("");
     //timer.start("add");
     var connection = this._connections.add(item, itemConnectionCoords);
     //timer.stop();
@@ -230,30 +238,26 @@ Gridifier.VerticalGrid.Appender.prototype._createConnectionPerItem = function(it
 }
 
 Gridifier.VerticalGrid.Appender.prototype._filterConnectorsPerNextConnection = function() {
-    //timer.start();
     var connectors = this._connectors.getClone();
-    //console.log("cloning connectors = " + timer.get());
 
     if(this._settings.isDefaultIntersectionStrategy()) { //timer.start();
-        var connectorsShifter = new Gridifier.ConnectorsShifter(this._gridifier, connectors, this._connections);
-        //console.log("creating object = " + timer.get());
-        //timer.start();
-        connectorsShifter.shiftAllConnectors();
-        connectors = connectorsShifter.getAllConnectors();
+        this._connectorsShifter.attachConnectors(connectors);
+        this._connectorsShifter.shiftAllConnectors();
+        connectors = this._connectorsShifter.getAllConnectors();
         Logger.log(                     // @system-log-start
             "createConnectionPerItem",
             "filterConnectorsPerNextConnection -> isDefaultIntersectionStrategy() -> shiftAllConnectors",
             connectors,
             this._connections.get()
         );                              // @system-log-end
-        //sconsole.log("shift all connectors = " + timer.get());
+        //console.log("shift all connectors = " + timer.get());
     }
     else if(this._settings.isNoIntersectionsStrategy()) {
         var connectorsSide = Gridifier.Connectors.SIDES.BOTTOM.RIGHT;
 
-        var connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(connectors, this._guid);
-        connectorsSelector.selectOnlyMostBottomConnectorFromSide(connectorsSide);
-        connectors = connectorsSelector.getSelectedConnectors();
+        this._connectorsSelector.attachConnectors(connectors);
+        this._connectorsSelector.selectOnlyMostBottomConnectorFromSide(connectorsSide);
+        connectors = this._connectorsSelector.getSelectedConnectors();
         Logger.log(                     // @system-log-start
             "createConnectionPerItem",
             "filterConnectorsPerNextConnection -> isNoIntersectionsStrategy() -> selectOnlyMostBottomConnectorFromSide(BOTTOM.RIGHT)",
@@ -261,9 +265,9 @@ Gridifier.VerticalGrid.Appender.prototype._filterConnectorsPerNextConnection = f
             this._connections.get()
         );                              // @system-log-end
         
-        var connectorsShifter = new Gridifier.ConnectorsShifter(this._gridifier, connectors, this._connections);
-        connectorsShifter.shiftAllWithSpecifiedSideToRightGridCorner(connectorsSide);
-        connectors = connectorsShifter.getAllConnectors();
+        this._connectorsShifter.attachConnectors(connectors);
+        this._connectorsShifter.shiftAllWithSpecifiedSideToRightGridCorner(connectorsSide);
+        connectors = this._connectorsShifter.getAllConnectors();
         Logger.log(                     // @system-log-start
             "createConnectionPerItem",
             "filterConnectorsPerNextConnection -> isNoIntersectionsStrategy() -> shiftAllWithSpecifiedSideToRightGridCorner(BOTTOM.RIGHT)",
@@ -271,12 +275,11 @@ Gridifier.VerticalGrid.Appender.prototype._filterConnectorsPerNextConnection = f
             this._connections.get()
         );                              // @system-log-end
     }
-    //timer.start();
-    var connectorsSorter = new Gridifier.VerticalGrid.ConnectorsSorter(connectors);
-    //console.log("creating sorter = " + timer.get()); timer.start();
-    connectorsSorter.sortConnectorsForAppend(Gridifier.APPEND_TYPES.DEFAULT_APPEND);
+    
+    this._connectorsSorter.attachConnectors(connectors); 
+    this._connectorsSorter.sortConnectorsForAppend(Gridifier.APPEND_TYPES.DEFAULT_APPEND);
     //console.log("sort connector = " + timer.get()); console.log("");
-    return connectorsSorter.getConnectors();
+    return this._connectorsSorter.getConnectors();
 }
 
 Gridifier.VerticalGrid.Appender.prototype._findItemConnectionCoords = function(item, sortedConnectors) {
@@ -326,7 +329,7 @@ Gridifier.VerticalGrid.Appender.prototype._findItemConnectionCoords = function(i
         if(itemConnectionCoords != null)
             break;
     }
-
+    
     Logger.logFindItemConnectionCoordsFound( // @system-log
         sortedConnectors[i], itemConnectionCoords, item, this._connections.get()
     );                                       // @system-log
