@@ -5,6 +5,8 @@ Gridifier.VerticalGrid.Connections = function(guid, settings) {
     this._settings = null;
 
     this._connections = [];
+    this._ranges = null;
+
     this._lastRowVerticallyExpandedConnections = null;
 
     this._css = {
@@ -13,6 +15,8 @@ Gridifier.VerticalGrid.Connections = function(guid, settings) {
     this._construct = function() {
         me._guid = guid;
         me._settings = settings;
+        me._ranges = new Gridifier.VerticalGrid.ConnectionsRanges(me);
+        me._ranges.init();
     };
 
     this._bindEvents = function() {
@@ -28,6 +32,35 @@ Gridifier.VerticalGrid.Connections = function(guid, settings) {
 
     this._construct();
     return this;
+}
+
+Gridifier.VerticalGrid.Connections.prototype.attachConnectionToRanges = function(connection) {
+    this._ranges.attachConnection(connection, this._connections.length - 1);
+}
+
+Gridifier.VerticalGrid.Connections.prototype.reinitRanges = function() {
+    this._ranges.init();
+}
+
+Gridifier.VerticalGrid.Connections.prototype.getAllHorizontallyIntersectedAndUpperConnections = function(connector) {
+    //return this._ranges.getAllConnectionsFromIntersectedAndUpperRanges(connector.y);
+    return this._ranges.getAllConnectionsFromIntersectedAndUpperRanges(connector.y);
+}
+
+Gridifier.VerticalGrid.Connections.prototype.getAllHorizontallyIntersectedConnections = function(connector) {
+    return this._ranges.getAllConnectionsFromIntersectedRange(connector.y);
+}
+
+Gridifier.VerticalGrid.Connections.prototype.getAllHorizontallyIntersectedAndLowerConnections = function(connector) {
+    return this._ranges.getAllConnectionsFromIntersectedAndLowerRanges(connector.y);
+}
+
+Gridifier.VerticalGrid.Connections.prototype.mapAllIntersectedAndLowerConnectionsPerEachConnector = function(sortedConnectors) {
+    return this._ranges.mapAllIntersectedAndLowerConnectionsPerEachConnector(sortedConnectors);
+}
+
+Gridifier.VerticalGrid.Connections.prototype.mapAllIntersectedAndUpperConnectionsPerEachConnector = function(sortedConnectors) {
+    return this._ranges.mapAllIntersectedAndUpperConnectionsPerEachConnector(sortedConnectors);
 }
 
 Gridifier.VerticalGrid.Connections.prototype.getLastRowVerticallyExpandedConnections = function() {
@@ -253,7 +286,8 @@ Gridifier.VerticalGrid.Connections.prototype.normalizeVerticalPositionsOfAllConn
     if(newConnection.y1 >= 0)
         return false;
 
-    var increaseVerticalPositionBy = Math.round(Math.abs(newConnection.y1)) - 1;
+    var increaseVerticalPositionBy = Math.round(Math.abs(newConnection.y1));
+    this._lastVerticalIncreaseOfEachConnection = increaseVerticalPositionBy;
     newConnection.y2 = Math.abs(newConnection.y1 - newConnection.y2);
     newConnection.y1 = 0;
 
@@ -261,12 +295,15 @@ Gridifier.VerticalGrid.Connections.prototype.normalizeVerticalPositionsOfAllConn
         if(newConnection.itemGUID == this._connections[i].itemGUID)
             continue;
 
-        this._connections[i].y1 += increaseVerticalPositionBy + 1;
-        this._connections[i].y2 += increaseVerticalPositionBy + 1;
+        this._connections[i].y1 += increaseVerticalPositionBy;
+        this._connections[i].y2 += increaseVerticalPositionBy;
     }
 
     for(var i = 0; i < connectors.length; i++)
-        connectors[i].y += increaseVerticalPositionBy + 1;
+        connectors[i].y += increaseVerticalPositionBy;
+
+    this._ranges.shiftAllRangesBy(increaseVerticalPositionBy);
+    this._ranges.createPrependedRange(newConnection.y1, newConnection.y2);
 
     return true;
 }

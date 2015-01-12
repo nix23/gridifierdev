@@ -94,8 +94,6 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         // me._gridifierDynamicSettings._itemSizes[4].width = "200px";
         // me._gridifierDynamicSettings._itemSizes[4].height = "200px"; // cars tmp
 
-
-
         me._gridifierDynamicSettings._itemSizes[0].width = "5%";  // @todo -> Delete, tmp
         me._gridifierDynamicSettings._itemSizes[0].height = "100px";
 

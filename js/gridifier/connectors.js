@@ -132,7 +132,8 @@ Gridifier.Connectors.prototype.getClone = function() {
             side: this._connectors[i].side,
             x: this._connectors[i].x,
             y: this._connectors[i].y,
-            itemGUID: this._connectors[i].itemGUID
+            itemGUID: this._connectors[i].itemGUID,
+            connectorIndex: i
         });
     }
 

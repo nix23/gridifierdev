@@ -122,6 +122,8 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerRev
 
 Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerDefaultTransformedConnectionAppend = function(firstConnectionToReappend) {
     // First prepended item should be processed separately(To not align to corner).
+    this._connections.reinitRanges();
+
     if(this._guid.wasItemPrepended(this._guid.getItemGUID(firstConnectionToReappend.item))
        && this._connections.count() == 0) {
         if(typeof(firstConnectionToReappend.transformedItemClone) != "undefined") 

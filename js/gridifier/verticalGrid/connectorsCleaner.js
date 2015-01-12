@@ -61,18 +61,37 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype.isConnectorInsideOrBeforeItem
     return (this._connectionItemIntersectionStrategy == intersectionStrategies.CONNECTOR_INSIDE_OR_BEFORE_CONNECTION_ITEM);
 }
 
-Gridifier.VerticalGrid.ConnectorsCleaner.prototype.isConnectorIntersectingAnyTopConnectionItem = function(connector) {
-    var connections = this._connections.get();
-    for(var i = 0; i < connections.length; i++) {
-        if(this.isConnectorInsideOrBeforeItemIntersectionStrategy()) 
-            var verticalIntersectionCond = (connector.y >= connections[i].y1);
-        else if(this.isConnectorInsideItemIntersectionStrategy())
-            var verticalIntersectionCond = (connector.y >= connections[i].y1 
-                                                              && connector.y <= connections[i].y2);
+Gridifier.VerticalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersectingAnyTopConnectionItem = function(mappedConnector) {
+    // var connections = this._connections.get();
+    // for(var i = 0; i < connections.length; i++) {
+    //     if(this.isConnectorInsideOrBeforeItemIntersectionStrategy()) 
+    //         var verticalIntersectionCond = (connector.y >= connections[i].y1);
+    //     else if(this.isConnectorInsideItemIntersectionStrategy())
+    //         var verticalIntersectionCond = (connector.y >= connections[i].y1 
+    //                                                           && connector.y <= connections[i].y2);
 
-        if(connector.x >= connections[i].x1 && connector.x <= connections[i].x2 
-            && verticalIntersectionCond)
-            return true;
+    //     if(connector.x >= connections[i].x1 && connector.x <= connections[i].x2 
+    //         && verticalIntersectionCond)
+    //         return true;
+    // }
+
+    // return false;
+    var connections = this._connections.get();
+
+    for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
+        for(var j = 0; j < mappedConnector.connectionIndexes[i].length; j++) {
+            var connection = connections[mappedConnector.connectionIndexes[i][j]];
+
+            if(this.isConnectorInsideOrBeforeItemIntersectionStrategy())
+                var verticalIntersectionCond = (mappedConnector.y >= connection.y1);
+            else if(this.isConnectorInsideItemIntersectionStrategy())
+                var verticalIntersectionCond = (mappedConnector.y >= connection.y1 
+                                                && mappedConnector.y <= connection.y2);
+
+            if(mappedConnector.x >= connection.x1 && mappedConnector.x <= connection.x2
+                && verticalIntersectionCond)
+                return true;
+        }
     }
 
     return false;
@@ -80,12 +99,41 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype.isConnectorIntersectingAnyTop
 
 Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllIntersectedFromTopConnectors = function() {
     var connectors = this._connectors.get();
+    var mappedConnectors = this._connectors.getClone();
+
+    mappedConnectors.sort(function(firstConnector, secondConnector) {
+        if(firstConnector.y == secondConnector.y)
+            return 0;
+        else if(firstConnector.y > secondConnector.y)
+            return -1;
+        else
+            return 1;
+    });
+    mappedConnectors = this._connections.mapAllIntersectedAndUpperConnectionsPerEachConnector(
+        mappedConnectors
+    );
+
+    for(var i = 0; i < mappedConnectors.length; i++) {
+        if(this._isMappedConnectorIntersectingAnyTopConnectionItem(mappedConnectors[i]))
+            connectors[mappedConnectors[i].connectorIndex].isIntersected = true;
+        else
+            connectors[mappedConnectors[i].connectorIndex].isIntersected = false;
+    }
+
     for(var i = 0; i < connectors.length; i++) {
-        if(this.isConnectorIntersectingAnyTopConnectionItem(connectors[i])) {
+        if(connectors[i].isIntersected) {
             connectors.splice(i, 1);
             i--;
         }
     }
+
+    // var connectors = this._connectors.get();
+    // for(var i = 0; i < connectors.length; i++) {
+    //     if(this.isConnectorIntersectingAnyTopConnectionItem(connectors[i])) {
+    //         connectors.splice(i, 1);
+    //         i--;
+    //     }
+    // }
 }
 
 Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllTooLowConnectorsFromMostTopConnector = function() {
@@ -108,31 +156,82 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllTooLowConnectorsFrom
     }
 }
 
-Gridifier.VerticalGrid.ConnectorsCleaner.prototype.isConnectorIntersectingAnyBottomConnectionItem = function(connector) {
+Gridifier.VerticalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersectingAnyBottomConnectionItem = function(mappedConnector) {
+    //var connections = this._connections.get();
+    //var connections = this._connections.getAllHorizontallyIntersectedAndLowerConnections(connector);
+    //if(time > 0.199)
+      //  console.log("time = " + time);
+    // console.log("CONN COUNT = ", connections.length);
+    // console.log("connector info = ", $.parseJSON(JSON.stringify(connector)));
+
+    // for(var i = 0; i < connections.length; i++) {
+    //     if(this.isConnectorInsideOrBeforeItemIntersectionStrategy()) 
+    //         var verticalIntersectionCond = (connector.y <= connections[i].y2);
+    //     else if(this.isConnectorInsideItemIntersectionStrategy())
+    //         var verticalIntersectionCond = (connector.y <= connections[i].y2 
+    //                                                           && connector.y >= connections[i].y1);
+
+    //     if(connector.x >= connections[i].x1 && connector.x <= connections[i].x2
+    //         && verticalIntersectionCond) 
+    //         return true;
+    // }
     var connections = this._connections.get();
-    for(var i = 0; i < connections.length; i++) {
-        if(this.isConnectorInsideOrBeforeItemIntersectionStrategy()) 
-            var verticalIntersectionCond = (connector.y <= connections[i].y2);
-        else if(this.isConnectorInsideItemIntersectionStrategy())
-            var verticalIntersectionCond = (connector.y <= connections[i].y2 
-                                                              && connector.y >= connections[i].y1);
 
-        if(connector.x >= connections[i].x1 && connector.x <= connections[i].x2
-            && verticalIntersectionCond) 
-            return true;
+    for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
+        for(var j = 0; j < mappedConnector.connectionIndexes[i].length; j++) {
+            var connection = connections[mappedConnector.connectionIndexes[i][j]];
+
+            if(this.isConnectorInsideOrBeforeItemIntersectionStrategy())
+                var verticalIntersectionCond = (mappedConnector.y <= connection.y2);
+            else if(this.isConnectorInsideItemIntersectionStrategy())
+                var verticalIntersectionCond = (mappedConnector.y <= connection.y2
+                                                && mappedConnector.y >= connection.y1);
+
+            if(mappedConnector.x >= connection.x1 && mappedConnector.x <= connection.x2
+                && verticalIntersectionCond)
+                return true;
+        }
     }
-
+    
     return false;
 }
 
 Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllIntersectedFromBottomConnectors = function() {
     var connectors = this._connectors.get();
+    var mappedConnectors = this._connectors.getClone();
+
+    mappedConnectors.sort(function(firstConnector, secondConnector) {
+        if(firstConnector.y == secondConnector.y)
+            return 0;
+        else if(firstConnector.y < secondConnector.y)
+            return -1;
+        else 
+            return 1;
+    });
+    mappedConnectors = this._connections.mapAllIntersectedAndLowerConnectionsPerEachConnector(
+        mappedConnectors
+    );
+
+    for(var i = 0; i < mappedConnectors.length; i++) {
+        if(this._isMappedConnectorIntersectingAnyBottomConnectionItem(mappedConnectors[i])) 
+            connectors[mappedConnectors[i].connectorIndex].isIntersected = true;
+        else
+            connectors[mappedConnectors[i].connectorIndex].isIntersected = false;
+    }
+
     for(var i = 0; i < connectors.length; i++) {
-        if(this.isConnectorIntersectingAnyBottomConnectionItem(connectors[i])) {
+        if(connectors[i].isIntersected) {
             connectors.splice(i, 1);
             i--;
         }
     }
+
+    // for(var i = 0; i < connectors.length; i++) {
+    //     if(this.isConnectorIntersectingAnyBottomConnectionItem(connectors[i])) {
+    //         connectors.splice(i, 1);
+    //         i--;
+    //     }
+    // }
 }
 
 Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllTooHighConnectorsFromMostBottomConnector = function() {
@@ -148,8 +247,8 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllTooHighConnectorsFro
     var cc = Gridifier.VerticalGrid.ConnectorsCleaner;
     var minValidY = mostBottomConnector.y - cc.MAX_VALID_VERTICAL_DISTANCE.FROM_MOST_BOTTOM_CONNECTOR;
     for(var i = 0; i < connectors.length; i++) {
-        if(connectors[i] < minValidY) {
-            connectors[i].splice(i, 1);
+        if(connectors[i].y < minValidY) {
+            connectors.splice(i, 1);
             i--;
         }
     }

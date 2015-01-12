@@ -60,6 +60,21 @@ Gridifier.VerticalGrid.Prepender.prototype.prepend = function(item, disableMarki
     var wereItemsNormalized = this._connections.normalizeVerticalPositionsOfAllConnectionsAfterPrepend(
         connection, this._connectors.get()
     );
+    this._connections.attachConnectionToRanges(connection);
+
+    Logger.log(                 // @system-log-start
+        "initConnectors",
+        "isCurrentOperationSameAsPrevious -> deleteAllIntersectedFromTopConnectors",
+        this._connectors.get(),
+        this._connections.get()
+    );                          // @system-log-end
+    this._connectorsCleaner.deleteAllTooLowConnectorsFromMostTopConnector();
+    Logger.log(                 // @system-log-start
+        "initConnectors",
+        "isCurrentOperationSameAsPrevious -> deleteAllTooLowConnectorsFromMostTopConnector",
+        this._connectors.get(),
+        this._connections.get()
+    );                          // @system-log-end
     Logger.log( // @system-log-start
         "normalizeVerticalPositionsOfAllConnectionsAfterPrepend",
         "",
