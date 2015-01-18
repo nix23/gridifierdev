@@ -57,6 +57,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
+        me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
 
         me._attachView();
         me._gridifierDynamicSettings = new DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings();
@@ -94,19 +95,42 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         // me._gridifierDynamicSettings._itemSizes[4].width = "200px";
         // me._gridifierDynamicSettings._itemSizes[4].height = "200px"; // cars tmp
 
-        me._gridifierDynamicSettings._itemSizes[0].width = "5%";  // @todo -> Delete, tmp
+
+
+        // me._gridifierDynamicSettings._itemSizes[0].width = "5%";  // @todo -> Delete, tmp
+        // //me._gridifierDynamicSettings._itemSizes[0].width = "25px";
+        // me._gridifierDynamicSettings._itemSizes[0].height = "100px";
+
+        // me._gridifierDynamicSettings._itemSizes[1].width = "20%";
+        // me._gridifierDynamicSettings._itemSizes[1].height = "200px";
+
+        // me._gridifierDynamicSettings._itemSizes[2].width = "25%";
+        // me._gridifierDynamicSettings._itemSizes[2].height = "300px";
+        // //me._gridifierDynamicSettings._itemSizes[2].height = "335px";
+
+        // me._gridifierDynamicSettings._itemSizes[3].width = "5%";
+        // me._gridifierDynamicSettings._itemSizes[3].height = "100px";
+
+        // me._gridifierDynamicSettings._itemSizes[4].width = "5%";
+        // me._gridifierDynamicSettings._itemSizes[4].height = "200px"; // @todo -> Delete, tmp
+
+
+
+
+
+        me._gridifierDynamicSettings._itemSizes[0].width = "20%";
         me._gridifierDynamicSettings._itemSizes[0].height = "100px";
 
-        me._gridifierDynamicSettings._itemSizes[1].width = "20%";
+        me._gridifierDynamicSettings._itemSizes[1].width = "40%";
         me._gridifierDynamicSettings._itemSizes[1].height = "200px";
 
-        me._gridifierDynamicSettings._itemSizes[2].width = "25%";
+        me._gridifierDynamicSettings._itemSizes[2].width = "20%";
         me._gridifierDynamicSettings._itemSizes[2].height = "300px";
 
-        me._gridifierDynamicSettings._itemSizes[3].width = "5%";
+        me._gridifierDynamicSettings._itemSizes[3].width = "20%";
         me._gridifierDynamicSettings._itemSizes[3].height = "100px";
 
-        me._gridifierDynamicSettings._itemSizes[4].width = "5%";
+        me._gridifierDynamicSettings._itemSizes[4].width = "40%";
         me._gridifierDynamicSettings._itemSizes[4].height = "200px"; // @todo -> Delete, tmp
 
         me._$loadGridConfiguratorButton = me._$view.find("." + me._css.loadGridConfiguratorButtonClass);
@@ -244,8 +268,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         });
 
         // @todo -> Replace this.(Tmp for testing)
-        me._$view.on("click", ".gridItem", function() {
-            me._gridifier.toggleSizes($(this), "*2", "*2");
+        // me._$view.on("click", ".gridItem", function() {
+        //     me._gridifier.toggleSizes($(this), "*2", "*2");
             // if($(this).hasClass("transformedItem")) {
             //     $(this).removeClass("transformedItem");
             //     me._gridifier.transformSizes($(this), "25%", "200px");
@@ -256,7 +280,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             //     me._gridifier.transformSizes($(this), "50%", "400px");
             //     //me._gridifier.transformSizes($(this), "400px", "400px");
             // }
-        });
+        //});
 
         // @todo -> Replace this.(tmp for testing)
         me._$gridTopControlsView.find(".gridControlsHeadingMenu").on("click", function() {

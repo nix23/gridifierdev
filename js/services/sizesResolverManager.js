@@ -281,6 +281,14 @@ var SizesResolverManager = {
 
     positionLeft: function(DOMElem) {
         return SizesResolver.positionLeft(DOMElem);
+    },
+
+    offsetLeft: function(DOMElem) {
+        return SizesResolver.offsetLeft(DOMElem);
+    },
+
+    offsetTop: function(DOMElem) {
+        return SizesResolver.offsetTop(DOMElem);
     }
 }
 SizesResolverManager.init();

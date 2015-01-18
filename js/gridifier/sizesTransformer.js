@@ -43,7 +43,7 @@ Gridifier.SizesTransformer = function(gridifier,
 
         if(me._settings.isVerticalGrid()) {
             me._connectorsCleaner = new Gridifier.VerticalGrid.ConnectorsCleaner(
-                me._connectors, me._connections
+                me._connectors, me._connections, me._settings
             );
 
             me._transformerConnectors = new Gridifier.VerticalGrid.TransformerConnectors(
@@ -305,8 +305,10 @@ Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTra
             // When customSortDispersion is used, element with bigger guid can be above.(Depending on the dispersion param).
             // @todo Determine, how far from current connection.y1 items should be collected for reappend.
             //      (Resort batch, and append transformed item first????, Or under some special conditions???)
-            else if(me._settings.isCustomSortDispersion() || me._settings.isNoIntersectionsStrategy()) {
+            else if(me._settings.isCustomSortDispersion() || me._settings.isCustomAllEmptySpaceSortDispersion() ||
+                    me._settings.isNoIntersectionsStrategy()) {
                 // @todo -> process horizontal hrid here
+                // @todo -> process isCustomAllAvailableSpaceSD???
                 if(connections[i].y2 >= firstTransformedConnection.y1)
                     iteratorFunction();
             }
@@ -342,10 +344,10 @@ Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTra
     itemsToReappend.sort(function(firstItem, secondItem) {
         return Dom.toInt(me._guid.getItemGUID(firstItem)) - Dom.toInt(me._guid.getItemGUID(secondItem));
     });
-
+    
     var firstConnectionToReappend = this._gridifier.findConnectionByItem(itemsToReappend[0]);
     iterateConnections(iteratorTypes.CLEAR_COLLECTED_ITEMS);
-
+    
     return {
         itemsToReappend: itemsToReappend,
         firstConnectionToReappend: firstConnectionToReappend

@@ -121,8 +121,14 @@ Gridifier = function(grid, settings) {
             me._normalizer
         );
 
+        // @todo -> Remove from local var
+        var dragifier = new Gridifier.VerticalGrid.Dragifier(
+            me, me._connections, me._connectors, me._guid, me._settings
+        );
+
         // @tmp, replace this :)
         // @todo -> Log this action???
+        // @todo -> With Custom SD it should be item with smallest y most right(DA) or most left(RV)
         var processResizeEventTimeout = null;
         var processResizeEvent = 100;
         $(window).resize(function() {

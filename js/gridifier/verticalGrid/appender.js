@@ -27,7 +27,7 @@ Gridifier.VerticalGrid.Appender = function(gridifier, settings, connectors, conn
         me._connections = connections;
 
         me._connectorsCleaner = new Gridifier.VerticalGrid.ConnectorsCleaner(
-            me._connectors, me._connections
+            me._connectors, me._connections, me._settings
         );
         me._connectorsShifter = new Gridifier.ConnectorsShifter(
             me._gridifier, me._connections

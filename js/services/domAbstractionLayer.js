@@ -142,7 +142,25 @@ var Dom = {
 
         addClass: function(DOMElem, classToAdd) {
             var currentClass = DOMElem.getAttribute("class");
-            DOMElem.setAttribute("class", currentClass + " " + classToAdd);
+            if(currentClass == null || currentClass.length == 0)
+                var newClass = classToAdd;
+            else
+                var newClass = currentClass + " " + classToAdd;
+
+            DOMElem.setAttribute("class", newClass);
+        },
+
+        removeClass: function(DOMElem, classToRemove) {
+            var classes = DOMElem.getAttribute("class").split(" ");
+            var cleanedClass = "";
+
+            for(var i = 0; i < classes.length; i++) {
+                if(classes[i].trim() != classToRemove)
+                    cleanedClass += classes[i] + " ";
+            }
+            cleanedClass = cleanedClass.substring(0, cleanedClass.length - 1);
+
+            DOMElem.setAttribute("class", cleanedClass);
         }
     },
 

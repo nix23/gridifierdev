@@ -99,10 +99,39 @@ Gridifier.VerticalGrid.Connections.prototype.removeConnection = function(connect
     }
 }
 
+Gridifier.VerticalGrid.Connections.prototype.getMinConnectionWidth = function() {
+    if(this._connections.length == 0)
+        return 0;
+
+    var minConnectionWidth = this._connections[0].x2 - this._connections[0].x1 + 1;
+    for(var i = 1; i < this._connections.length; i++) {
+        var connectionWidth = this._connections[i].x2 - this._connections[i].x1 + 1;
+        if(connectionWidth < minConnectionWidth)
+            minConnectionWidth = connectionWidth;
+    }
+
+    return minConnectionWidth;
+}
+
+Gridifier.VerticalGrid.Connections.prototype.getMinConnectionHeight = function() {
+    if(this._connections.length == 0)
+        return 0;
+
+    var minConnectionHeight = this._connections[0].y2 - this._connections[0].y1 + 1;
+    for(var i = 1; i < this._connections.length; i++) {
+        var connectionHeight = this._connections[i].y2 - this._connections[i].y1 + 1;
+        if(connectionHeight < minConnectionHeight)
+            minConnectionHeight = connectionHeight;
+    }
+
+    return minConnectionHeight;
+}
+
 Gridifier.VerticalGrid.Connections.prototype.getAllConnectionsBelowY = function(y) {
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
-        if(this._connections[i].y1 > y)
+        if(this._connections[i].y1 - 10000 > y) // @todo -> Delete, for testing
+        //if(this._connections[i].y1 > y)
             connections.push(this._connections[i]);
     }
 

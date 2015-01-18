@@ -594,6 +594,7 @@ var SizesResolver = {
             return 0;
 
         var computedProperties = this.getComputedProperties("forPositionLeft", elementComputedCSS, DOMElem);
+        // @todo -> delete Math.round ???(%)
         return DOMElem.offsetLeft - Math.round(computedProperties.marginLeft);
     },
 
@@ -605,7 +606,24 @@ var SizesResolver = {
             return 0;
 
         var computedProperties = this.getComputedProperties("forPositionTop", elementComputedCSS, DOMElem);
+        // @todo -> delete Math.round ????(%)
         return DOMElem.offsetTop - Math.round(computedProperties.marginTop);
+    },
+
+    offsetLeft: function(DOMElem)
+    {
+        var clientRect = DOMElem.getBoundingClientRect();
+        var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+        return clientRect.left + scrollLeft;
+    },
+
+    offsetTop: function(DOMElem)
+    {
+        var clientRect = DOMElem.getBoundingClientRect();
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+        
+        return clientRect.top + scrollTop;
     },
 
     getComputedProperty: function(DOMElem, propertyName)

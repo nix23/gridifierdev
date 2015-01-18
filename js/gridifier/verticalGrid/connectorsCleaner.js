@@ -1,8 +1,9 @@
-Gridifier.VerticalGrid.ConnectorsCleaner = function(connectors, connections) {
+Gridifier.VerticalGrid.ConnectorsCleaner = function(connectors, connections, settings) {
     var me = this;
 
     this._connectors = null;
     this._connections = null;
+    this._settings = null;
 
     this._connectionItemIntersectionStrategy = null;
 
@@ -12,8 +13,15 @@ Gridifier.VerticalGrid.ConnectorsCleaner = function(connectors, connections) {
     this._construct = function() {
         me._connectors = connectors;
         me._connections = connections;
+        me._settings = settings;
 
-        me.setConnectorInsideOrBeforeItemIntersectionStrategy();
+        if(me._settings.isDisabledSortDispersion()) {
+            me.setConnectorInsideOrBeforeItemIntersectionStrategy();
+        }
+        else if(me._settings.isCustomSortDispersion() ||
+                me._settings.isCustomAllEmptySpaceSortDispersion()) {
+            me.setConnectorInsideItemIntersectionStrategy();
+        }
     };
 
     this._bindEvents = function() {
