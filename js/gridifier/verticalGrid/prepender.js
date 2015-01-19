@@ -164,7 +164,7 @@ Gridifier.VerticalGrid.Prepender.prototype._initConnectors = function() {
 
 Gridifier.VerticalGrid.Prepender.prototype.createInitialConnector = function() {
     this._connectors.addPrependConnector(
-        Gridifier.Connectors.SIDES.TOP.LEFT,
+        Gridifier.Connectors.SIDES.RIGHT.BOTTOM,
         0,
         0
     );

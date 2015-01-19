@@ -123,7 +123,14 @@ Gridifier = function(grid, settings) {
 
         // @todo -> Remove from local var
         var dragifier = new Gridifier.VerticalGrid.Dragifier(
-            me, me._connections, me._connectors, me._guid, me._settings
+            me, 
+            me._appender,
+            me._reversedAppender,
+            me._connections, 
+            me._connectors, 
+            me._guid, 
+            me._settings, 
+            me._normalizer
         );
 
         // @tmp, replace this :)
@@ -604,7 +611,6 @@ Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {
         loggerLegend
     );                              // @system-log-end
     this._sizesTransformer.transformConnectionSizes(transformationData);
-    Logger.stopLoggingOperation(); // @system-log
     
     SizesResolverManager.stopCachingTransaction();
     // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
@@ -666,7 +672,6 @@ Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
         loggerLegend
     );                            // @system-log-end
     this._sizesTransformer.transformConnectionSizes(transformationData);
-    Logger.stopLoggingOperation(); // @system-log
 
     SizesResolverManager.stopCachingTransaction();
     // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid

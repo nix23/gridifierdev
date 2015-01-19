@@ -93,6 +93,9 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype.getIntersectedRowsAndCol
             }
 
             if(this._isCellIntersectedBy(cellCoords, intersectionCoords)) {
+                console.log("is intersected");
+                console.log("cell coords = ", cellCoords);
+                console.log("intersection coords = ", intersectionCoords);
                 if(!isRowMarkedAsIntersected) {
                     intersectedRowsCount++;
                     isRowMarkedAsIntersected = true;
@@ -238,7 +241,7 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype.updateDiscretizationDemo
 }
 
 // @todo -> Tmp method???
-Gridifier.VerticalGrid.DragifierDiscretizator.prototype._demonstrateDiscretization = function() {
+Gridifier.VerticalGrid.DragifierDiscretizator.prototype._demonstrateDiscretization = function() { //return;
     var demonstrator = document.createElement("div");
     this._gridifier.getGrid().appendChild(demonstrator);
     this._discretizationDemonstrator = demonstrator;

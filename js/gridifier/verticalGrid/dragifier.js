@@ -1,13 +1,23 @@
 // @todo -> important drag items from one Gridifier instance to another!!!!!
 
-Gridifier.VerticalGrid.Dragifier = function(gridifier, connections, connectors, guid, settings) {
+Gridifier.VerticalGrid.Dragifier = function(gridifier, 
+                                            appender,
+                                            reversedAppender,
+                                            connections, 
+                                            connectors, 
+                                            guid, 
+                                            settings, 
+                                            normalizer) {
     var me = this;
 
     this._gridifier = null;
+    this._appender = null;
+    this._reversedAppender = null;
     this._connections = null;
     this._connectors = null;
     this._guid = null;
     this._settings = null;
+    this._normalizer = null;
     this._connectionsIntersector = null;
     this._dragifierDiscretizator = null;
 
@@ -23,15 +33,20 @@ Gridifier.VerticalGrid.Dragifier = function(gridifier, connections, connectors, 
     this._gridOffsetLeft = null;
     this._gridOffsetTop = null;
 
+    this._reappendGridItemsAfterDragTimeout = null;
+
     this._css = {
     };
 
     this._construct = function() {
         me._gridifier = gridifier;
+        me._appender = appender;
+        me._reversedAppender = reversedAppender;
         me._connections = connections;
         me._connectors = connectors;
         me._guid = guid;
         me._settings = settings;
+        me._normalizer = normalizer;
         me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(
             me._connections
         );
@@ -47,10 +62,12 @@ Gridifier.VerticalGrid.Dragifier = function(gridifier, connections, connectors, 
         // @todo -> Replace with gridifier events
         $("body").on("mousedown", ".gridItem", function(event) {
             // @todo Check if this is required
-            // SizesResolverManager.startCachingTransaction();
+            SizesResolverManager.startCachingTransaction();
 
             me._isDragging = true;
             me._draggableItem = $(this).get(0);
+            // @todo -> Fix this(visibility uses transition timeout, Replace global from all???)
+            Dom.css3.transition(me._draggableItem, "Visibility 0ms ease");
             me._draggableItemConnection = me._gridifier.findConnectionByItem(me._draggableItem);
 
             me._determineInitialCursorOffsetsFromDraggableItemCenter(
@@ -67,34 +84,38 @@ Gridifier.VerticalGrid.Dragifier = function(gridifier, connections, connectors, 
             // @todo -> Replace with real hidder
             Dom.css.addClass(document.body, "disableSelect");
         });
-
+        
         $(document).on("mousemove.gridifier.dragifier", function(event) {
-            if(!me._isDragging)
-                return;
-
-            var draggableItemNewPosition = me._calculateDraggableItemNewPosition(
-                event.pageX, event.pageY
-            );
-            me._processDragStep(draggableItemNewPosition);
+            me._testTimeout = setTimeout(function() {
+                if(!me._isDragging)
+                    return;
+                
+                var draggableItemNewPosition = me._calculateDraggableItemNewPosition(
+                    event.pageX, event.pageY
+                );
+                me._processDragStep.call(me, draggableItemNewPosition);
+            }, 0);
         });
 
         $(document).on("mouseup.gridifier.dragifier", function() {
-            if(me._isDragging) {
-                var grid = me._gridifier.getGrid();
-                //grid.removeChild(me._draggableItemClone);
-                document.body.removeChild(me._draggableItemClone);
-                grid.removeChild(me._draggableItemPointer);
+            setTimeout(function() {
+                if(me._isDragging) {
+                    var grid = me._gridifier.getGrid();
+                    //grid.removeChild(me._draggableItemClone);
+                    document.body.removeChild(me._draggableItemClone);
+                    grid.removeChild(me._draggableItemPointer);
 
-                me._draggableItem.style.visibility = "visible";
-                me._isDragging = false;
-                me._draggableItem = null;
+                    me._draggableItem.style.visibility = "visible";
+                    me._isDragging = false;
+                    me._draggableItem = null;
 
-                // @todo -> Replace with real hidder
-                Dom.css.removeClass(document.body, "disableSelect");
+                    // @todo -> Replace with real hidder
+                    Dom.css.removeClass(document.body, "disableSelect");
 
-                // @todo Check if this is required
-                // SizesResolverManager.stopCachingTransaction();
-            }
+                    // @todo Check if this is required
+                    SizesResolverManager.stopCachingTransaction();
+                }
+            }, 0);
         });
     };
 
@@ -130,6 +151,12 @@ Gridifier.VerticalGrid.Dragifier.prototype._determineGridOffsets = function() {
 
 Gridifier.VerticalGrid.Dragifier.prototype._createDraggableItemClone = function() {
     this._draggableItemClone = this._draggableItem.cloneNode(true);
+
+    // @todo -> Replace this, tmp solution
+    this._draggableItemClone.style.setProperty("background", "rgb(235,235,235)", "important");
+    Dom.css3.transition(this._draggableItemClone, "All 0ms ease");
+    this._draggableItemClone.style.zIndex = 10; // end @todo
+
     //this._gridifier.getGrid().appendChild(this._draggableItemClone);
     document.body.appendChild(this._draggableItemClone);
 
@@ -143,10 +170,6 @@ Gridifier.VerticalGrid.Dragifier.prototype._createDraggableItemClone = function(
 
     this._draggableItemClone.style.left = draggableItemOffsetLeft + "px";
     this._draggableItemClone.style.top = draggableItemOffsetTop + "px";
-    // @todo -> Replace this, tmp solution
-    this._draggableItemClone.style.setProperty("background", "rgb(235,235,235)", "important");
-    Dom.css3.transition(this._draggableItemClone, "All 0ms ease");
-    this._draggableItemClone.style.zIndex = 10;
 }
 
 Gridifier.VerticalGrid.Dragifier.prototype._createDraggableItemPointer = function() {
@@ -218,8 +241,9 @@ Gridifier.VerticalGrid.Dragifier.prototype._processDragStep = function(draggable
     draggableItemCloneNewGridPosition.y2 -= this._gridOffsetTop;
 
     var intersectedByDraggableItemCellsCount = this._dragifierDiscretizator.getIntersectedRowsAndColsCount(
-        this._draggableItemConnection
+        this._draggableItemConnection, true
     );
+    console.log("ibydrag item cells count = ", intersectedByDraggableItemCellsCount);
 
     var cellsWithIntersectedCenterData = this._dragifierDiscretizator.getAllCellsWithIntersectedCenterData(
         draggableItemCloneNewGridPosition
@@ -258,7 +282,15 @@ Gridifier.VerticalGrid.Dragifier.prototype._transformGridOnDrag = function(newIn
         this._draggableItem, draggableItemNewConnectionCoords
     );
 
-    this._reappendGridItems(draggableItemNewConnectionCoords);
+    if(this._reappendGridItemsAfterDragTimeout != null) {
+        clearTimeout(this._reappendGridItemsAfterDragTimeout);
+        this._reappendGridItemsAfterDragTimeout = null;
+    }
+
+    var me = this;
+    this._reappendGridItemsAfterDragTimeout = setTimeout(function() {
+        me._reappendGridItems(draggableItemNewConnectionCoords);
+    }, 100); // @todo -> Move 100 to const
 }
 
 Gridifier.VerticalGrid.Dragifier.prototype._getDraggableItemNewConnectionCoords = function(newIntersectedCells) {
@@ -287,8 +319,17 @@ Gridifier.VerticalGrid.Dragifier.prototype._getDraggableItemNewConnectionCoords 
 }
 
 Gridifier.VerticalGrid.Dragifier.prototype._adjustItemPositionsAfterDrag = function(draggableItemNewCoords) {
+    this._draggableItemConnection.x1 = draggableItemNewCoords.x1;
+    this._draggableItemConnection.x2 = draggableItemNewCoords.x2;
+    this._draggableItemConnection.y1 = draggableItemNewCoords.y1;
+    this._draggableItemConnection.y2 = draggableItemNewCoords.y2;
+    this._draggableItemConnection.isDragged = true;
+
+    var left = draggableItemNewCoords.x1 / (this._gridifier.getGridX2() + 1) * 100;
+    left = this._normalizer.normalizeFractionalValueForRender(left) + "%";
+
     Dom.css.set(this._draggableItem, {
-        left: draggableItemNewCoords.x1 + "px",
+        left: left,
         top: draggableItemNewCoords.y1 + "px"
     });
 
@@ -299,5 +340,78 @@ Gridifier.VerticalGrid.Dragifier.prototype._adjustItemPositionsAfterDrag = funct
 }
 
 Gridifier.VerticalGrid.Dragifier.prototype._reappendGridItems = function(draggableItemNewConnectionCoords) {
+    var me = this;
+    var firstItemToReappend = this._findFirstItemToReappend();
     
+    if(this._settings.isDefaultAppend()) {
+        this._connectors.setNextFlushCallback(function() { 
+            me._appender.createInitialConnector(); 
+        });
+    }
+    else if(this._settings.isReversedAppend()) {
+        this._connectors.setNextFlushCallback(function() { 
+            me._reversedAppender.createInitialConnector(); 
+        });
+    }
+
+    this._gridifier.transformSizes(firstItemToReappend);
+}
+
+// @todo -> Move logic to divide Disabled SD/Custom SD in separate class,
+//          and share it with SizesTransformer class???
+Gridifier.VerticalGrid.Dragifier.prototype._findFirstItemToReappend = function() {
+    var connections = this._connections.get();
+
+    if(this._settings.isDisabledSortDispersion()) {
+        connections.sort(function(firstConnection, secondConnection) {
+            if(firstConnection.itemGUID > secondConnection.itemGUID)
+                return 1;
+
+            return -1;
+        });
+    }
+    else if(this._settings.isCustomSortDispersion() || this._settings.isCustomAllEmptySpaceSortDispersion()) {
+        if(this._settings.isDefaultAppend()) {
+            connections.sort(function(firstConnection, secondConnection) {
+                if(firstConnection.y1 == secondConnection.y1) {
+                    if(firstConnection.x2 > secondConnection.x2)
+                        return -1;
+                    else
+                        return 1;
+                }
+                else {
+                    if(firstConnection.y1 < secondConnection.y1)
+                        return -1;
+                    else
+                        return 1;
+                }
+            });
+        }
+        else if(this._settings.isReversedAppend()) {
+            connections.sort(function(firstConnection, secondConnection) {
+                if(firstConnection.y1 == secondConnection.y1) {
+                    if(firstConnection.x1 < secondConnection.x1)
+                        return -1;
+                    else 
+                        return 1;
+                }
+                else {
+                    if(firstConnection.y1 < secondConnection.y1)
+                        return -1;
+                    else
+                        return 1;
+                }
+            });
+        }
+    }
+
+    var firstConnection = null;
+    for(var i = 0; i < connections.length; i++) {
+        if(this._draggableItemConnection.itemGUID != connections[i].itemGUID) {
+            firstConnection = connections[i];
+            break;
+        }
+    }
+
+    return firstConnection.item;
 }

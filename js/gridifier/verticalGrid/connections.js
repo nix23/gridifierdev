@@ -81,6 +81,8 @@ Gridifier.VerticalGrid.Connections.prototype.add = function(item, itemConnection
     connection.itemGUID = Dom.toInt(this._guid.getItemGUID(item));
     if(!connection.hasOwnProperty("verticalOffset"))
         connection.verticalOffset = 0; // Used with noIntersections strategy
+    if(!connection.hasOwnProperty("isDragged"))
+        connection.isDragged = false;
 
     if(this._settings.isNoIntersectionsStrategy()) {
         connection.itemHeightWithMargins = SizesResolverManager.outerHeight(item, true);

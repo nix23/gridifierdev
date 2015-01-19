@@ -6,6 +6,8 @@ Gridifier.Connectors = function(guid, connections) {
 
     this._connectors = [];
 
+    this._nextFlushCallback = null;
+
     this._css = {
     };
 
@@ -112,8 +114,17 @@ Gridifier.Connectors.prototype.count = function() {
     return this._connectors.length;
 }
 
+Gridifier.Connectors.prototype.setNextFlushCallback = function(callbackFn) {
+    this._nextFlushCallback = callbackFn;
+}
+
 Gridifier.Connectors.prototype.flush = function() {
     this._connectors = [];
+
+    if(typeof this._nextFlushCallback == "function") {
+        this._nextFlushCallback();
+        this._nextFlushCallback = null;
+    }
 }
 
 Gridifier.Connectors.prototype.get = function() {

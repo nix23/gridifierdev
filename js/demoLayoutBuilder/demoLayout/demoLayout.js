@@ -97,6 +97,36 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
 
 
+        me._gridifierDynamicSettings._batchSize = 3;
+
+        me._gridifierDynamicSettings._itemSizes[0].width = "35%";
+        me._gridifierDynamicSettings._itemSizes[0].height = "200px";
+
+        me._gridifierDynamicSettings._itemSizes[1].width = "15%";
+        me._gridifierDynamicSettings._itemSizes[1].height = "200px";
+
+        me._gridifierDynamicSettings._itemSizes[2].width = "50%";
+        me._gridifierDynamicSettings._itemSizes[2].height = "200px";
+
+
+
+        // me._gridifierDynamicSettings._batchSize = 50;
+        // for(var i = 0; i < 50; i++) {
+        //     if(i % 2 == 0) {
+        //         var width = "50px";
+        //         var height = "25px";
+        //     }
+        //     else {
+        //         var width = "25px";
+        //         var height = "50px";
+        //     }
+
+        //     me._gridifierDynamicSettings._itemSizes[i].width = width;
+        //     me._gridifierDynamicSettings._itemSizes[i].height = height;
+        // }
+
+
+
         // me._gridifierDynamicSettings._itemSizes[0].width = "5%";  // @todo -> Delete, tmp
         // //me._gridifierDynamicSettings._itemSizes[0].width = "25px";
         // me._gridifierDynamicSettings._itemSizes[0].height = "100px";
@@ -118,20 +148,20 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
 
 
-        me._gridifierDynamicSettings._itemSizes[0].width = "20%";
-        me._gridifierDynamicSettings._itemSizes[0].height = "100px";
+        // me._gridifierDynamicSettings._itemSizes[0].width = "20%";
+        // me._gridifierDynamicSettings._itemSizes[0].height = "100px";
 
-        me._gridifierDynamicSettings._itemSizes[1].width = "40%";
-        me._gridifierDynamicSettings._itemSizes[1].height = "200px";
+        // me._gridifierDynamicSettings._itemSizes[1].width = "40%";
+        // me._gridifierDynamicSettings._itemSizes[1].height = "200px";
 
-        me._gridifierDynamicSettings._itemSizes[2].width = "20%";
-        me._gridifierDynamicSettings._itemSizes[2].height = "300px";
+        // me._gridifierDynamicSettings._itemSizes[2].width = "20%";
+        // me._gridifierDynamicSettings._itemSizes[2].height = "300px";
 
-        me._gridifierDynamicSettings._itemSizes[3].width = "20%";
-        me._gridifierDynamicSettings._itemSizes[3].height = "100px";
+        // me._gridifierDynamicSettings._itemSizes[3].width = "20%";
+        // me._gridifierDynamicSettings._itemSizes[3].height = "100px";
 
-        me._gridifierDynamicSettings._itemSizes[4].width = "40%";
-        me._gridifierDynamicSettings._itemSizes[4].height = "200px"; // @todo -> Delete, tmp
+        // me._gridifierDynamicSettings._itemSizes[4].width = "40%";
+        // me._gridifierDynamicSettings._itemSizes[4].height = "200px"; // @todo -> Delete, tmp
 
         me._$loadGridConfiguratorButton = me._$view.find("." + me._css.loadGridConfiguratorButtonClass);
         me._$gridTopHeadingView = me._$view.find("." + me._css.gridTopHeadingViewClass);
