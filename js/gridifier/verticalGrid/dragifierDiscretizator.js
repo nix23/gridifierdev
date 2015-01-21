@@ -60,9 +60,8 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype.discretizeGrid = functio
     this._demonstrateDiscretization();
 }
 
-Gridifier.VerticalGrid.DragifierDiscretizator.prototype.getIntersectedRowsAndColsCount = function(intersectionCoords, 
-                                                                                                  compareOnlyCellCenter) {
-    var compareOnlyCellCenter = compareOnlyCellCenter || false;
+Gridifier.VerticalGrid.DragifierDiscretizator.prototype.getAllCellsWithIntersectedCenterData = function(intersectionCoords) {
+    var cellsWithIntersectedCenter = [];
     var intersectedRowsCount = 0;
     var intersectedColsCount = 0;
     var intersectedCols = [];
@@ -78,24 +77,19 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype.getIntersectedRowsAndCol
 
     for(var row = 0; row < this._cells.length; row++) {
         var isRowMarkedAsIntersected = false;
+        var rowColumnsWithIntersectedCenter = [];
 
         for(var col = 0; col < this._cells[row].length; col++) {
-            if(compareOnlyCellCenter) {
-                var cellCoords = {
-                    x1: this._cells[row][col].centerX,
-                    x2: this._cells[row][col].centerX,
-                    y1: this._cells[row][col].centerY,
-                    y2: this._cells[row][col].centerY
-                };
-            }
-            else {
-                var cellCoords = this._cells[row][col];
-            }
+            var cellCoords = {
+                x1: this._cells[row][col].centerX,
+                x2: this._cells[row][col].centerX,
+                y1: this._cells[row][col].centerY,
+                y2: this._cells[row][col].centerY
+            };
 
             if(this._isCellIntersectedBy(cellCoords, intersectionCoords)) {
-                console.log("is intersected");
-                console.log("cell coords = ", cellCoords);
-                console.log("intersection coords = ", intersectionCoords);
+                rowColumnsWithIntersectedCenter.push(this._cells[row][col]);
+
                 if(!isRowMarkedAsIntersected) {
                     intersectedRowsCount++;
                     isRowMarkedAsIntersected = true;
@@ -107,9 +101,13 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype.getIntersectedRowsAndCol
                 }
             }
         }
+
+        if(rowColumnsWithIntersectedCenter.length > 0)
+            cellsWithIntersectedCenter.push(rowColumnsWithIntersectedCenter);
     }
 
     return {
+        cellsWithIntersectedCenter: cellsWithIntersectedCenter,
         intersectedRowsCount: intersectedRowsCount,
         intersectedColsCount: intersectedColsCount
     };
@@ -119,7 +117,14 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype.markCellsIntersectedByDr
                                                                                                        draggableItemConnection) {
     for(var row = 0; row < this._cells.length; row++) {
         for(var col = 0; col < this._cells[row].length; col++) {
-            if(this._isCellIntersectedBy(this._cells[row][col], draggableItemConnection))
+            var cellCoords = {
+                x1: this._cells[row][col].centerX,
+                x2: this._cells[row][col].centerX,
+                y1: this._cells[row][col].centerY,
+                y2: this._cells[row][col].centerY
+            };
+
+            if(this._isCellIntersectedBy(cellCoords, draggableItemConnection))
                 this._cells[row][col].isIntersectedByDraggableItem = true;
             else
                 this._cells[row][col].isIntersectedByDraggableItem = false;
@@ -151,31 +156,31 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype._isCellIntersectedBy = f
 //     return intersectedCells;
 // }
 
-Gridifier.VerticalGrid.DragifierDiscretizator.prototype.getAllCellsWithIntersectedCenterData = function(intersectionCoords) {
-    var cellsWithIntersectedCenter = [];
-    var intersectedCellsCountData = this.getIntersectedRowsAndColsCount(intersectionCoords, true);
+// Gridifier.VerticalGrid.DragifierDiscretizator.prototype.getAllCellsWithIntersectedCenterData = function(intersectionCoords) {
+//     var cellsWithIntersectedCenter = [];
+//     var intersectedCellsCountData = this.getIntersectedRowsAndColsCount(intersectionCoords, true);
 
-    for(var row = 0; row < this._cells.length; row++) {
-        for(var col = 0; col < this._cells[row].length; col++) {
-            var cellData = {
-                x1: this._cells[row][col].centerX,
-                x2: this._cells[row][col].centerX,
-                y1: this._cells[row][col].centerY,
-                y2: this._cells[row][col].centerY
-            };
+//     for(var row = 0; row < this._cells.length; row++) {
+//         for(var col = 0; col < this._cells[row].length; col++) {
+//             var cellData = {
+//                 x1: this._cells[row][col].centerX,
+//                 x2: this._cells[row][col].centerX,
+//                 y1: this._cells[row][col].centerY,
+//                 y2: this._cells[row][col].centerY
+//             };
 
-            if(this._isCellIntersectedBy(cellData, intersectionCoords)) {
-                cellsWithIntersectedCenter.push(this._cells[row][col]);
-            }
-        }
-    }
+//             if(this._isCellIntersectedBy(cellData, intersectionCoords)) {
+//                 cellsWithIntersectedCenter.push(this._cells[row][col]);
+//             }
+//         }
+//     }
 
-    return {
-        cellsWithIntersectedCenter: cellsWithIntersectedCenter,
-        intersectedRowsCount: intersectedCellsCountData.intersectedRowsCount,
-        intersectedColsCount: intersectedCellsCountData.intersectedColsCount 
-    };
-}
+//     return {
+//         cellsWithIntersectedCenter: cellsWithIntersectedCenter,
+//         intersectedRowsCount: intersectedCellsCountData.intersectedRowsCount,
+//         intersectedColsCount: intersectedCellsCountData.intersectedColsCount 
+//     };
+// }
 
 Gridifier.VerticalGrid.DragifierDiscretizator.prototype._discretizeGridWithDefaultAppendMode = function(discretizationHorizontalStep,
                                                                                                         discretizationVerticalStep,

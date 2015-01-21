@@ -1,4 +1,5 @@
 // @todo -> important drag items from one Gridifier instance to another!!!!!
+// @todo -> Multitouch -> multiple dragged items cannot intersect each other
 
 Gridifier.VerticalGrid.Dragifier = function(gridifier, 
                                             appender,
@@ -240,42 +241,84 @@ Gridifier.VerticalGrid.Dragifier.prototype._processDragStep = function(draggable
     draggableItemCloneNewGridPosition.y1 -= this._gridOffsetTop;
     draggableItemCloneNewGridPosition.y2 -= this._gridOffsetTop;
 
-    var intersectedByDraggableItemCellsCount = this._dragifierDiscretizator.getIntersectedRowsAndColsCount(
-        this._draggableItemConnection, true
+    var intersectedByDraggableItemCellCentersData = this._dragifierDiscretizator.getAllCellsWithIntersectedCenterData(
+        this._draggableItemConnection
     );
-    console.log("ibydrag item cells count = ", intersectedByDraggableItemCellsCount);
 
-    var cellsWithIntersectedCenterData = this._dragifierDiscretizator.getAllCellsWithIntersectedCenterData(
+    var intersectedByDraggableItemCloneCellCentersData = this._dragifierDiscretizator.getAllCellsWithIntersectedCenterData(
         draggableItemCloneNewGridPosition
     );
-    var intersectedByDraggableItemCloneCellCenters = cellsWithIntersectedCenterData.cellsWithIntersectedCenter;
+    var intersectedByDraggableItemCloneCellCenters = intersectedByDraggableItemCloneCellCentersData.cellsWithIntersectedCenter;
     var intersectedByDraggableItemCloneCellCentersCount = {
-        intersectedRowsCount: cellsWithIntersectedCenterData.intersectedRowsCount,
-        intersectedColsCount: cellsWithIntersectedCenterData.intersectedColsCount
+        intersectedRowsCount: intersectedByDraggableItemCloneCellCentersData.intersectedRowsCount,
+        intersectedColsCount: intersectedByDraggableItemCloneCellCentersData.intersectedColsCount
     };
 
     var isAtLeastOneOfIntersectedCellCentersEmpty = false;
-    for(var i = 0; i < intersectedByDraggableItemCloneCellCenters.length; i++) {
-        if(!intersectedByDraggableItemCloneCellCenters[i].isIntersectedByDraggableItem)
-            isAtLeastOneOfIntersectedCellCentersEmpty = true;
+    for(var row = 0; row < intersectedByDraggableItemCloneCellCenters.length; row++) {
+        for(var col = 0; col < intersectedByDraggableItemCloneCellCenters[row].length; col++) {
+            if(!intersectedByDraggableItemCloneCellCenters[row][col].isIntersectedByDraggableItem)
+                isAtLeastOneOfIntersectedCellCentersEmpty = true;
+        }
     }
 
     if(!isAtLeastOneOfIntersectedCellCentersEmpty)
         return;
 
-    var originalCellsCount = intersectedByDraggableItemCellsCount;
+    var originalCellsCount = intersectedByDraggableItemCellCentersData;
     var newCellsCount = intersectedByDraggableItemCloneCellCentersCount;
     if(newCellsCount.intersectedRowsCount < originalCellsCount.intersectedRowsCount ||
         newCellsCount.intersectedColsCount < originalCellsCount.intersectedColsCount) {
         return;
     }
 
-    this._transformGridOnDrag(intersectedByDraggableItemCloneCellCenters);
+    this._transformGridOnDrag(this._normalizeCellsWithMaybeIntersectionOverflows(
+        intersectedByDraggableItemCloneCellCenters, newCellsCount, originalCellsCount
+    ));
     this._dragifierDiscretizator.updateDiscretizationDemonstrator();
+}
+
+/*
+    Sometimes on the start of the drag dragged item can cover fractional count of cells,
+    for example 3 full cells and 1/4 of fourth cell.(Center is not intersected) After draggable item clone
+    movement it can intersect 4 cell centers, but we should still cover only 3 full cells. Later we will align
+    the item to the most left or most right(most bottom or top vertically) side of all cells and depending on
+    insertion type(Reversed or Default append) and will ensure, that draggable item is not out of grid bounds.
+*/
+Gridifier.VerticalGrid.Dragifier.prototype._normalizeCellsWithMaybeIntersectionOverflows = function(intersectedByDraggableItemCloneCellCenters,
+                                                                                                    newCellsCount,
+                                                                                                    originalCellsCount) {
+    if(newCellsCount.intersectedRowsCount > originalCellsCount.intersectedRowsCount) {
+        var rowsDifference = newCellsCount.intersectedRowsCount - originalCellsCount.intersectedRowsCount;
+        for(var i = 0; i < rowsDifference; i++) {
+            intersectedByDraggableItemCloneCellCenters.pop();
+        }
+    }
+
+    if(newCellsCount.intersectedColsCount > originalCellsCount.intersectedColsCount) {
+        var colsDifference = newCellsCount.intersectedColsCount - originalCellsCount.intersectedColsCount;
+        for(var row = 0; row < intersectedByDraggableItemCloneCellCenters.length; row++) {
+            for(var i = 0; i < colsDifference; i++) {
+                intersectedByDraggableItemCloneCellCenters[row].pop();
+            }
+        }
+    }
+
+    var mergedIntersectedByDraggableItemCloneCellCenters = [];
+    for(var row = 0; row < intersectedByDraggableItemCloneCellCenters.length; row++) {
+        for(var col = 0; col < intersectedByDraggableItemCloneCellCenters[row].length; col++) {
+            mergedIntersectedByDraggableItemCloneCellCenters.push(
+                intersectedByDraggableItemCloneCellCenters[row][col]
+            );
+        }
+    }
+
+    return mergedIntersectedByDraggableItemCloneCellCenters;
 }
 
 Gridifier.VerticalGrid.Dragifier.prototype._transformGridOnDrag = function(newIntersectedCells) {
     var draggableItemNewConnectionCoords = this._getDraggableItemNewConnectionCoords(newIntersectedCells);
+    draggableItemNewConnectionCoords = this._normalizeDraggableItemNewConnectionCoords(draggableItemNewConnectionCoords);
     this._adjustItemPositionsAfterDrag(draggableItemNewConnectionCoords);
 
     this._dragifierDiscretizator.markCellsIntersectedByDraggableItem(
@@ -316,6 +359,49 @@ Gridifier.VerticalGrid.Dragifier.prototype._getDraggableItemNewConnectionCoords 
     }
 
     return draggableItemNewConnectionCoords;
+}
+
+Gridifier.VerticalGrid.Dragifier.prototype._normalizeDraggableItemNewConnectionCoords = function(newConnectionCoords) {
+    var newConnectionWidth = newConnectionCoords.x2 - newConnectionCoords.x1 + 1;
+    var newConnectionHeight = newConnectionCoords.y2 - newConnectionCoords.y1 + 1;
+
+    var draggableItemWidth = SizesResolverManager.outerWidth(this._draggableItem, true);
+    var draggableItemHeight = SizesResolverManager.outerHeight(this._draggableItem, true);
+
+    if(newConnectionWidth < draggableItemWidth) {
+        if(this._settings.isDefaultAppend()) {
+            newConnectionCoords.x1 = newConnectionCoords.x2 - draggableItemWidth + 1;
+        }
+        else if(this._settings.isReversedApppend()) {
+            newConnectionCoords.x2 = newConnectionCoords.x1 + draggableItemWidth - 1;
+        }
+    }
+
+    if(newConnectionHeight < draggableItemHeight) {
+        newConnectionCoords.y2 = newConnectionCoords.y1 + draggableItemHeight - 1;
+    }
+
+    if(newConnectionCoords.x1 < 0) {
+        newConnectionCoords.x1 = 0;
+        newConnectionCoords.x2 = draggableItemWidth - 1;
+    }
+
+    if(newConnectionCoords.x2 > this._gridifier.getGridX2()) {
+        newConnectionCoords.x2 = this._gridifier.getGridX2();
+        newConnectionCoords.x1 = newConnectionCoords.x2 - draggableItemWidth + 1;
+    }
+
+    if(newConnectionCoords.y1 < 0) {
+        newConnectionCoords.y1 = 0;
+        newConnectionCoords.y2 = draggableItemHeight - 1;
+    }
+
+    if(newConnectionCoords.y2 > this._gridifier.getGridY2()) {
+        newConnectionCoords.y2 = this._gridifier.getGridY2();
+        newConnectionCoords.y1 = newConnectionCoords.y2 - draggableItemHeight + 1;
+    }
+
+    return newConnectionCoords;
 }
 
 Gridifier.VerticalGrid.Dragifier.prototype._adjustItemPositionsAfterDrag = function(draggableItemNewCoords) {

@@ -108,6 +108,17 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierDynamicSettings._itemSizes[2].width = "50%";
         me._gridifierDynamicSettings._itemSizes[2].height = "200px";
 
+        // me._gridifierDynamicSettings._batchSize = 3;
+
+        // me._gridifierDynamicSettings._itemSizes[0].width = "50%";
+        // me._gridifierDynamicSettings._itemSizes[0].height = "200px";
+
+        // me._gridifierDynamicSettings._itemSizes[1].width = "25%";
+        // me._gridifierDynamicSettings._itemSizes[1].height = "200px";
+
+        // me._gridifierDynamicSettings._itemSizes[2].width = "25%";
+        // me._gridifierDynamicSettings._itemSizes[2].height = "200px";
+
 
 
         // me._gridifierDynamicSettings._batchSize = 50;
