@@ -193,6 +193,21 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype._discretizeGridWithDefau
     var currentY = -1;
     var createNextRow = true;
 
+/*
+    var elemsCanFitInRowCount = Math.floor((gridX2 + 1) / discretizationHorizontalStep);
+    var elemsCanFitInRowTotalWidth = elemsCanFitInRowCount * discretizationHorizontalStep;
+    var remainderWidth = gridX2 + 1 - elemsCanFitInRowTotalWidth;
+    //var horizontalGapsCount = elemsCanFitInRowCount - 1;
+    if(elemsCanFitInRowCount == 1) {
+        discretizationHorizontalStep += remainderWidth;
+    }
+    else {
+        //var gapWidth = Math.floor(remainderWidth / elemsCanFitInRowCount);
+        //discretizationHorizontalStep += gapWidth - 1;
+        var gapWidth = remainderWidth / elemsCanFitInRowCount;
+    }
+*/
+
     while(createNextRow) {
         var rowColumns = [];
         var currentX = gridX2 + 1;
@@ -219,6 +234,8 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype._discretizeGridWithDefau
 
                 rowColumns.unshift(nextColumn);
             }
+
+            //currentX -= gapWidth;
         }
 
         this._cells.push(rowColumns);
