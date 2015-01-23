@@ -255,7 +255,7 @@ var SizesResolverManager = {
             if(includeMargins)
                 cachedItemEntry.cachedReturnedValues.withIncludeMarginsParam = returnedValue;
             else
-                cachedItemEntry.cachedReturnedValues.withoutIncludeMarginsParam = retunedValue;
+                cachedItemEntry.cachedReturnedValues.withoutIncludeMarginsParam = returnedValue;
         }
         else {
             this._nextCachedItemGUIDPerOuterHeight++;
@@ -283,12 +283,38 @@ var SizesResolverManager = {
         return SizesResolver.positionLeft(DOMElem);
     },
 
-    offsetLeft: function(DOMElem) {
-        return SizesResolver.offsetLeft(DOMElem);
+    offsetLeft: function(DOMElem, substractMargins) {
+        var substractMargins = substractMargins || false;
+
+        if(substractMargins) {
+            var elemWidth = SizesResolverManager.outerWidth(DOMElem);
+            var elemWidthWithMargins = SizesResolverManager.outerWidth(DOMElem, true);
+            var marginWidth = elemWidthWithMargins - elemWidth;
+            var halfOfMarginWidth = marginWidth / 2;
+            var offsetLeft = SizesResolver.offsetLeft(DOMElem) - halfOfMarginWidth;
+        }
+        else {
+            var offsetLeft = SizesResolver.offsetLeft(DOMElem);
+        }
+
+        return offsetLeft;
     },
 
-    offsetTop: function(DOMElem) {
-        return SizesResolver.offsetTop(DOMElem);
+    offsetTop: function(DOMElem, substractMargins) {
+        var substractMargins = substractMargins || false;
+
+        if(substractMargins) {
+            var elemHeight = SizesResolverManager.outerHeight(DOMElem);
+            var elemHeightWithMargins = SizesResolverManager.outerHeight(DOMElem, true);
+            var marginHeight = elemHeightWithMargins - elemHeight;
+            var halfOfMarginHeight = marginHeight / 2;
+            var offsetTop = SizesResolver.offsetTop(DOMElem) - halfOfMarginHeight;
+        }
+        else {
+            var offsetTop = SizesResolver.offsetTop(DOMElem);
+        }
+
+        return offsetTop;
     }
 }
 SizesResolverManager.init();

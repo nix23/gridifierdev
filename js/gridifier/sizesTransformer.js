@@ -275,7 +275,7 @@ Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTra
         exceptItemGUIDS.push(this._guid.getItemGUID(transformedItemClones[i]));
     }
 
-    var draggedConnections = [];
+    //var draggedConnections = [];
 
     var me = this;
     var iteratorTypes = {COLLECT_ITEMS_TO_REAPPEND: 0, CLEAR_COLLECTED_ITEMS: 1};
@@ -300,7 +300,7 @@ Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTra
 
         for(var i = 0; i < connections.length; i++) {
             if(connections[i].isDragged) {
-                draggedConnections.push(connections[i]);
+                //draggedConnections.push(connections[i]);
                 continue;
             }
 
@@ -355,8 +355,8 @@ Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTra
     var firstConnectionToReappend = this._gridifier.findConnectionByItem(itemsToReappend[0]);
     iterateConnections(iteratorTypes.CLEAR_COLLECTED_ITEMS);
 
-    for(var i = 0; i < draggedConnections.length; i++)
-        draggedConnections[i].isDragged = false;
+    // for(var i = 0; i < draggedConnections.length; i++)
+    //     draggedConnections[i].isDragged = false;
     
     return {
         itemsToReappend: itemsToReappend,

@@ -1,6 +1,7 @@
-Gridifier.VerticalGrid.Connections = function(guid, settings) {
+Gridifier.VerticalGrid.Connections = function(gridifier, guid, settings) {
     var me = this;
 
+    this._gridifier = null;
     this._guid = null;
     this._settings = null;
 
@@ -13,6 +14,7 @@ Gridifier.VerticalGrid.Connections = function(guid, settings) {
     };
 
     this._construct = function() {
+        me._gridifier = gridifier;
         me._guid = guid;
         me._settings = settings;
         me._ranges = new Gridifier.VerticalGrid.ConnectionsRanges(me);
@@ -105,9 +107,26 @@ Gridifier.VerticalGrid.Connections.prototype.getMinConnectionWidth = function() 
     if(this._connections.length == 0)
         return 0;
 
-    var minConnectionWidth = this._connections[0].x2 - this._connections[0].x1 + 1;
+    var me = this;
+    var gridX2 = this._gridifier.getGridX2();
+
+    // Sometimes fast dragging breaks coordinates of some connections.
+    // In such cases we should recalculate connection item width.
+    var getConnectionWidth = function(i) {
+        if(me._connections[i].x1 >= me._connections[i].x2 || me._connections[i].x1 < 0
+            || me._connections[i].x2 > gridX2) {
+            var connectionWidth = SizesResolverManager.outerWidth(me._connections[i].item, true);
+        }
+        else {
+            var connectionWidth = me._connections[i].x2 - me._connections[i].x1 + 1;
+        }
+
+        return connectionWidth;
+    };
+
+    var minConnectionWidth = getConnectionWidth(0);
     for(var i = 1; i < this._connections.length; i++) {
-        var connectionWidth = this._connections[i].x2 - this._connections[i].x1 + 1;
+        var connectionWidth = getConnectionWidth(i);
         if(connectionWidth < minConnectionWidth)
             minConnectionWidth = connectionWidth;
     }
@@ -119,9 +138,26 @@ Gridifier.VerticalGrid.Connections.prototype.getMinConnectionHeight = function()
     if(this._connections.length == 0)
         return 0;
 
-    var minConnectionHeight = this._connections[0].y2 - this._connections[0].y1 + 1;
+    var me = this;
+    var gridY2 = this._gridifier.getGridY2();
+
+    // Sometimes fast dragging breaks coordinates of some connections.
+    // In such cases we should recalculate connection item height.
+    var getConnectionHeight = function(i) {
+        if(me._connections[i].y1 >= me._connections[i].y2 || me._connections[i].y1 < 0
+            || me._connections[i].y2 > gridY2) {
+            var connectionHeight = SizesResolverManager.outerHeight(me._connections[i].item, true);
+        }
+        else {
+            var connectionHeight = me._connections[i].y2 - me._connections[i].y1 + 1;
+        }
+
+        return connectionHeight;
+    };
+
+    var minConnectionHeight = getConnectionHeight(0);
     for(var i = 1; i < this._connections.length; i++) {
-        var connectionHeight = this._connections[i].y2 - this._connections[i].y1 + 1;
+        var connectionHeight = getConnectionHeight(i);
         if(connectionHeight < minConnectionHeight)
             minConnectionHeight = connectionHeight;
     }

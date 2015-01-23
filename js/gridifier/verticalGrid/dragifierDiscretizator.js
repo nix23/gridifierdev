@@ -42,8 +42,8 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype.discretizeGrid = functio
     var discretizationHorizontalStep = this._connections.getMinConnectionWidth() - 1;
     var discretizationVerticalStep = this._connections.getMinConnectionHeight() - 1;
 
-    var cellWidth = SizesResolverManager.outerWidth(draggableItem, true);
-    var cellHeight = SizesResolverManager.outerHeight(draggableItem, true);
+    var cellWidth = SizesResolverManager.outerWidth(draggableItem, true); // @todo -> Not used?
+    var cellHeight = SizesResolverManager.outerHeight(draggableItem, true); // @todo -> Not used??
 
     if(this._settings.isDefaultAppend()) {
         this._discretizeGridWithDefaultAppendMode(
@@ -207,8 +207,8 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype._discretizeGridWithDefau
         var gapWidth = remainderWidth / elemsCanFitInRowCount;
     }
 */
-
-    while(createNextRow) {
+    
+    while(createNextRow) { 
         var rowColumns = [];
         var currentX = gridX2 + 1;
         var createNextColumn = true;

@@ -70,6 +70,7 @@ Gridifier.VerticalGrid.Dragifier = function(gridifier,
             // @todo -> Fix this(visibility uses transition timeout, Replace global from all???)
             Dom.css3.transition(me._draggableItem, "Visibility 0ms ease");
             me._draggableItemConnection = me._gridifier.findConnectionByItem(me._draggableItem);
+            me._draggableItemConnection.isDragged = true;
 
             me._determineInitialCursorOffsetsFromDraggableItemCenter(
                 event.pageX, event.pageY
@@ -87,7 +88,7 @@ Gridifier.VerticalGrid.Dragifier = function(gridifier,
         });
         
         $(document).on("mousemove.gridifier.dragifier", function(event) {
-            me._testTimeout = setTimeout(function() {
+            setTimeout(function() {
                 if(!me._isDragging)
                     return;
                 
@@ -109,6 +110,7 @@ Gridifier.VerticalGrid.Dragifier = function(gridifier,
                     me._draggableItem.style.visibility = "visible";
                     me._isDragging = false;
                     me._draggableItem = null;
+                    me._draggableItemConnection.isDragged = false;
 
                     // @todo -> Replace with real hidder
                     Dom.css.removeClass(document.body, "disableSelect");
@@ -159,23 +161,40 @@ Gridifier.VerticalGrid.Dragifier.prototype._createDraggableItemClone = function(
     this._draggableItemClone.style.zIndex = 10; // end @todo
 
     //this._gridifier.getGrid().appendChild(this._draggableItemClone);
+
+    var cloneWidth = SizesResolverManager.outerWidth(this._draggableItem);
+    var cloneHeight = SizesResolverManager.outerHeight(this._draggableItem);
+    this._draggableItemClone.style.width = cloneWidth + "px";
+    this._draggableItemClone.style.height = cloneHeight + "px";
+    this._draggableItemClone.style.margin = "0px";
+
+    if(this._settings.isNoIntersectionsStrategy()) {
+        var draggableItemCloneTmp = this._draggableItemClone;
+        var cloneExpandedHeight = this._draggableItemConnection.y2 - this._draggableItemConnection.y1 + 1;
+        console.log("clone expanded height = " + cloneExpandedHeight);
+        this._draggableItemClone = document.createElement("div");
+        console.log("draggableItemCloneTmp = ", draggableItemCloneTmp);
+        Dom.css.set(this._draggableItemClone, {
+            position: 'absolute',
+            width: cloneWidth + "px",
+            height: cloneExpandedHeight + "px",
+            background: 'blue'
+        });
+        this._draggableItemClone.appendChild(draggableItemCloneTmp);
+    }
+
     document.body.appendChild(this._draggableItemClone);
 
     var draggableItemOffsetLeft = SizesResolverManager.offsetLeft(this._draggableItem);
     var draggableItemOffsetTop = SizesResolverManager.offsetTop(this._draggableItem);
-
-    var cloneWidth = SizesResolverManager.outerWidth(this._draggableItem, true);
-    var cloneHeight = SizesResolverManager.outerHeight(this._draggableItem, true);
-    this._draggableItemClone.style.width = cloneWidth + "px";
-    this._draggableItemClone.style.height = cloneHeight + "px";
 
     this._draggableItemClone.style.left = draggableItemOffsetLeft + "px";
     this._draggableItemClone.style.top = draggableItemOffsetTop + "px";
 }
 
 Gridifier.VerticalGrid.Dragifier.prototype._createDraggableItemPointer = function() {
-    var draggableItemOffsetLeft = SizesResolverManager.offsetLeft(this._draggableItem);
-    var draggableItemOffsetTop = SizesResolverManager.offsetTop(this._draggableItem);
+    var draggableItemOffsetLeft = SizesResolverManager.offsetLeft(this._draggableItem, true);
+    var draggableItemOffsetTop = SizesResolverManager.offsetTop(this._draggableItem, true);
 
     this._draggableItemPointer = document.createElement("div");
     Dom.css.set(this._draggableItemPointer, {
@@ -244,6 +263,14 @@ Gridifier.VerticalGrid.Dragifier.prototype._processDragStep = function(draggable
     var intersectedByDraggableItemCellCentersData = this._dragifierDiscretizator.getAllCellsWithIntersectedCenterData(
         this._draggableItemConnection
     );
+    // If we have started drag from not covered by discretizator corner,
+    // we can get into situation, when dragged item isn't intersecting any discretizator cell center,
+    // so we should fix it. (In this situation item should cover 1 cell center).
+    if(intersectedByDraggableItemCellCentersData.intersectedColsCount == 0 &&
+        intersectedByDraggableItemCellCentersData.intersectedRowsCount == 0) {
+        intersectedByDraggableItemCellCentersData.intersectedRowsCount = 1;
+        intersectedByDraggableItemCellCentersData.intersectedColsCount = 1;
+    }
 
     var intersectedByDraggableItemCloneCellCentersData = this._dragifierDiscretizator.getAllCellsWithIntersectedCenterData(
         draggableItemCloneNewGridPosition
@@ -257,7 +284,7 @@ Gridifier.VerticalGrid.Dragifier.prototype._processDragStep = function(draggable
     var isAtLeastOneOfIntersectedCellCentersEmpty = false;
     for(var row = 0; row < intersectedByDraggableItemCloneCellCenters.length; row++) {
         for(var col = 0; col < intersectedByDraggableItemCloneCellCenters[row].length; col++) {
-            if(!intersectedByDraggableItemCloneCellCenters[row][col].isIntersectedByDraggableItem)
+            if(!intersectedByDraggableItemCloneCellCenters[row][col].isIntersectedByDraggableItem) 
                 isAtLeastOneOfIntersectedCellCentersEmpty = true;
         }
     }
@@ -329,11 +356,12 @@ Gridifier.VerticalGrid.Dragifier.prototype._transformGridOnDrag = function(newIn
         clearTimeout(this._reappendGridItemsAfterDragTimeout);
         this._reappendGridItemsAfterDragTimeout = null;
     }
-
+    
     var me = this;
     this._reappendGridItemsAfterDragTimeout = setTimeout(function() {
         me._reappendGridItems(draggableItemNewConnectionCoords);
     }, 100); // @todo -> Move 100 to const
+    //this._reappendGridItems(draggableItemNewConnectionCoords);
 }
 
 Gridifier.VerticalGrid.Dragifier.prototype._getDraggableItemNewConnectionCoords = function(newIntersectedCells) {
@@ -381,6 +409,19 @@ Gridifier.VerticalGrid.Dragifier.prototype._normalizeDraggableItemNewConnectionC
         newConnectionCoords.y2 = newConnectionCoords.y1 + draggableItemHeight - 1;
     }
 
+    if(draggableItemWidth < newConnectionWidth) {
+        if(this._settings.isDefaultAppend()) {
+            newConnectionCoords.x1 = newConnectionCoords.x2 - draggableItemWidth + 1;
+        }
+        else if(this._settings.isReversedAppend()) {
+            newConnectionCoords.x2 = newConnectionCoords.x1 + draggableItemWidth - 1;
+        }
+    }
+
+    if(draggableItemHeight < newConnectionHeight) {
+        newConnectionCoords.y2 = newConnectionCoords.y1 + draggableItemHeight - 1;
+    }
+
     if(newConnectionCoords.x1 < 0) {
         newConnectionCoords.x1 = 0;
         newConnectionCoords.x2 = draggableItemWidth - 1;
@@ -409,7 +450,7 @@ Gridifier.VerticalGrid.Dragifier.prototype._adjustItemPositionsAfterDrag = funct
     this._draggableItemConnection.x2 = draggableItemNewCoords.x2;
     this._draggableItemConnection.y1 = draggableItemNewCoords.y1;
     this._draggableItemConnection.y2 = draggableItemNewCoords.y2;
-    this._draggableItemConnection.isDragged = true;
+    //this._draggableItemConnection.isDragged = true;
 
     var left = draggableItemNewCoords.x1 / (this._gridifier.getGridX2() + 1) * 100;
     left = this._normalizer.normalizeFractionalValueForRender(left) + "%";

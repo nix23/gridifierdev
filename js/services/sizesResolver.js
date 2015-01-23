@@ -614,7 +614,7 @@ var SizesResolver = {
     {
         var clientRect = DOMElem.getBoundingClientRect();
         var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-
+        
         return clientRect.left + scrollLeft;
     },
 

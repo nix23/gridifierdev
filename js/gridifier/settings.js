@@ -58,7 +58,10 @@ Gridifier.Settings = function(settings) {
 
             var addSideCss = function(frame) {
                 Dom.css.set(frame, {
-                    display: "block", position: "absolute", width: "100%", height: "100%"
+                    display: "block", 
+                    position: "absolute", 
+                    width: "100%", 
+                    height: "100%"
                 });
                 Dom.css3.backfaceVisibility(frame, "hidden");
             };
@@ -78,8 +81,16 @@ Gridifier.Settings = function(settings) {
             frames.appendChild(backFrame);
 
             var itemClone = item.cloneNode(true);
-            Dom.css.set(itemClone, {left: "0px", top: "0px"});
-            Dom.css.set(itemClone, {visibility: "visible"});
+            Dom.css.set(itemClone, {
+                left: "0px",
+                top: "0px",
+                visibility: "visible",
+                width: SizesResolverManager.outerWidth(item, true) + "px",
+                height: SizesResolverManager.outerHeight(item, true) + "px"
+            });
+
+            // Dom.css.set(itemClone, {left: "0px", top: "0px"});
+            // Dom.css.set(itemClone, {visibility: "visible"});
             if(isShowing) {
                 backFrame.appendChild(itemClone);
             }

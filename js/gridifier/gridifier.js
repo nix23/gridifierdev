@@ -66,7 +66,9 @@ Gridifier = function(grid, settings) {
         me._normalizer = new Gridifier.Normalizer();
 
         if(me._settings.isVerticalGrid()) {
-            me._connections = new Gridifier.VerticalGrid.Connections(me._guid, me._settings);
+            me._connections = new Gridifier.VerticalGrid.Connections(
+                me, me._guid, me._settings
+            );
         }
         else if(me._settings.isHorizontalGrid()) {
             me._connections = new Gridifier.HorizontalGrid.Connections(me._guid, me._settings);
