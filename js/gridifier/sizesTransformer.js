@@ -2,6 +2,7 @@ Gridifier.SizesTransformer = function(gridifier,
                                       settings,
                                       connectors,
                                       connections,
+                                      connectionsSorter,
                                       guid,
                                       appender,
                                       reversedAppender,
@@ -12,6 +13,7 @@ Gridifier.SizesTransformer = function(gridifier,
     this._settings = null;
     this._connectors = null;
     this._connections = null;
+    this._connectionsSorter = null;
     this._guid = null;
     this._appender = null;
     this._reversedAppender = null;
@@ -36,6 +38,7 @@ Gridifier.SizesTransformer = function(gridifier,
         me._settings = settings;
         me._connectors = connectors;
         me._connections = connections;
+        me._connectionsSorter = connectionsSorter;
         me._guid = guid;
         me._appender = appender;
         me._reversedAppender = reversedAppender;
@@ -206,9 +209,28 @@ Gridifier.SizesTransformer.prototype.unmarkConnectionPerToggle = function(connec
 //          or when Custom Sort Dispersion is used, it will be more logical to sort by Y???
 Gridifier.SizesTransformer.prototype._sortConnectionsToTransform = function(transformationData) {
     var me = this;
+
+    var connectionsToSort = [];
+    for(var i = 0; i < transformationData.length; i++)
+        connectionsToSort.push(transformationData[i].connectionToTransform);
+    
+    var transformedConnectionSortNumber = 1;
+    var sortedConnectionsToTransform = this._connectionsSorter.sortConnectionsPerReappend(
+        connectionsToSort
+    );
+    for(var i = 0; i < sortedConnectionsToTransform.length; i++) {
+        for(var j = 0; j < transformationData.length; j++) {
+            if(sortedConnectionsToTransform[i].itemGUID == 
+               transformationData[j].connectionToTransform.itemGUID) {
+               transformationData[j].sortNumber = transformedConnectionSortNumber;
+               transformedConnectionSortNumber++;
+               break;
+            }
+        }
+    }
+
     transformationData.sort(function(firstTransformationData, secondTransformationData) {
-        if(firstTransformationData.connectionToTransform.itemGUID >
-            secondTransformationData.connectionToTransform.itemGUID)
+        if(firstTransformationData.sortNumber > secondTransformationData.sortNumber)
             return 1;
 
         return -1;
@@ -266,12 +288,18 @@ Gridifier.SizesTransformer.prototype._createAllTransformedConnectionItemClones =
 
 // @todo -> Check Custom Sort Dispersion mode, maybe we should take only items with > GUID and Y >= tritemY1??
 // Or item with shifted dispersion will be moved in same place???? Please check this, Mr. Eduard :D
-Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTransformedConnection, transformedItemClones) {
-    var itemsToReappend = [];
+Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTransformedConnection, 
+                                                                        transformedItemClones,
+                                                                        transformedConnections) {
+    //var itemsToReappend = [];
+    var connectionsToReappend = [];
     var exceptItemGUIDS = [];
 
+    for(var i = 0; i < transformedConnections.length; i++)
+        connectionsToReappend.push(transformedConnections[i]);
+
     for(var i = 0; i < transformedItemClones.length; i++) {
-        itemsToReappend.push(transformedItemClones[i]);
+        //itemsToReappend.push(transformedItemClones[i]);
         exceptItemGUIDS.push(this._guid.getItemGUID(transformedItemClones[i]));
     }
 
@@ -287,7 +315,8 @@ Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTra
             }
 
             if(iteratorType == iteratorTypes.COLLECT_ITEMS_TO_REAPPEND) {
-                itemsToReappend.push(connections[i].item);
+                //itemsToReappend.push(connections[i].item);
+                connectionsToReappend.push(connections[i]);
             }
             else if(iteratorType == iteratorTypes.CLEAR_COLLECTED_ITEMS) {
                 connections.splice(i, 1);
@@ -348,9 +377,32 @@ Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTra
     // }
 
     var me = this;
-    itemsToReappend.sort(function(firstItem, secondItem) {
-        return Dom.toInt(me._guid.getItemGUID(firstItem)) - Dom.toInt(me._guid.getItemGUID(secondItem));
-    });
+    var sortedConnectionsToReappend = this._connectionsSorter.sortConnectionsPerReappend(
+        connectionsToReappend
+    );
+
+    var itemsToReappend = [];
+    for(var i = 0; i < sortedConnectionsToReappend.length; i++) {
+        var isTransformedItem = false;
+        var transformedItemClone = null;
+
+        for(var j = 0; j < transformedItemClones.length; j++) {
+            if(this._guid.getItemGUID(transformedItemClones[j]) == 
+               sortedConnectionsToReappend[i].itemGUID) {
+                isTransformedItem = true;
+                transformedItemClone = transformedItemClones[j];
+                break;
+            }
+        }
+
+        if(isTransformedItem)
+            itemsToReappend.push(transformedItemClone);
+        else
+            itemsToReappend.push(sortedConnectionsToReappend[i].item);
+    }
+    // itemsToReappend.sort(function(firstItem, secondItem) {
+    //     return Dom.toInt(me._guid.getItemGUID(firstItem)) - Dom.toInt(me._guid.getItemGUID(secondItem));
+    // });
     
     var firstConnectionToReappend = this._gridifier.findConnectionByItem(itemsToReappend[0]);
     iterateConnections(iteratorTypes.CLEAR_COLLECTED_ITEMS);
@@ -784,7 +836,7 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transfo
 
     var processor = function() {
     var itemsToReappendData = this._findAllItemsToReappend(
-        transformationData[0].connectionToTransform, transformedItemClones
+        transformationData[0].connectionToTransform, transformedItemClones, transformedConnections
     );
     var itemsToReappend = itemsToReappendData.itemsToReappend;
     var firstConnectionToReappend = itemsToReappendData.firstConnectionToReappend;

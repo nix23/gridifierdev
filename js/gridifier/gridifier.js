@@ -8,6 +8,7 @@ Gridifier = function(grid, settings) {
 
     this._connectors = null;
     this._connections = null;
+    this._connectionsSorter = null;
     this._renderer = null;
     this._sizesTransformer = null;
     this._normalizer = null;
@@ -69,9 +70,16 @@ Gridifier = function(grid, settings) {
             me._connections = new Gridifier.VerticalGrid.Connections(
                 me, me._guid, me._settings
             );
+            me._connectionsSorter = new Gridifier.VerticalGrid.ConnectionsSorter(
+                me._connections, me._settings
+            );
         }
         else if(me._settings.isHorizontalGrid()) {
             me._connections = new Gridifier.HorizontalGrid.Connections(me._guid, me._settings);
+            // @todo -> Change to Horizontal Grid
+            me._connectionsSorter = new Gridifier.VerticalGrid.ConnectionsSorter(
+                me._connections, me._settings
+            );
         }
 
         me._connectors = new Gridifier.Connectors(me._guid, me._connections);
@@ -117,6 +125,7 @@ Gridifier = function(grid, settings) {
             me._settings,
             me._connectors,
             me._connections,
+            me._connectionsSorter,
             me._guid,
             me._appender,
             me._reversedAppender,
@@ -129,6 +138,7 @@ Gridifier = function(grid, settings) {
             me._appender,
             me._reversedAppender,
             me._connections, 
+            me._connectionsSorter,
             me._connectors, 
             me._guid, 
             me._settings, 
@@ -141,22 +151,28 @@ Gridifier = function(grid, settings) {
         var processResizeEventTimeout = null;
         var processResizeEvent = 100;
         $(window).resize(function() {
-            var $firstItem = null;
-            var $gridItems = $(".grid .gridItem");
-            if($gridItems.length == 0)
-                return;
+            // var $firstItem = null;
+            // var $gridItems = $(".grid .gridItem");
+            // if($gridItems.length == 0)
+            //     return;
             
-            $.each($gridItems, function() {
-                var currItemGUID = parseInt($(this).attr("data-gridifier-item-id"), 10);
+            // $.each($gridItems, function() {
+            //     var currItemGUID = parseInt($(this).attr("data-gridifier-item-id"), 10);
 
-                if($firstItem == null)
-                    $firstItem = $(this);
-                else {
-                    var firstItemGUID = parseInt($firstItem.attr("data-gridifier-item-id"), 10);
-                    if(currItemGUID < firstItemGUID)
-                        $firstItem = $(this);
-                }
-            });
+            //     if($firstItem == null)
+            //         $firstItem = $(this);
+            //     else {
+            //         var firstItemGUID = parseInt($firstItem.attr("data-gridifier-item-id"), 10);
+            //         if(currItemGUID < firstItemGUID)
+            //             $firstItem = $(this);
+            //     }
+            // });
+            var connections = me._connections.get();
+            if(connections.length == 0)
+                return;
+
+            connections = me._connectionsSorter.sortConnectionsPerReappend(connections);
+            var $firstItem = $(connections[0].item);
             
             if(processResizeEventTimeout != null) {
                 clearTimeout(processResizeEventTimeout);
@@ -452,7 +468,9 @@ Gridifier.prototype._applyAppend = function(item) {
         this._reversedAppender.reversedAppend(item);
     }
     // @todo -> replace with real event
-    $(item).trigger("gridifier.appendFinished");
+    setTimeout(function() {
+        $(item).trigger("gridifier.appendFinished");
+    }, 0);
 }
 
 Gridifier.prototype.append = function(items) {

@@ -46,7 +46,7 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype.discretizeGrid = functio
     var cellHeight = SizesResolverManager.outerHeight(draggableItem, true); // @todo -> Not used??
 
     if(this._settings.isDefaultAppend()) {
-        this._discretizeGridWithDefaultAppendMode(
+        this._discretizeGridWithDefaultAppendDefaultIntersectionStrategyMode(
             discretizationHorizontalStep,
             discretizationVerticalStep,
             cellWidth,
@@ -182,10 +182,10 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype._isCellIntersectedBy = f
 //     };
 // }
 
-Gridifier.VerticalGrid.DragifierDiscretizator.prototype._discretizeGridWithDefaultAppendMode = function(discretizationHorizontalStep,
-                                                                                                        discretizationVerticalStep,
-                                                                                                        cellWidth,
-                                                                                                        cellHeight) {
+Gridifier.VerticalGrid.DragifierDiscretizator.prototype._discretizeGridWithDefaultAppendDefaultIntersectionStrategyMode = function(discretizationHorizontalStep,
+                                                                                                                                   discretizationVerticalStep,
+                                                                                                                                   cellWidth,
+                                                                                                                                   cellHeight) {
     this._cells = [];
     var gridX2 = this._gridifier.getGridX2();
     var gridY2 = this._gridifier.getGridY2();

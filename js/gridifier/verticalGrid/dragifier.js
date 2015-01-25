@@ -5,6 +5,7 @@ Gridifier.VerticalGrid.Dragifier = function(gridifier,
                                             appender,
                                             reversedAppender,
                                             connections, 
+                                            connectionsSorter,
                                             connectors, 
                                             guid, 
                                             settings, 
@@ -15,6 +16,7 @@ Gridifier.VerticalGrid.Dragifier = function(gridifier,
     this._appender = null;
     this._reversedAppender = null;
     this._connections = null;
+    this._connectionsSorter = null;
     this._connectors = null;
     this._guid = null;
     this._settings = null;
@@ -44,6 +46,7 @@ Gridifier.VerticalGrid.Dragifier = function(gridifier,
         me._appender = appender;
         me._reversedAppender = reversedAppender;
         me._connections = connections;
+        me._connectionsSorter = connectionsSorter;
         me._connectors = connectors;
         me._guid = guid;
         me._settings = settings;
@@ -168,20 +171,20 @@ Gridifier.VerticalGrid.Dragifier.prototype._createDraggableItemClone = function(
     this._draggableItemClone.style.height = cloneHeight + "px";
     this._draggableItemClone.style.margin = "0px";
 
-    if(this._settings.isNoIntersectionsStrategy()) {
-        var draggableItemCloneTmp = this._draggableItemClone;
-        var cloneExpandedHeight = this._draggableItemConnection.y2 - this._draggableItemConnection.y1 + 1;
-        console.log("clone expanded height = " + cloneExpandedHeight);
-        this._draggableItemClone = document.createElement("div");
-        console.log("draggableItemCloneTmp = ", draggableItemCloneTmp);
-        Dom.css.set(this._draggableItemClone, {
-            position: 'absolute',
-            width: cloneWidth + "px",
-            height: cloneExpandedHeight + "px",
-            background: 'blue'
-        });
-        this._draggableItemClone.appendChild(draggableItemCloneTmp);
-    }
+    // if(this._settings.isNoIntersectionsStrategy()) {
+    //     var draggableItemCloneTmp = this._draggableItemClone;
+    //     var cloneExpandedHeight = this._draggableItemConnection.y2 - this._draggableItemConnection.y1 + 1;
+    //     console.log("clone expanded height = " + cloneExpandedHeight);
+    //     this._draggableItemClone = document.createElement("div");
+    //     console.log("draggableItemCloneTmp = ", draggableItemCloneTmp);
+    //     Dom.css.set(this._draggableItemClone, {
+    //         position: 'absolute',
+    //         width: cloneWidth + "px",
+    //         height: cloneExpandedHeight + "px",
+    //         background: 'blue'
+    //     });
+    //     this._draggableItemClone.appendChild(draggableItemCloneTmp);
+    // }
 
     document.body.appendChild(this._draggableItemClone);
 
@@ -488,49 +491,7 @@ Gridifier.VerticalGrid.Dragifier.prototype._reappendGridItems = function(draggab
 //          and share it with SizesTransformer class???
 Gridifier.VerticalGrid.Dragifier.prototype._findFirstItemToReappend = function() {
     var connections = this._connections.get();
-
-    if(this._settings.isDisabledSortDispersion()) {
-        connections.sort(function(firstConnection, secondConnection) {
-            if(firstConnection.itemGUID > secondConnection.itemGUID)
-                return 1;
-
-            return -1;
-        });
-    }
-    else if(this._settings.isCustomSortDispersion() || this._settings.isCustomAllEmptySpaceSortDispersion()) {
-        if(this._settings.isDefaultAppend()) {
-            connections.sort(function(firstConnection, secondConnection) {
-                if(firstConnection.y1 == secondConnection.y1) {
-                    if(firstConnection.x2 > secondConnection.x2)
-                        return -1;
-                    else
-                        return 1;
-                }
-                else {
-                    if(firstConnection.y1 < secondConnection.y1)
-                        return -1;
-                    else
-                        return 1;
-                }
-            });
-        }
-        else if(this._settings.isReversedAppend()) {
-            connections.sort(function(firstConnection, secondConnection) {
-                if(firstConnection.y1 == secondConnection.y1) {
-                    if(firstConnection.x1 < secondConnection.x1)
-                        return -1;
-                    else 
-                        return 1;
-                }
-                else {
-                    if(firstConnection.y1 < secondConnection.y1)
-                        return -1;
-                    else
-                        return 1;
-                }
-            });
-        }
-    }
+    connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
 
     var firstConnection = null;
     for(var i = 0; i < connections.length; i++) {
@@ -539,6 +500,6 @@ Gridifier.VerticalGrid.Dragifier.prototype._findFirstItemToReappend = function()
             break;
         }
     }
-
+    
     return firstConnection.item;
 }

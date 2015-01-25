@@ -56,7 +56,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
-        me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
+        //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
 
         me._attachView();
@@ -155,20 +155,35 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
 
         // @todo -> This is an example with margins params.(Margin size = 30px)
-        me._gridifierDynamicSettings._itemSizes[0].width = "260px";
-        me._gridifierDynamicSettings._itemSizes[0].height = "130px";
+        // me._gridifierDynamicSettings._itemSizes[0].width = "260px";
+        // me._gridifierDynamicSettings._itemSizes[0].height = "130px";
 
-        me._gridifierDynamicSettings._itemSizes[1].width = "100px";
-        me._gridifierDynamicSettings._itemSizes[1].height = "320px";
+        // me._gridifierDynamicSettings._itemSizes[1].width = "100px";
+        // me._gridifierDynamicSettings._itemSizes[1].height = "320px";
 
-        me._gridifierDynamicSettings._itemSizes[2].width = "260px";
-        me._gridifierDynamicSettings._itemSizes[2].height = "130px";
+        // me._gridifierDynamicSettings._itemSizes[2].width = "260px";
+        // me._gridifierDynamicSettings._itemSizes[2].height = "130px";
 
-        me._gridifierDynamicSettings._itemSizes[3].width = "260px";
-        me._gridifierDynamicSettings._itemSizes[3].height = "130px";
+        // me._gridifierDynamicSettings._itemSizes[3].width = "260px";
+        // me._gridifierDynamicSettings._itemSizes[3].height = "130px";
 
-        me._gridifierDynamicSettings._itemSizes[4].width = "100px";
-        me._gridifierDynamicSettings._itemSizes[4].height = "320px"; // @todo -> Delete, tmp
+        // me._gridifierDynamicSettings._itemSizes[4].width = "100px";
+        // me._gridifierDynamicSettings._itemSizes[4].height = "320px"; // @todo -> Delete, tmp
+
+        me._gridifierDynamicSettings._itemSizes[0].width = "250px";
+        me._gridifierDynamicSettings._itemSizes[0].height = "250px";
+
+        me._gridifierDynamicSettings._itemSizes[1].width = "250px";
+        me._gridifierDynamicSettings._itemSizes[1].height = "250px";
+
+        me._gridifierDynamicSettings._itemSizes[2].width = "250px";
+        me._gridifierDynamicSettings._itemSizes[2].height = "250px";
+
+        me._gridifierDynamicSettings._itemSizes[3].width = "250px";
+        me._gridifierDynamicSettings._itemSizes[3].height = "250px";
+
+        me._gridifierDynamicSettings._itemSizes[4].width = "250px";
+        me._gridifierDynamicSettings._itemSizes[4].height = "250px"; // @todo -> Delete, tmp
 
         me._$loadGridConfiguratorButton = me._$view.find("." + me._css.loadGridConfiguratorButtonClass);
         me._$gridTopHeadingView = me._$view.find("." + me._css.gridTopHeadingViewClass);
@@ -390,7 +405,7 @@ DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
         (function($gridItem, gridItem) {
             $gridItem.on("gridifier.appendFinished", function() {
                 //setTimeout(function() {
-                   // gridItem.renderGUID();
+                   gridItem.renderGUID();
                 //}, 0);
             });
         })($gridItem, gridItem);
