@@ -46,6 +46,29 @@ Gridifier.VerticalGrid.ConnectionsIntersector.prototype.isIntersectingAnyConnect
     return false;
 }
 
+Gridifier.VerticalGrid.ConnectionsIntersector.prototype.getAllConnectionsWithIntersectedCenter = function(maybeIntersectionCoords) {
+    var connections = this._connections.get();
+    var connectionsWithIntersectedCenter = [];
+
+    for(var i = 0; i < connections.length; i++) {
+        var connectionWidth = connections[i].x2 - connections[i].x1 + 1;
+        var connectionHeight = connections[i].y2 - connections[i].y1 + 1;
+
+        var connectionCenterCoords = {
+            x1: connections[i].x1 + connectionWidth / 2,
+            x2: connections[i].x1 + connectionWidth / 2,
+            y1: connections[i].y1 + connectionHeight / 2,
+            y2: connections[i].y1 + connectionHeight / 2
+        };
+        
+        if(this.isIntersectingAnyConnection([connectionCenterCoords], maybeIntersectionCoords)) {
+            connectionsWithIntersectedCenter.push(connections[i]);
+        }
+    }
+
+    return connectionsWithIntersectedCenter;
+}
+
 Gridifier.VerticalGrid.ConnectionsIntersector.prototype.findAllMaybeIntersectableConnectionsOnAppend = function(connector) {
     var connections = this._connections.get();
     var maybeIntersectableConnections = [];

@@ -141,6 +141,7 @@ Gridifier = function(grid, settings) {
             me._connectionsSorter,
             me._connectors, 
             me._guid, 
+            me._collector,
             me._settings, 
             me._normalizer
         );
@@ -167,12 +168,14 @@ Gridifier = function(grid, settings) {
             //             $firstItem = $(this);
             //     }
             // });
-            var connections = me._connections.get();
-            if(connections.length == 0)
-                return;
 
-            connections = me._connectionsSorter.sortConnectionsPerReappend(connections);
-            var $firstItem = $(connections[0].item);
+
+            // var connections = me._connections.get();
+            // if(connections.length == 0)
+            //     return;
+
+            // connections = me._connectionsSorter.sortConnectionsPerReappend(connections);
+            // var $firstItem = $(connections[0].item);
             
             if(processResizeEventTimeout != null) {
                 clearTimeout(processResizeEventTimeout);
@@ -180,7 +183,9 @@ Gridifier = function(grid, settings) {
             }
             
             processResizeEventTimeout = setTimeout(function() {
-                me.transformSizes($firstItem);
+                SizesResolverManager.startCachingTransaction();
+                me.retransformAllSizes();
+                SizesResolverManager.stopCachingTransaction();
             }, processResizeEvent);
         });
 
@@ -564,6 +569,14 @@ Gridifier.prototype._append = function(items, fakerDiv) { //timer.start();
     return this;
 }
 
+Gridifier.prototype.retransformAllSizes = function() {
+    Logger.startLoggingOperation(   // @system-log-start
+        Logger.OPERATION_TYPES.TRANSFORM_SIZES,
+        "retransformAllSizes"
+    );                              // @system-log-end
+    this._sizesTransformer.retransformAllConnections();
+}
+
 // @todo -> Apply check that item is < than grid
 // @todo -> Update grid sizes after toggle and transform
 Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {
@@ -632,7 +645,7 @@ Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {
     );                              // @system-log-end
     this._sizesTransformer.transformConnectionSizes(transformationData);
     
-    SizesResolverManager.stopCachingTransaction();
+    SizesResolverManager.stopCachingTransaction(); // @todo -> will it work(SizesTransfomer has async action inside)
     // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
 }
 
@@ -693,7 +706,7 @@ Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
     );                            // @system-log-end
     this._sizesTransformer.transformConnectionSizes(transformationData);
 
-    SizesResolverManager.stopCachingTransaction();
+    SizesResolverManager.stopCachingTransaction(); // @todo -> will it work(SizesTransfomer has async action inside)
     // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
 }
 

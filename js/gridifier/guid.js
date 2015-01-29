@@ -34,6 +34,12 @@ Gridifier.GUID.prototype.getItemGUID = function(item) {
     return Dom.toInt(item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR));
 }
 
+Gridifier.GUID.prototype.setItemGUID = function(item, itemGUID) {
+    return item.setAttribute(
+        Gridifier.GUID.GUID_DATA_ATTR, itemGUID
+    );
+}
+
 Gridifier.GUID.prototype.markNextAppendedItem = function(item) {
     this._nextAppendedItemGUID++;
     item.setAttribute(Gridifier.GUID.GUID_DATA_ATTR, this._nextAppendedItemGUID);

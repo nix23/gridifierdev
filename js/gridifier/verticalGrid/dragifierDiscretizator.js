@@ -46,7 +46,7 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype.discretizeGrid = functio
     var cellHeight = SizesResolverManager.outerHeight(draggableItem, true); // @todo -> Not used??
 
     if(this._settings.isDefaultAppend()) {
-        this._discretizeGridWithDefaultAppendDefaultIntersectionStrategyMode(
+        this._discretizeGridWithDefaultAppend(
             discretizationHorizontalStep,
             discretizationVerticalStep,
             cellWidth,
@@ -182,10 +182,10 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype._isCellIntersectedBy = f
 //     };
 // }
 
-Gridifier.VerticalGrid.DragifierDiscretizator.prototype._discretizeGridWithDefaultAppendDefaultIntersectionStrategyMode = function(discretizationHorizontalStep,
-                                                                                                                                   discretizationVerticalStep,
-                                                                                                                                   cellWidth,
-                                                                                                                                   cellHeight) {
+Gridifier.VerticalGrid.DragifierDiscretizator.prototype._discretizeGridWithDefaultAppend = function(discretizationHorizontalStep,
+                                                                                                    discretizationVerticalStep,
+                                                                                                    cellWidth,
+                                                                                                    cellHeight) {
     this._cells = [];
     var gridX2 = this._gridifier.getGridX2();
     var gridY2 = this._gridifier.getGridY2();
@@ -263,7 +263,8 @@ Gridifier.VerticalGrid.DragifierDiscretizator.prototype.updateDiscretizationDemo
 }
 
 // @todo -> Tmp method???
-Gridifier.VerticalGrid.DragifierDiscretizator.prototype._demonstrateDiscretization = function() { //return;
+// @todo -> Refactor this to beatiful grid??? Make customizible????
+Gridifier.VerticalGrid.DragifierDiscretizator.prototype._demonstrateDiscretization = function() { return;
     var demonstrator = document.createElement("div");
     this._gridifier.getGrid().appendChild(demonstrator);
     this._discretizationDemonstrator = demonstrator;

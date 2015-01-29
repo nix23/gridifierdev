@@ -81,10 +81,11 @@ Gridifier.VerticalGrid.Connections.prototype.add = function(item, itemConnection
     var connection = itemConnectionCoords;
     connection.item = item;
     connection.itemGUID = Dom.toInt(this._guid.getItemGUID(item));
+    // @todo -> Move verticalOffset ot const???
     if(!connection.hasOwnProperty("verticalOffset"))
         connection.verticalOffset = 0; // Used with noIntersections strategy
-    if(!connection.hasOwnProperty("isDragged"))
-        connection.isDragged = false;
+    if(!connection.hasOwnProperty(Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT))
+        connection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = false;
 
     if(this._settings.isNoIntersectionsStrategy()) {
         connection.itemHeightWithMargins = SizesResolverManager.outerHeight(item, true);
@@ -310,12 +311,14 @@ Gridifier.VerticalGrid.Connections.prototype.expandVerticallyAllRowConnectionsTo
             var y1 = rowConnectionsToExpand[i].y1;
             var y2 = rowConnectionsToExpand[i].y2;
             var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
+            // @todo fix to return Math.round(Math.abs(y2 - y1 + 1) / 2) - Math.round(itemHeight / 2);
             rowConnectionsToExpand[i].verticalOffset = Math.round(Math.abs(y2 - y1) / 2) - Math.round(itemHeight / 2);
         }
         else if(this._settings.isVerticalGridBottomAlignmentType()) {
             var y1 = rowConnectionsToExpand[i].y1;
             var y2 = rowConnectionsToExpand[i].y2;
             var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
+            // @todo fix (y2 - y1 + 1) 
             rowConnectionsToExpand[i].verticalOffset = Math.abs(y2 - y1) - itemHeight;
         }
     }

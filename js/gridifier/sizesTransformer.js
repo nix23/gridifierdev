@@ -95,6 +95,8 @@ Gridifier.SizesTransformer.TOGGLE_SIZES_ORIGINAL_WIDTH_DATA_ATTR = "data-toggle-
 Gridifier.SizesTransformer.TOGGLE_SIZES_ORIGINAL_HEIGHT_DATA_ATTR = "data-toggle-sizes-original-height";
 Gridifier.SizesTransformer.DELETE_TRANSFORMED_ITEM_CLONES_DELAY = 100;
 
+Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT = "restrictConnectionCollect";
+
 Gridifier.SizesTransformer.prototype.initConnectionTransform = function(connection, newWidth, newHeight) {
     this._isNoIntersectionsStrategyFakeCallToFixPrependedTransform = false; // @todo -> remove this???
     var targetSizes = {};
@@ -328,11 +330,13 @@ Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTra
         }
 
         for(var i = 0; i < connections.length; i++) {
-            if(connections[i].isDragged) {
+            if(connections[i][Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT]) {
                 //draggedConnections.push(connections[i]);
                 continue;
             }
 
+            // Default or no intersections strategy check is required here, because we are reappending items
+            // starting from random position. In such case we should reappend all row items in NIS mode.
             if(me._settings.isDisabledSortDispersion() && me._settings.isDefaultIntersectionStrategy()) {
                 if(connections[i].itemGUID > firstTransformedConnection.itemGUID)
                     iteratorFunction();
@@ -341,6 +345,7 @@ Gridifier.SizesTransformer.prototype._findAllItemsToReappend = function(firstTra
             // When customSortDispersion is used, element with bigger guid can be above.(Depending on the dispersion param).
             // @todo Determine, how far from current connection.y1 items should be collected for reappend.
             //      (Resort batch, and append transformed item first????, Or under some special conditions???)
+            // @todo -> custom sort dispersion should have custom y1(VG) and custom x1(HG)
             else if(me._settings.isCustomSortDispersion() || me._settings.isCustomAllEmptySpaceSortDispersion() ||
                     me._settings.isNoIntersectionsStrategy()) {
                 // @todo -> process horizontal hrid here
@@ -834,6 +839,8 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transfo
 
     var transformedItemClones = this._createAllTransformedConnectionItemClones(transformationData);
 
+    // Timeout is required here because of DOM-tree changes inside transformed item clones creation.
+    // (Optimizing getComputedStyle after reflow performance)
     var processor = function() {
     var itemsToReappendData = this._findAllItemsToReappend(
         transformationData[0].connectionToTransform, transformedItemClones, transformedConnections
@@ -849,7 +856,7 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transfo
     }
 
     for(var i = 0; i < transformationData.length; i++)
-        this._connections.removeConnection(transformationData[i].connectionToTransform);
+       this._connections.removeConnection(transformationData[i].connectionToTransform);
 
     this._storeHowNextReappendedItemWasInserted(itemsToReappend[0]);
     this._transformerConnectors.recreateConnectorsPerConnectionTransform(firstConnectionToReappend);
@@ -893,4 +900,58 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transfo
     //         this._applyNoIntersectionsStrategyLeftFreeSpaceFixOnPrependedItemTransform();
     //     return;
     // }
+}
+
+Gridifier.SizesTransformer.prototype.retransformAllConnections = function() {
+    var connections = this._connections.get();
+    if(connections.length == 0)
+        return;
+
+    connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
+
+    var itemsToReappend = [];
+    var connectionsToKeep = [];
+    for(var i = 0; i < connections.length; i++) {
+        if(!connections[i][Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT]) {
+            itemsToReappend.push(connections[i].item);
+        }
+        else {
+            connectionsToKeep.push(connections[i]);
+        }
+    }
+
+    var firstConnectionToReappend = null;
+    if(connectionsToKeep.length == 0) {
+        firstConnectionToReappend = connections[0];
+        connections.splice(0, connections.length);
+    }
+    else {
+        for(var i = 0; i < connections.length; i++) {
+            var shouldRetransformConnection = true;
+
+            for(var j = 0; j < connectionsToKeep.length; j++) {
+                if(connectionsToKeep[j].itemGUID == connections[i].itemGUID) {
+                    shouldRetransformConnection = false;
+                    break;
+                }
+            }
+
+            if(shouldRetransformConnection) {
+                firstConnectionToReappend = connections[i];
+                break;
+            }
+        }
+
+        connections.splice(0, connections.length);
+        for(var i = 0; i < connectionsToKeep.length; i++)
+            connections.push(connectionsToKeep[i]);
+    }
+
+    this._storeHowNextReappendedItemWasInserted(itemsToReappend[0]);
+    this._transformerConnectors.recreateConnectorsPerConnectionTransform(firstConnectionToReappend);
+    this._maybeAddGluingConnectorOnFirstPrependedConnection(firstConnectionToReappend); // @todo -> delete???
+
+    this._reappendItems(itemsToReappend, []);
+    this._gridifier.getRenderer().renderTransformedConnections();
+    Logger.stopLoggingOperation(); // @system-log
 }

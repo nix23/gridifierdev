@@ -146,6 +146,8 @@ Gridifier.Renderer.prototype._processScheduledConnections = function() {
         }
     }
 
+    // @todo -> This kills performance on drags. Plan all caching interactions inside SizesTransformer.
+    //          (Sync with queue????)
     SizesResolverManager.stopCachingTransaction();
     this._gridifier.scheduleGridSizesUpdate();
 

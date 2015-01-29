@@ -135,7 +135,7 @@ Gridifier.Collector.prototype.ensureAllItemsCanBeAttachedToGrid = function(items
 //               declare as constants
 
 Gridifier.Collector.prototype.collect = function() {
-    var items = this._collectorFunction();
+    var items = this._collectorFunction(this._grid);
     // @todo -> Filter only not yet processed items, also check
     // at append and prepend??? (item.attr != grid.itemDataStates.LAYOUTED)
 }

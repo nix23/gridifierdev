@@ -369,7 +369,7 @@ var SizesResolver = {
             //elementComputedCSS.getPropertyCSSValue("width");
             //elementComputedCSS.getPropertyValue("width");
             //var elementComputedCSS = elementComputedCSS.
-            var elementWidth = elementComputedCSS.width;
+            // var elementWidth = elementComputedCSS.width;
             // var time = timer.get();
             // var message = "time = " + time + " class = " + DOMElem.getAttribute("class") + "<br>";
             // if(time > 0.100) {

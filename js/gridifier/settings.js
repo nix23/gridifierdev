@@ -371,14 +371,14 @@ Gridifier.Settings.prototype._parseIntersectionStrategyAlignmentType = function(
         return;
     }
 
-    if(this._settings.isVerticalGrid()) {
+    if(this.isVerticalGrid()) {
         var validAlignmentTypes = [
             alignmentTypes.FOR_VERTICAL_GRID.TOP,
             alignmentTypes.FOR_VERTICAL_GRID.CENTER,
             alignmentTypes.FOR_VERTICAL_GRID.BOTTOM
         ];
     }
-    else if(this._settings.isHorizontalGrid()) {
+    else if(this.isHorizontalGrid()) {
         var validAlignmentTypes = [
             alignmentTypes.FOR_HORIZONTAL_GRID.LEFT,
             alignmentTypes.FOR_HORIZONTAL_GRID.CENTER,
@@ -392,7 +392,10 @@ Gridifier.Settings.prototype._parseIntersectionStrategyAlignmentType = function(
             isValidAlignmentType = true;
     }
 
-    if(isValidAlignmentType) return;
+    if(isValidAlignmentType) {
+        this._alignmentType = this._settings.alignmentType;
+        return;
+    }
 
     new Gridifier.Error(
         Gridifier.Error.ERROR_TYPES.INVALID_ALIGNMENT_TYPE,
