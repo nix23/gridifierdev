@@ -549,7 +549,6 @@ Gridifier.VerticalGrid.Dragifier.prototype._adjustItemPositionsAfterDrag = funct
 
 Gridifier.VerticalGrid.Dragifier.prototype._reappendGridItems = function(draggableItemNewConnectionCoords) {
     var me = this;
-    var firstItemToReappend = this._findFirstItemToReappend();
     
     if(this._settings.isDefaultAppend()) {
         this._connectors.setNextFlushCallback(function() { 
@@ -563,28 +562,4 @@ Gridifier.VerticalGrid.Dragifier.prototype._reappendGridItems = function(draggab
     }
 
     this._gridifier.retransformAllSizes();
-    //this._gridifier.transformSizes(firstItemToReappend);
-}
-
-// @todo -> Move logic to divide Disabled SD/Custom SD in separate class,
-//          and share it with SizesTransformer class???
-Gridifier.VerticalGrid.Dragifier.prototype._findFirstItemToReappend = function() {
-    var connections = this._connections.get();
-    connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
-
-    var firstConnection = null;
-    // @todo -> add customsortdispersion here???
-    if(this._settings.isDisabledSortDispersion()) {
-        firstConnection = connections[0];
-    }
-    else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
-        for(var i = 0; i < connections.length; i++) {
-            if(this._draggableItemConnection.itemGUID != connections[i].itemGUID) {
-                firstConnection = connections[i];
-                break;
-            }
-        }
-    }
-    
-    return firstConnection.item;
 }
