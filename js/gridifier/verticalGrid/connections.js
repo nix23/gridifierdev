@@ -324,22 +324,23 @@ Gridifier.VerticalGrid.Connections.prototype.expandVerticallyAllRowConnectionsTo
     }
 }
 
-Gridifier.VerticalGrid.Connections.prototype.getLastPrependedConnection = function() {
-    var lastPrependedConnection = null;
+// @todo -> Remove(Deprecated, was used in NIS mode to perform NIS subcall)
+// Gridifier.VerticalGrid.Connections.prototype.getLastPrependedConnection = function() {
+//     var lastPrependedConnection = null;
 
-    for(var i = 0; i < this._connections.length; i++) {
-        if(this._guid.wasItemPrepended(this._connections[i].itemGUID)) {
-            if(lastPrependedConnection == null)
-                lastPrependedConnection = this._connections[i];
-            else {
-                if(this._connections[i].itemGUID < lastPrependedConnection.itemGUID)
-                    lastPrependedConnection = this._connections[i];
-            }
-        }
-    }
+//     for(var i = 0; i < this._connections.length; i++) {
+//         if(this._guid.wasItemPrepended(this._connections[i].itemGUID)) {
+//             if(lastPrependedConnection == null)
+//                 lastPrependedConnection = this._connections[i];
+//             else {
+//                 if(this._connections[i].itemGUID < lastPrependedConnection.itemGUID)
+//                     lastPrependedConnection = this._connections[i];
+//             }
+//         }
+//     }
 
-    return lastPrependedConnection;
-}
+//     return lastPrependedConnection;
+// }
 
 Gridifier.VerticalGrid.Connections.prototype.getMaxYFromAllConnections = function() {
     var maxY = 0;

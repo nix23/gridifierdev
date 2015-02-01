@@ -95,6 +95,7 @@ var Logger = {
         return objectClone;
     },
 
+    // @todo -> Remove isSizesResolverSubcall logic(Deprecated function)
     log: function(heading, subheading, connectors, connections, isSizesResolverSubcall) {
         var subheading = subheading || "";
         var connectors = connectors || null;

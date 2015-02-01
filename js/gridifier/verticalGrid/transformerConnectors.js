@@ -6,7 +6,8 @@ Gridifier.VerticalGrid.TransformerConnectors = function(gridifier,
                                                         reversedAppender,
                                                         normalizer,
                                                         sizesTransformer,
-                                                        connectorsCleaner) {
+                                                        connectorsCleaner,
+                                                        transformedItemMarker) {
     var me = this;
 
     this._gridifier = null;
@@ -19,6 +20,8 @@ Gridifier.VerticalGrid.TransformerConnectors = function(gridifier,
     this._sizesTransformer = null;
 
     this._connectorsCleaner = null;
+    this._transformedItemMarker = null;
+    this._itemsReappender = null;
 
     this._css = {
     };
@@ -33,6 +36,7 @@ Gridifier.VerticalGrid.TransformerConnectors = function(gridifier,
         me._normalizer = normalizer;
         me._sizesTransformer = sizesTransformer;
         me._connectorsCleaner = connectorsCleaner;
+        me._transformedItemMarker = transformedItemMarker;
     };
 
     this._bindEvents = function() {
@@ -49,20 +53,77 @@ Gridifier.VerticalGrid.TransformerConnectors = function(gridifier,
     return this;
 }
 
-Gridifier.VerticalGrid.TransformerConnectors.prototype.recreateConnectorsPerConnectionTransform = function(firstConnectionToReappend) {
-    if(this._sizesTransformer.isReversedAppendShouldBeUsedPerItemInsert(firstConnectionToReappend.item)) {
+Gridifier.VerticalGrid.TransformerConnectors.prototype.setItemsReappenderInstance = function(itemsReappender) {
+    this._itemsReappender = itemsReappender;
+}
+
+// @todo -> Determine, if gluing connectors are required.
+// If yes, I think this method should accept firstConnectionToReappend(not transformedConnection)
+Gridifier.VerticalGrid.TransformerConnectors.prototype.maybeAddGluingConnectorOnFirstPrependedConnection = function(transformedConnection) {
+    // @todo -> item before can be not neccesarilly with < GUID(in CSD mode)
+    var itemBeforeTransformedGUID = this._guid.getMaxGUIDBefore(
+        this._guid.getItemGUID(transformedConnection.item), this._connections.get()
+    );
+    if(itemBeforeTransformedGUID == null)
+        return;
+
+    if(!this._guid.isFirstPrependedItem(itemBeforeTransformedGUID))
+        return;
+    
+    if(this.isReversedAppendShouldBeUsedPerItemInsert(transformedConnection.item)) {
+        this.addGluingReversedAppendConnectorOnFirstPrependedConnection();
+        Logger.log( // @system-log-start
+            "maybeAddGluingConnectorOnFirstPrependedConnection",
+            "addGluingReversedAppendConnectorOnFirstPrependedConnection",
+            this._connectors.get(),
+            this._connections.get()
+        );          // @system-log-end
+    }
+    else {
+        this.addGluingDefaultAppendConnectorOnFirstPrependedConnection();
+        Logger.log( // @system-log-start
+            "maybeAddGluingConnectorOnFirstPrependedConnection",
+            "addGluingDefaultAppendConnectorOnFirstPrependedConnection",
+            this._connectors.get(),
+            this._connections.get()
+        );          // @system-log-end
+    }
+}
+
+// @todo -> Determine, if gluing connectors are required
+Gridifier.VerticalGrid.TransformerConnectors.prototype.addGluingDefaultAppendConnectorOnFirstPrependedConnection = function() {
+    // var connections = this._connections.get();
+    // for(var i = 0; i < connections.length; i++) {
+    //     if(this._guid.isFirstPrependedItem(Dom.toInt(connections[i].itemGUID))) {
+    //         this._connectors.addAppendConnector(
+    //             Gridifier.Connectors.SIDES.LEFT.TOP,
+    //             parseFloat(this._gridifier.getGridX2()),
+    //             Dom.toInt(connections[i].y1)
+    //         );
+    //         break;
+    //     }
+    // }
+}
+
+Gridifier.VerticalGrid.TransformerConnectors.prototype.addGluingReversedAppendConnectorOnFirstPrependedConnection = function() {
+
+}
+
+Gridifier.VerticalGrid.TransformerConnectors.prototype.recreateConnectorsPerFirstItemReappendOnTransform = function(firstItemToReappend,
+                                                                                                                    firstConnectionToReappend) {
+    if(this._itemsReappender.isReversedAppendShouldBeUsedPerItemInsert(firstItemToReappend)) {
         this._gridifier.setLastOperation(Gridifier.OPERATIONS.REVERSED_APPEND);
-        this._recreateConnectorsPerReversedTransformedConnectionAppend(firstConnectionToReappend);
+        this._recreateConnectorsPerReversedItemReappend(firstItemToReappend, firstConnectionToReappend);
     }
     else {
         this._gridifier.setLastOperation(Gridifier.OPERATIONS.APPEND);
-        this._recreateConnectorsPerDefaultTransformedConnectionAppend(firstConnectionToReappend);
+        this._recreateConnectorsPerDefaultItemReappend(firstItemToReappend, firstConnectionToReappend);
     }
 }
 
 // @todo -> Change to use firstConnectionToReappend
-Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerReversedTransformedConnectionAppend = function(transformedConnection,
-                                                                                                                            transformedItemClone) {
+Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerReversedItemReappend = function(firstItemToReappend,
+                                                                                                             firstConnectionToReappend) {
     // First prepended item should be processed separately(To not align to corner).
     if(this._guid.wasItemPrepended(this._guid.getItemGUID(transformedConnection.item))
        && this._connections.count() == 0) {
@@ -120,16 +181,20 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerRev
     }
 }
 
-Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerDefaultTransformedConnectionAppend = function(firstConnectionToReappend) {
-    // First prepended item should be processed separately(To not align to corner).
+Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerDefaultItemReappend = function(firstItemToReappend,
+                                                                                                            firstConnectionToReappend) {
     this._connections.reinitRanges();
 
-    if(this._guid.wasItemPrepended(this._guid.getItemGUID(firstConnectionToReappend.item))
+    // First prepended item should be processed separately(To not align to corner).
+    if(this._guid.wasItemPrepended(this._guid.getItemGUID(firstItemToReappend))
        && this._connections.count() == 0) {
-        if(typeof(firstConnectionToReappend.transformedItemClone) != "undefined") 
-            var firstItemToReappendWidth = SizesResolverManager.outerWidth(firstConnectionToReappend.transformedItemClone, true);
-        else
-            var firstItemToReappendWidth = SizesResolverManager.outerWidth(firstConnectionToReappend.item, true);
+        if(this._transformedItemMarker.isTransformedItem(firstItemToReappend)) {
+            var transformedItemTargetPxSizes = this._transformedItemMarker.getTransformedItemTargetPxSizes(firstItemToReappend);
+            var firstItemToReappendWidth = transformedItemTargetPxSizes.targetPxWidth;
+        }
+        else {
+            var firstItemToReappendWidth = SizesResolverManager.outerWidth(firstItemToReappend, true);
+        }
         
         var lastRenderedLeftOffset = parseFloat(firstConnectionToReappend.lastRenderedLeftOffset);
         var transformedConnectionNewPtX1 = this._normalizer.unnormalizeFractionalValueForRender(lastRenderedLeftOffset);
@@ -178,23 +243,4 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerDef
             this._connections.get()
         );          // @system-log-end
     }
-}
-
-// @todo -> Determine, if gluing connectors are required
-Gridifier.VerticalGrid.TransformerConnectors.prototype.addGluingDefaultAppendConnectorOnFirstPrependedConnection = function() {
-    // var connections = this._connections.get();
-    // for(var i = 0; i < connections.length; i++) {
-    //     if(this._guid.isFirstPrependedItem(Dom.toInt(connections[i].itemGUID))) {
-    //         this._connectors.addAppendConnector(
-    //             Gridifier.Connectors.SIDES.LEFT.TOP,
-    //             parseFloat(this._gridifier.getGridX2()),
-    //             Dom.toInt(connections[i].y1)
-    //         );
-    //         break;
-    //     }
-    // }
-}
-
-Gridifier.VerticalGrid.TransformerConnectors.prototype.addGluingReversedAppendConnectorOnFirstPrependedConnection = function() {
-
 }

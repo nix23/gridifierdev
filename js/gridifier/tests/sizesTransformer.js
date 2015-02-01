@@ -197,5 +197,5 @@ $(document).ready(function() {
         }
     }
 
-    initConnectionTransformTester.runTests();
+    //initConnectionTransformTester.runTests();
 });

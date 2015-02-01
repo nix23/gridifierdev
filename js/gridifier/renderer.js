@@ -87,8 +87,6 @@ Gridifier.Renderer.prototype._saveLastCalculatedConnectionOffsets = function(con
 }
 
 Gridifier.Renderer.prototype._processScheduledConnections = function() {
-    var st = Gridifier.SizesTransformer;
-
     SizesResolverManager.startCachingTransaction();
 
     for(var i = 0; i < this._scheduledConnectionsToProcessData.length; i++) {
@@ -117,15 +115,19 @@ Gridifier.Renderer.prototype._processScheduledConnections = function() {
             });
         }
         else if(processingType == Gridifier.Renderer.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_TRANSFORMED) {
-            if(Dom.hasAttribute(connectionToProcess.item, st.TRANSFORMED_ITEM_DATA_ATTR)) {
-                connectionToProcess.item.removeAttribute(st.TRANSFORMED_ITEM_DATA_ATTR);
+            var itemMarker = Gridifier.SizesTransformer.TransformedItemMarker;
+
+            if(Dom.hasAttribute(connectionToProcess.item, itemMarker.TRANSFORMED_ITEM_DATA_ATTR)) {
+                connectionToProcess.item.removeAttribute(itemMarker.TRANSFORMED_ITEM_DATA_ATTR);
                 // @todo -> Move to separate function
                 Dom.css3.transition(connectionToProcess.item, "All 600ms ease");
 
-                var targetWidth = connectionToProcess.item.getAttribute(st.TARGET_WIDTH_DATA_ATTR);
-                var targetHeight = connectionToProcess.item.getAttribute(st.TARGET_HEIGHT_DATA_ATTR);
-                connectionToProcess.item.removeAttribute(st.TARGET_WIDTH_DATA_ATTR);
-                connectionToProcess.item.removeAttribute(st.TARGET_HEIGHT_DATA_ATTR);
+                var targetWidth = connectionToProcess.item.getAttribute(itemMarker.TRANSFORMED_ITEM_RAW_TARGET_WIDTH_DATA_ATTR);
+                var targetHeight = connectionToProcess.item.getAttribute(itemMarker.TRANSFORMED_ITEM_RAW_TARGET_HEIGHT_DATA_ATTR);
+                connectionToProcess.item.removeAttribute(itemMarker.TRANSFORMED_ITEM_RAW_TARGET_WIDTH_DATA_ATTR);
+                connectionToProcess.item.removeAttribute(itemMarker.TRANSFORMED_ITEM_RAW_TARGET_HEIGHT_DATA_ATTR);
+                connectionToProcess.item.removeAttribute(itemMarker.TRANSFORMED_ITEM_PX_TARGET_WIDTH_DATA_ATTR);
+                connectionToProcess.item.removeAttribute(itemMarker.TRANSFORMED_ITEM_PX_TARGET_HEIGHT_DATA_ATTR);
 
                 Dom.css.set(connectionToProcess.item, {
                     width: targetWidth,
@@ -134,8 +136,8 @@ Gridifier.Renderer.prototype._processScheduledConnections = function() {
                     top: top
                 });
             }
-            else if(Dom.hasAttribute(connectionToProcess.item, st.DEPENDED_ITEM_DATA_ATTR)) {
-                connectionToProcess.item.removeAttribute(st.DEPENDED_ITEM_DATA_ATTR);
+            else if(Dom.hasAttribute(connectionToProcess.item, itemMarker.DEPENDED_ITEM_DATA_ATTR)) {
+                connectionToProcess.item.removeAttribute(itemMarker.DEPENDED_ITEM_DATA_ATTR);
                 // @todo -> Move to separate function
                 Dom.css3.transition(connectionToProcess.item, "All 600ms ease");
                 Dom.css.set(connectionToProcess.item, {

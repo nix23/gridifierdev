@@ -382,32 +382,32 @@ Gridifier.prototype.findConnectionByItem = function(item) {
     return connectionItem;
 }
 
-Gridifier.prototype._applyChromeGetComputedStylePerformanceFix = function(items, gridClone) {
-    var gridClone = this._grid.cloneNode();
-    this._grid.parentNode.appendChild(gridClone);
+// Gridifier.prototype._applyChromeGetComputedStylePerformanceFix = function(items, gridClone) {
+//     var gridClone = this._grid.cloneNode();
+//     this._grid.parentNode.appendChild(gridClone);
 
-    Dom.css.set(gridClone, {
-        visibility: "hidden",
-        position: "absolute",
-        left: "0px",
-        top: "0px",
-        width: SizesResolverManager.outerWidth(this._grid) + "px",
-        height: SizesResolverManager.outerHeight(this._grid) + "px"
-    });
+//     Dom.css.set(gridClone, {
+//         visibility: "hidden",
+//         position: "absolute",
+//         left: "0px",
+//         top: "0px",
+//         width: SizesResolverManager.outerWidth(this._grid) + "px",
+//         height: SizesResolverManager.outerHeight(this._grid) + "px"
+//     });
 
-    for(var i = 0; i < items.length; i++) {
-        var itemClone = items[i].cloneNode();
-        gridClone.appendChild(itemClone);
+//     for(var i = 0; i < items.length; i++) {
+//         var itemClone = items[i].cloneNode();
+//         gridClone.appendChild(itemClone);
 
-        // This will set item values to cache per current transaction.
-        SizesResolverManager.outerWidth(itemClone, true);
-        SizesResolverManager.outerHeight(itemClone, true);
-        SizesResolverManager.changeCachedDOMElem(itemClone, items[i]);
-    }
+//         // This will set item values to cache per current transaction.
+//         SizesResolverManager.outerWidth(itemClone, true);
+//         SizesResolverManager.outerHeight(itemClone, true);
+//         SizesResolverManager.changeCachedDOMElem(itemClone, items[i]);
+//     }
 
-    gridClone.parentNode.removeChild(gridClone);
-    return items;
-}
+//     gridClone.parentNode.removeChild(gridClone);
+//     return items;
+// }
 
 Gridifier.prototype._applyPrepend = function(item) {
     if(this._settings.isMirroredPrepend())
@@ -603,21 +603,22 @@ Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {
     this._collector.ensureAllItemsAreAttachedToGrid(itemsToTransform);
     this._collector.ensureAllItemsCanBeAttachedToGrid(itemsToTransform);
 
+    var itemNewRawSizesFinder = new Gridifier.SizesTransformer.ItemNewRawSizesFinder();
     var connectionsToTransform = [];
     var targetSizesToTransform = [];
     var loggerLegend = ""; // @system-log
     for(var i = 0; i < itemsToTransform.length; i++) {
         connectionsToTransform.push(this.findConnectionByItem(itemsToTransform[i]));
 
-        if(this._sizesTransformer.areConnectionSizesToggled(connectionsToTransform[i])) {
-            targetSizesToTransform[i] = this._sizesTransformer.getConnectionSizesPerUntoggle(
+        if(itemNewRawSizesFinder.areConnectionSizesToggled(connectionsToTransform[i])) {
+            targetSizesToTransform[i] = itemNewRawSizesFinder.getConnectionSizesPerUntoggle(
                 connectionsToTransform[i]
             );
-            this._sizesTransformer.unmarkConnectionPerToggle(connectionsToTransform[i]);
+            itemNewRawSizesFinder.unmarkConnectionPerToggle(connectionsToTransform[i]);
         }
         else {
-            this._sizesTransformer.markConnectionPerToggle(connectionsToTransform[i]);
-            targetSizesToTransform[i] = this._sizesTransformer.initConnectionTransform(
+            itemNewRawSizesFinder.markConnectionPerToggle(connectionsToTransform[i]);
+            targetSizesToTransform[i] = itemNewRawSizesFinder.initConnectionTransform(
                 connectionsToTransform[i],
                 sizesToTransform[i][0],
                 sizesToTransform[i][1]
@@ -674,12 +675,13 @@ Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
     this._collector.ensureAllItemsAreAttachedToGrid(itemsToTransform);
     this._collector.ensureAllItemsCanBeAttachedToGrid(itemsToTransform);
 
+    var itemNewRawSizesFinder = new Gridifier.SizesTransformer.ItemNewRawSizesFinder();
     var connectionsToTransform = [];
     var targetSizesToTransform = [];
     var loggerLegend = ""; // @system-log
     for(var i = 0; i < itemsToTransform.length; i++) {
         connectionsToTransform.push(this.findConnectionByItem(itemsToTransform[i]));
-        targetSizesToTransform[i] = this._sizesTransformer.initConnectionTransform(
+        targetSizesToTransform[i] = itemNewRawSizesFinder.initConnectionTransform(
             connectionsToTransform[i],
             sizesToTransform[i][0],
             sizesToTransform[i][1]

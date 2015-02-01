@@ -58,7 +58,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         //me._gridifierSettings.alignmentType = "center";
-        me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
+        //me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
 
         me._attachView();
         me._gridifierDynamicSettings = new DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings();
@@ -356,18 +356,18 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         });
 
         // @todo -> Replace this.(Tmp for testing)
-        // me._$view.on("click", ".gridItem", function() {
-        //     me._gridifier.toggleSizes($(this), "*2", "*2");
+        //me._$view.on("click", ".gridItem", function() { ///console.log("toggle");
+            //me._gridifier.toggleSizes($(this), "*2", "*2");
             // if($(this).hasClass("transformedItem")) {
             //     $(this).removeClass("transformedItem");
             //     me._gridifier.transformSizes($(this), "25%", "200px");
-            //    //me._gridifier.transformSizes($(this), "200px", "200px");
+               //me._gridifier.transformSizes($(this), "200px", "200px");
             // }
             // else {
-            //     $(this).addClass("transformedItem");
-            //     me._gridifier.transformSizes($(this), "50%", "400px");
-            //     //me._gridifier.transformSizes($(this), "400px", "400px");
-            // }
+                // $(this).addClass("transformedItem");
+                // me._gridifier.transformSizes($(this), "50%", "400px");
+                //me._gridifier.transformSizes($(this), "400px", "400px");
+            //}
         //});
 
         // @todo -> Replace this.(tmp for testing)
