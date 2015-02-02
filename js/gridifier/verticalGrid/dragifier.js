@@ -75,15 +75,17 @@ Gridifier.VerticalGrid.Dragifier = function(gridifier,
             me._draggableItem = $(this).get(0);
             // @todo -> Fix this(visibility uses transition timeout, Replace global from all???)
             Dom.css3.transition(me._draggableItem, "Visibility 0ms ease");
-            me._draggableItemConnection = me._gridifier.findConnectionByItem(me._draggableItem);
+            //me._draggableItemConnection = me._gridifier.findConnectionByItem(me._draggableItem);
 
             // @todo -> Add customSortDispersion???
             // With disable sort dispersion we should reappend all items
             // after drag interaction.(Including dragged item)
-            if(me._settings.isDisabledSortDispersion())
-                me._draggableItemConnection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = false;
-            else if(me._settings.isCustomAllEmptySpaceSortDispersion())
+            // if(me._settings.isDisabledSortDispersion())
+            //     me._draggableItemConnection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = false;
+            if(me._settings.isCustomAllEmptySpaceSortDispersion()) {
+                me._draggableItemConnection = me._gridifier.findConnectionByItem(me._draggableItem);
                 me._draggableItemConnection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = true;
+            }
 
             me._determineInitialCursorOffsetsFromDraggableItemCenter(
                 event.pageX, event.pageY
@@ -115,9 +117,10 @@ Gridifier.VerticalGrid.Dragifier = function(gridifier,
                 // We are reappending all items(including draggable), 
                 // so even draggable item connection is being spliced inside SizesTransformer
                 // class, we should update reference to point to new created connection.
-                if(me._settings.isDisabledSortDispersion()) {
-                    me._draggableItemConnection = me._gridifier.findConnectionByItem(me._draggableItem);
-                }
+                // @todo -> Looks like it is redundant
+                // if(me._settings.isDisabledSortDispersion()) {
+                //     me._draggableItemConnection = me._gridifier.findConnectionByItem(me._draggableItem);
+                // }
                 
                 var draggableItemNewPosition = me._calculateDraggableItemNewPosition(
                     event.pageX, event.pageY
@@ -137,7 +140,10 @@ Gridifier.VerticalGrid.Dragifier = function(gridifier,
                     me._draggableItem.style.visibility = "visible";
                     me._isDragging = false;
                     me._draggableItem = null;
-                    me._draggableItemConnection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = false;
+
+                    if(me._settings.isCustomAllEmptySpaceSortDispersion()) {
+                        me._draggableItemConnection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = false;
+                    }
 
                     // @todo -> Replace with real hidder
                     Dom.css.removeClass(document.body, "disableSelect");
@@ -398,8 +404,8 @@ Gridifier.VerticalGrid.Dragifier.prototype._transformGridOnConnectionIntersectio
     // this._draggableItemConnection.item = intersectedConnectionWithSmallestGUID.item;
     // intersectedConnectionWithSmallestGUID.item = this._draggableItem;
 
-    this._draggableItemConnection.itemGUID = intersectedConnectionWithSmallestGUID.itemGUID;
-    intersectedConnectionWithSmallestGUID.itemGUID = draggableItemGUID;
+    // this._draggableItemConnection.itemGUID = intersectedConnectionWithSmallestGUID.itemGUID; // not req anymore
+    // intersectedConnectionWithSmallestGUID.itemGUID = draggableItemGUID;                      // not req anymore
 
     // if(this._reappendGridItemsAfterDragTimeout != null) {
     //     clearTimeout(this._reappendGridItemsAfterDragTimeout);
@@ -408,7 +414,7 @@ Gridifier.VerticalGrid.Dragifier.prototype._transformGridOnConnectionIntersectio
     
     //var me = this;
     //this._reappendGridItemsAfterDragTimeout = setTimeout(function() {
-    this._reappendGridItems(draggableItemNewConnectionCoords);
+    this._reappendGridItems();
     //}, 0); // @todo -> Move 100 to const
 
     //this._reappendGridItems(draggableItemNewConnectionCoords);
@@ -547,7 +553,7 @@ Gridifier.VerticalGrid.Dragifier.prototype._adjustItemPositionsAfterDrag = funct
     });
 }
 
-Gridifier.VerticalGrid.Dragifier.prototype._reappendGridItems = function(draggableItemNewConnectionCoords) {
+Gridifier.VerticalGrid.Dragifier.prototype._reappendGridItems = function() {
     var me = this;
     
     if(this._settings.isDefaultAppend()) {

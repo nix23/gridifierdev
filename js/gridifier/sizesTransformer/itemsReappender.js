@@ -1,4 +1,5 @@
-Gridifier.SizesTransformer.ItemsReappender = function(appender,
+Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
+                                                      appender,
                                                       reversedAppender,
                                                       connections,
                                                       connectors,
@@ -10,6 +11,7 @@ Gridifier.SizesTransformer.ItemsReappender = function(appender,
                                                       transformedItemMarker) {
     var me = this;
 
+    this._gridifier = null;
     this._appender = null;
     this._reversedAppender = null;
     this._connections = null;
@@ -22,12 +24,20 @@ Gridifier.SizesTransformer.ItemsReappender = function(appender,
     this._transformedItemMarker = null;
 
     this._insertTypeChangeConnectors = null;
+
     this._lastReappendedItemInsertType = null;
+    this._lastReappendedItemGUID = null;
+
+    this._reappendQueue = null;
+    this._batchSize = 5;
+    this._reappendNextQueuedItemsBatchTimeout = null;
+    this._reappendedQueueData = null;
 
     this._css = {
     };
 
     this._construct = function() {
+        me._gridifier = gridifier;
         me._appender = appender;
         me._reversedAppender = reversedAppender;
         me._connections = connections;
@@ -100,16 +110,54 @@ Gridifier.SizesTransformer.ItemsReappender.prototype.storeHowNextReappendedItemW
     this._lastReappendedItemInsertType = this._getNextReappendedItemInsertType(item);
 }
 
-Gridifier.SizesTransformer.ItemsReappender.prototype.reappendItems = function(itemsToReappend) {
-    var lastReappendedItemGUID = null;
+Gridifier.SizesTransformer.ItemsReappender.prototype.createReappendQueue = function(itemsToReappend,
+                                                                                    connectionsToReappend) {
+    this._reappendQueue = [];
+    this._reappendedQueueData = [];
 
-    for(var i = 0; i < itemsToReappend.length; i++) {
-        if(this.isReversedAppendShouldBeUsedPerItemInsert(itemsToReappend[i]))
+    for(var i = 0; i < connectionsToReappend.length; i++) {
+        this._reappendQueue.push({
+            'itemToReappend': itemsToReappend[i],
+            'connectionToReappend': connectionsToReappend[i]
+        });
+    }
+}
+
+Gridifier.SizesTransformer.ItemsReappender.prototype.isReappendQueueEmpty = function() {
+    return (this._reappendNextQueuedItemsBatchTimeout == null) ? true : false;
+} 
+
+Gridifier.SizesTransformer.ItemsReappender.prototype.stopReappendingQueuedItems = function() {
+    clearTimeout(this._reappendNextQueuedItemsBatchTimeout);
+    this._reappendNextQueuedItemsBatchTimeout = null;
+
+    return {
+        reappendQueue: this._reappendQueue,
+        reappendedQueueData: this._reappendedQueueData
+    };
+}
+
+Gridifier.SizesTransformer.ItemsReappender.prototype.startReappendingQueuedItems = function() {
+    this._lastReappendedItemGUID = null;
+    this._reappendNextQueuedItemsBatch();
+}
+
+Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBatch = function() {
+    var batchSize = this._batchSize;
+    if(batchSize > this._reappendQueue.length)
+        batchSize = this._reappendQueue.length;
+
+    var reappendedItemGUIDS = [];
+
+    for(var i = 0; i < batchSize; i++) {
+        var nextItemToReappend = this._reappendQueue[i].itemToReappend;
+
+        if(this.isReversedAppendShouldBeUsedPerItemInsert(nextItemToReappend))
             var reappendType = Gridifier.APPEND_TYPES.REVERSED_APPEND;
         else
             var reappendType = Gridifier.APPEND_TYPES.DEFAULT_APPEND;
 
-        this._reappendItem(reappendType, itemsToReappend[i], lastReappendedItemGUID);
+        this._reappendItem(reappendType, nextItemToReappend);
 
         if(this._settings.isVerticalGrid())
             this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
@@ -123,16 +171,32 @@ Gridifier.SizesTransformer.ItemsReappender.prototype.reappendItems = function(it
             this._connections.get()
         );          // @system-log-end
 
-        lastReappendedItemGUID = this._guid.getItemGUID(itemsToReappend[i]);
+        this._lastReappendedItemGUID = this._guid.getItemGUID(nextItemToReappend);
+        reappendedItemGUIDS.push(this._lastReappendedItemGUID);
     }
+
+    var reappendedConnections = this._connections.getConnectionsByItemGUIDS(reappendedItemGUIDS);
+    this._gridifier.getRenderer().renderTransformedConnections(reappendedConnections);
+
+    this._reappendedQueueData = this._reappendedQueueData.concat(this._reappendQueue.splice(0, batchSize));
+    if(this._reappendQueue.length == 0) {
+        this._reappendNextQueuedItemsBatchTimeout = null;
+        Logger.stopLoggingOperation(); // @system-log
+        return;
+    }
+
+    var me = this;
+    this._reappendNextQueuedItemsBatchTimeout = setTimeout(function() {
+        me._reappendNextQueuedItemsBatch.call(me);
+    //}, 25); // Move to const
+    }, 25);
 }
 
 Gridifier.SizesTransformer.ItemsReappender.prototype._reappendItem = function(reappendType,
-                                                                              itemToReappend,
-                                                                              lastReappendedItemGUID) {
+                                                                              itemToReappend) {
     if(this._isNextReappendedItemInsertTypeChanged(itemToReappend)) {
         this._insertTypeChangeConnectors.recreate(
-            reappendType, itemToReappend, lastReappendedItemGUID
+            reappendType, itemToReappend, this._lastReappendedItemGUID
         );
     }
 

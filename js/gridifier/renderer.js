@@ -6,9 +6,13 @@ Gridifier.Renderer = function(gridifier, connections, settings, normalizer) {
     this._settings = null;
     this._normalizer = null;
 
+    this._transformedItemMarker = null;
+
     // Array[
-    //     [0] => {connection: connection, processingType: processingType, left: left, top: top},
-    //     [1] => {connection: connection, processingType: processingType, left: left, top: top},
+    //     [0] => {connection: connection, processingType: processingType, left: left, top: top, 
+    //             (targetWidth: tw, targetHeight: th)},
+    //     [1] => {connection: connection, processingType: processingType, left: left, top: top
+    //             (targetWidth: tw, targetHeight: th)},
     //     ...,
     //     n
     // ]
@@ -23,6 +27,7 @@ Gridifier.Renderer = function(gridifier, connections, settings, normalizer) {
         me._connections = connections;
         me._settings = settings;
         me._normalizer = normalizer;
+        me._transformedItemMarker = new Gridifier.SizesTransformer.TransformedItemMarker();
     };
 
     this._bindEvents = function() {
@@ -42,7 +47,7 @@ Gridifier.Renderer = function(gridifier, connections, settings, normalizer) {
 Gridifier.Renderer.CONNECTION_RENDERED_ITEM_DATA_CLASS = "gridifier-connection-rendered";
 Gridifier.Renderer.PROCESS_SCHEDULED_CONNECTIONS_TIMEOUT = 20;
 Gridifier.Renderer.SCHEDULED_CONNECTIONS_PROCESSING_TYPES = {
-    SHOW: 0, RENDER: 1, RENDER_TRANSFORMED: 2
+    SHOW: 0, RENDER: 1, RENDER_TRANSFORMED: 2, RENDER_DEPENDED: 3
 };
 
 Gridifier.Renderer.prototype._isConnectionItemRendered = function(connection) {
@@ -96,6 +101,7 @@ Gridifier.Renderer.prototype._processScheduledConnections = function() {
         var top = this._scheduledConnectionsToProcessData[i].top;
 
         if(processingType == Gridifier.Renderer.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.SHOW) {
+            // @todo -> maybe add here start/stop caching transaction??? Or it is useless?
             Dom.css.set(connectionToProcess.item, {
                 position: "absolute",
                 left: left,
@@ -115,36 +121,27 @@ Gridifier.Renderer.prototype._processScheduledConnections = function() {
             });
         }
         else if(processingType == Gridifier.Renderer.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_TRANSFORMED) {
-            var itemMarker = Gridifier.SizesTransformer.TransformedItemMarker;
+            var targetWidth = this._scheduledConnectionsToProcessData[i].targetWidth;
+            var targetHeight = this._scheduledConnectionsToProcessData[i].targetHeight;
 
-            if(Dom.hasAttribute(connectionToProcess.item, itemMarker.TRANSFORMED_ITEM_DATA_ATTR)) {
-                connectionToProcess.item.removeAttribute(itemMarker.TRANSFORMED_ITEM_DATA_ATTR);
-                // @todo -> Move to separate function
-                Dom.css3.transition(connectionToProcess.item, "All 600ms ease");
+            // @todo -> Move to separate function
+            Dom.css3.transition(connectionToProcess.item, "All 600ms ease");
 
-                var targetWidth = connectionToProcess.item.getAttribute(itemMarker.TRANSFORMED_ITEM_RAW_TARGET_WIDTH_DATA_ATTR);
-                var targetHeight = connectionToProcess.item.getAttribute(itemMarker.TRANSFORMED_ITEM_RAW_TARGET_HEIGHT_DATA_ATTR);
-                connectionToProcess.item.removeAttribute(itemMarker.TRANSFORMED_ITEM_RAW_TARGET_WIDTH_DATA_ATTR);
-                connectionToProcess.item.removeAttribute(itemMarker.TRANSFORMED_ITEM_RAW_TARGET_HEIGHT_DATA_ATTR);
-                connectionToProcess.item.removeAttribute(itemMarker.TRANSFORMED_ITEM_PX_TARGET_WIDTH_DATA_ATTR);
-                connectionToProcess.item.removeAttribute(itemMarker.TRANSFORMED_ITEM_PX_TARGET_HEIGHT_DATA_ATTR);
-
-                Dom.css.set(connectionToProcess.item, {
-                    width: targetWidth,
-                    height: targetHeight,
-                    left: left,
-                    top: top
-                });
-            }
-            else if(Dom.hasAttribute(connectionToProcess.item, itemMarker.DEPENDED_ITEM_DATA_ATTR)) {
-                connectionToProcess.item.removeAttribute(itemMarker.DEPENDED_ITEM_DATA_ATTR);
-                // @todo -> Move to separate function
-                Dom.css3.transition(connectionToProcess.item, "All 600ms ease");
-                Dom.css.set(connectionToProcess.item, {
-                    left: left,
-                    top: top
-                });
-            }
+            Dom.css.set(connectionToProcess.item, {
+                width: targetWidth,
+                height: targetHeight,
+                left: left,
+                top: top
+            });
+        }
+        else if(processingType == Gridifier.Renderer.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED) {
+            // @todo -> Move to separate function
+            Dom.css3.transition(connectionToProcess.item, "All 600ms ease");
+            
+            Dom.css.set(connectionToProcess.item, {
+                left: left,
+                top: top
+            });
         }
     }
 
@@ -215,9 +212,7 @@ Gridifier.Renderer.prototype.showConnections = function(connections) {
 //     }
 // }
 
-Gridifier.Renderer.prototype.renderTransformedConnections = function() {
-    var connections = this._connections.get();
-
+Gridifier.Renderer.prototype.renderTransformedConnections = function(connections) {
     for(var i = 0; i < connections.length; i++) {
         var left = this._getCssLeftPropertyValuePerConnection(connections[i]);
         var top = this._getCssTopPropertyValuePerConnection(connections[i]);
@@ -231,13 +226,31 @@ Gridifier.Renderer.prototype.renderTransformedConnections = function() {
             this._processScheduledConnectionsTimeout = null;
         }
 
+        if(this._transformedItemMarker.isTransformedItem(connections[i].item)) {
+            var targetRawSizes = this._transformedItemMarker.getTransformedItemTargetRawSizes(
+                connections[i].item
+            );
+            this._scheduledConnectionsToProcessData.push({
+                connection: connections[i],
+                processingType: Gridifier.Renderer.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_TRANSFORMED,
+                targetWidth: targetRawSizes.targetRawWidth,
+                targetHeight: targetRawSizes.targetRawHeight,
+                left: left,
+                top: top
+            });
+            this._transformedItemMarker.unmarkItemAsTransformed(connections[i].item);
+        }
+        else if(this._transformedItemMarker.isDependedItem(connections[i].item)) {
+            this._scheduledConnectionsToProcessData.push({
+                connection: connections[i],
+                processingType: Gridifier.Renderer.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED,
+                left: left,
+                top: top
+            });
+            this._transformedItemMarker.unmarkItemAsDepended(connections[i].item);
+        }
+
         var me = this;
-        this._scheduledConnectionsToProcessData.push({
-            connection: connections[i],
-            processingType: Gridifier.Renderer.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_TRANSFORMED,
-            left: left,
-            top: top
-        });
         this._processScheduledConnectionsTimeout = setTimeout(function() {
             me._processScheduledConnections.call(me);
         }, Gridifier.Renderer.PROCESS_SCHEDULED_CONNECTIONS_TIMEOUT);

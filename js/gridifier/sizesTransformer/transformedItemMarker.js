@@ -61,6 +61,23 @@ Gridifier.SizesTransformer.TransformedItemMarker.prototype.isTransformedItem = f
     return Dom.hasAttribute(maybeTransformedItem, Gridifier.SizesTransformer.TransformedItemMarker.TRANSFORMED_ITEM_DATA_ATTR);
 }
 
+Gridifier.SizesTransformer.TransformedItemMarker.prototype.unmarkItemAsTransformed = function(transformedItem) {
+    transformedItem.removeAttribute(Gridifier.SizesTransformer.TransformedItemMarker.TRANSFORMED_ITEM_DATA_ATTR);
+    transformedItem.removeAttribute(Gridifier.SizesTransformer.TransformedItemMarker.TRANSFORMED_ITEM_RAW_TARGET_WIDTH_DATA_ATTR);
+    transformedItem.removeAttribute(Gridifier.SizesTransformer.TransformedItemMarker.TRANSFORMED_ITEM_RAW_TARGET_HEIGHT_DATA_ATTR);
+    transformedItem.removeAttribute(Gridifier.SizesTransformer.TransformedItemMarker.TRANSFORMED_ITEM_PX_TARGET_WIDTH_DATA_ATTR);
+    transformedItem.removeAttribute(Gridifier.SizesTransformer.TransformedItemMarker.TRANSFORMED_ITEM_PX_TARGET_HEIGHT_DATA_ATTR);
+}
+
+Gridifier.SizesTransformer.TransformedItemMarker.prototype.getTransformedItemTargetRawSizes = function(transformedItem) {
+    var transformedItemMarker = Gridifier.SizesTransformer.TransformedItemMarker;
+
+    return {
+        targetRawWidth: transformedItem.getAttribute(transformedItem.TRANSFORMED_ITEM_RAW_TARGET_WIDTH_DATA_ATTR),
+        targetRawHeight: transformedItem.getAttribute(transformedItem.TRANSFORMED_ITEM_RAW_TARGET_HEIGHT_DATA_ATTR)
+    };
+}
+
 Gridifier.SizesTransformer.TransformedItemMarker.prototype.getTransformedItemTargetPxSizes = function(transformedItem) {
     var transformedItemMarker = Gridifier.SizesTransformer.TransformedItemMarker;
 
@@ -80,4 +97,12 @@ Gridifier.SizesTransformer.TransformedItemMarker.prototype.markAllTransformDepen
             Gridifier.SizesTransformer.TransformedItemMarker.TRANSFORMER_EMPTY_DATA_ATTR_VALUE
         );
     }
+}
+
+Gridifier.SizesTransformer.TransformedItemMarker.prototype.isDependedItem = function(maybeDependedItem) {
+    return Dom.hasAttribute(maybeDependedItem, Gridifier.SizesTransformer.TransformedItemMarker.DEPENDED_ITEM_DATA_ATTR);
+}
+
+Gridifier.SizesTransformer.TransformedItemMarker.prototype.unmarkItemAsDepended = function(dependedItem) {
+    dependedItem.removeAttribute(Gridifier.SizesTransformer.TransformedItemMarker.DEPENDED_ITEM_DATA_ATTR);
 }

@@ -104,6 +104,39 @@ Gridifier.VerticalGrid.Connections.prototype.removeConnection = function(connect
     }
 }
 
+Gridifier.VerticalGrid.Connections.prototype.getConnectionsByItemGUIDS = function(itemGUIDS) {
+    var connections = [];
+
+    for(var i = 0; i < this._connections.length; i++) {
+        for(var j = 0; j < itemGUIDS.length; j++) {
+            if(this._connections[i].itemGUID == itemGUIDS[j]) {
+                connections.push(this._connections[i]);
+                break;
+            }
+        }
+    }
+
+    return connections;
+}
+
+Gridifier.VerticalGrid.Connections.prototype.syncConnectionParams = function(connectionsData) {
+    for(var i = 0; i < connectionsData.length; i++) {
+        for(var j = 0; j < this._connections.length; j++) {
+            if(this._connections[j].itemGUID == connectionsData[i].itemGUID) {
+                this._connections[j].lastRenderedLeftOffset = connectionsData[i].lastRenderedLeftOffset;
+                this._connections[j].lastRenderedTopOffset = connectionsData[i].lastRenderedTopOffset;
+                this._connections[j].verticalOffset = connectionsData[i].verticalOffset;
+                this._connections[j].x1 = connectionsData[i].x1;
+                this._connections[j].x2 = connectionsData[i].x2;
+                this._connections[j].y1 = connectionsData[i].y1;
+                this._connections[j].y2 = connectionsData[i].y2;
+
+                break;
+            }
+        }
+    }
+}
+
 Gridifier.VerticalGrid.Connections.prototype.getMinConnectionWidth = function() {
     if(this._connections.length == 0)
         return 0;
@@ -169,8 +202,8 @@ Gridifier.VerticalGrid.Connections.prototype.getMinConnectionHeight = function()
 Gridifier.VerticalGrid.Connections.prototype.getAllConnectionsBelowY = function(y) {
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
-        if(this._connections[i].y1 - 10000 > y) // @todo -> Delete, for testing
-        //if(this._connections[i].y1 > y)
+        //if(this._connections[i].y1 - 10000 > y) // @todo -> Delete, for testing
+        if(this._connections[i].y1 > y)
             connections.push(this._connections[i]);
     }
 

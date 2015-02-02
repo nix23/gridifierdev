@@ -1,8 +1,9 @@
-Gridifier.VerticalGrid.ConnectionsSorter = function(connections, settings) {
+Gridifier.VerticalGrid.ConnectionsSorter = function(connections, settings, guid) {
     var me = this;
 
     this._connections = null;
     this._settings = null;
+    this._guid = null;
 
     this._css = {
     };
@@ -10,6 +11,7 @@ Gridifier.VerticalGrid.ConnectionsSorter = function(connections, settings) {
     this._construct = function() {
         me._connections = connections;
         me._settings = settings;
+        me._guid = guid;
     };
 
     this._bindEvents = function() {
@@ -29,9 +31,11 @@ Gridifier.VerticalGrid.ConnectionsSorter = function(connections, settings) {
 }
 
 Gridifier.VerticalGrid.ConnectionsSorter.prototype.sortConnectionsPerReappend = function(connections) {
+    var me = this;
+
     if(this._settings.isDisabledSortDispersion()) {
         connections.sort(function(firstConnection, secondConnection) {
-            if(firstConnection.itemGUID > secondConnection.itemGUID)
+            if(me._guid.getItemGUID(firstConnection.item) > me._guid.getItemGUID(secondConnection.item))
                 return 1;
 
             return -1;

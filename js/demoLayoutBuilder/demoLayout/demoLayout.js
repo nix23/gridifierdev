@@ -121,7 +121,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             }
             else {
                // var width = "25px";
-                // var height = "50px";
+               //  var height = "50px";
                 var width = "50px";
                 var height = "100px";
             }

@@ -71,14 +71,14 @@ Gridifier = function(grid, settings) {
                 me, me._guid, me._settings
             );
             me._connectionsSorter = new Gridifier.VerticalGrid.ConnectionsSorter(
-                me._connections, me._settings
+                me._connections, me._settings, me._guid
             );
         }
         else if(me._settings.isHorizontalGrid()) {
             me._connections = new Gridifier.HorizontalGrid.Connections(me._guid, me._settings);
             // @todo -> Change to Horizontal Grid
             me._connectionsSorter = new Gridifier.VerticalGrid.ConnectionsSorter(
-                me._connections, me._settings
+                me._connections, me._settings, me._guid
             );
         }
 

@@ -245,3 +245,7 @@ body {
     cursor: not-allowed;
     background: rgb(170,170,170);
 }
+
+/*.gridItem {
+    font-size: 0px !important;
+}*/

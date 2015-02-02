@@ -85,6 +85,7 @@ Gridifier.SizesTransformer = function(gridifier,
         }
 
         me._itemsReappender = new Gridifier.SizesTransformer.ItemsReappender(
+            me._gridifier,
             me._appender,
             me._reversedAppender,
             me._connections, 
@@ -164,6 +165,19 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transfo
 
 Gridifier.SizesTransformer.prototype.retransformAllConnections = function() {
     var connections = this._connections.get();
+
+    if(!this._itemsReappender.isReappendQueueEmpty()) {
+        var currentQueueState = this._itemsReappender.stopReappendingQueuedItems();
+
+        var reappendedConnections = [];
+        for(var i = 0; i < currentQueueState.reappendedQueueData.length; i++)
+            reappendedConnections.push(currentQueueState.reappendedQueueData[i].connectionToReappend);
+        this._connections.syncConnectionParams(reappendedConnections);
+
+        for(var i = 0; i < currentQueueState.reappendQueue.length; i++)
+            connections.push(currentQueueState.reappendQueue[i].connectionToReappend);
+    }
+    
     if(connections.length == 0)
         return;
 
@@ -171,9 +185,11 @@ Gridifier.SizesTransformer.prototype.retransformAllConnections = function() {
 
     var itemsToReappend = [];
     var connectionsToKeep = [];
+    var connectionsToReappend = [];
     for(var i = 0; i < connections.length; i++) {
         if(!connections[i][Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT]) {
             itemsToReappend.push(connections[i].item);
+            connectionsToReappend.push(connections[i]);
         }
         else {
             connectionsToKeep.push(connections[i]);
@@ -215,14 +231,15 @@ Gridifier.SizesTransformer.prototype.retransformAllConnections = function() {
     // @todo -> Check, if this is still required
     //this._transformerConnectors.maybeAddGluingConnectorOnFirstPrependedConnection(transformedConections[0]);
 
-    this._itemsReappender.reappendItems(itemsToReappend);
+    this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
+    this._itemsReappender.startReappendingQueuedItems();
 
-    // @todo -> Enable this setting (Is it required here?)
+    // @todo -> Enable this setting (Is it required here?) Move this declaration after queue flush
     //if(me._settings.isNoIntersectionsStrategy()) {
     //    me._emptySpaceNormalizer.emptySpaceNormalizer.normalizeFreeSpace();
     //}
 
-    this._gridifier.getRenderer().renderTransformedConnections();
+    //this._gridifier.getRenderer().renderTransformedConnections();
     
-    Logger.stopLoggingOperation(); // @system-log
+    //Logger.stopLoggingOperation(); // @system-log
 }
