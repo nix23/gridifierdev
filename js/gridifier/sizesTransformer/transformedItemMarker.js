@@ -73,8 +73,8 @@ Gridifier.SizesTransformer.TransformedItemMarker.prototype.getTransformedItemTar
     var transformedItemMarker = Gridifier.SizesTransformer.TransformedItemMarker;
 
     return {
-        targetRawWidth: transformedItem.getAttribute(transformedItem.TRANSFORMED_ITEM_RAW_TARGET_WIDTH_DATA_ATTR),
-        targetRawHeight: transformedItem.getAttribute(transformedItem.TRANSFORMED_ITEM_RAW_TARGET_HEIGHT_DATA_ATTR)
+        targetRawWidth: transformedItem.getAttribute(transformedItemMarker.TRANSFORMED_ITEM_RAW_TARGET_WIDTH_DATA_ATTR),
+        targetRawHeight: transformedItem.getAttribute(transformedItemMarker.TRANSFORMED_ITEM_RAW_TARGET_HEIGHT_DATA_ATTR)
     };
 }
 

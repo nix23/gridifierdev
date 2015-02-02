@@ -202,8 +202,8 @@ Gridifier.VerticalGrid.Connections.prototype.getMinConnectionHeight = function()
 Gridifier.VerticalGrid.Connections.prototype.getAllConnectionsBelowY = function(y) {
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
-        //if(this._connections[i].y1 - 10000 > y) // @todo -> Delete, for testing
-        if(this._connections[i].y1 > y)
+        if(this._connections[i].y1 - 10000 > y) // @todo -> Delete, for testing
+        //if(this._connections[i].y1 > y)
             connections.push(this._connections[i]);
     }
 

@@ -120,6 +120,14 @@ Gridifier.SizesTransformer = function(gridifier,
 
 Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT = "restrictConnectionCollect";
 
+Gridifier.SizesTransformer.prototype.isTransformerQueueEmpty = function() {
+    return this._itemsReappender.isReappendQueueEmpty();
+}
+
+Gridifier.SizesTransformer.prototype.getQueuedConnectionsPerTransform = function() {
+    return this._itemsReappender.getQueuedConnectionsPerTransform();
+}
+
 Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transformationData) {
     transformationData = this._transformedConnectionsSorter.sortTransformedConnections(
         transformationData
@@ -132,13 +140,28 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transfo
     // (Optimizing getComputedStyle after reflow performance)
     var applyTransform = function() {
         this._transformedItemMarker.markEachConnectionItemWithTransformData(transformationData);
+
+        var connectionsToReappend = [];
+        if(!this._itemsReappender.isReappendQueueEmpty()) {
+            var currentQueueState = this._itemsReappender.stopReappendingQueuedItems();
+
+            for(var i = 0; i < currentQueueState.reappendQueue.length; i++) {
+                var queuedConnection = currentQueueState.reappendQueue[i].connectionToReappend;
+                if(queuedConnection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT])
+                    continue;
+
+                connectionsToReappend.push(queuedConnection);
+            }
+        }
+
         var itemsToReappendData = this._itemsToReappendFinder.findAllOnSizesTransform(
-            transformationData[0].connectionToTransform
+            connectionsToReappend, transformationData[0].connectionToTransform
         );
 
         var itemsToReappend = itemsToReappendData.itemsToReappend;
+        var connectionsToReappend = itemsToReappendData.connectionsToReappend;
         var firstConnectionToReappend = itemsToReappendData.firstConnectionToReappend;
-
+        
         this._transformedItemMarker.markAllTransformDependedItems(itemsToReappend);
         this._itemsReappender.storeHowNextReappendedItemWasInserted(itemsToReappend[0]);
         this._transformerConnectors.recreateConnectorsPerFirstItemReappendOnTransform(
@@ -147,16 +170,17 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transfo
         // @todo -> Check, if this is still required
         //this._transformerConnectors.maybeAddGluingConnectorOnFirstPrependedConnection(transformedConections[0]);
 
-        this._itemsReappender.reappendItems(itemsToReappend);
+        this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
+        this._itemsReappender.startReappendingQueuedItems();
 
         // @todo -> Enable this setting
         //if(me._settings.isNoIntersectionsStrategy()) {
         //    me._emptySpaceNormalizer.emptySpaceNormalizer.normalizeFreeSpace();
         //}
 
-        this._gridifier.getRenderer().renderTransformedConnections();
+        //this._gridifier.getRenderer().renderTransformedConnections();
 
-        Logger.stopLoggingOperation(); // @system-log
+        //Logger.stopLoggingOperation(); // @system-log
     }
 
     var me = this;
@@ -172,6 +196,12 @@ Gridifier.SizesTransformer.prototype.retransformAllConnections = function() {
         var reappendedConnections = [];
         for(var i = 0; i < currentQueueState.reappendedQueueData.length; i++)
             reappendedConnections.push(currentQueueState.reappendedQueueData[i].connectionToReappend);
+        // Sync is required here, because item sorting in CSDAES mode depends on item positions.
+        // And if we made resize, first batch was reappended, and than made second resize,
+        // we should grab all items according to start positions to not keep item sorting in sync.
+        // (That happens because here on second resize we are resizing ALL items again from scratch.
+        //   In transform sizes this is redundant, because we are starting AFTER reppended items(if there
+        //   are some items in queue), or from first transformed connection)
         this._connections.syncConnectionParams(reappendedConnections);
 
         for(var i = 0; i < currentQueueState.reappendQueue.length; i++)

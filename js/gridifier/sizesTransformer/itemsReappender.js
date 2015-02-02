@@ -137,6 +137,15 @@ Gridifier.SizesTransformer.ItemsReappender.prototype.stopReappendingQueuedItems 
     };
 }
 
+Gridifier.SizesTransformer.ItemsReappender.prototype.getQueuedConnectionsPerTransform = function() {
+    var queuedConnections = [];
+    for(var i = 0; i < this._reappendQueue.length; i++) {
+        queuedConnections.push(this._reappendQueue[i].connectionToReappend);
+    }
+
+    return queuedConnections;
+}
+
 Gridifier.SizesTransformer.ItemsReappender.prototype.startReappendingQueuedItems = function() {
     this._lastReappendedItemGUID = null;
     this._reappendNextQueuedItemsBatch();

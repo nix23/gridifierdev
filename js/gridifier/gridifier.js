@@ -373,6 +373,16 @@ Gridifier.prototype.findConnectionByItem = function(item) {
     }
 
     if(connectionItem == null) {
+        if(!this._sizesTransformer.isTransformerQueueEmpty()) {
+            var queuedConnections = this._sizesTransformer.getQueuedConnectionsPerTransform();
+            for(var i = 0; i < queuedConnections.length; i++) {
+                if(itemGUID == queuedConnections[i].itemGUID)
+                    connectionItem = queuedConnections[i];
+            }
+        }
+    }
+
+    if(connectionItem == null) {
         new Gridifier.Error(
             Gridifier.Error.ERROR_TYPES.CONNECTIONS.CONNECTION_BY_ITEM_NOT_FOUND,
             {item: item, connections: connections}
@@ -630,7 +640,7 @@ Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {
         loggerLegend += " targetHeight: " + targetSizesToTransform[i].targetHeight;
         loggerLegend += "<br><br>";                                                             // @system-log-end
     }
-
+    
     var transformationData = [];
     for(var i = 0; i < connectionsToTransform.length; i++) {
         transformationData.push({

@@ -30,8 +30,8 @@ Gridifier.SizesTransformer.ItemsToReappendFinder = function(connections,
     return this;
 }
 
-Gridifier.SizesTransformer.ItemsToReappendFinder.prototype.findAllOnSizesTransform = function(firstTransformedConnection) {
-    var connectionsToReappend = [];
+Gridifier.SizesTransformer.ItemsToReappendFinder.prototype.findAllOnSizesTransform = function(connectionsToReappend,
+                                                                                              firstTransformedConnection) {
     var connections = this._connections.get();
 
     for(var i = 0; i < connections.length; i++) {
@@ -74,6 +74,7 @@ Gridifier.SizesTransformer.ItemsToReappendFinder.prototype.findAllOnSizesTransfo
 
     return {
         itemsToReappend: itemsToReappend,
+        connectionsToReappend: connectionsToReappend,
         firstConnectionToReappend: sortedConnectionsToReappend[0]
     };
 }
