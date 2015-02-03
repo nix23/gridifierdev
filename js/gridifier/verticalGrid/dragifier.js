@@ -62,7 +62,7 @@ Gridifier.VerticalGrid.Dragifier = function(gridifier,
             me._gridifier, me._connections, me._guid, me._settings
         );
 
-        me._bindEvents();
+        //me._bindEvents();
     };
 
     this._bindEvents = function() {

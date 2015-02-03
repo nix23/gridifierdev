@@ -58,7 +58,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         //me._gridifierSettings.alignmentType = "center";
-        me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
+        //me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
 
         me._attachView();
         me._gridifierDynamicSettings = new DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings();
@@ -111,7 +111,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
 
 
-        me._gridifierDynamicSettings._batchSize = 50;
+        me._gridifierDynamicSettings._batchSize = 5;
         for(var i = 0; i < 50; i++) {
             if(i % 2 == 0) {
                 // var width = "50px";

@@ -24,6 +24,16 @@ Gridifier = function(grid, settings) {
 
     this._gridSizesUpdateTimeout = null;
 
+    /*
+        Array(
+            {'queuedOperationType' => 'qot', 'items/item' => 'i'},
+            ....,
+            n
+        )
+    */
+    this._queuedOperations = [];
+    this._isWaitingForTransformerQueueRelease = false;
+
     this._css = {
     };
 
@@ -469,6 +479,33 @@ Gridifier.prototype._prepend = function(items) {
     return this;
 }
 
+Gridifier.prototype._processQueuedOperations = function() {
+    var me = this;
+
+    if(this._sizesTransformer.isTransformerQueueEmpty()) {
+        for(var i = 0; i < this._queuedOperations.length; i++) {
+            if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.APPEND) {
+                this._append(this._queuedOperations[i].items);
+            }
+            else if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.PREPEND) {
+                this._prepend(this._queuedOperations[i].items);
+            }
+            else {
+                var operationType = this._queuedOperations[i].queuedOperationType;
+                throw new Error("Unknown queued operation type = '" + operationType + "'");
+            }
+        }
+
+        this._queuedOperations = [];
+        this._isWaitingForTransformerQueueRelease = false;
+    }
+    else {
+        setTimeout(function() {
+            me._processQueuedOperations.call(me);
+        }, Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
+    }
+}
+
 // @todo -> Render connectors and debug after each step
 Gridifier.prototype._applyAppend = function(item) {
     if(this._settings.isDefaultAppend()) {
@@ -502,13 +539,28 @@ Gridifier.prototype.append = function(items) {
     //     items[i].style.left = "-90000px";
     //     items[i].style.top = "0px";
     // }
-
     var me = this;
-    (function(items, fakerDiv) {
+    // (function(items, fakerDiv) {
         setTimeout(function() { 
-            me._append.call(me, items);
+            if(me._sizesTransformer.isTransformerQueueEmpty()) {
+                me._append.call(me, items);
+            }
+            else {
+                me._queuedOperations.push({
+                    queuedOperationType: Gridifier.QUEUED_OPERATION_TYPES.APPEND,
+                    items: items
+                });
+
+                if(me._isWaitingForTransformerQueueRelease)
+                    return;
+
+                setTimeout(function() {
+                    me._isWaitingForTransformerQueueRelease = true;
+                    me._processQueuedOperations.call(me);
+                }, Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
+            }
         }, 0);
-    })(items, {});
+    //})(items, {});
     //this._append(items);
 }
 
@@ -750,3 +802,6 @@ Gridifier.GRID_ITEM_MARKING_DEFAULTS = {CLASS: "gridifier-item", DATA_ATTR: "dat
 
 Gridifier.OPERATIONS = {PREPEND: 0, REVERSED_PREPEND: 1, APPEND: 2, REVERSED_APPEND: 3, MIRRORED_PREPEND: 4};
 Gridifier.GRID_SIZES_UPDATE_TIMEOUT = 100;
+
+Gridifier.QUEUED_OPERATION_TYPES = {PREPEND: 0, APPEND: 1};
+Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT = 100;

@@ -29,7 +29,7 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
     this._lastReappendedItemGUID = null;
 
     this._reappendQueue = null;
-    this._batchSize = 5;
+    this._batchSize = 1;
     this._reappendNextQueuedItemsBatchTimeout = null;
     this._reappendedQueueData = null;
 
@@ -198,7 +198,7 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
     this._reappendNextQueuedItemsBatchTimeout = setTimeout(function() {
         me._reappendNextQueuedItemsBatch.call(me);
     //}, 25); // Move to const
-    }, 25);
+    }, 2500);
 }
 
 Gridifier.SizesTransformer.ItemsReappender.prototype._reappendItem = function(reappendType,
