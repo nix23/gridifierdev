@@ -365,7 +365,7 @@ var SizesResolver = {
         //var outerWidth = DOMElem.offsetWidth; // @todo -> Check all cases, looks like outerWidth here s redundant
         var outerWidth = 0;
         //if(Dom.css.hasClass(DOMElem, "gridItem")) {
-            //timer.start();
+           // timer.start();
             //elementComputedCSS.getPropertyCSSValue("width");
             //elementComputedCSS.getPropertyValue("width");
             //var elementComputedCSS = elementComputedCSS.

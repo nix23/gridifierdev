@@ -178,9 +178,69 @@ var Dom = {
                 DOMElem.style[this.prefixedTransitionProps[i]] = propertyValue;
         },
 
+        transitionProperty: function(DOMElem, property) {
+            // @todo -> Add vendor prefixes
+            var currentTransition = DOMElem.style.transition;
+            if(currentTransition.length == 0) {
+                DOMElem.style.transition = property;
+                return;
+            }
+
+            var newTransition = property;
+            var currentTransitionProps = currentTransition.split(",");
+            for(var i = 0; i < currentTransitionProps.length; i++) {
+                var currentTransitionProp = currentTransitionProps[i].trim();
+                if(currentTransitionProp.length == 0)
+                    continue;
+                
+                var currentTransitionPropParts = currentTransitionProp.split(" ");
+                var currentTransitionPropName = currentTransitionPropParts[0];
+                
+                if(newTransition.search(currentTransitionPropName) === -1) {
+                    newTransition += ", " + currentTransitionProp;
+                }
+            }
+
+            // @todo -> Add vendor prefixes
+            DOMElem.style.transition = newTransition.trim();
+        },
+
         transform: function(DOMElem, propertyValue) {
             for(var i = 0; i < this.prefixedTransformProps.length; i++)
                 DOMElem.style[this.prefixedTransformProps[i]] = propertyValue;
+        },
+
+        // @todo -> Process array of values???
+        transformProperty: function(DOMElem, property, propertyValue) {
+            // @todo -> Add vendor prefixes
+            var currentTransform = DOMElem.style.transform;
+            if(currentTransform.length == 0) {
+                DOMElem.style.transform = property + "(" + propertyValue + ")";
+                return;
+            }
+
+            var newTransform = "";
+            var currentTransformProps = currentTransform.split(/\)/);
+            var hasCurrentTransformProperty = false;
+            for(var i = 0; i < currentTransformProps.length; i++) {
+                var currentTransformProp = currentTransformProps[i].trim();
+                if(currentTransformProp.trim().length == 0)
+                    continue;
+                
+                if(currentTransformProp.search(property) !== -1) {
+                    newTransform += " " + property + "(" + propertyValue + ")";
+                    hasCurrentTransformProperty = true;
+                }
+                else {
+                    newTransform += " " + currentTransformProp + ")";
+                }
+            }
+
+            if(!hasCurrentTransformProperty)
+                newTransform += " " + property + "(" + propertyValue + ")";
+
+            // @todo -> Add vendor prefixes
+            DOMElem.style.transform = newTransform.trim();
         },
 
         opacity: function(DOMElem, opacityValue) {

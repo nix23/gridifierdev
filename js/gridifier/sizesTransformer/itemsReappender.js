@@ -29,9 +29,11 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
     this._lastReappendedItemGUID = null;
 
     this._reappendQueue = null;
-    this._batchSize = 1;
+    this._batchSize = 8;
     this._reappendNextQueuedItemsBatchTimeout = null;
     this._reappendedQueueData = null;
+    this._reappendStartViewportWidth = null;
+    this._reappendStartViewportHeight = null;
 
     this._css = {
     };
@@ -148,6 +150,10 @@ Gridifier.SizesTransformer.ItemsReappender.prototype.getQueuedConnectionsPerTran
 
 Gridifier.SizesTransformer.ItemsReappender.prototype.startReappendingQueuedItems = function() {
     this._lastReappendedItemGUID = null;
+    // @todo -> Replace with JS events
+    this._reappendStartViewportWidth = $(window).width();
+    this._reappendStartViewportHeight = $(window).height();
+
     this._reappendNextQueuedItemsBatch();
 }
 
@@ -157,6 +163,10 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
         batchSize = this._reappendQueue.length;
 
     var reappendedItemGUIDS = [];
+    // @todo -> Replace with JS events
+    // @todo -> Check settings ver.grid/hor.grid
+    if($(window).width() != this._reappendStartViewportWidth)
+        return;
 
     for(var i = 0; i < batchSize; i++) {
         var nextItemToReappend = this._reappendQueue[i].itemToReappend;
@@ -198,7 +208,7 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
     this._reappendNextQueuedItemsBatchTimeout = setTimeout(function() {
         me._reappendNextQueuedItemsBatch.call(me);
     //}, 25); // Move to const
-    }, 2500);
+    }, 25); 
 }
 
 Gridifier.SizesTransformer.ItemsReappender.prototype._reappendItem = function(reappendType,

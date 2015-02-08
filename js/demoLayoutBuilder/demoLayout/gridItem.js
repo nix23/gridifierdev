@@ -88,8 +88,13 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         var borderColor = "blue";
 
     this._$gridItem.css({
-        width: itemSizes.width,
-        height: itemSizes.height,
+        // width: itemSizes.width,
+        // height: itemSizes.height,
+
+        width: "20%",
+        height: "100px",
+        //"padding-bottom": "25%",
+
         //"margin-top": "10px",
         // "margin-left": "30px",
         // "margin-right": "30px",
@@ -120,11 +125,11 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
     });
     this._$gridItem.addClass(itemBgClass);
 
-    // var res = Math.floor(Math.random()*(2-1+1)+1);
-    // if(res == 1) 
-    //     var bgs = "url(img/Cars1.jpg)";
-    // else
-    //     var bgs = "url(img/Cars2.jpg)";
+    var res = Math.floor(Math.random()*(2-1+1)+1);
+    if(res == 1) 
+        var bgs = "url(img/Cars1.jpg)";
+    else
+        var bgs = "url(img/Cars2.jpg)";
 
     var $gridItemBg = $("<div/>");
     $gridItemBg.css({
@@ -138,7 +143,7 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         // @todo -> Make Crossbrowser
         //background: "url(img/gridItemBg9.png)",
         //background: "url(img/test2.png)",
-        //background: bgs,
+        background: bgs,
         "background-size": "cover",
         "background-repeat": "no-repeat",
         "background-position": "center center"

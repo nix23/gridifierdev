@@ -160,7 +160,8 @@ Gridifier = function(grid, settings) {
         // @todo -> Log this action???
         // @todo -> With Custom SD it should be item with smallest y most right(DA) or most left(RV)
         var processResizeEventTimeout = null;
-        var processResizeEvent = 100;
+        //var processResizeEvent = 100;
+        // @todo -> Make this adjustable or enable by default???(Resize timeouts)
         $(window).resize(function() {
             // var $firstItem = null;
             // var $gridItems = $(".grid .gridItem");
@@ -187,16 +188,17 @@ Gridifier = function(grid, settings) {
             // connections = me._connectionsSorter.sortConnectionsPerReappend(connections);
             // var $firstItem = $(connections[0].item);
             
-            if(processResizeEventTimeout != null) {
-                clearTimeout(processResizeEventTimeout);
-                processResizeEventTimeout = null;
-            }
+            // if(processResizeEventTimeout != null) {
+            //     clearTimeout(processResizeEventTimeout);
+            //     processResizeEventTimeout = null;
+            // }
             
-            processResizeEventTimeout = setTimeout(function() {
+            // @todo -> Make this as optional parameter???
+           //processResizeEventTimeout = setTimeout(function() {
                 SizesResolverManager.startCachingTransaction();
                 me.retransformAllSizes();
                 SizesResolverManager.stopCachingTransaction();
-            }, processResizeEvent);
+            //}, processResizeEvent);
         });
 
         // @todo -> run first iteration?(Process items that were at start)

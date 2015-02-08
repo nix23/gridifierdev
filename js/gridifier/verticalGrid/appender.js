@@ -329,7 +329,7 @@ Gridifier.VerticalGrid.Appender.prototype._findItemConnectionCoords = function(i
         if(itemConnectionCoords != null)
             break;
     }
-    
+
     Logger.logFindItemConnectionCoordsFound( // @system-log
         sortedConnectors[i], itemConnectionCoords, item, this._connections.get()
     );                                       // @system-log

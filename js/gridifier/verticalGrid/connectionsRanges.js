@@ -71,18 +71,23 @@ Gridifier.VerticalGrid.ConnectionsRanges.prototype._createNextRange = function()
 }
 
 Gridifier.VerticalGrid.ConnectionsRanges.prototype.attachConnection = function(connection, connectionIndex) {
-    while(connection.y2 > this._ranges[this._ranges.length - 1].y2) {
+    while(connection.y2 + 1 > this._ranges[this._ranges.length - 1].y2) {
         this._createNextRange();
     }
 
+    var wasConnectionAttachedAtLeastInOneRange = false;
     for(var i = 0; i < this._ranges.length; i++) {
         var isAboveRange = connection.y2 < this._ranges[i].y1;
         var isBelowRange = connection.y1 > this._ranges[i].y2;
 
         if(!isAboveRange && !isBelowRange) {
             this._ranges[i].connectionIndexes.push(connectionIndex);
+            wasConnectionAttachedAtLeastInOneRange = true;
         }
     }
+
+    if(!wasConnectionAttachedAtLeastInOneRange)
+        throw new Error("Gridifier core error: connection was not connected to any range: " + connection.itemGUID);
 }
 
 Gridifier.VerticalGrid.ConnectionsRanges.prototype._attachAllConnections = function() {
@@ -104,6 +109,15 @@ Gridifier.VerticalGrid.ConnectionsRanges.prototype.mapAllIntersectedAndUpperConn
             var isCurrentConnectorRangeSameAsPrevious = true;
 
         while(!currentConnectorRangeIndexFound) { 
+            // Sometimes connector y may become 1px lower than range.
+            // (Spot on (width=10%, height=0px, padding-bottom: 25%)).
+            // In this such cases we should return connections of all ranges.
+            if(currentConnectorRangeIndex > this._ranges.length - 1
+                || currentConnectorRangeIndex < 0) {
+                currentConnectorRangeIndex = this._ranges.length - 1;
+                break;
+            }
+
             if(sortedConnectors[connectorIndex].y >= this._ranges[currentConnectorRangeIndex].y1 &&
                 sortedConnectors[connectorIndex].y <= this._ranges[currentConnectorRangeIndex].y2) {
                 currentConnectorRangeIndexFound = true;
@@ -136,6 +150,9 @@ Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersec
             break;
         }
     }
+
+    if(intersectedRangeIndex == null)
+        intersectedRangeIndex = 0;
 
     for(var i = intersectedRangeIndex; i < this._ranges.length; i++) {
         connectionIndexes.push(this._ranges[i].connectionIndexes);
@@ -202,6 +219,15 @@ Gridifier.VerticalGrid.ConnectionsRanges.prototype.mapAllIntersectedAndLowerConn
             var isCurrentConnectorRangeSameAsPrevious = true;
 
         while(!currentConnectorRangeIndexFound) {
+            // Sometimes connector y may become 1px larger than range.
+            // (Spot on (width=10%, height=0px, padding-bottom: 25%)).
+            // In this such cases we should return connections of all ranges.
+            if(currentConnectorRangeIndex > this._ranges.length - 1
+                || currentConnectorRangeIndex < 0) {
+                currentConnectorRangeIndex = 0;
+                break;
+            }
+
             if(sortedConnectors[connectorIndex].y >= this._ranges[currentConnectorRangeIndex].y1 &&
                sortedConnectors[connectorIndex].y <= this._ranges[currentConnectorRangeIndex].y2) {
                 currentConnectorRangeIndexFound = true;
@@ -229,6 +255,25 @@ Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersec
         if(y >= this._ranges[i].y1 && y <= this._ranges[i].y2)
             return this._ranges[i].connectionIndexes;
     }
+
+    var isConnectionIndexAdded = function(connectionIndexes, index) {
+        for(var i = 0; i < connectionIndexes.length; i++) {
+            if(connectionIndexes[i] == index)
+                return true;
+        }
+
+        return false;
+    }
+
+    var connectionIndexes = [];
+    for(var i = 0; i < this._ranges.length; i++) {
+        for(var j = 0; j < this._ranges[i].connectionIndexes.length; j++) {
+            if(!isConnectionIndexAdded(connectionIndexes, this._ranges[i].connectionIndexes[j]))
+                connectionIndexes.push(this._ranges[i].connectionIndexes[j]);
+        }
+    }
+
+    return connectionIndexes;
 }
 
 Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersectedAndUpperRanges = function(y) {
@@ -241,6 +286,9 @@ Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersec
             break;
         }
     }
+
+    if(intersectedRangeIndex == null)
+        intersectedRangeIndex = this._ranges.length - 1;
 
     for(var i = intersectedRangeIndex; i >= 0; i--) {
         connectionIndexes.push(this._ranges[i].connectionIndexes);

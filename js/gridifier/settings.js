@@ -174,13 +174,17 @@ Gridifier.Settings = function(settings) {
                 }
                 
                 // @todo -> Adjust timeout, and move to separate const
-                Dom.css3.transition(item, "All 0s ease");
-                Dom.css3.transform(item, "scale(0)"); 
+                // @todo -> Change other transition params to transform
+                Dom.css3.transitionProperty(item, "transform 0ms ease");
+                // @todo -> Make multiple transform. Replace in all other settings
+                //          (Rewrite all transitions and transforms in such manners)
+                Dom.css3.transformProperty(item, "scale", 0);
                 item.style.visibility = "visible"; // Ie11 blinking fix(:))
                 setTimeout(function() {
+                    // @todo -> Use correct vendor.(Refactor SizesTransformer)
                     item.style.visibility = "visible";
-                    Dom.css3.transition(item, "All 1000ms ease");
-                    Dom.css3.transform(item, "scale(1)");
+                    Dom.css3.transitionProperty(item, "transform 1000ms ease");
+                    Dom.css3.transformProperty(item, "scale", 1);
                 }, 20); 
             },
 
@@ -191,11 +195,11 @@ Gridifier.Settings = function(settings) {
                     return;
                 }
 
-                Dom.css3.transition(item, "All 1000ms ease");
+                Dom.css3.transition(item, "transform 1000ms ease");
                 Dom.css3.transform(item, "scale(0)");
                 setTimeout(function() {
                     item.style.visibility = "hidden";
-                    Dom.css3.transition(item, "All 0s ease");
+                    Dom.css3.transition(item, "transform 0s ease");
                     Dom.css3.transform(item, "scale(1)");
                 }, 20);
                 // Send event through global Gridifier.Event Object
@@ -257,6 +261,68 @@ Gridifier.Settings = function(settings) {
         }
     };
 
+    // @todo -> Pass timeouter object to correctly register delay???
+    //          (For correct callback fire)
+    this._rendererCoordsChangerFunction = null;
+    this._rendererCoordsChangerFunctions = {
+        'default': function(item, left, top) {
+            Dom.css3.transitionProperty(item, "left 0ms ease, top 0ms ease");
+            Dom.css.set(item, {
+                left: left,
+                top: top
+            });
+        },
+
+        'simultaneousCSS3Transition': function(item, newLeft, newTop) {
+            var newLeft = parseFloat(newLeft);
+            var newTop = parseFloat(newTop);
+
+            var currentLeft = parseFloat(item.style.left);
+            var currentTop = parseFloat(item.style.top);
+
+            if(newLeft > currentLeft)
+                var translateX = newLeft - currentLeft;
+            else if(newLeft < currentLeft)
+                var translateX = (currentLeft - newLeft) * -1;
+            else 
+                var translateX = 0;
+
+            if(newTop > currentTop)
+                var translateY = newTop - currentTop;
+            else if(newTop < currentTop)
+                var translateY = (currentTop - newTop) * -1;
+            else
+                var translateY = 0;
+
+            // @todo -> correctly parse params
+            // @todo -> set transitions only in this func-on, or separate transition setter???
+            Dom.css3.transitionProperty(item, "transform 600ms ease");//, width 600ms ease, height 600ms ease");
+            Dom.css3.transformProperty(item, "translate", translateX + "px," + translateY + "px");
+        }
+    };
+
+    this._rendererSizesChangerFunction = null;
+    this._rendererSizesChangerFunctions = {
+        'default': function(item, newWidth, newHeight) {
+            Dom.css3.transitionProperty(item, "width 0ms ease, height 0ms ease");
+            Dom.css.set(item, {
+                width: newWidth,
+                height: newHeight
+            });
+        },
+
+        'simultaneousCSS3Transition': function(item, newWidth, newHeight) {
+            // @todo -> correctly parse params
+            //var transition = item.style.transition;
+
+            //Dom.css3.transition(item, "width 300ms ease, height 300ms ease");
+            Dom.css.set(item, {
+                width: newWidth,
+                height: newHeight
+            });
+        }
+    };
+
     this._gridItemMarkingStrategyType = null;
     this._gridItemMarkingValue = null;
 
@@ -292,6 +358,8 @@ Gridifier.Settings.prototype._parse = function() {
     this._parseToggleOptions();
     this._parseSortOptions();
     this._parseFilterOptions();
+    this._parseRendererCoordsChanger();
+    this._parseRendererSizesChanger();
     this._parseGridItemMarkingStrategy();
 }
 
@@ -605,6 +673,80 @@ Gridifier.Settings.prototype._parseFilterOptions = function() {
     }
 }
 
+Gridifier.Settings.prototype._parseRendererCoordsChanger = function(rendererCoordsChangerFunctionName) {
+    if(!this._settings.hasOwnProperty("rendererCoordsChanger")) {
+        this._rendererCoordsChangerFunction = this._rendererCoordsChangerFunctions["simultaneousCSS3Transition"];
+        return;
+    }
+
+    if(typeof this._settings.rendererCoordsChanger == "function") {
+        this._rendererCoordsChangerFunctions["clientDefault"] = this._settings.rendererCoordsChanger;
+        this._rendererCoordsChangerFunction = this._settings.rendererCoordsChanger;
+    }
+    else if(typeof this._settings.rendererCoordsChanger == "object") {
+        for(var rendererCoordsChangerFunctionName in this._settings.rendererCoordsChanger) {
+            var rendererCoordsChangerFunction = this._settings.rendererCoordsChanger[rendererCoordsChangerFunctionName];
+
+            if(typeof rendererCoordsChangerFunction != "function") {
+                // @todo -> Throw correct error
+                throw new Error("Invalid renderCoordsChanger function on object.");
+                // new Gridifier.Error(
+                //     Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_ONE_OF_SORT_FUNCTION_TYPES,
+                //     sortFunction
+                // );
+            }
+            this._rendererCoordsChangerFunctions[rendererCoordsChangerFunctionName] = rendererCoordsChangerFunction;
+        }
+        // @todo -> parse first function
+        this._rendererCoordsChangerFunction = this._rendererCoordsChangerFunctions["default"];
+    }
+    else {
+        // @todo -> Throw correct error
+        throw new Error("Invalid rendererCoordsChanger function.");
+        // new Gridifier.Error(
+        //     Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_SORT_PARAM_VALUE,
+        //     this._settings.sort
+        // );
+    }
+}
+
+Gridifier.Settings.prototype._parseRendererSizesChanger = function(rendererSizesChangerFunctionName) {
+    if(!this._settings.hasOwnProperty("rendererSizesChanger")) {
+        this._rendererSizesChangerFunction = this._rendererSizesChangerFunctions["simultaneousCSS3Transition"];
+        return;
+    }
+
+    if(typeof this._settings.rendererSizesChanger == "function") {
+        this._rendererSizesChangerFunctions["clientDefault"] = this._settings.rendererSizesChanger;
+        this._rendererSizesChangerFunction = this._settings.rendererSizesChanger;
+    }
+    else if(typeof this._settings.rendererSizesChanger == "object") {
+        for(var rendererSizesChangerFunctionName in this._settings.rendererSizesChanger) {
+            var rendererSizesChangerFunction = this._settings.rendererSizesChanger[rendererSizesChangerFunctionName];
+
+            if(typeof rendererSizesChangerFunction != "function") {
+                // @todo -> Throw correct error
+                throw new Error("Invalid renderSizesChanger function on object.");
+                // new Gridifier.Error(
+                //     Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_ONE_OF_SORT_FUNCTION_TYPES,
+                //     sortFunction
+                // );
+            }
+            this._rendererSizesChangerFunctions[rendererSizesChangerFunctionName] = rendererSizesChangerFunction;
+        }
+        // @todo -> parse first function
+        this._rendererSizesChangerFunction = this._rendererSizesChangerFunctions["default"];
+    }
+    else {
+        // @todo -> Throw correct error
+        throw new Error("Invalid rendererSizesChanger function.");
+        // new Gridifier.Error(
+        //     Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_SORT_PARAM_VALUE,
+        //     this._settings.sort
+        // );
+    }
+}
+
 Gridifier.Settings.prototype.setToggle = function(toggleFunctionName) {
     if(!this._toggleFunctions.hasOwnProperty(toggleFunctionName)) {
         new Gridifier.Error(
@@ -641,6 +783,34 @@ Gridifier.Settings.prototype.setSort = function(sortFunctionName) {
     this._sortFunction = this._sortFunctions[sortFunctionName];
 }
 
+Gridifier.Settings.prototype.setRendererCoordsChanger = function(rendererCoordsChangerFunctionName) {
+    if(!this._rendererCoordsChangerFunctions.hasOwnProperty(rendererCoordsChangerFunctionName)) {
+        // @todo -> Throw correct error here
+        throw new Error("wrong renderer coords changer function to set.");
+        // new Gridifier.Error(
+        //     Gridifier.Error.ERROR_TYPES.SETTINGS.SET_SORT_INVALID_PARAM,
+        //     sortFunctionName
+        // );
+        return;
+    }
+
+    this._rendererCoordsChangerFunction = this._rendererCoordsChangerFunctions[rendererCoordsChangerFunctionName];
+}
+
+Gridifier.Settings.prototype.setRendererSizesChanger = function(rendererSizesChangerFunctionName) {
+    if(!this._rendererSizesChangerFunctions.hasOwnProperty(rendererSizesChangerFunctionName)) {
+        // @todo -> Throw correct error here
+        throw new Error("wrong renderer sizes changer function to set.");
+        // new Gridifier.Error(
+        //     Gridifier.Error.ERROR_TYPES.SETTINGS.SET_SORT_INVALID_PARAM,
+        //     sortFunctionName
+        // );
+        return;
+    }
+
+    this._rendererSizesChangerFunction = this._rendererSizesChangerFunctions[rendererSizesChangerFunctionName];
+}
+
 Gridifier.Settings.prototype.getToggle = function() {
     return this._toggleFunction;
 }
@@ -651,6 +821,14 @@ Gridifier.Settings.prototype.getSort = function() {
 
 Gridifier.Settings.prototype.getFilter = function() {
     return this._filterFunction;
+}
+
+Gridifier.Settings.prototype.getRendererCoordsChanger = function() {
+    return this._rendererCoordsChangerFunction;
+}
+
+Gridifier.Settings.prototype.getRendererSizesChanger = function() {
+    return this._rendererSizesChangerFunction;
 }
 
 Gridifier.Settings.prototype._parseGridItemMarkingStrategy = function() {

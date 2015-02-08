@@ -13,15 +13,15 @@ $(document).ready(function() {
     var appenderMock = {};
     var reversedAppenderMock = {};
 
-    var sizesTransformer = new Gridifier.SizesTransformer(
-        gridifierMock,
-        settingsMock,
-        connectorsMock,
-        connectionsMock,
-        guidMock,
-        appenderMock,
-        reversedAppenderMock
-    );
+    // var sizesTransformer = new Gridifier.SizesTransformer(
+    //     gridifierMock,
+    //     settingsMock,
+    //     connectorsMock,
+    //     connectionsMock,
+    //     guidMock,
+    //     appenderMock,
+    //     reversedAppenderMock
+    // );
 
     var initConnectionTransformTester = {
         // _realSizesResolver: null,

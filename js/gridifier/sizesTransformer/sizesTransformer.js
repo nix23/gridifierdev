@@ -211,65 +211,105 @@ Gridifier.SizesTransformer.prototype.retransformAllConnections = function() {
     if(connections.length == 0)
         return;
 
-    connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
+    var applyRetransform = function() {
+        connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
 
-    var itemsToReappend = [];
-    var connectionsToKeep = [];
-    var connectionsToReappend = [];
-    for(var i = 0; i < connections.length; i++) {
-        if(!connections[i][Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT]) {
-            itemsToReappend.push(connections[i].item);
-            connectionsToReappend.push(connections[i]);
+        var itemsToReappend = [];
+        var connectionsToKeep = [];
+        var connectionsToReappend = [];
+        for(var i = 0; i < connections.length; i++) {
+            if(!connections[i][Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT]) {
+                itemsToReappend.push(connections[i].item);
+                connectionsToReappend.push(connections[i]);
+            }
+            else {
+                connectionsToKeep.push(connections[i]);
+            }
+        }
+
+        var firstConnectionToReappend = null;
+        if(connectionsToKeep.length == 0) {
+            firstConnectionToReappend = connections[0];
+            connections.splice(0, connections.length);
         }
         else {
-            connectionsToKeep.push(connections[i]);
-        }
-    }
+            for(var i = 0; i < connections.length; i++) {
+                var shouldRetransformConnection = true;
 
-    var firstConnectionToReappend = null;
-    if(connectionsToKeep.length == 0) {
-        firstConnectionToReappend = connections[0];
-        connections.splice(0, connections.length);
-    }
-    else {
-        for(var i = 0; i < connections.length; i++) {
-            var shouldRetransformConnection = true;
+                for(var j = 0; j < connectionsToKeep.length; j++) {
+                    if(connectionsToKeep[j].itemGUID == connections[i].itemGUID) {
+                        shouldRetransformConnection = false;
+                        break;
+                    }
+                }
 
-            for(var j = 0; j < connectionsToKeep.length; j++) {
-                if(connectionsToKeep[j].itemGUID == connections[i].itemGUID) {
-                    shouldRetransformConnection = false;
+                if(shouldRetransformConnection) {
+                    firstConnectionToReappend = connections[i];
                     break;
                 }
             }
 
-            if(shouldRetransformConnection) {
-                firstConnectionToReappend = connections[i];
-                break;
-            }
+            connections.splice(0, connections.length);
+            for(var i = 0; i < connectionsToKeep.length; i++)
+                connections.push(connectionsToKeep[i]);
         }
 
-        connections.splice(0, connections.length);
-        for(var i = 0; i < connectionsToKeep.length; i++)
-            connections.push(connectionsToKeep[i]);
+        this._transformedItemMarker.markAllTransformDependedItems(itemsToReappend);
+        this._itemsReappender.storeHowNextReappendedItemWasInserted(firstConnectionToReappend.item);
+        this._transformerConnectors.recreateConnectorsPerFirstItemReappendOnTransform(
+            firstConnectionToReappend.item, firstConnectionToReappend
+        );
+        // @todo -> Check, if this is still required
+        //this._transformerConnectors.maybeAddGluingConnectorOnFirstPrependedConnection(transformedConections[0]);
+
+        this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
+        this._itemsReappender.startReappendingQueuedItems();
+
+        // @todo -> Enable this setting (Is it required here?) Move this declaration after queue flush
+        //if(me._settings.isNoIntersectionsStrategy()) {
+        //    me._emptySpaceNormalizer.emptySpaceNormalizer.normalizeFreeSpace();
+        //}
+
+        //this._gridifier.getRenderer().renderTransformedConnections();
+        
+        //Logger.stopLoggingOperation(); // @system-log
     }
 
-    this._transformedItemMarker.markAllTransformDependedItems(itemsToReappend);
-    this._itemsReappender.storeHowNextReappendedItemWasInserted(firstConnectionToReappend.item);
-    this._transformerConnectors.recreateConnectorsPerFirstItemReappendOnTransform(
-        firstConnectionToReappend.item, firstConnectionToReappend
+    var wereItemSizesSyncs = this._syncAllScheduledToTransformItemSizes(connections);
+    if(!wereItemSizesSyncs) {
+        applyRetransform.call(this);
+    }
+    // Timeout is required here because of DOM-tree changes inside transformed item clones creation.
+    // (Optimizing getComputedStyle after reflow performance)
+    else {
+        var me = this;
+        setTimeout(function() { applyRetransform.call(me); }, 0);
+    }
+}
+
+// Sync is required, because scheduled connection to transform may has changed % sizes after resizes.
+Gridifier.SizesTransformer.prototype._syncAllScheduledToTransformItemSizes = function(connections) {
+    var transformationData = [];
+    for(var i = 0; i < connections.length; i++) {
+        if(this._transformedItemMarker.isTransformedItem(connections[i].item)) {
+            var rawSizes = this._transformedItemMarker.getTransformedItemTargetRawSizes(
+                connections[i].item
+            );
+            transformationData.push({
+                connectionToTransform: connections[i],
+                widthToTransform: rawSizes.targetRawWidth,
+                heightToTransform: rawSizes.targetRawHeight
+            });
+        }
+    }
+
+    if(transformationData.length == 0)
+        return false;
+
+    transformationData = this._itemNewPxSizesFinder.calculateNewPxSizesPerAllTransformedItems(
+        transformationData
     );
-    // @todo -> Check, if this is still required
-    //this._transformerConnectors.maybeAddGluingConnectorOnFirstPrependedConnection(transformedConections[0]);
+    this._transformedItemMarker.markEachConnectionItemWithTransformData(transformationData);
 
-    this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
-    this._itemsReappender.startReappendingQueuedItems();
-
-    // @todo -> Enable this setting (Is it required here?) Move this declaration after queue flush
-    //if(me._settings.isNoIntersectionsStrategy()) {
-    //    me._emptySpaceNormalizer.emptySpaceNormalizer.normalizeFreeSpace();
-    //}
-
-    //this._gridifier.getRenderer().renderTransformedConnections();
-    
-    //Logger.stopLoggingOperation(); // @system-log
+    return true;
 }

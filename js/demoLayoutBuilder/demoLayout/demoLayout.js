@@ -58,7 +58,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         //me._gridifierSettings.alignmentType = "center";
-        //me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
+        me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
 
         me._attachView();
         me._gridifierDynamicSettings = new DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings();
@@ -242,6 +242,9 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         }
         
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
+
+        // me._gridifier._settings.setRendererCoordsChanger('default');
+        // me._gridifier._settings.setRendererSizesChanger('default');
 
        // for(var i = 0; i < 10000; i++) {
        //      var div = document.createElement("div");
