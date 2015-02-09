@@ -1,6 +1,3 @@
-// @todo -> important drag items from one Gridifier instance to another!!!!!
-// @todo -> Multitouch -> multiple dragged items cannot intersect each other
-
 Gridifier.VerticalGrid.Dragifier = function(gridifier, 
                                             appender,
                                             reversedAppender,

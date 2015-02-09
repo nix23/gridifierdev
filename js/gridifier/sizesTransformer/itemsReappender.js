@@ -29,7 +29,7 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
     this._lastReappendedItemGUID = null;
 
     this._reappendQueue = null;
-    this._batchSize = 8;
+    this._batchSize = 2;
     this._reappendNextQueuedItemsBatchTimeout = null;
     this._reappendedQueueData = null;
     this._reappendStartViewportWidth = null;

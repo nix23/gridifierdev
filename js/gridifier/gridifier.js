@@ -143,18 +143,29 @@ Gridifier = function(grid, settings) {
         );
 
         // @todo -> Remove from local var
-        var dragifier = new Gridifier.VerticalGrid.Dragifier(
-            me, 
-            me._appender,
-            me._reversedAppender,
-            me._connections, 
-            me._connectionsSorter,
-            me._connectors, 
-            me._guid, 
-            me._collector,
-            me._settings, 
-            me._normalizer
-        );
+        // @todo -> Add customSD mode
+        if(me._settings.isDisabledSortDispersion()) {
+            var dragifier = new Gridifier.Dragifier.ConnectionIntersectionDragifier(
+                me, 
+                me._appender,
+                me._reversedAppender,
+                me._connections, 
+                me._connectors, 
+                me._guid, 
+                me._settings
+            );
+        }
+        else if(me._settings.isCustomAllEmptySpaceSortDispersion()) {
+            var dragifier = new Gridifier.Dragifier.GridDiscretizationDragifier(
+                me, 
+                me._appender,
+                me._reversedAppender,
+                me._connections, 
+                me._connectors, 
+                me._guid, 
+                me._settings
+            );
+        }
 
         // @tmp, replace this :)
         // @todo -> Log this action???

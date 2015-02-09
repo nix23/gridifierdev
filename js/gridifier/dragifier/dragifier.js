@@ -1,0 +1,1 @@
+Gridifier.Dragifier = {};
