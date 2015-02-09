@@ -1,30 +1,3 @@
-var styleMaybePrefixedPropertyGetter = {
-    prefixes: ['Moz', 'Webkit', 'ms', 'Ms', 'Khtml', 'O'],
-
-    init: function()
-    {
-        ;
-    },
-
-    get: function(propertyName, element)
-    {
-        element = element || document.documentElement;
-        var style = element.style;
-
-        if(typeof style[propertyName] === "string") {
-            return propertyName;
-        }
-
-        propertyName = propertyName.charAt(0).toUpperCase() + propertyName.slice(1);
-        var prefixedPropertyName;
-        for(var i = 0; i < this.prefixes.length; i++) {
-            prefixedPropertyName = this.prefixes[i] + propertyName;
-            if(typeof style[prefixedPropertyName] === "string")
-                return prefixedPropertyName;
-        }
-    }
-}
-
 var SizesResolver = {
     getComputedCSS: null,
     propertiesToGet: {
@@ -94,7 +67,7 @@ var SizesResolver = {
 
     determineMaybePrefixedProperties: function()
     {
-        this.maybePrefixedProperties.boxSizing = styleMaybePrefixedPropertyGetter.get("boxSizing");
+        this.maybePrefixedProperties.boxSizing = Prefixer.get("boxSizing");
     },
 
     // based on http://connect.microsoft.com/IE/feedback/details/695683/dimensions-returned-by-getcomputedstyle-are-wrong-if-element-has-box-sizing-border-box.

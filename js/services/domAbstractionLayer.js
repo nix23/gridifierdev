@@ -179,10 +179,9 @@ var Dom = {
         },
 
         transitionProperty: function(DOMElem, property) {
-            // @todo -> Add vendor prefixes
-            var currentTransition = DOMElem.style.transition;
+            var currentTransition = DOMElem.style[Prefixer.get("transition", DOMElem)];
             if(currentTransition.length == 0) {
-                DOMElem.style.transition = property;
+                DOMElem.style[Prefixer.get("transition", DOMElem)] = property;
                 return;
             }
 
@@ -201,8 +200,7 @@ var Dom = {
                 }
             }
 
-            // @todo -> Add vendor prefixes
-            DOMElem.style.transition = newTransition.trim();
+            DOMElem.style[Prefixer.get("transition", DOMElem)] = newTransition.trim();
         },
 
         transform: function(DOMElem, propertyValue) {
@@ -212,10 +210,9 @@ var Dom = {
 
         // @todo -> Process array of values???
         transformProperty: function(DOMElem, property, propertyValue) {
-            // @todo -> Add vendor prefixes
-            var currentTransform = DOMElem.style.transform;
+            var currentTransform = DOMElem.style[Prefixer.get('transform', DOMElem)];
             if(currentTransform.length == 0) {
-                DOMElem.style.transform = property + "(" + propertyValue + ")";
+                DOMElem.style[Prefixer.get('transform', DOMElem)] = property + "(" + propertyValue + ")";
                 return;
             }
 
@@ -239,8 +236,7 @@ var Dom = {
             if(!hasCurrentTransformProperty)
                 newTransform += " " + property + "(" + propertyValue + ")";
 
-            // @todo -> Add vendor prefixes
-            DOMElem.style.transform = newTransform.trim();
+            DOMElem.style[Prefixer.get('transform', DOMElem)] = newTransform.trim();
         },
 
         opacity: function(DOMElem, opacityValue) {

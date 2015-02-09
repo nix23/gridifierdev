@@ -27,60 +27,56 @@ $(document).ready(function() {
         },
 
         _testCallOnAddingNewParamToEmptyTransformString: function() {
-            // @todo -> Add vendor prefixes
-            var fakeDOMElem = {style: {transform: ""}};
+            var fakeDOMElem = document.createElement("div");
+            fakeDOMElem.style[Prefixer.get('transform', fakeDOMElem)] = "";
             Dom.css3.transformProperty(fakeDOMElem, "scale", 1);
 
             ok(
-                fakeDOMElem.style.transform == "scale(1)",
+                fakeDOMElem.style[Prefixer.get('transform', fakeDOMElem)] == "scale(1)",
                 "call with scale(1) param on empty transform string"
             );
         },
 
         _testCallOnAddingNewParamToNotEmptyTransformString: function() {
-            var fakeDOMElem = {style: {transform: "rotate(90)"}};
-            Dom.css3.transformProperty(fakeDOMElem, "scale", 1);
-
+            var fakeDOMElem = document.createElement("div");
+            fakeDOMElem.style[Prefixer.get('transform', fakeDOMElem)] = "rotate(90deg)";
+            Dom.css3.transformProperty(fakeDOMElem, "scale", 1, true);
+            
             ok(
-                fakeDOMElem.style.transform == "rotate(90) scale(1)",
-                "call with scale(1) param on 'rotate(90)' string"
+                fakeDOMElem.style[Prefixer.get('transform', fakeDOMElem)] == "rotate(90deg) scale(1)",
+                "call with scale(1) param on 'rotate(90deg)' string"
             );
         },
 
         _testCallOnReplacingParamOnTransformStringOnlyWithThatParam: function() {
-            var fakeDOMElem = {style: {transform: "scale(10)"}};
+            var fakeDOMElem = document.createElement("div");
+            fakeDOMElem.style[Prefixer.get('transform', fakeDOMElem)] = "scale(10)";
             Dom.css3.transformProperty(fakeDOMElem, "scale", 1);
 
             ok(
-                fakeDOMElem.style.transform == "scale(1)",
+                fakeDOMElem.style[Prefixer.get('transform', fakeDOMElem)] == "scale(1)",
                 "call with scale(1) param on 'scale(10)' string"
             );
         },
 
         _testCallOnReplacingParamOnTransformStringWithThatAndOtherParams: function() {
-            var fakeDOMElem = {style: {transform: "scale(10) rotate(90)"}};
+            var fakeDOMElem = document.createElement("div");
+            fakeDOMElem.style[Prefixer.get('transform', fakeDOMElem)] = "scale(10) rotate(90deg)";
             Dom.css3.transformProperty(fakeDOMElem, "scale", 1);
 
             ok(
-                fakeDOMElem.style.transform == "scale(1) rotate(90)",
-                "call with scale(1) param on 'scale(10) rotate(90)' string"
+                fakeDOMElem.style[Prefixer.get('transform', fakeDOMElem)] == "scale(1) rotate(90deg)",
+                "call with scale(1) param on 'scale(10) rotate(90deg)' string"
             );
         },
 
         _testCallOnReplacingParamOnTransformStringWithMultipleParams: function() {
-            var fakeDOMElem = {style: {transform: "scale(10)"}};
-            Dom.css3.transformProperty(fakeDOMElem, "scale", "10px, 5px");
-
+            var fakeDOMElem = document.createElement("div");
+            fakeDOMElem.style[Prefixer.get('transform', fakeDOMElem)] = "rotate(90deg) translate(10px,1px)";
+            Dom.css3.transformProperty(fakeDOMElem, "translate", "10px, 5px");
             ok(
-                fakeDOMElem.style.transform == "scale(10px, 5px)",
-                "call with scale(10px, 5px) param on 'scale(10)' string"
-            );
-
-            var fakeDOMElem = {style: {transform: "rotate(90) scale(10)"}};
-            Dom.css3.transformProperty(fakeDOMElem, "scale", "10px,5px");
-            ok(
-                fakeDOMElem.style.transform == "rotate(90) scale(10px,5px)",
-                "call with scale(10px,5px) param on 'rotate(90) scale(10) string"
+                fakeDOMElem.style[Prefixer.get('transform', fakeDOMElem)] == "rotate(90deg) translate(10px, 5px)",
+                "call with translate(10px,5px) param on 'rotate(90deg) translate(10px,5px) string"
             );
         }
     }
@@ -114,52 +110,56 @@ $(document).ready(function() {
         },
 
         _testCallOnAddingNewParamToEmptyTransitionString: function() {
-            // @todo -> Add vendor prefixes
-            var fakeDOMElem = {style: {transition: ""}};
+            var fakeDOMElem = document.createElement("div");
+            fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] = "";
             Dom.css3.transitionProperty(fakeDOMElem, "width 0ms ease");
 
             ok(
-                fakeDOMElem.style.transition == "width 0ms ease",
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] == "width 0ms ease",
                 "call with 'width 0ms ease' param on empty transition string"
             );
         },
 
         _testCallOnAddingNewParamToNotEmptyTransitionString: function() {
-            var fakeDOMElem = {style: {transition: "height 0ms ease, transform 0ms ease"}};
+            var fakeDOMElem = document.createElement("div");
+            fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] = "height 0ms ease, transform 0ms ease";
             Dom.css3.transitionProperty(fakeDOMElem, "width 0ms ease");
 
             ok(
-                fakeDOMElem.style.transition == "width 0ms ease, height 0ms ease, transform 0ms ease",
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] == "width 0ms ease, height 0ms ease, transform 0ms ease",
                 "call with 'width 0ms ease' param on 'height 0ms ease, transform 0ms ease' string"
             );
         },
 
         _testCallOnReplacingParamOnTransitionStringOnlyWithThatParam: function() {
-            var fakeDOMElem = {style: {transition: "transform 0ms ease"}};
+            var fakeDOMElem = document.createElement("div");
+            fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] = "transform 0ms ease";
             Dom.css3.transitionProperty(fakeDOMElem, "transform 10ms ease");
 
             ok(
-                fakeDOMElem.style.transition == "transform 10ms ease",
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] == "transform 10ms ease",
                 "call with 'transform 10ms ease' param on 'transform 0ms ease' string"
             );
         },
 
         _testCallOnReplacingParamOnTransitionStringWithThatAndOtherParams: function() {
-            var fakeDOMElem = {style: {transition: "width 0ms ease, height 0ms ease"}};
+            var fakeDOMElem = document.createElement("div");
+            fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] = "width 0ms ease, height 0ms ease";
             Dom.css3.transitionProperty(fakeDOMElem, "width 10ms ease");
 
             ok(
-                fakeDOMElem.style.transition == "width 10ms ease, height 0ms ease",
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] == "width 10ms ease, height 0ms ease",
                 "call with 'width 10ms ease' param on 'width 0ms ease, height 0ms ease' string"
             );
         },
 
         _testCallOnReplacingParamOnTransitionStringWithMultipleParams: function() {
-            var fakeDOMElem = {style: {transition: "width 0ms ease, height 0ms ease"}};
+            var fakeDOMElem = document.createElement("div");
+            fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] = "width 0ms ease, height 0ms ease";
             Dom.css3.transitionProperty(fakeDOMElem, "transform 10ms ease, height 20ms ease");
 
             ok(
-                fakeDOMElem.style.transition == "transform 10ms ease, height 20ms ease, width 0ms ease",
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] == "transform 10ms ease, height 20ms ease, width 0ms ease",
                 "call with 'transform 10ms ease, height 20ms ease' param on 'width 0ms ease, height 0ms ease' string"
             );
         }

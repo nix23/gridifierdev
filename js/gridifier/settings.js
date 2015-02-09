@@ -175,7 +175,7 @@ Gridifier.Settings = function(settings) {
                 
                 // @todo -> Adjust timeout, and move to separate const
                 // @todo -> Change other transition params to transform
-                Dom.css3.transitionProperty(item, "transform 0ms ease");
+                Dom.css3.transitionProperty(item, Prefixer.getForCSS('transform', item) +" 0ms ease");
                 // @todo -> Make multiple transform. Replace in all other settings
                 //          (Rewrite all transitions and transforms in such manners)
                 Dom.css3.transformProperty(item, "scale", 0);
@@ -183,7 +183,7 @@ Gridifier.Settings = function(settings) {
                 setTimeout(function() {
                     // @todo -> Use correct vendor.(Refactor SizesTransformer)
                     item.style.visibility = "visible";
-                    Dom.css3.transitionProperty(item, "transform 1000ms ease");
+                    Dom.css3.transitionProperty(item, Prefixer.getForCSS('transform', item) + " 1000ms ease");
                     Dom.css3.transformProperty(item, "scale", 1);
                 }, 20); 
             },
