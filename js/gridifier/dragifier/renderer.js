@@ -53,7 +53,7 @@ Gridifier.Dragifier.Renderer.prototype._setTransitionRenderFunction = function()
         else
             var translateY = 0;
 
-        Dom.css3.transformProperty(item, "translate", translateX + "px," + translateY + "px");
+        Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px, 0px");
     };
 }
 

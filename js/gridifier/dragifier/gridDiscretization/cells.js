@@ -1,4 +1,4 @@
-Gridifier.Dragifier.GridDiscretizationDragifier.Cells = function(discretizer) {
+Gridifier.Dragifier.Cells = function(discretizer) {
     var me = this;
 
     this._discretizer = null;
@@ -26,7 +26,7 @@ Gridifier.Dragifier.GridDiscretizationDragifier.Cells = function(discretizer) {
     return this;
 }
 
-Gridifier.Dragifier.GridDiscretizationDragifier.Cells.prototype.getIntersectedByDraggableItemCellCentersData = function(draggableItemConnection) {
+Gridifier.Dragifier.Cells.prototype.getIntersectedByDraggableItemCellCentersData = function(draggableItemConnection) {
     var intersectedByDraggableItemCellCentersData = this._discretizer.getAllCellsWithIntersectedCenterData(
         draggableItemConnection
     );
@@ -43,7 +43,7 @@ Gridifier.Dragifier.GridDiscretizationDragifier.Cells.prototype.getIntersectedBy
     return intersectedByDraggableItemCellCentersData;
 }
 
-Gridifier.Dragifier.GridDiscretizationDragifier.Cells.prototype.isAtLeastOneOfIntersectedCellCentersEmpty = function(intersectedByDraggableItemCloneCellCentersData) {
+Gridifier.Dragifier.Cells.prototype.isAtLeastOneOfIntersectedCellCentersEmpty = function(intersectedByDraggableItemCloneCellCentersData) {
     var intersectedByDraggableItemCloneCellCenters = intersectedByDraggableItemCloneCellCentersData.cellsWithIntersectedCenter;
 
     var isAtLeastOneOfIntersectedCellCentersEmpty = false;
@@ -57,7 +57,7 @@ Gridifier.Dragifier.GridDiscretizationDragifier.Cells.prototype.isAtLeastOneOfIn
     return isAtLeastOneOfIntersectedCellCentersEmpty;
 }
 
-Gridifier.Dragifier.GridDiscretizationDragifier.Cells.prototype.isIntersectingEnoughRowsAndCols = function(originalCellsCount,
+Gridifier.Dragifier.Cells.prototype.isIntersectingEnoughRowsAndCols = function(originalCellsCount,
                                                                                                            newCellsCount) {
     if(newCellsCount.intersectedRowsCount < originalCellsCount.intersectedRowsCount ||
         newCellsCount.intersectedColsCount < originalCellsCount.intersectedColsCount) {
@@ -74,7 +74,7 @@ Gridifier.Dragifier.GridDiscretizationDragifier.Cells.prototype.isIntersectingEn
     the item to the most left or most right(most bottom or top vertically) side of all cells and depending on
     insertion type(Reversed or Default append) and will ensure, that draggable item is not out of grid bounds.
 */
-Gridifier.Dragifier.GridDiscretizationDragifier.Cells.prototype.normalizeCellsWithMaybeIntersectionOverflows = function(intersectedByDraggableItemCloneCellCenters,
+Gridifier.Dragifier.Cells.prototype.normalizeCellsWithMaybeIntersectionOverflows = function(intersectedByDraggableItemCloneCellCenters,
                                                                                                                         originalCellsCount,
                                                                                                                         newCellsCount) {
     if(newCellsCount.intersectedRowsCount > originalCellsCount.intersectedRowsCount) {

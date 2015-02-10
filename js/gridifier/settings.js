@@ -175,6 +175,7 @@ Gridifier.Settings = function(settings) {
                 
                 // @todo -> Adjust timeout, and move to separate const
                 // @todo -> Change other transition params to transform
+                // @todo -> Apply prefixer to all settings
                 Dom.css3.transitionProperty(item, Prefixer.getForCSS('transform', item) +" 0ms ease");
                 // @todo -> Make multiple transform. Replace in all other settings
                 //          (Rewrite all transitions and transforms in such manners)
@@ -296,8 +297,11 @@ Gridifier.Settings = function(settings) {
 
             // @todo -> correctly parse params
             // @todo -> set transitions only in this func-on, or separate transition setter???
-            Dom.css3.transitionProperty(item, "transform 600ms ease");//, width 600ms ease, height 600ms ease");
-            Dom.css3.transformProperty(item, "translate", translateX + "px," + translateY + "px");
+            Dom.css3.transitionProperty(item, Prefixer.getForCSS('transform3d', item) + " 500ms ease");
+            //, width 600ms ease, height 600ms ease");
+            Dom.css3.perspective(item, "1000");
+            Dom.css3.backfaceVisibility(item, "hidden");
+            Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px,0px");
         }
     };
 
@@ -325,6 +329,9 @@ Gridifier.Settings = function(settings) {
 
     this._gridItemMarkingStrategyType = null;
     this._gridItemMarkingValue = null;
+
+    this._shouldEnableDragifierOnInit = false;
+    this._dragifierItemSelector = null;
 
     this._css = {
     };
@@ -361,6 +368,7 @@ Gridifier.Settings.prototype._parse = function() {
     this._parseRendererCoordsChanger();
     this._parseRendererSizesChanger();
     this._parseGridItemMarkingStrategy();
+    this._parseDragifierSettings();
 }
 
 Gridifier.Settings.prototype._parseGridType = function() {
@@ -859,4 +867,44 @@ Gridifier.Settings.prototype.isByDataAttrGridItemMarkingStrategy = function() {
 
 Gridifier.Settings.prototype.getGridItemMarkingType = function() {
     return this._gridItemMarkingValue;
+}
+
+Gridifier.Settings.prototype.getGridItemMarkingValue = function() {
+    return this._gridItemMarkingValue;
+}
+
+Gridifier.Settings.prototype._parseDragifierSettings = function() {
+    if(this._settings.hasOwnProperty("dragifier") && this._settings.dragifier) {
+        this._shouldEnableDragifierOnInit = true;
+
+        if(typeof this._settings.dragifier == "boolean") {
+            if(this.isByClassGridItemMarkingStrategy()) {
+                this._dragifierItemSelector = "." + this._gridItemMarkingValue;
+            }
+            else if(this.isByDataAttrGridItemMarkingStrategy()) {
+                this._dragifierItemSelector = "[" + this._gridItemMarkingValue + "]";
+            }
+        }
+        else {
+            this._dragifierItemSelector = this._settings.dragifier;
+        }
+        
+        return;
+    }
+
+    this._shouldEnableDragifierOnInit = false;
+    if(this.isByClassGridItemMarkingStrategy()) {
+        this._dragifierItemSelector = "." + this._gridItemMarkingValue;
+    }
+    else if(this.isByDataAttrGridItemMarkingStrategy()) {
+        this._dragifierItemSelector = "[" + this._gridItemMarkingValue + "]";
+    }
+}
+
+Gridifier.Settings.prototype.shouldEnableDragifierOnInit = function() {
+    return this._shouldEnableDragifierOnInit;
+}
+
+Gridifier.Settings.prototype.getDragifierItemSelector = function() {
+    return this._dragifierItemSelector;
 }

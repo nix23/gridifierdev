@@ -1,10 +1,10 @@
-Gridifier.Dragifier.ConnectionIntersectionDragifier = function(gridifier,
-                                                               appender,
-                                                               reversedAppender,
-                                                               connections,
-                                                               connectors,
-                                                               guid,
-                                                               settings) {
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
+                                                                   appender,
+                                                                   reversedAppender,
+                                                                   connections,
+                                                                   connectors,
+                                                                   guid,
+                                                                   settings) {
     var me = this;
 
     this._gridifier = null;
@@ -19,7 +19,7 @@ Gridifier.Dragifier.ConnectionIntersectionDragifier = function(gridifier,
     this._dragifierCore = null;
     this._dragifierRenderer = null;
 
-    this._isDragging = false;
+    this._dragIdentifiers = [];
     this._draggableItem = null;
     this._draggableItemClone = null;
 
@@ -34,6 +34,8 @@ Gridifier.Dragifier.ConnectionIntersectionDragifier = function(gridifier,
         me._connectors = connectors;
         me._guid = guid;
         me._settings = settings;
+
+        me._dragIdentifiers = [];
 
         // @todo -> Check settings, or merge intersections logic
         me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(
@@ -51,35 +53,6 @@ Gridifier.Dragifier.ConnectionIntersectionDragifier = function(gridifier,
     };
 
     this._bindEvents = function() {
-        // @todo -> Replace with gridifier events
-        $("body").on("mousedown", ".gridItem", function(event) {
-            me._initDragInteraction();
-            me._initDraggableItems($(this).get(0));
-
-            me._dragifierCore.determineInitialCursorOffsetsFromDraggableItemCenter(
-                me._draggableItem, event.pageX, event.pageY
-            );
-            me._dragifierCore.determineGridOffsets();
-
-            me._draggableItemClone = me._dragifierCore.createDraggableItemClone(me._draggableItem);
-            me._hideDraggableItems();
-        });
-
-        $(document).on("mouseup.gridifier.dragifier", function() {
-            setTimeout(function() {
-                if(!me._isDragging) return;
-                me._stopDragInteraction.call(me);
-            }, 0);
-        });
-
-        $(document).on("mousemove.gridifier.dragifier", function(event) {
-            setTimeout(function() {
-                if(!me._isDragging) return;
-                me._processDragMove.call(me, me._dragifierCore.calculateDraggableItemCloneNewDocumentPosition(
-                    me._draggableItem, event.pageX, event.pageY
-                ));
-            }, 0);
-        });
     };
 
     this._unbindEvents = function() {
@@ -93,36 +66,67 @@ Gridifier.Dragifier.ConnectionIntersectionDragifier = function(gridifier,
     return this;
 }
 
-Gridifier.Dragifier.ConnectionIntersectionDragifier.prototype._initDragInteraction = function() {
-    SizesResolverManager.startCachingTransaction();
-    this._isDragging = true;
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.bindDraggableItem = function(item,
+                                                                                               cursorX,
+                                                                                               cursorY) {
+    this._initDraggableItem(item);
+
+    this._dragifierCore.determineInitialCursorOffsetsFromDraggableItemCenter(
+        this._draggableItem, cursorX, cursorY
+    );
+    this._dragifierCore.determineGridOffsets();
+
+    this._draggableItemClone = this._dragifierCore.createDraggableItemClone(this._draggableItem);
+    this._hideDraggableItem();
 }
 
-Gridifier.Dragifier.ConnectionIntersectionDragifier.prototype._initDraggableItems = function(item) {
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.getDraggableItem = function() {
+    return this._draggableItem;
+}
+
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.addDragIdentifier = function(identifier) {
+    this._dragIdentifiers.push(identifier);
+}
+
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.hasDragIdentifier = function(identifier) {
+    for(var i = 0; i < this._dragIdentifiers.length; i++) {
+        if(this._dragIdentifiers[i] == identifier)
+            return true;
+    }
+
+    return false;
+}
+
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.removeDragIdentifier = function(identifier) {
+    for(var i = 0; i < this._dragIdentifiers.length; i++) {
+        if(this._dragIdentifiers[i] == identifier) {
+            this._dragIdentifiers.splice(i, 1);
+            break;
+        }
+    }
+}
+
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.getDragIdentifiersCount = function() {
+    return this._dragIdentifiers.length;
+}
+
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._initDraggableItem = function(item) {
     this._draggableItem = item;
     // @todo -> Fix this(visibility uses transition timeout, Replace global from all???)
-    Dom.css3.transition(this._draggableItem, "Visibility 0ms ease");
+    Dom.css3.transitionProperty(this._draggableItem, "Visibility 0ms ease");
 }
 
-Gridifier.Dragifier.ConnectionIntersectionDragifier.prototype._hideDraggableItems = function() {
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._hideDraggableItem = function() {
     this._draggableItem.style.visibility = "hidden";
     // @todo -> Replace with real hidder
     Dom.css.addClass(document.body, "disableSelect");
 }
 
-Gridifier.Dragifier.ConnectionIntersectionDragifier.prototype._stopDragInteraction = function() {
-    document.body.removeChild(this._draggableItemClone);
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.processDragMove = function(cursorX, cursorY) {
+    var draggableItemCloneNewDocumentPosition = this._dragifierCore.calculateDraggableItemCloneNewDocumentPosition(
+        this._draggableItem, cursorX, cursorY
+    )
 
-    this._draggableItem.style.visibility = "visible";
-    this._isDragging = false;
-    this._draggableItem = null;
-
-    // @todo -> Replace with real hidder
-    Dom.css.removeClass(document.body, "disableSelect");
-    SizesResolverManager.stopCachingTransaction();
-}
-
-Gridifier.Dragifier.ConnectionIntersectionDragifier.prototype._processDragMove = function(draggableItemCloneNewDocumentPosition) {
     this._dragifierRenderer.render(
         this._draggableItemClone,
         draggableItemCloneNewDocumentPosition.x,
@@ -141,7 +145,7 @@ Gridifier.Dragifier.ConnectionIntersectionDragifier.prototype._processDragMove =
     this._dragifierCore.reappendGridItems();
 }
 
-Gridifier.Dragifier.ConnectionIntersectionDragifier.prototype._getNewIntersectedConnections = function(draggableItemCloneNewGridPosition) {
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._getNewIntersectedConnections = function(draggableItemCloneNewGridPosition) {
     var draggableItemGUID = this._guid.getItemGUID(this._draggableItem);
     var allConnectionsWithIntersectedCenter = this._connectionsIntersector.getAllConnectionsWithIntersectedCenter(
         draggableItemCloneNewGridPosition
@@ -157,7 +161,7 @@ Gridifier.Dragifier.ConnectionIntersectionDragifier.prototype._getNewIntersected
     return newIntersectedConnections;
 }
 
-Gridifier.Dragifier.ConnectionIntersectionDragifier.prototype._swapItemGUIDS = function(newIntersectedConnections) {
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._swapItemGUIDS = function(newIntersectedConnections) {
     var draggableItemGUID = this._guid.getItemGUID(this._draggableItem);
 
     var intersectedConnectionWithSmallestGUID = newIntersectedConnections[0];
@@ -169,4 +173,15 @@ Gridifier.Dragifier.ConnectionIntersectionDragifier.prototype._swapItemGUIDS = f
     this._guid.setItemGUID(this._draggableItem, intersectedConnectionWithSmallestGUID.itemGUID);
     this._guid.setItemGUID(this._draggableItemClone, intersectedConnectionWithSmallestGUID.itemGUID);
     this._guid.setItemGUID(intersectedConnectionWithSmallestGUID.item, draggableItemGUID);
+}
+
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.unbindDraggableItem = function() {
+    document.body.removeChild(this._draggableItemClone);
+
+    this._draggableItem.style.visibility = "visible";
+    this._draggableItem = null;
+    this._draggableItem = null;
+
+    // @todo -> Replace with real hidder
+    Dom.css.removeClass(document.body, "disableSelect");
 }
