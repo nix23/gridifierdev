@@ -93,7 +93,7 @@ DemoLayoutBuilder.DemoLayout.GridControls.LegendDecorator.prototype.decorateAppe
 
     if(this._demoLayout.isDefaultAppendGrid())
         var legendHighlightedText = this._legendPrefixes.defaultAppend;
-    else if(this._demoLayout.isReversedPrependGrid())
+    else if(this._demoLayout.isReversedAppendGrid())
         var legendHighlightedText = this._legendPrefixes.reversedAppend;
 
     $legendHighlightedText.text(legendHighlightedText);

@@ -88,11 +88,11 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         var borderColor = "blue";
 
     this._$gridItem.css({
-        // width: itemSizes.width,
-        // height: itemSizes.height,
+        width: itemSizes.width,
+        height: itemSizes.height,
 
-        width: "20%",
-        height: "100px",
+        // width: "20%",
+        // height: "100px",
         //"padding-bottom": "25%",
 
         //"margin-top": "10px",

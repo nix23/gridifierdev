@@ -55,12 +55,34 @@ Gridifier.VerticalGrid.ItemCoordsExtractor.prototype.connectorToAppendedItemCoor
     };
 }
 
+Gridifier.VerticalGrid.ItemCoordsExtractor.prototype.connectorToReversedAppendedItemCoords = function(item, connector) {
+    var targetSizes = this._getItemSizesPerAppend(item);
+
+    return {
+        x1: parseFloat(connector.x),
+        x2: parseFloat(connector.x + targetSizes.targetWidth - 1),
+        y1: Dom.toInt(connector.y),
+        y2: Dom.toInt(connector.y + targetSizes.targetHeight - 1)
+    };
+}
+
 Gridifier.VerticalGrid.ItemCoordsExtractor.prototype.connectorToPrependedItemCoords = function(item, connector) {
     var targetSizes = this._getItemSizesPerAppend(item);
 
     return {
         x1: parseFloat(connector.x),
         x2: parseFloat(connector.x + targetSizes.targetWidth - 1),
+        y1: Dom.toInt(connector.y - targetSizes.targetHeight + 1),
+        y2: Dom.toInt(connector.y)
+    };
+}
+
+Gridifier.VerticalGrid.ItemCoordsExtractor.prototype.connectorToReversedPrependedItemCoords = function(item, connector) {
+    var targetSizes = this._getItemSizesPerAppend(item);
+
+    return {
+        x1: parseFloat(connector.x - targetSizes.targetWidth + 1),
+        x2: parseFloat(connector.x),
         y1: Dom.toInt(connector.y - targetSizes.targetHeight + 1),
         y2: Dom.toInt(connector.y)
     };

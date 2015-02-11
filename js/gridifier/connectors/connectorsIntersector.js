@@ -95,6 +95,28 @@ Gridifier.ConnectorsIntersector.prototype.getMostBottomFromIntersectedTopOrTopLe
     return mostBottomConnection;
 }
 
+Gridifier.ConnectorsIntersector.prototype.getMostBottomFromIntersectedTopOrTopRightItems = function(connector) {
+    var connections = this._connections.get();
+    var mostBottomConnection = null;
+
+    var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedAndUpperConnections(connector);
+    for(var i = 0; i < intersectedConnectionIndexes.length; i++) {
+        for(var j = 0; j < intersectedConnectionIndexes[i].length; j++) {
+            var connection = connections[intersectedConnectionIndexes[i][j]];
+
+            if(((connector.x >= connection.x1 && connector.x <= connection.x2) || (connector.x < connection.x1))
+                && connector.y > connection.y2) {
+                if(mostBottomConnection == null)
+                    mostBottomConnection = connection;
+                else {
+                    if(connection.y2 > mostBottomConnection.y2)
+                        mostBottomConnection = connection;
+                }
+            }
+        }
+    }
+}
+
 Gridifier.ConnectorsIntersector.prototype.getMostRightFromIntersectedLeftItems = function(connector) {
     var connections = this._connections.get();
     var mostRightConnection = null;
@@ -151,6 +173,30 @@ Gridifier.ConnectorsIntersector.prototype.getMostTopFromIntersectedBottomOrBotto
             var connection = connections[intersectedConnectionIndexes[i][j]];
 
             if(((connector.x >= connection.x1 && connector.x <= connection.x2) || (connector.x < connection.x1))
+                && connector.y < connection.y1) {
+                if(mostTopConnection == null)
+                    mostTopConnection = connection;
+                else {
+                    if(connection.y1 < mostTopConnection.y1)
+                        mostTopConnection = connection;
+                }
+            }
+        }
+    }
+
+    return mostTopConnection;
+}
+
+Gridifier.ConnectorsIntersector.prototype.getMostTopFromIntersectedBottomOrBottomLeftItems = function(connector) {
+    var connections = this._connections.get();
+    var mostTopConnection = null;
+
+    var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedAndLowerConnections(connector);
+    for(var i = 0; i < intersectedConnectionIndexes.length; i++) {
+        for(var j = 0; j < intersectedConnectionIndexes[i].length; j++) {
+            var connection = connections[intersectedConnectionIndexes[i][j]];
+
+            if(((connector.x >= connection.x1 && connector.x <= connection.x2) || (connector.x > connection.x2))
                 && connector.y < connection.y1) {
                 if(mostTopConnection == null)
                     mostTopConnection = connection;

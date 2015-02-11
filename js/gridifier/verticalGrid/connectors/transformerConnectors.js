@@ -124,20 +124,36 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype.recreateConnectorsPerFirs
 // @todo -> Change to use firstConnectionToReappend
 Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerReversedItemReappend = function(firstItemToReappend,
                                                                                                              firstConnectionToReappend) {
+    this._connections.reinitRanges();
+
     // First prepended item should be processed separately(To not align to corner).
-    if(this._guid.wasItemPrepended(this._guid.getItemGUID(transformedConnection.item))
+    if(this._guid.wasItemPrepended(this._guid.getItemGUID(firstItemToReappend))
        && this._connections.count() == 0) {
-        var transformedItemCloneWidth = SizesResolverManager.outerWidth(transformedItemClone, true);
+        if(this._transformedItemMarker.isTransformedItem(firstItemToReappend)) {
+            var transformedItemTargetPxSizes = this._transformedItemMarker.getTransformedItemTargetPxSizes(firstItemToReappend);
+            var firstItemToReappendWidth = transformedItemTargetPxSizes.targetPxWidth;
+        }
+        else {
+            var firstItemToReappendWidth = SizesResolverManager.outerWidth(firstItemToReappend, true);
+        }
+
+        // @todo -> Fix this, and delete fractional PT render
+        var lastRenderedLeftOffset = parseFloat(firstConnectionToReappend.lastRenderedLeftOffset);
+        var transformedConnectionNewPtX1 = this._normalizer.unnormalizeFractionalValueForRender(lastRenderedLeftOffset);
+        var transformedConnectionNewX1 = (this._gridifier.getGridX2() + 1) * (transformedConnectionNewPtX1 / 100);
+        var transformedConnectionNewX2 = transformedConnectionNewX1 + firstItemToReappendWidth - 1;
+
         this._connectors.flush();
 
         // @todo -> Check logic, and if x1 normalization is required
         // @todo -> Check if normalizeLowRounding(0) is required
-        if(transformedConnection.x2 - transformedItemCloneWidth + 1 >= 0
-           && transformedConnection.x2 <= this._gridifier.getGridX2()) {
+        if(transformedConnectionNewX2 - firstItemToReappendWidth + 1 >= 0
+           && transformedConnectionNewX2 <= this._gridifier.getGridX2()) {
             this._connectors.addAppendConnector(
-                Gridifier.Connectors.SIDES.RIGHT.TOP,
-                parseFloat(transformedConnection.x2 - transformedItemCloneWidth + 1),
-                Dom.toInt(transformedConnection.y1)
+                // @old -> Gridifier.Connectors.SIDES.RIGHT.TOP
+                Gridifier.Connectors.SIDES.LEFT.TOP,
+                parseFloat(transformedConnectionNewX2 - firstItemToReappendWidth + 1),
+                Dom.toInt(firstConnectionToReappend.y1)
             );
             Logger.log( // @system-log-start
                 "recreateConnectorsPerReversedTransformedConnectionAppend",
@@ -146,11 +162,12 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerRev
                 this._connections.get()
             );          // @system-log-end
         }
-        else if(this._gridifier.getGridX2() - transformedItemCloneWidth + 1 >= 0) {
+        else if(this._gridifier.getGridX2() - firstItemToReappendWidth + 1 >= 0) {
             this._connectors.addAppendConnector(
-                Gridifier.Connectors.SIDES.RIGHT.TOP,
-                parseFloat(this._gridifier.getGridX2() - transformedItemCloneWidth + 1),
-                Dom.toInt(transformedConnection.y1)
+                // @old -> Gridifier.Connectors.SIDES.RIGHT.TOP
+                Gridifier.Connectors.SIDES.LEFT.TOP,
+                parseFloat(this._gridifier.getGridX2() - firstItemToReappendWidth + 1),
+                Dom.toInt(firstConnectionToReappend.y1)
             );
             Logger.log( // @system-log-start
                 "recreateConnectorsPerReversedTransformedConnectionAppend",
@@ -178,6 +195,13 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerRev
             this._connectors.get(),
             this._connections.get()
         );          // @system-log-end
+        this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
+        Logger.log( // @system-log-start
+            "recreateConnectorsPerReversedTransformedConnectionAppend",
+            "deleteAllIntersectedFromBottomConnectors",
+            this._connectors.get(),
+            this._connections.get()
+        );          // @system-log-end
     }
 }
 
@@ -196,9 +220,10 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerDef
             var firstItemToReappendWidth = SizesResolverManager.outerWidth(firstItemToReappend, true);
         }
         
-        var lastRenderedLeftOffset = parseFloat(firstConnectionToReappend.lastRenderedLeftOffset);
-        var transformedConnectionNewPtX1 = this._normalizer.unnormalizeFractionalValueForRender(lastRenderedLeftOffset);
-        var transformedConnectionNewX1 = (this._gridifier.getGridX2() + 1) * (transformedConnectionNewPtX1 / 100);
+        //var lastRenderedLeftOffset = parseFloat(firstConnectionToReappend.lastRenderedLeftOffset);
+        //var transformedConnectionNewPtX1 = this._normalizer.unnormalizeFractionalValueForRender(lastRenderedLeftOffset);
+        //var transformedConnectionNewX1 = (this._gridifier.getGridX2() + 1) * (transformedConnectionNewPtX1 / 100);
+        var transformedConnectionNewX1 = parseFloat(firstConnectionToReappend.lastRenderedLeftOffset);
         var transformedConnectionNewX2 = transformedConnectionNewX1 + firstItemToReappendWidth - 1;
 
         this._connectors.flush();

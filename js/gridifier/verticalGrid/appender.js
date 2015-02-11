@@ -64,6 +64,12 @@ Gridifier.VerticalGrid.Appender.prototype.append = function(item, disableMarking
     this._initConnectors();
     //timer.start();
     var connection = this._createConnectionPerItem(item);
+    Logger.log(                 // @system-log-start
+        "connection created",
+        "---",
+        this._connectors.get(),
+        this._connections.get()
+    );                          // @system-log-end
     //console.log("create connection = ", timer.get());
     // var result = timer.get();
     // if(typeof window.appendsCount == "undefined") {
@@ -76,40 +82,21 @@ Gridifier.VerticalGrid.Appender.prototype.append = function(item, disableMarking
     // }
     this._connections.attachConnectionToRanges(connection);
     
-    Logger.log(                 // @system-log-start
-        "initConnectors",
-        "isCurrentOperationSameAsPrevious -> deleteAllIntersectedFromBottomConnectors",
-        this._connectors.get(),
-        this._connections.get()
-    );                          // @system-log-end
     this._connectorsCleaner.deleteAllTooHighConnectorsFromMostBottomConnector();
     Logger.log(                 // @system-log-start
-        "initConnectors",
-        "isCurrentOperationSameAsPrevious -> deleteAllTooHighConnectorsFromMostBottomConnector",
+        "deleteAllTooHighConnectorsFromMostBottomConnector",
+        "---",
         this._connectors.get(),
         this._connections.get()
     );                          // @system-log-end
     //timer.start();
     this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
-    // var deleteIntersected = timer.get();
-    // if(deleteIntersected > 0.100)
-    //     console.log("delete intersected = " + deleteIntersected);
-    //console.log("delete = " + timer.get());
-
-    // if(typeof window.totalTime == "undefined")
-    //     window.totalTime = 0;
-    // if(typeof window.totalCount == "undefined")
-    //     window.totalCount = 0;
-
-    // window.totalTime += parseFloat(deleteIntersected);
-    // window.totalCount++;
-
-    Logger.log( // @system-log-start
+    Logger.log(                 // @system-log-start
         "deleteAllIntersectedFromBottomConnectors",
-        "",
+        "---",
         this._connectors.get(),
         this._connections.get()
-    );          // @system-log-end
+    );                          // @system-log-end
     
     if(this._settings.isDefaultIntersectionStrategy())
         this._renderer.showConnections(connection);
@@ -168,7 +155,7 @@ Gridifier.VerticalGrid.Appender.prototype._initConnectors = function() {
 
 Gridifier.VerticalGrid.Appender.prototype.createInitialConnector = function() {
     this._connectors.addAppendConnector(
-        Gridifier.Connectors.SIDES.TOP.LEFT,
+        Gridifier.Connectors.SIDES.LEFT.TOP,
         Dom.toInt(this._gridifier.getGridX2()),
         0
     );
@@ -326,13 +313,14 @@ Gridifier.VerticalGrid.Appender.prototype._findItemConnectionCoords = function(i
             }
         }
         
-        if(itemConnectionCoords != null)
+        if(itemConnectionCoords != null) {
+            Logger.logFindItemConnectionCoordsFound( // @system-log
+                sortedConnectors[i], itemConnectionCoords, item, this._connections.get()
+            );                                       // @system-log
+            Logger.stopLoggingFindItemConnectionCoords(); // @system-log
             break;
+        }
     }
 
-    Logger.logFindItemConnectionCoordsFound( // @system-log
-        sortedConnectors[i], itemConnectionCoords, item, this._connections.get()
-    );                                       // @system-log
-    Logger.stopLoggingFindItemConnectionCoords(); // @system-log
     return itemConnectionCoords;
 }

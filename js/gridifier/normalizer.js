@@ -4,6 +4,7 @@ Gridifier.Normalizer = function() {
     // this._roundingNormalizationValue = 2; // @todo -> Looks like without Math.floor in SR 1 pixel is enough(Per IE)
     this._roundingNormalizationValue = 1;
 
+    // @todo -> Check, if this is required
     // This is required per FF responsive grids support.
     // (To not overflow right grid corner)
     this._renderNormalizationValue = 0.01;
@@ -36,6 +37,8 @@ Gridifier.Normalizer.prototype.normalizeHighRounding = function(valueToNormalize
     return valueToNormalize + this._roundingNormalizationValue;
 }
 
+// @old
+// @todo -> Check in transformedConnectors
 Gridifier.Normalizer.prototype.normalizeFractionalValueForRender = function(valueToNormalize) {
     return valueToNormalize - this._renderNormalizationValue;
 }

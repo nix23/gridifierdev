@@ -103,13 +103,13 @@ Gridifier = function(grid, settings) {
                 me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer
             );
             me._reversedPrepender = new Gridifier.VerticalGrid.ReversedPrepender(
-                // @todo, pass params
+                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer
             );
             me._appender = new Gridifier.VerticalGrid.Appender(
                 me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer
             );
             me._reversedAppender = new Gridifier.VerticalGrid.ReversedAppender(
-                // @todo, pass params
+                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer
             );
         }
         else if(me._settings.isHorizontalGrid()) {
@@ -439,8 +439,14 @@ Gridifier.prototype._applyPrepend = function(item) {
         this._prepender.prepend(item);
         Logger.stopLoggingOperation(); // @system-log
     }
-    else if(this._settings.isReversedPrepend())
+    else if(this._settings.isReversedPrepend()) {
+        Logger.startLoggingOperation(       // @system-log-start
+            Logger.OPERATION_TYPES.REVERSED_PREPEND,
+            "Item GUID: " + this._guid.getItemGUID(item)
+        );                                  // @system-log-end
         this._reversedPrepender.reversedPrepend(item);
+        Logger.stopLoggingOperation(); // @system-log
+    }
     // @todo -> replace with real event
     $(item).trigger("gridifier.prependFinished");
 }
@@ -516,7 +522,12 @@ Gridifier.prototype._applyAppend = function(item) {
         Logger.stopLoggingOperation();// @system-log
     }
     else if(this._settings.isReversedAppend()) {
+        Logger.startLoggingOperation(                   // @system-log-start
+            Logger.OPERATION_TYPES.REVERSED_APPEND,
+            "Item GUID: " + this._guid.getItemGUID(item)
+        );                                              // @system-log-end
         this._reversedAppender.reversedAppend(item);
+        Logger.stopLoggingOperation();// @system-log
     }
     // @todo -> replace with real event
     setTimeout(function() {

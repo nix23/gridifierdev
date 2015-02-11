@@ -5,6 +5,7 @@ Gridifier.Settings = function(settings) {
 
     this._gridType = null;
 
+    // @todo -> Fix this
     this._animationDuration = 900;
 
     this._prependType = null;
