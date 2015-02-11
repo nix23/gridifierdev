@@ -57,12 +57,10 @@ Gridifier.SizesTransformer.InsertTypeChangeConnectors = function(itemsReappender
 }
 
 Gridifier.SizesTransformer.InsertTypeChangeConnectors.prototype.recreate = function(reappendType,
-                                                                                     itemToReappend,
-                                                                                     lastReappendedItemGUID) {
+                                                                                     itemToReappend) {
     this._itemsReappender.storeHowNextReappendedItemWasInserted(itemToReappend);
     this._recreateConnectorsPerAllConnectedItems(reappendType, itemToReappend);
     this._selectOnlyRequiredConnectorsOnPrependedItems(reappendType, itemToReappend);
-    this._maybeAddGluingConnectorOnFirstPrependedConnection(reappendType, itemToReappend, lastReappendedItemGUID);
     this._deleteAllIntersectedConnectors(reappendType, itemToReappend);
 }
 
@@ -116,27 +114,6 @@ Gridifier.SizesTransformer.InsertTypeChangeConnectors.prototype._selectOnlyRequi
     this._logRecreateConnectorsStep(                // @system-log-start
         "nextReappendedItemInsertTypeChanged -> " +
         "selectOnlySpecifiedSideConnectorsOnPrependedItemsExceptFirst(" + logSide + ")",
-        reappendType,
-        itemToReappend
-    );                                              // @system-log-end
-}
-
-Gridifier.SizesTransformer.InsertTypeChangeConnectors.prototype._maybeAddGluingConnectorOnFirstPrependedConnection = function(reappendType,
-                                                                                                                              itemToReappend,
-                                                                                                                              lastReappendedItemGUID) {
-    if(!this._guid.isFirstPrependedItem(lastReappendedItemGUID))
-        return;
-
-    if(reappendType == Gridifier.APPEND_TYPES.REVERSED_APPEND) {
-        this._transformerConnectors.addGluingReversedAppendConnectorOnFirstPrependedConnection();
-        var subheadingPostfix = "addGluingReversedAppendConnectorOnFirstPrependedConnection"; // @system-log
-    }
-    else if(reappendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND) {
-        this._transformerConnectors.addGluingDefaultAppendConnectorOnFirstPrependedConnection();
-        var subheadingPostfix = "addGluingDefaultAppendConnectorOnFirstPrependedConnection"; // @system-log
-    }
-    this._logRecreateConnectorsStep(                // @system-log-start
-        "nextReappendedItemInsertTypeChanged -> " + subheadingPostfix,
         reappendType,
         itemToReappend
     );                                              // @system-log-end

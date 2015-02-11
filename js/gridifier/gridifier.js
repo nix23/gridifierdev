@@ -265,6 +265,7 @@ Gridifier.prototype.markAsGridItem = function(items) {
 }
 
 // @todo After SizesTransforms maybe should decrease grid height,
+// Make custom updates(User decides update or no... Maybe will be used for fixed animations!!!)
 // if elements become smaller?
 Gridifier.prototype._updateGridSizes = function() {
     var connections = this._connections.get();

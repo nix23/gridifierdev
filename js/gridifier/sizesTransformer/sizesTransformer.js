@@ -167,8 +167,6 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transfo
         this._transformerConnectors.recreateConnectorsPerFirstItemReappendOnTransform(
             itemsToReappend[0], firstConnectionToReappend
         );
-        // @todo -> Check, if this is still required
-        //this._transformerConnectors.maybeAddGluingConnectorOnFirstPrependedConnection(transformedConections[0]);
 
         this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
         this._itemsReappender.startReappendingQueuedItems();
@@ -259,8 +257,6 @@ Gridifier.SizesTransformer.prototype.retransformAllConnections = function() {
         this._transformerConnectors.recreateConnectorsPerFirstItemReappendOnTransform(
             firstConnectionToReappend.item, firstConnectionToReappend
         );
-        // @todo -> Check, if this is still required
-        //this._transformerConnectors.maybeAddGluingConnectorOnFirstPrependedConnection(transformedConections[0]);
 
         this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
         this._itemsReappender.startReappendingQueuedItems();

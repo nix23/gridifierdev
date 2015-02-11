@@ -90,21 +90,3 @@ Gridifier.GUID.prototype.isFirstAppendedItem = function(itemGUID) {
 
     return (itemGUID == this._firstAppendedItemGUID) ? true : false;
 }
-
-Gridifier.GUID.prototype.getMaxGUIDBefore = function(beforeItemGUID, connections) {
-    var maxGUID = null;
-    for(var i = 0; i < connections.length; i++) {
-        var connectionItemGUID = Dom.toInt(this.getItemGUID(connections[i].item));
-
-        if(connectionItemGUID < beforeItemGUID) {
-            if(maxGUID == null) 
-                maxGUID = connections[i].itemGUID;
-            else {
-                if(connectionItemGUID > maxGUID)
-                    maxGUID = connectionItemGUID;
-            }
-        }
-    }
-
-    return maxGUID;
-}

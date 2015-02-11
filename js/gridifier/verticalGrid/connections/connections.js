@@ -123,8 +123,6 @@ Gridifier.VerticalGrid.Connections.prototype.syncConnectionParams = function(con
     for(var i = 0; i < connectionsData.length; i++) {
         for(var j = 0; j < this._connections.length; j++) {
             if(this._connections[j].itemGUID == connectionsData[i].itemGUID) {
-                this._connections[j].lastRenderedLeftOffset = connectionsData[i].lastRenderedLeftOffset;
-                this._connections[j].lastRenderedTopOffset = connectionsData[i].lastRenderedTopOffset;
                 this._connections[j].verticalOffset = connectionsData[i].verticalOffset;
                 this._connections[j].x1 = connectionsData[i].x1;
                 this._connections[j].x2 = connectionsData[i].x2;

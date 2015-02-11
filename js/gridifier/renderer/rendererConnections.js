@@ -25,8 +25,6 @@ Gridifier.Renderer.Connections = function(settings) {
 }
 
 Gridifier.Renderer.Connections.CONNECTION_RENDERED_ITEM_DATA_CLASS = "gridifier-connection-rendered";
-Gridifier.Renderer.Connections.CONNECTION_LAST_CALCULATED_LEFT_OFFSET = "lastRenderedLeftOffset";
-Gridifier.Renderer.Connections.CONNECTION_LAST_CALCULATED_TOP_OFFSET = "lastRenderedTopOffset";
 
 Gridifier.Renderer.Connections.prototype.isConnectionItemRendered = function(connection) {
     return Dom.css.hasClass(
@@ -74,9 +72,4 @@ Gridifier.Renderer.Connections.prototype.getCssTopPropertyValuePerConnection = f
     }
 
     return top;
-}
-
-Gridifier.Renderer.Connections.prototype.saveLastCalculatedConnectionOffsets = function(connection, left, top) {
-    connection[Gridifier.Renderer.Connections.CONNECTION_LAST_CALCULATED_LEFT_OFFSET] = left;
-    connection[Gridifier.Renderer.Connections.CONNECTION_LAST_CALCULATED_TOP_OFFSET] = top;
 }

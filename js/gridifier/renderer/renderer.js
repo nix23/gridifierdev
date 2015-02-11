@@ -56,7 +56,6 @@ Gridifier.Renderer.prototype.showConnections = function(connections) {
 
         var left = this._rendererConnections.getCssLeftPropertyValuePerConnection(connections[i]);
         var top = this._rendererConnections.getCssTopPropertyValuePerConnection(connections[i]);
-        this._rendererConnections.saveLastCalculatedConnectionOffsets(connections[i], left, top);
         this._rendererConnections.markConnectionItemAsRendered(connections[i]);
 
         this._rendererSchedulator.reinit();
@@ -68,7 +67,6 @@ Gridifier.Renderer.prototype.renderTransformedConnections = function(connections
     for(var i = 0; i < connections.length; i++) {
         var left = this._rendererConnections.getCssLeftPropertyValuePerConnection(connections[i]);
         var top = this._rendererConnections.getCssTopPropertyValuePerConnection(connections[i]);
-        this._rendererConnections.saveLastCalculatedConnectionOffsets(connections[i], left, top);
 
         this._rendererSchedulator.reinit();
 
@@ -108,7 +106,6 @@ Gridifier.Renderer.prototype.renderConnections = function(connections, exceptCon
 
         var left = this._rendererConnections.getCssLeftPropertyValuePerConnection(connections[i]);
         var top = this._rendererConnections.getCssTopPropertyValuePerConnection(connections[i]);
-        this._rendererConnections.saveLastCalculatedConnectionOffsets(connections[i], left, top);
 
         this._rendererSchedulator.reinit();
         this._rendererSchedulator.scheduleRender(connections[i], left, top);

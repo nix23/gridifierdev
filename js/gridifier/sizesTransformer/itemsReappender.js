@@ -215,7 +215,7 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendItem = function(re
                                                                               itemToReappend) {
     if(this._isNextReappendedItemInsertTypeChanged(itemToReappend)) {
         this._insertTypeChangeConnectors.recreate(
-            reappendType, itemToReappend, this._lastReappendedItemGUID
+            reappendType, itemToReappend
         );
     }
 
