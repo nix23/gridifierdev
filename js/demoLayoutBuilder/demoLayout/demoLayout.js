@@ -54,6 +54,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridType = gridType;
         me._gridifierSettings = gridifierSettings;
         
+        me._gridifierSettings.prependType = "mirroredPrepend";
         //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
@@ -474,10 +475,15 @@ DemoLayoutBuilder.DemoLayout.prototype._prependNextItems = function() {
         this._gridifier.prepend($gridItem);
         // @todo -> Replace with real event
         (function($gridItem, gridItem) {
+            // @todo -> No append/prepend finished events.(Just insert finished)
             $gridItem.on("gridifier.prependFinished", function() {
                 //setTimeout(function() {
-                    // gridItem.renderGUID();
+                    gridItem.renderGUID();
                 //}, 0);
+            });
+
+            $gridItem.on("gridifier.appendFinished", function() {
+                gridItem.renderGUID();
             });
         })($gridItem, gridItem);
     }

@@ -7,6 +7,7 @@ Gridifier.VerticalGrid.Connections = function(gridifier, guid, settings) {
 
     this._connections = [];
     this._ranges = null;
+    this._sorter = null;
 
     this._lastRowVerticallyExpandedConnections = null;
 
@@ -19,6 +20,9 @@ Gridifier.VerticalGrid.Connections = function(gridifier, guid, settings) {
         me._settings = settings;
         me._ranges = new Gridifier.VerticalGrid.ConnectionsRanges(me);
         me._ranges.init();
+        me._sorter = new Gridifier.VerticalGrid.ConnectionsSorter(
+            me, me._settings, me._guid
+        );
     };
 
     this._bindEvents = function() {
@@ -75,6 +79,20 @@ Gridifier.VerticalGrid.Connections.prototype.get = function() {
 
 Gridifier.VerticalGrid.Connections.prototype.count = function() {
     return this._connections.length;
+}
+
+Gridifier.VerticalGrid.Connections.prototype.restore = function(connections) {
+    this._connections = this._connections.concat(connections);
+}
+
+Gridifier.VerticalGrid.Connections.prototype.remapAllItemGUIDS = function() {
+    this._guid.reinit();
+
+    var connections = this._sorter.sortConnectionsPerReappend(this._connections);
+    for(var i = 0; i < connections.length; i++) {
+        var newConnectionItemGUID = this._guid.markNextAppendedItem(connections[i].item);
+        connections[i].itemGUID = newConnectionItemGUID;
+    }
 }
 
 Gridifier.VerticalGrid.Connections.prototype.add = function(item, itemConnectionCoords) {
@@ -200,7 +218,7 @@ Gridifier.VerticalGrid.Connections.prototype.getMinConnectionHeight = function()
 Gridifier.VerticalGrid.Connections.prototype.getAllConnectionsBelowY = function(y) {
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
-        //if(this._connections[i].y1 - 10000 > y) // @todo -> Delete, for testing
+        // if(this._connections[i].y1 - 10000 > y) // @todo -> Delete, for testing
         if(this._connections[i].y1 > y)
             connections.push(this._connections[i]);
     }

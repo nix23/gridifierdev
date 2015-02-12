@@ -13,7 +13,6 @@ Gridifier = function(grid, settings) {
     this._sizesTransformer = null;
     this._normalizer = null;
 
-    this._mirroredPrepender = null;
     this._prepender = null;
     this._reversedPrepender = null;
 
@@ -26,7 +25,7 @@ Gridifier = function(grid, settings) {
 
     /*
         Array(
-            {'queuedOperationType' => 'qot', 'items/item' => 'i'},
+            {'queuedOperationType' => 'qot', 'items/item' => 'i', 'opSpecificParam1' => 'osp1', ...},
             ....,
             n
         )
@@ -96,9 +95,6 @@ Gridifier = function(grid, settings) {
         me._renderer = new Gridifier.Renderer(me, me._connections, me._settings, me._normalizer);
 
         if(me._settings.isVerticalGrid()) {
-            me._mirroredPrepender = new Gridifier.VerticalGrid.MirroredPrepender(
-                // @todo, pass params
-            );
             me._prepender = new Gridifier.VerticalGrid.Prepender(
                 me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer
             );
@@ -113,9 +109,6 @@ Gridifier = function(grid, settings) {
             );
         }
         else if(me._settings.isHorizontalGrid()) {
-            me._mirroredPrepender = new Gridifier.HorizontalGrid.MirroredPrepender(
-                // @todo, pass params
-            );
             me._prepender = new Gridifier.HorizontalGrid.Prepender(
                 // @todo, pass params
             );
@@ -402,63 +395,32 @@ Gridifier.prototype.findConnectionByItem = function(item) {
     return connectionItem;
 }
 
-// Gridifier.prototype._applyChromeGetComputedStylePerformanceFix = function(items, gridClone) {
-//     var gridClone = this._grid.cloneNode();
-//     this._grid.parentNode.appendChild(gridClone);
-
-//     Dom.css.set(gridClone, {
-//         visibility: "hidden",
-//         position: "absolute",
-//         left: "0px",
-//         top: "0px",
-//         width: SizesResolverManager.outerWidth(this._grid) + "px",
-//         height: SizesResolverManager.outerHeight(this._grid) + "px"
-//     });
-
-//     for(var i = 0; i < items.length; i++) {
-//         var itemClone = items[i].cloneNode();
-//         gridClone.appendChild(itemClone);
-
-//         // This will set item values to cache per current transaction.
-//         SizesResolverManager.outerWidth(itemClone, true);
-//         SizesResolverManager.outerHeight(itemClone, true);
-//         SizesResolverManager.changeCachedDOMElem(itemClone, items[i]);
-//     }
-
-//     gridClone.parentNode.removeChild(gridClone);
-//     return items;
-// }
-
-Gridifier.prototype._applyPrepend = function(item) {
-    if(this._settings.isMirroredPrepend())
-        this._mirroredPrepender.mirroredPrepend(item);
-    else if(this._settings.isDefaultPrepend()) {
-        Logger.startLoggingOperation(       // @system-log-start
-            Logger.OPERATION_TYPES.PREPEND,
-            "Item GUID: " + this._guid.getItemGUID(item)
-        );                                  // @system-log-end
-        this._prepender.prepend(item);
-        Logger.stopLoggingOperation(); // @system-log
-    }
-    else if(this._settings.isReversedPrepend()) {
-        Logger.startLoggingOperation(       // @system-log-start
-            Logger.OPERATION_TYPES.REVERSED_PREPEND,
-            "Item GUID: " + this._guid.getItemGUID(item)
-        );                                  // @system-log-end
-        this._reversedPrepender.reversedPrepend(item);
-        Logger.stopLoggingOperation(); // @system-log
-    }
-    // @todo -> replace with real event
-    $(item).trigger("gridifier.prependFinished");
-}
-
 Gridifier.prototype.prepend = function(items) {
+    if(this._settings.isMirroredPrepend()) {
+        this.insertBefore(items);
+        return;
+    }
+
     var me = this;
-    (function(items) {
-        setTimeout(function() {
+    setTimeout(function() {
+        if(me._sizesTransformer.isTransformerQueueEmpty()) {
             me._prepend.call(me, items);
-        }, 0)
-    })(items);
+        }
+        else {
+            me._queuedOperations.push({
+                queuedOperationType: Gridifier.QUEUED_OPERATION_TYPES.PREPEND,
+                items: items
+            });
+
+            if(me._isWaitingForTransformerQueueRelease)
+                return;
+
+            setTimeout(function() {
+                me._isWaitingForTransformerQueueRelease = true;
+                me._processQueuedOperations.call(me);
+            }, Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
+        }
+    }, 0);
 }
 
 // @todo -> append, prepend, delete, insert
@@ -485,34 +447,144 @@ Gridifier.prototype._prepend = function(items) {
     return this;
 }
 
+Gridifier.prototype._applyPrepend = function(item) {
+    if(this._settings.isDefaultPrepend()) {
+        Logger.startLoggingOperation(       // @system-log-start
+            Logger.OPERATION_TYPES.PREPEND,
+            "Item GUID: " + this._guid.getItemGUID(item)
+        );                                  // @system-log-end
+        this._prepender.prepend(item);
+        Logger.stopLoggingOperation(); // @system-log
+    }
+    else if(this._settings.isReversedPrepend()) {
+        Logger.startLoggingOperation(       // @system-log-start
+            Logger.OPERATION_TYPES.REVERSED_PREPEND,
+            "Item GUID: " + this._guid.getItemGUID(item)
+        );                                  // @system-log-end
+        this._reversedPrepender.reversedPrepend(item);
+        Logger.stopLoggingOperation(); // @system-log
+    }
+    // @todo -> replace with real event
+    setTimeout(function() {
+        $(item).trigger("gridifier.prependFinished");
+    }, 0);
+}
+
 Gridifier.prototype._processQueuedOperations = function() {
     var me = this;
 
-    if(this._sizesTransformer.isTransformerQueueEmpty()) {
-        for(var i = 0; i < this._queuedOperations.length; i++) {
-            if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.APPEND) {
-                this._append(this._queuedOperations[i].items);
-            }
-            else if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.PREPEND) {
-                this._prepend(this._queuedOperations[i].items);
-            }
-            else {
-                var operationType = this._queuedOperations[i].queuedOperationType;
-                throw new Error("Unknown queued operation type = '" + operationType + "'");
-            }
+    var wereAllQueueOperationsExecuted = true;
+    for(var i = 0; i < this._queuedOperations.length; i++) {
+        if(!this._sizesTransformer.isTransformerQueueEmpty()) {
+            setTimeout(function() {
+                me._processQueuedOperations.call(me);
+            }, Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
+            wereAllQueueOperationsExecuted = false;
+            break;
         }
 
-        this._queuedOperations = [];
+        if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.APPEND) {
+            this._append(this._queuedOperations[i].items);
+        }
+        else if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.PREPEND) {
+            this._prepend(this._queuedOperations[i].items);
+        }
+        else if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.INSERT_BEFORE) {
+            this._insertBefore(
+                this._queuedOperations[i].items,
+                this._queuedOperations[i].beforeItem
+            );
+        }
+        else {
+            var operationType = this._queuedOperations[i].queuedOperationType;
+            throw new Error("Unknown queued operation type = '" + operationType + "'");
+        }
+
+        this._queuedOperations.shift();
+        i--;
+    }
+
+    if(wereAllQueueOperationsExecuted)
         this._isWaitingForTransformerQueueRelease = false;
-    }
-    else {
-        setTimeout(function() {
-            me._processQueuedOperations.call(me);
-        }, Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
-    }
+
+    // if(this._sizesTransformer.isTransformerQueueEmpty()) {
+    //     for(var i = 0; i < this._queuedOperations.length; i++) {
+    //         if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.APPEND) {
+    //             this._append(this._queuedOperations[i].items);
+    //         }
+    //         else if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.PREPEND) {
+    //             this._prepend(this._queuedOperations[i].items);
+    //         }
+    //         else if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.INSERT_BEFORE) {
+    //             this._insertBefore(
+    //                 this._queuedOperations[i].items,
+    //                 this._queuedOperations[i].beforeItem
+    //             );
+    //         }
+    //         else {
+    //             var operationType = this._queuedOperations[i].queuedOperationType;
+    //             throw new Error("Unknown queued operation type = '" + operationType + "'");
+    //         }
+    //     }
+
+    //     this._queuedOperations = [];
+    //     this._isWaitingForTransformerQueueRelease = false;
+    // }
+    // else {
+    //     setTimeout(function() {
+    //         me._processQueuedOperations.call(me);
+    //     }, Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
+    // }
 }
 
-// @todo -> Render connectors and debug after each step
+Gridifier.prototype.append = function(items) {
+    var me = this;
+    setTimeout(function() { 
+        if(me._sizesTransformer.isTransformerQueueEmpty()) {
+            me._append.call(me, items);
+        }
+        else {
+            me._queuedOperations.push({
+                queuedOperationType: Gridifier.QUEUED_OPERATION_TYPES.APPEND,
+                items: items
+            });
+
+            if(me._isWaitingForTransformerQueueRelease)
+                return;
+
+            setTimeout(function() {
+                me._isWaitingForTransformerQueueRelease = true;
+                me._processQueuedOperations.call(me);
+            }, Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
+        }
+    }, 0);
+}
+
+Gridifier.prototype._append = function(items) {
+    var items = this._collector.toDOMCollection(items);
+    SizesResolverManager.startCachingTransaction();
+
+    this._collector.ensureAllItemsAreAttachedToGrid(items);
+    this._collector.ensureAllItemsCanBeAttachedToGrid(items);
+
+    items = this._collector.filterCollection(items);
+    items = this._collector.sortCollection(items);
+    
+    for(var i = 0; i < items.length; i++) {
+        this._guid.markNextAppendedItem(items[i]);
+        this._applyAppend(items[i]);
+
+        // @todo after each operation update grid width/height(Also when width height is decreasing)
+        // @todo also update demo layout builder heading height label
+        //$(this).trigger("gridifier.gridSizesChange");
+    }
+
+    SizesResolverManager.stopCachingTransaction();
+    this.scheduleGridSizesUpdate();
+    
+    return this;
+}
+
 Gridifier.prototype._applyAppend = function(item) {
     if(this._settings.isDefaultAppend()) {
         Logger.startLoggingOperation(                   // @system-log-start
@@ -536,110 +608,73 @@ Gridifier.prototype._applyAppend = function(item) {
     }, 0);
 }
 
-Gridifier.prototype.append = function(items) {
-    // var gridClone = this._grid.cloneNode();
-    // this._grid.parentNode.appendChild(gridClone);
-    // var fakerDiv = document.createElement("div");
-    // var frag = document.createDocumentFragment();
-    // frag.appendChild(fakerDiv);
-    // SizesResolver.outerWidth(fakerDiv);
-    // SizesResolver.outerHeight(fakerDiv);
-
-    // for(var i = 0; i < items.length; i++) {
-    //     items[i].style.position = "absolute";
-    //     items[i].style.left = "-90000px";
-    //     items[i].style.top = "0px";
-    // }
+Gridifier.prototype.insertBefore = function(items, beforeItem) {
     var me = this;
-    // (function(items, fakerDiv) {
-        setTimeout(function() { 
-            if(me._sizesTransformer.isTransformerQueueEmpty()) {
-                me._append.call(me, items);
-            }
-            else {
-                me._queuedOperations.push({
-                    queuedOperationType: Gridifier.QUEUED_OPERATION_TYPES.APPEND,
-                    items: items
-                });
+    setTimeout(function() { 
+        if(me._sizesTransformer.isTransformerQueueEmpty()) {
+            me._insertBefore.call(me, items);
+        }
+        else {
+            me._queuedOperations.push({
+                queuedOperationType: Gridifier.QUEUED_OPERATION_TYPES.INSERT_BEFORE,
+                items: items,
+                beforeItem: beforeItem
+            });
 
-                if(me._isWaitingForTransformerQueueRelease)
-                    return;
+            if(me._isWaitingForTransformerQueueRelease)
+                return;
 
-                setTimeout(function() {
-                    me._isWaitingForTransformerQueueRelease = true;
-                    me._processQueuedOperations.call(me);
-                }, Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
-            }
-        }, 0);
-    //})(items, {});
-    //this._append(items);
+            setTimeout(function() {
+                me._isWaitingForTransformerQueueRelease = true;
+                me._processQueuedOperations.call(me);
+            }, Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
+        }
+    }, 0);
 }
 
-Gridifier.prototype._append = function(items, fakerDiv) { //timer.start();
-    var items = this._collector.toDOMCollection(items);
-    SizesResolverManager.startCachingTransaction();
-    //items = this._applyChromeGetComputedStylePerformanceFix(items, 'fhf');
-
-    // for(var i = 0; i < items.length; i++) {
-    //     items[i].style.position = "absolute";
-    //     items[i].style.left = "-90000px";
-    //     items[i].style.top = "0px";
-    // }
-
-    // var fakerDiv = document.createElement("div");
-    // fakerDiv.style.width = "0px";
-    // fakerDiv.style.height = "0px";
-    // fakerDiv.style.position = "absolute";
-    // fakerDiv.style.left = "-90000px";
-    // fakerDiv.style.top = "100px";
-    // fakerDiv.style.display = "none";
-    // fakerDiv.style.visibility = "none";
-    // var frag = document.createDocumentFragment();
-    // frag.appendChild(fakerDiv);
-
-    // var wrapperDiv = document.createElement("div");
-    // wrapperDiv.style.position = "absolute";
-    // wrapperDiv.style.left = "-90000px";
-    // wrapperDiv.style.top = "0px";
-    // wrapperDiv.style.width = "0px";
-    // wrapperDiv.style.height = "0px";
-    // wrapperDiv.style.visibility = "hidden";
-    // wrapperDiv.style.display = "none";
-    // document.body.parentNode.appendChild(wrapperDiv);
-
-    // wrapperDiv.appendChild(fakerDiv);
-
-    // SizesResolver.outerWidth(fakerDiv);
-    // SizesResolver.outerHeight(fakerDiv);
-    // timer.start();
-    // var elementComputedCSS = window.getComputedStyle(fakerDiv, null);
-    // var elementWidth = elementComputedCSS.width;
-    // var time = timer.get();
-    // var message = "time = " + time + " class = " + fakerDiv.getAttribute("class") + "<br>";
-    //if(time > 0.100) {
-       // console.log(message);
-    //}
-    //document.body.parentNode.removeChild(wrapperDiv);
-
-    this._collector.ensureAllItemsAreAttachedToGrid(items);
-    this._collector.ensureAllItemsCanBeAttachedToGrid(items);
-
-    items = this._collector.filterCollection(items);
-    items = this._collector.sortCollection(items);
-    
-    for(var i = 0; i < items.length; i++) {
-        this._guid.markNextAppendedItem(items[i]);
-        this._applyAppend(items[i]);
-
-        // @todo after each operation update grid width/height(Also when width height is decreasing)
-        // @todo also update demo layout builder heading height label
-        //$(this).trigger("gridifier.gridSizesChange");
+Gridifier.prototype._insertBefore = function(items, beforeItem) {
+    var connections = this._connections.get();
+    if(connections.length == 0) {
+        this._append(items);
+        return;
     }
 
-    SizesResolverManager.stopCachingTransaction();
-    this.scheduleGridSizesUpdate();
-    //console.log("full reappend call = " + timer.get());
-    return this;
+    var connectionsToRetransform = [];
+    connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
+
+    if(typeof beforeItem == "undefined") {
+        var beforeItem = connections[0].item;
+    }
+    else {
+        // @todo -> Ensure beforeItem exists(transform to DOM, than Check by guids)
+        // (Or check in cycle)
+    }
+
+    var lastConnectionGUID = null;
+    for(var i = 0; i < connections.length; i++) {
+        if(this._guid.getItemGUID(connections[i].item) == this._guid.getItemGUID(beforeItem)) {
+            connectionsToRetransform = connectionsToRetransform.concat(
+                connections.splice(i, connections.length - i)
+            );
+            break;
+        }
+
+        lastConnectionGUID = connections[i].itemGUID;
+    }
+    
+    this._connections.reinitRanges();
+    this._guid.reinitMaxGUID(lastConnectionGUID);
+
+    if(this._settings.isDefaultAppend())
+        this._appender.recreateConnectorsPerAllConnectedItems();
+    else if(this._settings.isReversedAppend())
+        this._reversedAppender.recreateConnectorsPerAllConnectedItems();
+
+    this._append(items);
+    this._connections.restore(connectionsToRetransform);
+    this._connections.remapAllItemGUIDS();
+
+    this._sizesTransformer.retransformFrom(connectionsToRetransform[0]);
 }
 
 Gridifier.prototype.retransformAllSizes = function() {
@@ -814,5 +849,5 @@ Gridifier.GRID_ITEM_MARKING_DEFAULTS = {CLASS: "gridifier-item", DATA_ATTR: "dat
 Gridifier.OPERATIONS = {PREPEND: 0, REVERSED_PREPEND: 1, APPEND: 2, REVERSED_APPEND: 3, MIRRORED_PREPEND: 4};
 Gridifier.GRID_SIZES_UPDATE_TIMEOUT = 100;
 
-Gridifier.QUEUED_OPERATION_TYPES = {PREPEND: 0, APPEND: 1};
+Gridifier.QUEUED_OPERATION_TYPES = {PREPEND: 0, APPEND: 1, INSERT_BEFORE: 2, INSERT_AFTER: 3};
 Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT = 100;

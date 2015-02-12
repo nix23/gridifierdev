@@ -57,11 +57,7 @@ Gridifier.VerticalGrid.Prepender = function(gridifier, settings, connectors, con
     return this;
 }
 
-Gridifier.VerticalGrid.Prepender.prototype.prepend = function(item, disableMarking) {
-    var disableMarking = disableMarking || false;
-    if(!disableMarking)
-        this._guid.markIfIsFirstPrependedItem(item);
-
+Gridifier.VerticalGrid.Prepender.prototype.prepend = function(item) {
     this._initConnectors();
 
     var connection = this._createConnectionPerItem(item);
@@ -138,13 +134,6 @@ Gridifier.VerticalGrid.Prepender.prototype._initConnectors = function() {
             this._connectors.get(),
             this._connections.get()
         );              // @system-log-end
-        this._connectors.deleteAllAppendedItemConnectorsExceptSide(Gridifier.Connectors.SIDES.TOP.LEFT);
-        Logger.log(                 // @system-log-start
-            "initConnectors",
-            "isCurrentOperationSameAsPrevious -> deleteAllAppendedItemConnectorsExceptSide(TOP.LEFT)",
-            this._connectors.get(),
-            this._connections.get()
-        );                          // @system-log-end
         this._connectorsCleaner.deleteAllIntersectedFromTopConnectors();
         Logger.log(                 // @system-log-start
             "initConnectors",

@@ -63,11 +63,7 @@ Gridifier.VerticalGrid.ReversedAppender = function(gridifier,
     return this;
 }
 
-Gridifier.VerticalGrid.ReversedAppender.prototype.reversedAppend = function(item, disableMarking) {
-    var disableMarking = disableMarking || false;
-    if(!disableMarking)
-        this._guid.markIfIsFirstAppendedItem(item);
-
+Gridifier.VerticalGrid.ReversedAppender.prototype.reversedAppend = function(item) {
     this._initConnectors();
 
     var connection = this._createConnectionPerItem(item);
@@ -125,13 +121,6 @@ Gridifier.VerticalGrid.ReversedAppender.prototype._initConnectors = function() {
             this._connectors.get(),
             this._connections.get()
         );                              // @system-log-end
-        this._connectors.deleteAllPrependedItemConnectorsExceptSide(Gridifier.Connectors.SIDES.BOTTOM.LEFT);
-        Logger.log(                 // @system-log-start
-            "initConnectors",
-            "isCurrentOperationSameAsPrevious -> deleteAllPrependedItemConnectorsExceptSide(BOTTOM.LEFT)",
-            this._connectors.get(),
-            this._connections.get()
-        );                          // @system-log-end
         this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
         Logger.log(                 // @system-log-start
             "initConnectors",

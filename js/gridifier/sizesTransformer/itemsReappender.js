@@ -190,14 +190,14 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendItem = function(re
             "reappend" + loggerItemType + "ItemWithReversedAppend",
             "reversedAppend item with GUID: " + this._guid.getItemGUID(itemToReappend)
         );                              // @system-log-end
-        this._reversedAppender.reversedAppend(itemToReappend, true);
+        this._reversedAppender.reversedAppend(itemToReappend);
     }
     else if(reappendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND) {
         Logger.startLoggingSubaction(   // @system-log-start
             "reappend" + loggerItemType + "ItemWithDefaultAppend",
             "defaultAppend item with GUID: " + this._guid.getItemGUID(itemToReappend)
         );                              // @system-log-end
-        this._appender.append(itemToReappend, true);
+        this._appender.append(itemToReappend);
     }
     Logger.stopLoggingSubaction(); // @system-log
 }

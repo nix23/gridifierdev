@@ -29,7 +29,8 @@ DemoLayoutBuilder = function($targetEl) {
         this._bindEvents(); 
         $(me._gridConfigurator).trigger(DemoLayoutBuilder.Configurator.EVENT_CREATE_VERTICAL_GRID, [{
             appendType: "defaultAppend",
-            gridType: "verticalGrid",
+            //gridType: "verticalGrid",
+            gridType: "horizontalGrid",
             intersectionStrategy: "default",
             prependType: "defaultPrepend",
             sortDispersionMode: "disabled",

@@ -174,10 +174,6 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transfo
         //if(me._settings.isNoIntersectionsStrategy()) {
         //    me._emptySpaceNormalizer.emptySpaceNormalizer.normalizeFreeSpace();
         //}
-
-        //this._gridifier.getRenderer().renderTransformedConnections();
-
-        //Logger.stopLoggingOperation(); // @system-log
     }
 
     var me = this;
@@ -263,10 +259,6 @@ Gridifier.SizesTransformer.prototype.retransformAllConnections = function() {
         //if(me._settings.isNoIntersectionsStrategy()) {
         //    me._emptySpaceNormalizer.emptySpaceNormalizer.normalizeFreeSpace();
         //}
-
-        //this._gridifier.getRenderer().renderTransformedConnections();
-        
-        //Logger.stopLoggingOperation(); // @system-log
     }
 
     var wereItemSizesSyncs = this._syncAllScheduledToTransformItemSizes(connections);
@@ -306,4 +298,44 @@ Gridifier.SizesTransformer.prototype._syncAllScheduledToTransformItemSizes = fun
     this._transformedItemMarker.markEachConnectionItemWithTransformData(transformationData);
 
     return true;
+}
+
+// This method has no async actions before starting the queue.
+// (Used in insertBefore, insertAfter methods. In that methods we should launch reappend
+//  queue immediatly, because in CSD mode we can't insertBefore or after next item BEFORE
+//  current items positions are recalculated.(Order depends on position)
+Gridifier.SizesTransformer.prototype.retransformFrom = function(firstConnectionToRetransform) {
+    var connectionsToReappend = [];
+    if(!this._itemsReappender.isReappendQueueEmpty()) {
+        var currentQueueState = this._itemsReappender.stopReappendingQueuedItems();
+
+        for(var i = 0; i < currentQueueState.reappendQueue.length; i++) {
+            var queuedConnection = currentQueueState.reappendQueue[i].connectionToReappend;
+            if(queuedConnection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT])
+                continue;
+
+            connectionsToReappend.push(queuedConnection);
+        }
+    }
+
+    var itemsToReappendData = this._itemsToReappendFinder.findAllOnSizesTransform(
+        connectionsToReappend, firstConnectionToRetransform
+    );
+
+    var itemsToReappend = itemsToReappendData.itemsToReappend;
+    var connectionsToReappend = itemsToReappendData.connectionsToReappend;
+    var firstConnectionToReappend = itemsToReappendData.firstConnectionToReappend;
+    
+    this._transformedItemMarker.markAllTransformDependedItems(itemsToReappend);
+    this._transformerConnectors.recreateConnectorsPerFirstItemReappendOnTransform(
+        itemsToReappend[0], firstConnectionToReappend
+    );
+
+    this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
+    this._itemsReappender.startReappendingQueuedItems();
+
+    // @todo -> Enable this setting
+    //if(me._settings.isNoIntersectionsStrategy()) {
+    //    me._emptySpaceNormalizer.emptySpaceNormalizer.normalizeFreeSpace();
+    //}
 }
