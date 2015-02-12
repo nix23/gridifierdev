@@ -76,17 +76,3 @@ Gridifier.GUID.prototype.wasItemAppended = function(itemGUID) {
     
     return (itemGUID >= this._firstAppendedItemGUID) ? true : false;
 }
-
-Gridifier.GUID.prototype.isFirstPrependedItem = function(itemGUID) {
-    if(this._firstPrependedItemGUID == null)
-        return false;
-
-    return (itemGUID == this._firstPrependedItemGUID) ? true : false;
-}
-
-Gridifier.GUID.prototype.isFirstAppendedItem = function(itemGUID) {
-    if(this._firstAppendedItemGUID == null)
-        return false;
-
-    return (itemGUID == this._firstAppendedItemGUID) ? true : false;
-}

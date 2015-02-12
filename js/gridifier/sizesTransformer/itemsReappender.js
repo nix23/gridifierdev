@@ -23,11 +23,6 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
     this._guid = null;
     this._transformedItemMarker = null;
 
-    this._insertTypeChangeConnectors = null;
-
-    this._lastReappendedItemInsertType = null;
-    this._lastReappendedItemGUID = null;
-
     this._reappendQueue = null;
     this._batchSize = 2;
     this._reappendNextQueuedItemsBatchTimeout = null;
@@ -50,20 +45,6 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
         me._settings = settings;
         me._guid = guid;
         me._transformedItemMarker = transformedItemMarker;
-
-        me._insertTypeChangeConnectors = new Gridifier.SizesTransformer.InsertTypeChangeConnectors(
-            me,
-            me._appender,
-            me._reversedAppender,
-            me._connections,
-            me._connectors,
-            me._connectorsCleaner,
-            me._connectorsSelector,
-            me._transformerConnectors,
-            me._settings,
-            me._guid,
-            me._transformedItemMarker
-        );
     };
 
     this._bindEvents = function() {
@@ -82,34 +63,23 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
 
 // @todo -> Check if horizontal grid works correctly here
 Gridifier.SizesTransformer.ItemsReappender.prototype.isReversedAppendShouldBeUsedPerItemInsert = function(item) {
-    if(this._guid.wasItemPrepended(this._guid.getItemGUID(item)) 
-       && !this._settings.isMirroredPrepend()) {
-        if(this._settings.isDefaultPrepend())
-            return false;
-        else if(this._settings.isReversedPrepend())
-            return true;
-    }
-    else if(this._guid.wasItemAppended(this._guid.getItemGUID(item))) {
-        if(this._settings.isDefaultAppend())
-            return false;
-        else if(this._settings.isReversedAppend())
-            return true;
-    }
-}
-
-Gridifier.SizesTransformer.ItemsReappender.prototype._getNextReappendedItemInsertType = function(item) {
-    if(this._guid.wasItemPrepended(this._guid.getItemGUID(item)))
-        return Gridifier.OPERATIONS.PREPEND;
-    else if(this._guid.wasItemAppended(this._guid.getItemGUID(item)))
-        return Gridifier.OPERATIONS.APPEND;
-}
-
-Gridifier.SizesTransformer.ItemsReappender.prototype._isNextReappendedItemInsertTypeChanged = function(item) {
-    return this._lastReappendedItemInsertType != this._getNextReappendedItemInsertType(item);
-}
-
-Gridifier.SizesTransformer.ItemsReappender.prototype.storeHowNextReappendedItemWasInserted = function(item) {
-    this._lastReappendedItemInsertType = this._getNextReappendedItemInsertType(item);
+    // if(this._guid.wasItemPrepended(this._guid.getItemGUID(item)) 
+    //    && !this._settings.isMirroredPrepend()) {
+    //     if(this._settings.isDefaultPrepend())
+    //         return false;
+    //     else if(this._settings.isReversedPrepend())
+    //         return true;
+    // }
+    // else if(this._guid.wasItemAppended(this._guid.getItemGUID(item))) {
+    //     if(this._settings.isDefaultAppend())
+    //         return false;
+    //     else if(this._settings.isReversedAppend())
+    //         return true;
+    // }
+    if(this._settings.isDefaultAppend())
+        return false;
+    else if(this._settings.isReversedAppend())
+        return true;
 }
 
 Gridifier.SizesTransformer.ItemsReappender.prototype.createReappendQueue = function(itemsToReappend,
@@ -149,7 +119,7 @@ Gridifier.SizesTransformer.ItemsReappender.prototype.getQueuedConnectionsPerTran
 }
 
 Gridifier.SizesTransformer.ItemsReappender.prototype.startReappendingQueuedItems = function() {
-    this._lastReappendedItemGUID = null;
+    //this._lastReappendedItemGUID = null;
     // @todo -> Replace with JS events
     this._reappendStartViewportWidth = $(window).width();
     this._reappendStartViewportHeight = $(window).height();
@@ -190,8 +160,8 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
             this._connections.get()
         );          // @system-log-end
 
-        this._lastReappendedItemGUID = this._guid.getItemGUID(nextItemToReappend);
-        reappendedItemGUIDS.push(this._lastReappendedItemGUID);
+        //this._lastReappendedItemGUID = this._guid.getItemGUID(nextItemToReappend);
+        reappendedItemGUIDS.push(this._guid.getItemGUID(nextItemToReappend));
     }
 
     var reappendedConnections = this._connections.getConnectionsByItemGUIDS(reappendedItemGUIDS);
@@ -213,12 +183,6 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
 
 Gridifier.SizesTransformer.ItemsReappender.prototype._reappendItem = function(reappendType,
                                                                               itemToReappend) {
-    if(this._isNextReappendedItemInsertTypeChanged(itemToReappend)) {
-        this._insertTypeChangeConnectors.recreate(
-            reappendType, itemToReappend
-        );
-    }
-
     var isTransformedItem = this._transformedItemMarker.isTransformedItem(itemToReappend); // @system-log
     var loggerItemType = (isTransformedItem) ? "Transformed" : "Depended";                 // @system-log
     if(reappendType == Gridifier.APPEND_TYPES.REVERSED_APPEND) {

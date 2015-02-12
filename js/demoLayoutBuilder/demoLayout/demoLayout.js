@@ -55,7 +55,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierSettings = gridifierSettings;
         
         //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
-        me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
+        //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         //me._gridifierSettings.alignmentType = "center";
          //me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";

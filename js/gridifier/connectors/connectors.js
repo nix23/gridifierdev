@@ -151,16 +151,10 @@ Gridifier.Connectors.prototype.getClone = function() {
     return connectorsClone;
 }
 
-Gridifier.Connectors.prototype.deleteAllPrependedItemConnectorsExceptSide = function(side, keepFirstItemConnectors) {
+Gridifier.Connectors.prototype.deleteAllPrependedItemConnectorsExceptSide = function(side) {
     for(var i = 0; i < this._connectors.length; i++) {
-        if(keepFirstItemConnectors)
-            keepFirstPrependedItemConnectorsCond = !(this._guid.isFirstPrependedItem(this._connectors[i].itemGUID));
-        else
-            keepFirstPrependedItemConnectorsCond = true;
-
         if(this._guid.wasItemPrepended(this._connectors[i].itemGUID)
-            && this._connectors[i].side != side 
-            && keepFirstPrependedItemConnectorsCond) {
+            && this._connectors[i].side != side) {
             this._connectors.splice(i, 1);
             i--;
         }

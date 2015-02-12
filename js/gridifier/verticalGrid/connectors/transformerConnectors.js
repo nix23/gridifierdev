@@ -92,7 +92,6 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerRev
 Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerDefaultItemReappend = function(firstItemToReappend,
                                                                                                             firstConnectionToReappend) {
     this._connections.reinitRanges();
-
     this._appender.recreateConnectorsPerAllConnectedItems();
     Logger.log( // @system-log-start
         "recreateConnectorsPerDefaultTransformedConnectionAppend",

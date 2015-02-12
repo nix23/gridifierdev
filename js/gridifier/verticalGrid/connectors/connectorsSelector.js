@@ -83,16 +83,3 @@ Gridifier.VerticalGrid.ConnectorsSelector.prototype.selectOnlyMostTopConnectorFr
             this._connectors.splice(i, 1);
     }
 }
-
-// This is required to correctly align items, when first item is not in the any corner,
-// and total items count is relatively small.
-Gridifier.VerticalGrid.ConnectorsSelector.prototype.selectOnlySpecifiedSideConnectorsOnPrependedItemsExceptFirst = function(side) {
-    for(var i = 0; i < this._connectors.length; i++) {
-        if(this._guid.wasItemPrepended(this._connectors[i].itemGUID)
-           && this._connectors[i].side != side 
-           && !this._guid.isFirstPrependedItem(this._connectors[i].itemGUID)) {
-            this._connectors.splice(i, 1);
-            i--;
-        }
-    }
-}
