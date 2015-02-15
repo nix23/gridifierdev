@@ -1,7 +1,8 @@
-Gridifier.Settings = function(settings) {
+Gridifier.Settings = function(settings, eventEmitter) {
     var me = this;
 
-    this._settings = settings;
+    this._settings = null;
+    this._eventEmitter = null;
 
     this._gridType = null;
 
@@ -187,6 +188,9 @@ Gridifier.Settings = function(settings) {
                     item.style.visibility = "visible";
                     Dom.css3.transitionProperty(item, Prefixer.getForCSS('transform', item) + " 1000ms ease");
                     Dom.css3.transformProperty(item, "scale", 1);
+                    setTimeout(function() {
+                        me._eventEmitter.emitShowEvent(item);
+                    }, 1020);
                 }, 20); 
             },
 
@@ -339,6 +343,7 @@ Gridifier.Settings = function(settings) {
 
     this._construct = function() {
         me._settings = settings;
+        me._eventEmitter = eventEmitter;
         me._parse();
     };
 

@@ -428,6 +428,7 @@ DemoLayoutBuilder.DemoLayout.prototype.getView = function() {
 
 DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
     var itemSizes = this._gridifierDynamicSettings.getAllItemSizes();
+    var itemsToAppend = [];
     for(var i = 0; i < this._gridifierDynamicSettings.getBatchSize(); i++) {
         var gridItem = new DemoLayoutBuilder.DemoLayout.GridItem(
             this._grid.getGrid(),
@@ -445,17 +446,23 @@ DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
         );
         
         var $gridItem = gridItem.getView();
-        this._gridifier.append($gridItem);
+        //this._gridifier.append($gridItem);
+        itemsToAppend.push($gridItem);
+
         // @todo -> Replace with real event
         // @todo -> Check if batch processing of appended items is required
-        (function($gridItem, gridItem) {
-            $gridItem.on("gridifier.appendFinished", function() {
-                //setTimeout(function() {
-                   gridItem.renderGUID();
-                //}, 0);
-            });
-        })($gridItem, gridItem);
+        // (function($gridItem, gridItem) {
+        //     $gridItem.on("gridifier.appendFinished", function() {
+        //            gridItem.renderGUID();
+        //     });
+        // })($gridItem, gridItem);
+        this._gridifier.onShow(function(item) {
+            var itemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
+            item.innerHTML = itemGUID;
+        });
     }
+
+    this._gridifier.append(itemsToAppend);
 }
 
 DemoLayoutBuilder.DemoLayout.prototype._prependNextItems = function() {

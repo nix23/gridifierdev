@@ -5,6 +5,7 @@ Gridifier = function(grid, settings) {
     this._settings = null;
     this._collector = null;
     this._guid = null;
+    this._eventEmitter = null;
 
     this._connectors = null;
     this._connections = null;
@@ -70,7 +71,8 @@ Gridifier = function(grid, settings) {
         // }
         // timer.stop();
 
-        me._settings = new Gridifier.Settings(settings);
+        me._eventEmitter = new Gridifier.EventEmitter(me);
+        me._settings = new Gridifier.Settings(settings, me._eventEmitter);
         me._collector = new Gridifier.Collector(me._settings,  me._grid);
         me._guid = new Gridifier.GUID();
         me._normalizer = new Gridifier.Normalizer();
@@ -138,7 +140,7 @@ Gridifier = function(grid, settings) {
         );
 
         // @todo -> Remove from local var
-        var gridifier = new Gridifier.Dragifier(
+        var dragifier = new Gridifier.Dragifier(
             me, 
             me._appender,
             me._reversedAppender,
@@ -539,27 +541,72 @@ Gridifier.prototype._processQueuedOperations = function() {
     // }
 }
 
-Gridifier.prototype.append = function(items) {
+Gridifier.prototype._packItemsToBatches = function(items, batchSize) {
+    var items = this._collector.toDOMCollection(items);
+
+    var itemBatches = [];
+    var itemsCountInCurrentBatch = 0;
+    var itemsBatch = [];
+    var wasLastBatchPushed = false;
+
+    for(var i = 0; i < items.length; i++) {
+        itemsBatch.push(items[i]);
+        wasLastBatchPushed = false;
+
+        itemsCountInCurrentBatch++;
+        if(itemsCountInCurrentBatch == batchSize) {
+            itemBatches.push(itemsBatch);
+            itemsBatch = [];
+            wasLastBatchPushed = true;
+            itemsCountInCurrentBatch = 0;
+        }
+    }
+
+    if(!wasLastBatchPushed)
+        itemBatches.push(itemsBatch);
+
+    return itemBatches;
+}
+
+Gridifier.prototype.append = function(items, batchSize, batchTimeout) {
     var me = this;
-    setTimeout(function() { 
-        if(me._sizesTransformer.isTransformerQueueEmpty()) {
-            me._append.call(me, items);
-        }
-        else {
-            me._queuedOperations.push({
-                queuedOperationType: Gridifier.QUEUED_OPERATION_TYPES.APPEND,
-                items: items
-            });
+    var appender = function(items) {
+        setTimeout(function() { 
+            if(me._sizesTransformer.isTransformerQueueEmpty()) {
+                me._append.call(me, items);
+            }
+            else {
+                me._queuedOperations.push({
+                    queuedOperationType: Gridifier.QUEUED_OPERATION_TYPES.APPEND,
+                    items: items
+                });
 
-            if(me._isWaitingForTransformerQueueRelease)
-                return;
+                if(me._isWaitingForTransformerQueueRelease)
+                    return;
 
+                setTimeout(function() {
+                    me._isWaitingForTransformerQueueRelease = true;
+                    me._processQueuedOperations.call(me);
+                }, Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
+            }
+        }, 0);
+    }
+
+    if(typeof batchSize == "undefined") {
+        appender.call(me, items);
+        return;
+    }
+
+    // @todo -> Move batches to other functions
+    var batchTimeout = batchTimeout || 100; // @todo -> Move to const
+    itemBatches = this._packItemsToBatches(items, batchSize);
+    for(var i = 0; i < itemBatches.length; i++) {
+        (function(itemBatch, i) {
             setTimeout(function() {
-                me._isWaitingForTransformerQueueRelease = true;
-                me._processQueuedOperations.call(me);
-            }, Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
-        }
-    }, 0);
+                appender.call(me, itemBatches[i]);
+            }, batchTimeout * i);
+        })(itemBatches[i], i);
+    }
 }
 
 Gridifier.prototype._append = function(items) {
