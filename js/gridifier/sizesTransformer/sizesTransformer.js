@@ -50,7 +50,9 @@ Gridifier.SizesTransformer = function(gridifier,
             );
         }
         else if(me._settings.isHorizontalGrid()) {
-            // @todo -> Implement here
+            me._connectorsCleaner = new Gridifier.HorizontalGrid.ConnectorsCleaner(
+                me._connectors, me._connections, me._settings
+            );
         }
 
         me._connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(me._guid);
@@ -81,7 +83,18 @@ Gridifier.SizesTransformer = function(gridifier,
             );
         }
         else if(me._settings.isHorizontalGrid()) {
-            // @todo -> Implement horizontal grid here
+            me._transformerConnectors = new Gridifier.HorizontalGrid.TransformerConnectors(
+                me._gridifier,
+                me._connectors,
+                me._connections,
+                me._guid,
+                me._appender,
+                me._reversedAppender,
+                me._normalizer,
+                me,
+                me._connectorsCleaner,
+                me._transformedItemMarker
+            );
         }
 
         me._itemsReappender = new Gridifier.SizesTransformer.ItemsReappender(

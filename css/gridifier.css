@@ -245,3 +245,7 @@ body {
     cursor: not-allowed;
     background: rgb(170,170,170);
 }
+/*
+@media screen and ( max-height: 300px ) {
+  .gridItem { height: 100% !important; }
+}*/

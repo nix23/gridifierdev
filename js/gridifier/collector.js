@@ -89,7 +89,7 @@ Gridifier.Collector.prototype._isItemWiderThanGridWidth = function(item) {
     return SizesResolverManager.outerWidth(item, true) > SizesResolverManager.outerWidth(this._grid);
 }
 
-Gridifier.Collector.prototype._isItemTallerThatGridHeight = function(item) {
+Gridifier.Collector.prototype._isItemTallerThanGridHeight = function(item) {
     return SizesResolverManager.outerHeight(item, true) > SizesResolverManager.outerHeight(this._grid);
 }
 

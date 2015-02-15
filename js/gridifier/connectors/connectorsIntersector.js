@@ -1,13 +1,15 @@
-Gridifier.ConnectorsIntersector = function(connections) {
+Gridifier.ConnectorsIntersector = function(connections, settings) {
     var me = this;
 
     this._connections = null;
+    this._settings = null;
 
     this._css = {
     };
 
     this._construct = function() {
         me._connections = connections;
+        me._settings = settings;
     };
 
     this._bindEvents = function() {
@@ -41,10 +43,7 @@ Gridifier.ConnectorsIntersector.prototype.getMostLeftFromIntersectedRightItems =
     //     }
     // }
 
-    var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedConnections(connector);
-    for(var i = 0; i < intersectedConnectionIndexes.length; i++) {
-        var connection = connections[intersectedConnectionIndexes[i]];
-
+    var connectionFinder = function(connection) {
         if(connector.y >= connection.y1 && connector.y <= connection.y2 
             && connector.x < connection.x1) {
             if(mostLeftConnection == null)
@@ -56,6 +55,21 @@ Gridifier.ConnectorsIntersector.prototype.getMostLeftFromIntersectedRightItems =
         }
     }
 
+    if(this._settings.isVerticalGrid()) {
+        var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedConnections(connector);
+        for(var i = 0; i < intersectedConnectionIndexes.length; i++) {
+            connectionFinder(connections[intersectedConnectionIndexes[i]]);
+        }
+    }
+    else if(this._settings.isHorizontalGrid()) {
+        var intersectedConnectionIndexes = this._connections.getAllVerticallyIntersectedAndRightConnections(connector);
+        for(var i = 0; i < intersectedConnectionIndexes.length; i++) {
+            for(var j = 0; j < intersectedConnectionIndexes[i].length; j++) {
+                connectionFinder(connections[intersectedConnectionIndexes[i][j]]);
+            }
+        }
+    }
+
     return mostLeftConnection;
 }
 
@@ -63,7 +77,11 @@ Gridifier.ConnectorsIntersector.prototype.getMostBottomFromIntersectedTopOrTopLe
     var connections = this._connections.get();
     var mostBottomConnection = null;
 
-    var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedAndUpperConnections(connector);
+    if(this._settings.isVerticalGrid())
+        var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedAndUpperConnections(connector);
+    else if(this._settings.isHorizontalGrid())
+        var intersectedConnectionIndexes = this._connections.getAllVerticallyIntersectedAndLeftConnections(connector);
+
     for(var i = 0; i < intersectedConnectionIndexes.length; i++) {
         for(var j = 0; j < intersectedConnectionIndexes[i].length; j++) {
             var connection = connections[intersectedConnectionIndexes[i][j]];
@@ -99,7 +117,11 @@ Gridifier.ConnectorsIntersector.prototype.getMostBottomFromIntersectedTopOrTopRi
     var connections = this._connections.get();
     var mostBottomConnection = null;
 
-    var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedAndUpperConnections(connector);
+    if(this._settings.isVerticalGrid())
+        var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedAndUpperConnections(connector);
+    else if(this._settings.isHorizontalGrid())
+        var intersectedConnectionIndexes = this._connections.getAllVerticallyIntersectedAndRightConnections(connector);
+
     for(var i = 0; i < intersectedConnectionIndexes.length; i++) {
         for(var j = 0; j < intersectedConnectionIndexes[i].length; j++) {
             var connection = connections[intersectedConnectionIndexes[i][j]];
@@ -133,10 +155,7 @@ Gridifier.ConnectorsIntersector.prototype.getMostRightFromIntersectedLeftItems =
     //     }
     // }
 
-    var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedConnections(connector);
-    for(var i = 0; i < intersectedConnectionIndexes.length; i++) {
-        var connection = connections[intersectedConnectionIndexes[i]];
-
+    var connectionFinder = function(connection) {
         if(connector.y >= connection.y1 && connector.y <= connection.y2
             && connector.x > connection.x2) {
             if(mostRightConnection == null)
@@ -144,6 +163,21 @@ Gridifier.ConnectorsIntersector.prototype.getMostRightFromIntersectedLeftItems =
             else {
                 if(connection.x > mostRightConnection.x2)
                     mostRightConnection = connection;
+            }
+        }
+    }
+
+    if(this._settings.isVerticalGrid()) {
+        var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedConnections(connector);
+        for(var i = 0; i < intersectedConnectionIndexes.length; i++) {
+            connectionFinder(connections[intersectedConnectionIndexes[i]]);
+        }
+    }
+    else if(this._settings.isHorizontalGrid()) {
+        var intersectedConnectionIndexes = this._connections.getAllVerticallyIntersectedAndLeftConnections(connector);
+        for(var i = 0; i < intersectedConnectionIndexes.length; i++) {
+            for(var j = 0; j < intersectedConnectionIndexes[i].length; j++) {
+                connectionFinder(connections[intersectedConnectionIndexes[i][j]]);
             }
         }
     }
@@ -167,7 +201,11 @@ Gridifier.ConnectorsIntersector.prototype.getMostTopFromIntersectedBottomOrBotto
     //     }
     // }
 
-    var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedAndLowerConnections(connector);
+    if(this._settings.isVerticalGrid())
+        var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedAndLowerConnections(connector);
+    else if(this._settings.isHorizontalGrid())
+        var intersectedConnectionIndexes = this._connections.getAllVerticallyIntersectedAndRightConnections(connector);
+
     for(var i = 0; i < intersectedConnectionIndexes.length; i++) {
         for(var j = 0; j < intersectedConnectionIndexes[i].length; j++) {
             var connection = connections[intersectedConnectionIndexes[i][j]];
@@ -191,7 +229,11 @@ Gridifier.ConnectorsIntersector.prototype.getMostTopFromIntersectedBottomOrBotto
     var connections = this._connections.get();
     var mostTopConnection = null;
 
-    var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedAndLowerConnections(connector);
+    if(this._settings.isVerticalGrid())
+        var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedAndLowerConnections(connector);
+    else if(this._settings.isHorizontalGrid())
+        var intersectedConnectionIndexes = this._connections.getAllVerticallyIntersectedAndLeftConnections(connector);
+
     for(var i = 0; i < intersectedConnectionIndexes.length; i++) {
         for(var j = 0; j < intersectedConnectionIndexes[i].length; j++) {
             var connection = connections[intersectedConnectionIndexes[i][j]];

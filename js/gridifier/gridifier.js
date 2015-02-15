@@ -1,4 +1,4 @@
-Gridifier = function(grid, settings) {
+Gridifier = function(grid, settings) { 
     var me = this;
 
     this._grid = null;
@@ -84,9 +84,11 @@ Gridifier = function(grid, settings) {
             );
         }
         else if(me._settings.isHorizontalGrid()) {
-            me._connections = new Gridifier.HorizontalGrid.Connections(me._guid, me._settings);
+            me._connections = new Gridifier.HorizontalGrid.Connections(
+                me, me._guid, me._settings
+            );
             // @todo -> Change to Horizontal Grid
-            me._connectionsSorter = new Gridifier.VerticalGrid.ConnectionsSorter(
+            me._connectionsSorter = new Gridifier.HorizontalGrid.ConnectionsSorter(
                 me._connections, me._settings, me._guid
             );
         }
@@ -110,16 +112,16 @@ Gridifier = function(grid, settings) {
         }
         else if(me._settings.isHorizontalGrid()) {
             me._prepender = new Gridifier.HorizontalGrid.Prepender(
-                // @todo, pass params
+                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer
             );
             me._reversedPrepender = new Gridifier.HorizontalGrid.ReversedPrepender(
-                // @todo, pass params
+                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer
             );
             me._appender = new Gridifier.HorizontalGrid.Appender(
-                // @todo, pass params
+                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer
             );
             me._reversedAppender = new Gridifier.HorizontalGrid.ReversedAppender(
-                // @todo, pass params
+                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer
             );
         }
 

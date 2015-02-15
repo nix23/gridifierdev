@@ -44,16 +44,16 @@ Gridifier.Discretizer.VerticalCore.prototype.discretizeGridWithDefaultAppend = f
         var createNextColumn = true;
 
         while(createNextColumn) {
-            currentX -= discretizationHorizontalStep + 1;
+            currentX -= discretizationHorizontalStep;
             if(currentX < 0) {
                 createNextColumn = false;
             }
             else {
                 var nextColumn = {
                     x1: currentX,
-                    x2: currentX + discretizationHorizontalStep,
+                    x2: currentX + discretizationHorizontalStep - 1,
                     y1: currentY + 1,
-                    y2: currentY + 1 + discretizationVerticalStep
+                    y2: currentY + discretizationVerticalStep
                 };
                 nextColumn[Gridifier.Discretizer.IS_INTERSECTED_BY_ITEM] = false;
                 var columnWidth = nextColumn.x2 - nextColumn.x1 + 1;
@@ -68,8 +68,8 @@ Gridifier.Discretizer.VerticalCore.prototype.discretizeGridWithDefaultAppend = f
 
         cells.push(rowColumns);
 
-        currentY += discretizationVerticalStep + 1;
-        if(currentY + 1 + discretizationVerticalStep > gridY2)
+        currentY += discretizationVerticalStep;
+        if(currentY + discretizationVerticalStep > gridY2)
             createNextRow = false;
     }
 
@@ -78,7 +78,49 @@ Gridifier.Discretizer.VerticalCore.prototype.discretizeGridWithDefaultAppend = f
 
 Gridifier.Discretizer.VerticalCore.prototype.discretizeGridWithReversedAppend = function(discretizationHorizontalStep,
                                                                                          discretizationVerticalStep) {
-    ;
+    var cells = [];
+    var gridX2 = this._gridifier.getGridX2();
+    var gridY2 = this._gridifier.getGridY2();
+
+    var currentY = -1;
+    var createNextRow = true;
+
+    while(createNextRow) {
+        var rowColumns = [];
+        var currentX = -1;
+        var createNextColumn = true;
+
+        while(createNextColumn) {
+            currentX += discretizationHorizontalStep;
+            if(currentX > gridX2) {
+                createNextColumn = false;
+            }
+            else {
+                var nextColumn = {
+                    x1: currentX - discretizationHorizontalStep + 1,
+                    x2: currentX,
+                    y1: currentY + 1,
+                    y2: currentY + discretizationVerticalStep
+                };
+                nextColumn[Gridifier.Discretizer.IS_INTERSECTED_BY_ITEM] = false;
+                var columnWidth = nextColumn.x2 - nextColumn.x1 + 1;
+                var columnHeight = nextColumn.y2 - nextColumn.y1 + 1;
+
+                nextColumn[Gridifier.Discretizer.CELL_CENTER_X] = nextColumn.x1 + (columnWidth / 2);
+                nextColumn[Gridifier.Discretizer.CELL_CENTER_Y] = nextColumn.y1 + (columnHeight / 2);
+
+                rowColumns.push(nextColumn);
+            }
+        }
+
+        cells.push(rowColumns);
+
+        currentY += discretizationVerticalStep;
+        if(currentY + discretizationVerticalStep > gridY2)
+            createNextRow = false;
+    }
+
+    return cells;
 }
 
 Gridifier.Discretizer.VerticalCore.prototype.normalizeItemNewConnectionHorizontalCoords = function(item,

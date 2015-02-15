@@ -30,7 +30,7 @@ Gridifier.VerticalGrid.Appender = function(gridifier, settings, connectors, conn
             me._connectors, me._connections, me._settings
         );
         me._connectorsShifter = new Gridifier.ConnectorsShifter(
-            me._gridifier, me._connections
+            me._gridifier, me._connections, me._settings
         );
         me._connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(me._guid);
         me._connectorsSorter = new Gridifier.VerticalGrid.ConnectorsSorter();

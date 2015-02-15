@@ -309,7 +309,7 @@ var SizesResolver = {
         var disablePercentageCSSRecalc = disablePercentageCSSRecalc || false;
         var disableBordersCalc = disableBordersCalc || false;
         var elementComputedCSS = this.getComputedCSS(DOMElem);
-
+        
         if(disablePercentageCSSRecalc)
             var recalculatePercentageCSSValues = false;
         else if(this.isBrowserNativePercentageCSSValuesCalcStrategy())

@@ -27,7 +27,8 @@ DemoLayoutBuilder = function($targetEl) {
         me._gridConfigurator = new DemoLayoutBuilder.Configurator(me._$gridConfiguratorAccordionTab, me);
         
         this._bindEvents(); 
-        $(me._gridConfigurator).trigger(DemoLayoutBuilder.Configurator.EVENT_CREATE_VERTICAL_GRID, [{
+        //$(me._gridConfigurator).trigger(DemoLayoutBuilder.Configurator.EVENT_CREATE_VERTICAL_GRID, [{
+        $(me._gridConfigurator).trigger(DemoLayoutBuilder.Configurator.EVENT_CREATE_HORIZONTAL_GRID, [{
             appendType: "defaultAppend",
             //gridType: "verticalGrid",
             gridType: "horizontalGrid",

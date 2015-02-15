@@ -1,7 +1,8 @@
-DemoLayoutBuilder.DemoLayout.GridDebugger = function(demoLayout) {
+DemoLayoutBuilder.DemoLayout.GridDebugger = function(demoLayout, grid) {
     var me = this;
 
     this._demoLayout = null;
+    this._grid = null;
 
     this._$bodyEl = null;
     this._$toggleButton = null;
@@ -80,6 +81,7 @@ DemoLayoutBuilder.DemoLayout.GridDebugger = function(demoLayout) {
 
     this._construct = function() {
         me._demoLayout = demoLayout;
+        me._grid = grid;
 
         me._$bodyEl = $("body");
         if(!Logger.isEnabled())
@@ -621,8 +623,8 @@ DemoLayoutBuilder.DemoLayout.GridDebugger.prototype._showGrid = function($showGr
 
     this._$gridDemonstrator.html("");
     this._$gridDemonstrator.css({
-        "top": $("#demoLayout .gridView .grid").offset().top + "px",
-        "left": $("#demoLayout .gridView .grid").offset().left + "px",
+        "top": $(this._grid).offset().top + "px",
+        "left": $(this._grid).offset().left + "px",
         "width": action.gridWidth + "px",
         "height": action.gridHeight + "px"
     });

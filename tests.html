@@ -65,6 +65,18 @@
     <script src="js/gridifier/guid.js"></script>
     <script src="js/gridifier/normalizer.js"></script>
 
+    <script src="js/gridifier/discretizer/discretizer.js"></script>
+    <script src="js/gridifier/discretizer/horizontalCore.js"></script>
+    <script src="js/gridifier/discretizer/verticalCore.js"></script>
+    <script src="js/gridifier/discretizer/demonstrator.js"></script>
+
+    <script src="js/gridifier/dragifier/dragifier.js"></script>
+    <script src="js/gridifier/dragifier/core.js"></script>
+    <script src="js/gridifier/dragifier/renderer.js"></script>
+    <script src="js/gridifier/dragifier/connectionIntersection/draggableItem.js"></script>
+    <script src="js/gridifier/dragifier/gridDiscretization/draggableItem.js"></script>
+    <script src="js/gridifier/dragifier/gridDiscretization/cells.js"></script>
+
     <script src="js/gridifier/connectors/connectors.js"></script>
     <script src="js/gridifier/connectors/connectorsShifter.js"></script>
     <script src="js/gridifier/connectors/connectorsIntersector.js"></script>
@@ -81,19 +93,22 @@
     <script src="js/gridifier/sizesTransformer/itemsToReappendFinder.js"></script>
     <script src="js/gridifier/sizesTransformer/itemsReappender.js"></script>
     <script src="js/gridifier/sizesTransformer/emptySpaceNormalizer.js"></script>
-    <script src="js/gridifier/sizesTransformer/insertTypeChangeConnectors.js"></script>
 
     <script src="js/gridifier/horizontalGrid/appender.js"></script>
     <script src="js/gridifier/horizontalGrid/prepender.js"></script>
     <script src="js/gridifier/horizontalGrid/reversedAppender.js"></script>
     <script src="js/gridifier/horizontalGrid/reversedPrepender.js"></script>
-    <script src="js/gridifier/horizontalGrid/mirroredPrepender.js"></script>
-    <script src="js/gridifier/horizontalGrid/connectorsCleaner.js"></script>
-    <script src="js/gridifier/horizontalGrid/connectorsSelector.js"></script>
-    <script src="js/gridifier/horizontalGrid/connectorsSorter.js"></script>
     <script src="js/gridifier/horizontalGrid/itemCoordsExtractor.js"></script>
-    <script src="js/gridifier/horizontalGrid/connectionsIntersector.js"></script>
-    <script src="js/gridifier/horizontalGrid/connections.js"></script>
+    
+    <script src="js/gridifier/horizontalGrid/connections/connections.js"></script>
+    <script src="js/gridifier/horizontalGrid/connections/connectionsIntersector.js"></script>
+    <script src="js/gridifier/horizontalGrid/connections/connectionsRanges.js"></script>
+    <script src="js/gridifier/horizontalGrid/connections/connectionsSorter.js"></script>
+
+    <script src="js/gridifier/horizontalGrid/connectors/connectorsCleaner.js"></script>
+    <script src="js/gridifier/horizontalGrid/connectors/connectorsSelector.js"></script>
+    <script src="js/gridifier/horizontalGrid/connectors/connectorsSorter.js"></script>
+    <script src="js/gridifier/horizontalGrid/connectors/transformerConnectors.js"></script>
 
     <script src="js/gridifier/verticalGrid/connections/connections.js"></script>
     <script src="js/gridifier/verticalGrid/connections/connectionsIntersector.js"></script>
@@ -109,10 +124,7 @@
     <script src="js/gridifier/verticalGrid/prepender.js"></script>
     <script src="js/gridifier/verticalGrid/reversedAppender.js"></script>
     <script src="js/gridifier/verticalGrid/reversedPrepender.js"></script>
-    <script src="js/gridifier/verticalGrid/mirroredPrepender.js"></script>
     <script src="js/gridifier/verticalGrid/itemCoordsExtractor.js"></script>
-    <script src="js/gridifier/verticalGrid/dragifier.js"></script>
-    <script src="js/gridifier/verticalGrid/dragifierDiscretizator.js"></script>
 
     <!-- Tests includes -->
     <script>
@@ -153,5 +165,7 @@
     <script src="tests/services/domAbstractionLayer.js"></script>
     
     <script src="tests/gridifier/sizesTransformer.js"></script>
+    <script src="tests/gridifier/discretizer/verticalCore.js"></script>
+    <script src="tests/gridifier/discretizer/horizontalCore.js"></script>
 </body>
 </html>

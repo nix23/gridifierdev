@@ -44,6 +44,10 @@ Gridifier.VerticalGrid.ItemCoordsExtractor.prototype._getItemSizesPerAppend = fu
     }
 }
 
+Gridifier.VerticalGrid.ItemCoordsExtractor.prototype.getItemTargetSizes = function(item) {
+    return this._getItemSizesPerAppend(item);
+}
+
 Gridifier.VerticalGrid.ItemCoordsExtractor.prototype.connectorToAppendedItemCoords = function(item, connector) {
     var targetSizes = this._getItemSizesPerAppend(item);
 

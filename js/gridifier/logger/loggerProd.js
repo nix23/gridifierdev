@@ -2,6 +2,10 @@ var Logger = {
     isEnabled: function() {
         return false;
     },
+
+    setGrid: function() {
+        return false;
+    },
     
     startLoggingOperation: function() { return false; },
     stopLoggingOperation: function() { return false; },

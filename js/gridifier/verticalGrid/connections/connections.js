@@ -5,6 +5,8 @@ Gridifier.VerticalGrid.Connections = function(gridifier, guid, settings) {
     this._guid = null;
     this._settings = null;
 
+    this._itemCoordsExtractor = null;
+
     this._connections = [];
     this._ranges = null;
     this._sorter = null;
@@ -22,6 +24,9 @@ Gridifier.VerticalGrid.Connections = function(gridifier, guid, settings) {
         me._ranges.init();
         me._sorter = new Gridifier.VerticalGrid.ConnectionsSorter(
             me, me._settings, me._guid
+        );
+        me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor(
+            me._gridifier
         );
     };
 
@@ -105,9 +110,9 @@ Gridifier.VerticalGrid.Connections.prototype.add = function(item, itemConnection
     if(!connection.hasOwnProperty(Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT))
         connection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = false;
     
-    if(this._settings.isNoIntersectionsStrategy()) {
-        connection.itemHeightWithMargins = SizesResolverManager.outerHeight(item, true);
-    }
+    // if(this._settings.isNoIntersectionsStrategy()) {
+    //     connection.itemHeightWithMargins = SizesResolverManager.outerHeight(item, true);
+    // }
 
     this._connections.push(connection);
     return connection;
@@ -146,6 +151,10 @@ Gridifier.VerticalGrid.Connections.prototype.syncConnectionParams = function(con
                 this._connections[j].x2 = connectionsData[i].x2;
                 this._connections[j].y1 = connectionsData[i].y1;
                 this._connections[j].y2 = connectionsData[i].y2;
+
+                // if(this._settings.isNoIntersectionsStrategy()) {
+                //     this._connections[j].itemHeightWithMargins = connectionsData[i].itemHeightWithMargins;
+                // }
 
                 break;
             }
@@ -359,14 +368,23 @@ Gridifier.VerticalGrid.Connections.prototype.expandVerticallyAllRowConnectionsTo
         else if(this._settings.isVerticalGridCenterAlignmentType()) {
             var y1 = rowConnectionsToExpand[i].y1;
             var y2 = rowConnectionsToExpand[i].y2;
-            var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
+
+            var targetSizes = this._itemCoordsExtractor.getItemTargetSizes(rowConnectionsToExpand[i].item);
+            // @todo -> Check if (-1) is required
+            var itemHeight = targetSizes.targetHeight - 1;
+
+            //var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
             // @todo fix to return Math.round(Math.abs(y2 - y1 + 1) / 2) - Math.round(itemHeight / 2);
             rowConnectionsToExpand[i].verticalOffset = Math.round(Math.abs(y2 - y1) / 2) - Math.round(itemHeight / 2);
         }
         else if(this._settings.isVerticalGridBottomAlignmentType()) {
             var y1 = rowConnectionsToExpand[i].y1;
             var y2 = rowConnectionsToExpand[i].y2;
-            var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
+
+            var targetSizes = this._itemCoordsExtractor.getItemTargetSizes(rowConnectionsToExpand[i].item);
+            var itemHeight = targetSizes.targetHeight - 1;
+
+            //var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
             // @todo fix (y2 - y1 + 1) 
             rowConnectionsToExpand[i].verticalOffset = Math.abs(y2 - y1) - itemHeight;
         }
@@ -389,7 +407,6 @@ Gridifier.VerticalGrid.Connections.prototype.normalizeVerticalPositionsOfAllConn
         return false;
 
     var increaseVerticalPositionBy = Math.round(Math.abs(newConnection.y1));
-    this._lastVerticalIncreaseOfEachConnection = increaseVerticalPositionBy;
     newConnection.y2 = Math.abs(newConnection.y1 - newConnection.y2);
     newConnection.y1 = 0;
 

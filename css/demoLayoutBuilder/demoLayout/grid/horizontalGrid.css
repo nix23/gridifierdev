@@ -1,0 +1,108 @@
+#demoLayout .gridView {
+    position: relative;
+}
+
+#demoLayout .gridView .horizontalGrid {
+    position: relative;
+    width: 100%;
+    height: 300px;
+    background: rgb(235,235,235);
+    border-top: 1px rgb(210,210,210) solid;
+    border-bottom: 1px rgb(210,210,210) solid;
+    overflow-x: scroll;
+    overflow-y: hidden;
+}
+
+#demoLayout .gridView .horizontalGrid .gridBody {
+    width: 100%;
+    height: 100%;
+}
+
+#demoLayout .gridView .horizontalGrid .gridBg {
+    position: absolute;
+    top: 50%;
+    width: 100%;
+    height: 70px;
+    line-height: 70px;
+    margin-top: -35px;
+    font-weight: bold;
+    color: rgb(180,180,180);
+    text-shadow: 0px 0px 2px rgba(150, 150, 150, 1);
+}
+
+#demoLayout .gridView .horizontalGrid .defaultGridBgFont {
+    letter-spacing: -3px;
+    font-size: 50px;
+}
+
+#demoLayout .gridView .horizontalGrid .reduced2xGridBgFont {
+    font-size: 25px;
+    letter-spacing: -1px;
+}
+
+#demoLayout .gridView .horizontalGridResizer {
+    position: absolute;
+    right: 0px;
+    bottom: 0px;
+    width: 60px;
+    height: 60px;
+    background: rgb(215,215,215);
+    box-sizing: border-box;
+    border: 1px rgb(190,190,190) solid;
+    z-index: 10;
+}
+
+#demoLayout .gridView .horizontalGridResizer:hover {
+    cursor: move;
+}
+
+#demoLayout .gridView .horizontalGridResizer .icon {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    margin-top: 10px;
+    margin-left: 10px;
+}
+
+#demoLayout .gridView .horizontalGridResizer .icon .left {
+    position: absolute;
+    left: -12px;
+    top: 8px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 12px 12px 12px 12px;
+    border-color: transparent rgb(90,90,90) transparent transparent;
+}
+
+#demoLayout .gridView .horizontalGridResizer .icon .leftSelected {
+    border-right-color: white;
+}
+
+#demoLayout .gridView .horizontalGridResizer .icon .middle {
+    position: absolute;
+    left: 9px;
+    top: 16px;
+    width: 23px;
+    height: 9px;
+    background: rgb(90,90,90);
+}
+
+#demoLayout .gridView .horizontalGridResizer .icon .middleSelected {
+    background: white;
+}
+
+#demoLayout .gridView .horizontalGridResizer .icon .right {
+    position: absolute;
+    top: 8px;
+    right: -12px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 12px 12px 12px 12px;
+    border-color: transparent transparent transparent rgb(90,90,90);
+}
+
+#demoLayout .gridView .horizontalGridResizer .icon .rightSelected {
+    border-left-color: white;
+}

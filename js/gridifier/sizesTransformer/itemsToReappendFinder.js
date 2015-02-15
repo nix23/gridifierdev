@@ -55,7 +55,14 @@ Gridifier.SizesTransformer.ItemsToReappendFinder.prototype.findAllOnSizesTransfo
         // @todo -> custom sort dispersion should have custom y1(VG) and custom x1(HG)
         else if(this._settings.isCustomSortDispersion() || this._settings.isCustomAllEmptySpaceSortDispersion() ||
                 this._settings.isNoIntersectionsStrategy()) {
-            if(connections[i].y2 >= firstTransformedConnection.y1) {
+            if(this._settings.isVerticalGrid()) {
+                var condition = connections[i].y2 >= firstTransformedConnection.y1;
+            }
+            else if(this._settings.isHorizontalGrid()) {
+                var condition = connections[i].x2 >= firstTransformedConnection.x1;
+            }
+
+            if(condition) {
                 connectionsToReappend.push(connections[i]);
                 connections.splice(i, 1);
                 i--;

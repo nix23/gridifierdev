@@ -77,6 +77,9 @@ Gridifier.Discretizer.Demonstrator.prototype.update = function(cells) {
 }
 
 Gridifier.Discretizer.Demonstrator.prototype.delete = function() {
+    if(this._demonstrator == null)
+        return;
+    
     this._demonstrator.parentNode.removeChild(this._demonstrator);
     this._demonstrator = null;
 }

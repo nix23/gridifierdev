@@ -24,12 +24,12 @@ Gridifier.Discretizer = function(gridifier,
 
         if(me._settings.isVerticalGrid()) {
             me._discretizerCore = new Gridifier.Discretizer.VerticalCore(
-                me._gridifier
+                me._gridifier, me._settings
             );
         }
         else if(me._settings.isHorizontalGrid()) {
-            me._discretizerCore = new Gridifier.Discretizer.HorizontalGrid(
-                me._gridifier
+            me._discretizerCore = new Gridifier.Discretizer.HorizontalCore(
+                me._gridifier, me._settings
             );
         }
 
@@ -69,8 +69,10 @@ Gridifier.Discretizer.CELL_CENTER_X = "centerX";
 Gridifier.Discretizer.CELL_CENTER_Y = "centerY";
 
 Gridifier.Discretizer.prototype.discretizeGrid = function() {
-    var discretizationHorizontalStep = this._connections.getMinConnectionWidth() - 1;
-    var discretizationVerticalStep = this._connections.getMinConnectionHeight() - 1;
+    //var discretizationHorizontalStep = this._connections.getMinConnectionWidth() - 1;
+    //var discretizationVerticalStep = this._connections.getMinConnectionHeight() - 1;
+    var discretizationHorizontalStep = this._connections.getMinConnectionWidth();
+    var discretizationVerticalStep = this._connections.getMinConnectionHeight();
 
     if(this._settings.isDefaultAppend()) {
         this._cells = this._discretizerCore.discretizeGridWithDefaultAppend(

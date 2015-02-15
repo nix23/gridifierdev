@@ -1,8 +1,9 @@
-Gridifier.ConnectorsShifter = function(gridifier, connections) {
+Gridifier.ConnectorsShifter = function(gridifier, connections, settings) {
     var me = this;
 
     this._gridifier = null;
     this._connections = null;
+    this._settings = null;
 
     this._connectorsIntersector = null;
     this._ci = null;
@@ -17,8 +18,11 @@ Gridifier.ConnectorsShifter = function(gridifier, connections) {
     this._construct = function() {
         me._gridifier = gridifier;
         me._connections = connections;
+        me._settings = settings;
 
-        me._connectorsIntersector = new Gridifier.ConnectorsIntersector(me._connections);
+        me._connectorsIntersector = new Gridifier.ConnectorsIntersector(
+            me._connections, me._settings
+        );
         me._ci = me._connectorsIntersector;
     };
 
@@ -195,5 +199,21 @@ Gridifier.ConnectorsShifter.prototype.shiftAllWithSpecifiedSideToLeftGridCorner 
     for(var i = 0; i < this._allConnectors.length; i++) {
         if(this._allConnectors[i].side == side)
             this._allConnectors[i].x = 0;
+    }
+}
+
+Gridifier.ConnectorsShifter.prototype.shiftAllWithSpecifiedSideToTopGridCorner = function(side) {
+    this._allConnectors = this._connectors;
+    for(var i = 0; i < this._allConnectors.length; i++) {
+        if(this._allConnectors[i].side == side)
+            this._allConnectors[i].y = 0;
+    }
+}
+
+Gridifier.ConnectorsShifter.prototype.shiftAllWithSpecifiedSideToBottomGridCorner = function(side) {
+    this._allConnectors = this._connectors;
+    for(var i = 0; i < this._allConnectors.length; i++) {
+        if(this._allConnectors[i].side == side)
+            this._allConnectors[i].y = this._gridifier.getGridY2();
     }
 }

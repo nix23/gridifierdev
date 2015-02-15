@@ -10,12 +10,18 @@ var Logger = {
 
     _findItemConnectionCoordsData: [],
 
+    _grid: null,
+
     init: function() {
         this._operations = [];
     },
 
     isEnabled: function() {
         return true;
+    },
+
+    setGrid: function(grid) {
+        this._grid = grid;
     },
 
     startLoggingOperation: function(operationType, operationSubheading) {
@@ -110,8 +116,8 @@ var Logger = {
             subactions: null,
             actionType: Logger.ACTION_TYPES.ACTION,
             isSizesResolverSubcall: isSizesResolverSubcall,
-            gridWidth: SizesResolver.outerWidth($("#demoLayout .gridView .grid").get(0)),
-            gridHeight: SizesResolver.outerHeight($("#demoLayout .gridView .grid").get(0))
+            gridWidth: SizesResolver.outerWidth(this._grid),
+            gridHeight: SizesResolver.outerHeight(this._grid)
         };
 
         if(this._isLoggingSubaction)
@@ -132,8 +138,8 @@ var Logger = {
             connections: null,
             steps: this._findItemConnectionCoordsData,
             actionType: Logger.ACTION_TYPES.FIND_ITEM_CONNECTION_COORDS_ROOT,
-            gridWidth: SizesResolver.outerWidth($("#demoLayout .gridView .grid").get(0)),
-            gridHeight: SizesResolver.outerHeight($("#demoLayout .gridView .grid").get(0))
+            gridWidth: SizesResolver.outerWidth(this._grid),
+            gridHeight: SizesResolver.outerHeight(this._grid)
         };
 
         if(this._isLoggingSubaction)
@@ -168,8 +174,8 @@ var Logger = {
             connector: this._cloneObject(connectorToInspect),
             connections: this._cloneConnections(connections),
             actionType: Logger.FIND_ITEM_CONNECTION_COORDS_ACTION_TYPES.INSPECT_CONNECTOR,
-            gridWidth: SizesResolver.outerWidth($("#demoLayout .gridView .grid").get(0)),
-            gridHeight: SizesResolver.outerHeight($("#demoLayout .gridView .grid").get(0))
+            gridWidth: SizesResolver.outerWidth(this._grid),
+            gridHeight: SizesResolver.outerHeight(this._grid)
         };
         this._findItemConnectionCoordsData.push(logData);
     },
@@ -183,8 +189,8 @@ var Logger = {
             itemCoords: this._cloneObject(itemCoords),
             connections: this._cloneConnections(connections),
             actionType: Logger.FIND_ITEM_CONNECTION_COORDS_ACTION_TYPES.OUT_OF_LAYOUT_BOUNDS,
-            gridWidth: SizesResolver.outerWidth($("#demoLayout .gridView .grid").get(0)),
-            gridHeight: SizesResolver.outerHeight($("#demoLayout .gridView .grid").get(0))
+            gridWidth: SizesResolver.outerWidth(this._grid),
+            gridHeight: SizesResolver.outerHeight(this._grid)
         };
         this._findItemConnectionCoordsData.push(logData); 
     },
@@ -202,8 +208,8 @@ var Logger = {
             maybeIntersectableConnections: this._cloneConnections(maybeIntersectableConnections),
             connections: this._cloneConnections(connections),
             actionType: Logger.FIND_ITEM_CONNECTION_COORDS_ACTION_TYPES.INTERSECTION_FOUND,
-            gridWidth: SizesResolver.outerWidth($("#demoLayout .gridView .grid").get(0)),
-            gridHeight: SizesResolver.outerHeight($("#demoLayout .gridView .grid").get(0))
+            gridWidth: SizesResolver.outerWidth(this._grid),
+            gridHeight: SizesResolver.outerHeight(this._grid)
         };
         this._findItemConnectionCoordsData.push(logData);
     },
@@ -221,8 +227,8 @@ var Logger = {
             connectionsBelowCurrent: this._cloneConnections(connectionsBelowCurrent),
             connections: this._cloneConnections(connections),
             actionType: Logger.FIND_ITEM_CONNECTION_COORDS_ACTION_TYPES.WRONG_SORTING,
-            gridWidth: SizesResolver.outerWidth($("#demoLayout .gridView .grid").get(0)),
-            gridHeight: SizesResolver.outerHeight($("#demoLayout .gridView .grid").get(0))
+            gridWidth: SizesResolver.outerWidth(this._grid),
+            gridHeight: SizesResolver.outerHeight(this._grid)
         };
         this._findItemConnectionCoordsData.push(logData);
     },
@@ -236,8 +242,23 @@ var Logger = {
             itemCoords: this._cloneObject(itemCoords),
             connections: this._cloneConnections(connections),
             actionType: Logger.FIND_ITEM_CONNECTION_COORDS_ACTION_TYPES.VERTICAL_INTERSECTIONS_ERROR,
-            gridWidth: SizesResolver.outerWidth($("#demoLayout .gridView .grid").get(0)),
-            gridHeight: SizesResolver.outerHeight($("#demoLayout .gridView .grid").get(0))
+            gridWidth: SizesResolver.outerWidth(this._grid),
+            gridHeight: SizesResolver.outerHeight(this._grid)
+        };
+        this._findItemConnectionCoordsData.push(logData);
+    },
+
+    logFindItemConnectionCoordsHorizontalIntersectionsError: function(connector, itemCoords, connections) {
+        var logData = {
+            heading: "noIntersectionsStrategy more than 1 horizontal intersection",
+            subheading: this._getConnectorLabel(connector) + "<br>" +
+                        this._getItemCoordsLabel(itemCoords),
+            connector: this._cloneObject(connector),
+            itemCoords: this._cloneObject(itemCoords),
+            connections: this._cloneConnections(connections),
+            actionType: Logger.FIND_ITEM_CONNECTION_COORDS_ACTION_TYPES.HORIZONTAL_INTERSECTIONS_ERROR,
+            gridWidth: SizesResolver.outerWidth(this._grid),
+            gridHeight: SizesResolver.outerHeight(this._grid)
         };
         this._findItemConnectionCoordsData.push(logData);
     },
@@ -251,8 +272,8 @@ var Logger = {
             connections: this._cloneConnections(connections),
             item: item,
             actionType: Logger.FIND_ITEM_CONNECTION_COORDS_ACTION_TYPES.FOUND,
-            gridWidth: SizesResolver.outerWidth($("#demoLayout .gridView .grid").get(0)),
-            gridHeight: SizesResolver.outerHeight($("#demoLayout .gridView .grid").get(0))
+            gridWidth: SizesResolver.outerWidth(this._grid),
+            gridHeight: SizesResolver.outerHeight(this._grid)
         };
         this._findItemConnectionCoordsData.push(logData);
     }
@@ -274,6 +295,7 @@ Logger.FIND_ITEM_CONNECTION_COORDS_ACTION_TYPES = {
     INTERSECTION_FOUND: "intersectionFound",
     WRONG_SORTING: "wrongSorting",
     VERTICAL_INTERSECTIONS_ERROR: "verticalIntersectionsError",
+    HORIZONTAL_INTERSECTIONS_ERROR: "horizontalIntersectionsError",
     FOUND: "found"
 };
 Logger.EVENT_NEW_OPERATION = "Logger.newOperationAdded";
