@@ -1,4 +1,11 @@
-Gridifier.VerticalGrid.Appender = function(gridifier, settings, connectors, connections, guid, renderer, normalizer) {
+Gridifier.VerticalGrid.Appender = function(gridifier, 
+                                           settings, 
+                                           connectors, 
+                                           connections, 
+                                           guid, 
+                                           renderer, 
+                                           normalizer,
+                                           operation) {
     var me = this;
 
     this._gridifier = null;
@@ -14,7 +21,8 @@ Gridifier.VerticalGrid.Appender = function(gridifier, settings, connectors, conn
     this._connectionsIntersector = null;
     this._guid = null;
     this._renderer = null;
-    this._normalizer = normalizer;
+    this._normalizer = null;
+    this._operation = null;
 
     this._css = {
     };
@@ -40,6 +48,7 @@ Gridifier.VerticalGrid.Appender = function(gridifier, settings, connectors, conn
         me._guid = guid;
         me._renderer = renderer;
         me._normalizer = normalizer;
+        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -112,12 +121,12 @@ Gridifier.VerticalGrid.Appender.prototype.append = function(item) {
 }
 
 Gridifier.VerticalGrid.Appender.prototype._initConnectors = function() {
-    if(this._gridifier.isInitialOperation(Gridifier.OPERATIONS.APPEND)) {
+    if(this._operation.isInitialOperation(Gridifier.OPERATIONS.APPEND)) {
         this.createInitialConnector();
         return;
     }
 
-    if(!this._gridifier.isCurrentOperationSameAsPrevious(Gridifier.OPERATIONS.APPEND)) {
+    if(!this._operation.isCurrentOperationSameAsPrevious(Gridifier.OPERATIONS.APPEND)) {
         this.recreateConnectorsPerAllConnectedItems();
         Logger.log(                     // @system-log-start
             "initConnectors",

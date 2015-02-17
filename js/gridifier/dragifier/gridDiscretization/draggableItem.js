@@ -130,7 +130,7 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._initDraggableItem
 }
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._initDraggableItemConnection = function() {
-    this._draggableItemConnection = this._gridifier.findConnectionByItem(this._draggableItem);
+    this._draggableItemConnection = this._connections.findConnectionByItem(this._draggableItem);
     this._draggableItemConnection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = true;
 }
 

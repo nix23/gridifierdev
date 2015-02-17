@@ -6,6 +6,9 @@ Gridifier.HorizontalGrid.Connections = function(gridifier, guid, settings) {
     this._settings = null;
 
     this._itemCoordsExtractor = null;
+    this._sizesTransformer = null;
+    this._connectionsCore = null;
+    this._connectionsHorizontalIntersector = null;
 
     this._connections = [];
     this._ranges = null;
@@ -20,13 +23,22 @@ Gridifier.HorizontalGrid.Connections = function(gridifier, guid, settings) {
         me._gridifier = gridifier;
         me._guid = guid;
         me._settings = settings;
+
         me._ranges = new Gridifier.HorizontalGrid.ConnectionsRanges(me);
         me._ranges.init();
+
         me._sorter = new Gridifier.HorizontalGrid.ConnectionsSorter(
             me, me._settings, me._guid
         );
         me._itemCoordsExtractor = new Gridifier.HorizontalGrid.ItemCoordsExtractor(
             me._gridifier
+        );
+
+        me._connectionsCore = new Gridifier.Connections(
+            me._gridifier, me, me._guid, me._sizesTransformer, me._sorter
+        );
+        me._connectionsHorizontalIntersector = new Gridifier.HorizontalGrid.ConnectionsHorizontalIntersector(
+            me, me._settings, me._itemCoordsExtractor
         );
     };
 
@@ -43,6 +55,10 @@ Gridifier.HorizontalGrid.Connections = function(gridifier, guid, settings) {
 
     this._construct();
     return this;
+}
+
+Gridifier.HorizontalGrid.Connections.prototype.setSizesTransformerInstance = function(sizesTransformer) {
+    this._sizesTransformer = sizesTransformer;
 }
 
 Gridifier.HorizontalGrid.Connections.prototype.attachConnectionToRanges = function(connection) {
@@ -75,7 +91,7 @@ Gridifier.HorizontalGrid.Connections.prototype.mapAllIntersectedAndLeftConnectio
 }
 
 Gridifier.HorizontalGrid.Connections.prototype.getLastColHorizontallyExpandedConnections = function() {
-    return this._lastColHorizontallyExpandedConnections;
+    return this._connectionsHorizontalIntersector.getLastColHorizontallyExpandedConnections();
 }
 
 Gridifier.HorizontalGrid.Connections.prototype.get = function() {
@@ -90,31 +106,18 @@ Gridifier.HorizontalGrid.Connections.prototype.restore = function(connections) {
     this._connections = this._connections.concat(connections);
 }
 
-Gridifier.HorizontalGrid.Connections.prototype.remapAllItemGUIDS = function() {
-    this._guid.reinit();
+Gridifier.HorizontalGrid.Connections.prototype.findConnectionByItem = function(item) {
+    return this._connectionsCore.findConnectionByItem(item);
+}
 
-    var connections = this._sorter.sortConnectionsPerReappend(this._connections);
-    for(var i = 0; i < connections.length; i++) {
-        var newConnectionItemGUID = this._guid.markNextAppendedItem(connections[i].item);
-        connections[i].itemGUID = newConnectionItemGUID;
-    }
+Gridifier.HorizontalGrid.Connections.prototype.remapAllItemGUIDS = function() {
+    this._connectionsCore.remapAllItemGUIDS();
 }
 
 Gridifier.HorizontalGrid.Connections.prototype.add = function(item, itemConnectionCoords) {
-    var connection = itemConnectionCoords;
-    connection.item = item;
-    connection.itemGUID = Dom.toInt(this._guid.getItemGUID(item));
-    // @todo -> Move verticalOffset ot const???
-    if(!connection.hasOwnProperty("horizontalOffset"))
-        connection.horizontalOffset = 0; // Used with noIntersections strategy
-    if(!connection.hasOwnProperty(Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT))
-        connection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = false;
-    
-    // if(this._settings.isNoIntersectionsStrategy()) {
-    //     connection.itemWidthWithMargins = SizesResolverManager.outerWidth(item, true);
-    // }
-
+    var connection = this._connectionsCore.createItemConnection(item, itemConnectionCoords);
     this._connections.push(connection);
+
     return connection;
 }
 
@@ -128,100 +131,29 @@ Gridifier.HorizontalGrid.Connections.prototype.removeConnection = function(conne
 }
 
 Gridifier.HorizontalGrid.Connections.prototype.getConnectionsByItemGUIDS = function(itemGUIDS) {
-    var connections = [];
-
-    for(var i = 0; i < this._connections.length; i++) {
-        for(var j = 0; j < itemGUIDS.length; j++) {
-            if(this._connections[i].itemGUID == itemGUIDS[j]) {
-                connections.push(this._connections[i]);
-                break;
-            }
-        }
-    }
-
-    return connections;
+    return this._connectionsCore.getConnectionsByItemGUIDS(itemGUIDS);
 }
 
 Gridifier.HorizontalGrid.Connections.prototype.syncConnectionParams = function(connectionsData) {
-    for(var i = 0; i < connectionsData.length; i++) {
-        for(var j = 0; j < this._connections.length; j++) {
-            if(this._connections[j].itemGUID == connectionsData[i].itemGUID) {
-                this._connections[j].horizontalOffset = connectionsData[i].horizontalOffset;
-                this._connections[j].x1 = connectionsData[i].x1;
-                this._connections[j].x2 = connectionsData[i].x2;
-                this._connections[j].y1 = connectionsData[i].y1;
-                this._connections[j].y2 = connectionsData[i].y2;
-
-                // if(this._settings.isNoIntersectionsStrategy()) {
-                //     this._connections[j].itemWidthWithMargins = connectionsData[i].itemWidthWithMargins;
-                // }
-
-                break;
-            }
-        }
-    }
+    this._connectionsCore.syncConnectionParams(connectionsData);
 }
 
 Gridifier.HorizontalGrid.Connections.prototype.getMinConnectionWidth = function() {
-    if(this._connections.length == 0)
-        return 0;
-
-    var me = this;
-    var gridX2 = this._gridifier.getGridX2();
-
-    // Sometimes fast dragging breaks coordinates of some connections.
-    // In such cases we should recalculate connection item width.
-    var getConnectionWidth = function(i) {
-        if(me._connections[i].x1 >= me._connections[i].x2 || me._connections[i].x1 < 0
-            || me._connections[i].x2 > gridX2) {
-            var connectionWidth = SizesResolverManager.outerWidth(me._connections[i].item, true);
-        }
-        else {
-            var connectionWidth = me._connections[i].x2 - me._connections[i].x1 + 1;
-        }
-
-        return connectionWidth;
-    };
-
-    var minConnectionWidth = getConnectionWidth(0);
-    for(var i = 1; i < this._connections.length; i++) {
-        var connectionWidth = getConnectionWidth(i);
-        if(connectionWidth < minConnectionWidth)
-            minConnectionWidth = connectionWidth;
-    }
-
-    return minConnectionWidth;
+    return this._connectionsCore.getMinConnectionWidth();
 }
 
 Gridifier.HorizontalGrid.Connections.prototype.getMinConnectionHeight = function() {
-    if(this._connections.length == 0)
-        return 0;
+    return this._connectionsCore.getMinConnectionHeight();
+}
 
-    var me = this;
-    var gridY2 = this._gridifier.getGridY2();
+Gridifier.HorizontalGrid.Connections.prototype.isAnyConnectionItemGUIDSmallerThan = function(comparableConnections, 
+                                                                                             item) {
+    return this._connectionsCore.isAnyConnectionItemGUIDSmallerThan(comparableConnections, item);
+}
 
-    // Sometimes fast dragging breaks coordinates of some connections.
-    // In such cases we should recalculate connection item height.
-    var getConnectionHeight = function(i) {
-        if(me._connections[i].y1 >= me._connections[i].y2 || me._connections[i].y1 < 0
-            || me._connections[i].y2 > gridY2) {
-            var connectionHeight = SizesResolverManager.outerHeight(me._connections[i].item, true);
-        }
-        else {
-            var connectionHeight = me._connections[i].y2 - me._connections[i].y1 + 1;
-        }
-
-        return connectionHeight;
-    };
-
-    var minConnectionHeight = getConnectionHeight(0);
-    for(var i = 1; i < this._connections.length; i++) {
-        var connectionHeight = getConnectionHeight(i);
-        if(connectionHeight < minConnectionHeight)
-            minConnectionHeight = connectionHeight;
-    }
-
-    return minConnectionHeight;
+Gridifier.HorizontalGrid.Connections.prototype.isAnyConnectionItemGUIDBiggerThan = function(comparableConnections,
+                                                                                            item) {
+    return this._connectionsCore.isAnyConnectionItemGUIDBiggerThan(comparableConnections, item);
 }
 
 Gridifier.HorizontalGrid.Connections.prototype.getAllConnectionsBehindX = function(x) {
@@ -235,18 +167,6 @@ Gridifier.HorizontalGrid.Connections.prototype.getAllConnectionsBehindX = functi
     return connections;
 }
 
-Gridifier.HorizontalGrid.Connections.prototype.isAnyConnectionItemGUIDSmallerThan = function(comparableConnections, 
-                                                                                             item) {
-    var connectionItemGUID = this._guid.getItemGUID(item);
-
-    for(var i = 0; i < comparableConnections.length; i++) {
-        var comparableConnectionItemGUID = this._guid.getItemGUID(comparableConnections[i].item);
-        if(comparableConnectionItemGUID < connectionItemGUID)
-            return true;
-    }
-
-    return false;
-}
 
 Gridifier.HorizontalGrid.Connections.prototype.getAllConnectionsBeforeX = function(x) {
     var connections = [];
@@ -258,151 +178,6 @@ Gridifier.HorizontalGrid.Connections.prototype.getAllConnectionsBeforeX = functi
     return connections;
 }
 
-Gridifier.HorizontalGrid.Connections.prototype.isAnyConnectionItemGUIDBiggerThan = function(comparableConnections,
-                                                                                            item) {
-    var connectionItemGUID = this._guid.getItemGUID(item);
-
-    for(var i = 0; i < comparableConnections.length; i++) {
-        var comparableConnectionItemGUID = this._guid.getItemGUID(comparableConnections[i].item);
-        if(comparableConnectionItemGUID > connectionItemGUID)
-            return true;
-    }
-
-    return false;
-}
-
-Gridifier.HorizontalGrid.Connections.prototype.isIntersectingMoreThanOneConnectionItemHorizontally = function(itemCoords) {
-    var me = this;
-    var intersectedConnectionItemIndexes = [];
-    
-    var isIntersectingHorizontallyAnyFromAlreadyIntersectedItems = function(connection) {
-        if(intersectedConnectionItemIndexes.length == 0)
-            return false;
-
-        for(var i = 0; i < intersectedConnectionItemIndexes.length; i++) {
-            var maybeIntersectableConnection = me._connections[intersectedConnectionItemIndexes[i]];
-            var isBefore = (connection.x1 < maybeIntersectableConnection.x1 && connection.x2 < maybeIntersectableConnection.x1);
-            var isBehind = (connection.x1 > maybeIntersectableConnection.x2 && connection.x2 > maybeIntersectableConnection.x2);
-
-            if(!isBefore && !isBehind)
-                return true;
-        }
-
-        return false;
-    };
-
-    var intersectedConnectionItemsCount = 0;
-    for(var i = 0; i < this._connections.length; i++) {
-        var maybeIntersectableConnection = this._connections[i];
-        var isBefore = (itemCoords.x1 < maybeIntersectableConnection.x1 && itemCoords.x2 < maybeIntersectableConnection.x1);
-        var isBehind = (itemCoords.x1 > maybeIntersectableConnection.x2 && itemCoords.x2 > maybeIntersectableConnection.x2);
-
-        if(!isBefore && !isBehind && !isIntersectingHorizontallyAnyFromAlreadyIntersectedItems(maybeIntersectableConnection)) {
-            intersectedConnectionItemIndexes.push(i);
-            intersectedConnectionItemsCount++;
-        }
-    }
-
-    return intersectedConnectionItemsCount > 1;
-}
-
-Gridifier.HorizontalGrid.Connections.prototype.getMostWideFromAllHorizontallyIntersectedConnections = function(itemCoords) {
-    var me = this;
-    var mostWideHorizontallyIntersectedConnection = null;
-
-    for(var i = 0; i < this._connections.length; i++) {
-        var maybeIntersectableConnection = this._connections[i];
-        var isBefore = (itemCoords.x1 < maybeIntersectableConnection.x1 && itemCoords.x2 < maybeIntersectableConnection.x1);
-        var isBehind = (itemCoords.x1 > maybeIntersectableConnection.x2 && itemCoords.x2 > maybeIntersectableConnection.x2);
-
-        if(!isBefore && !isBehind) {
-            if(mostWideHorizontallyIntersectedConnection == null)
-                mostWideHorizontallyIntersectedConnection = maybeIntersectableConnection;
-            else {
-                // @todo -> Should here add +1 in formulas?
-                var maybeIntersectableConnectionWidth = Math.abs(
-                    maybeIntersectableConnection.x2 - maybeIntersectableConnection.x1
-                );
-                var mostWideHorizontallyIntersectedConnectionWidth = Math.abs(
-                    mostWideHorizontallyIntersectedConnection.x2 - mostWideHorizontallyIntersectedConnection.x1
-                );
-
-                if(maybeIntersectableConnectionWidth > mostWideHorizontallyIntersectedConnectionWidth)
-                    mostWideHorizontallyIntersectedConnection = maybeIntersectableConnection;
-            }
-        }
-    }
-
-    return mostWideHorizontallyIntersectedConnection;
-}
-
-Gridifier.HorizontalGrid.Connections.prototype.getAllHorizontallyIntersectedConnections = function(itemCoords) {
-    var me = this;
-    var horizontallyIntersectedConnections = [];
-
-    for(var i = 0; i < this._connections.length; i++) {
-        var maybeIntersectableConnection = this._connections[i];
-        var isBefore = (itemCoords.x1 < maybeIntersectableConnection.x1 && itemCoords.x2 < maybeIntersectableConnection.x1);
-        var isBehind = (itemCoords.x1 > maybeIntersectableConnection.x2 && itemCoords.x2 > maybeIntersectableConnection.x2);
-
-        if(!isBefore && !isBehind) 
-            horizontallyIntersectedConnections.push(maybeIntersectableConnection);
-    }
-
-    return horizontallyIntersectedConnections;
-}
-
-Gridifier.HorizontalGrid.Connections.prototype.expandHorizontallyAllColConnectionsToMostWide = function(newConnection) {
-    var mostWideConnection = this.getMostWideFromAllHorizontallyIntersectedConnections(newConnection);
-    if(mostWideConnection == null)
-        return;
-    
-    var colConnectionsToExpand = this.getAllHorizontallyIntersectedConnections(newConnection);
-    this._lastColHorizontallyExpandedConnections = colConnectionsToExpand;
-
-    for(var i = 0; i < colConnectionsToExpand.length; i++) {
-        colConnectionsToExpand[i].x1 = mostWideConnection.x1;
-        colConnectionsToExpand[i].x2 = mostWideConnection.x2;
-
-        if(this._settings.isHorizontalGridLeftAlignmentType())
-            colConnectionsToExpand[i].horizontalOffset = 0;
-        else if(this._settings.isHorizontalGridCenterAlignmentType()) {
-            var x1 = colConnectionsToExpand[i].x1;
-            var x2 = colConnectionsToExpand[i].x2;
-
-            var targetSizes = this._itemCoordsExtractor.getItemTargetSizes(colConnectionsToExpand[i].item);
-            // @todo -> Check if (-1) is required
-            var itemWidth = targetSizes.targetWidth - 1;
-
-            //var itemWidth = colConnectionsToExpand[i].itemWidthWithMargins - 1;
-            // @todo fix to return Math.round(Math.abs(y2 - y1 + 1) / 2) - Math.round(itemHeight / 2);
-            colConnectionsToExpand[i].horizontalOffset = Math.round(Math.abs(x2 - x1) / 2) - Math.round(itemWidth / 2);
-        }
-        else if(this._settings.isHorizontalGridRightAlignmentType()) {
-            var x1 = colConnectionsToExpand[i].x1;
-            var x2 = colConnectionsToExpand[i].x2;
-
-            var targetSizes = this._itemCoordsExtractor.getItemTargetSizes(colConnectionsToExpand[i].item);
-            // @todo -> Check if (-1) is required
-            var itemWidth = targetSizes.targetWidth - 1;
-            
-            //var itemWidth = colConnectionsToExpand[i].itemWidthWithMargins - 1;
-            // @todo fix (y2 - y1 + 1) 
-            colConnectionsToExpand[i].horizontalOffset = Math.abs(x2 - x1) - itemWidth;
-        }
-    }
-}
-
-// Gridifier.HorizontalGrid.Connections.prototype.getMaxXFromAllConnections = function() {
-//     var maxX = 0;
-//     for(var i = 0; i < this._connections.length; i++) {
-//         if(this._connections[i].x2 > maxX)
-//             maxX = this._connections[i].x2;
-//     }
-
-//     return maxX;
-// }
-
 Gridifier.HorizontalGrid.Connections.prototype.getMaxYFromAllConnections = function() {
     var maxY = 0;
     for(var i = 0; i < this._connections.length; i++) {
@@ -411,6 +186,22 @@ Gridifier.HorizontalGrid.Connections.prototype.getMaxYFromAllConnections = funct
     }
 
     return maxY;
+}
+
+Gridifier.HorizontalGrid.Connections.prototype.isIntersectingMoreThanOneConnectionItemHorizontally = function(itemCoords) {
+    return this._connectionsHorizontalIntersector.isIntersectingMoreThanOneConnectionItemHorizontally(itemCoords);
+}
+
+Gridifier.HorizontalGrid.Connections.prototype.getMostWideFromAllHorizontallyIntersectedConnections = function(itemCoords) {
+    return this._connectionsHorizontalIntersector.getMostWideFromAllHorizontallyIntersectedConnections(itemCoords);
+}
+
+Gridifier.HorizontalGrid.Connections.prototype.getAllHorizontallyIntersectedConnections = function(itemCoords) {
+    return this._connectionsHorizontalIntersector.getAllHorizontallyIntersectedConnections(itemCoords);
+}
+
+Gridifier.HorizontalGrid.Connections.prototype.expandHorizontallyAllColConnectionsToMostWide = function(newConnection) {
+    this._connectionsHorizontalIntersector.expandHorizontallyAllColConnectionsToMostWide(newConnection);
 }
 
 Gridifier.HorizontalGrid.Connections.prototype.normalizeHorizontalPositionsOfAllConnectionsAfterPrepend = function(newConnection,

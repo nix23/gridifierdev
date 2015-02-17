@@ -1,4 +1,11 @@
-Gridifier.HorizontalGrid.Prepender = function(gridifier, settings, connectors, connections, guid, renderer, normalizer) {
+Gridifier.HorizontalGrid.Prepender = function(gridifier, 
+                                              settings, 
+                                              connectors, 
+                                              connections, 
+                                              guid, 
+                                              renderer, 
+                                              normalizer,
+                                              operation) {
     var me = this;
 
     this._gridifier = null;
@@ -15,6 +22,7 @@ Gridifier.HorizontalGrid.Prepender = function(gridifier, settings, connectors, c
     this._guid = null;
     this._renderer = null;
     this._normalizer = null;
+    this._operation = null;
 
     this._css = {
     };
@@ -40,6 +48,7 @@ Gridifier.HorizontalGrid.Prepender = function(gridifier, settings, connectors, c
         me._guid = guid;
         me._renderer = renderer;
         me._normalizer = normalizer;
+        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -121,12 +130,12 @@ Gridifier.HorizontalGrid.Prepender.prototype.prepend = function(item) {
 }
 
 Gridifier.HorizontalGrid.Prepender.prototype._initConnectors = function() {
-    if(this._gridifier.isInitialOperation(Gridifier.OPERATIONS.PREPEND)) {
+    if(this._operation.isInitialOperation(Gridifier.OPERATIONS.PREPEND)) {
         this.createInitialConnector();
         return;
     }
 
-    if(!this._gridifier.isCurrentOperationSameAsPrevious(Gridifier.OPERATIONS.PREPEND)) {
+    if(!this._operation.isCurrentOperationSameAsPrevious(Gridifier.OPERATIONS.PREPEND)) {
         this.recreateConnectorsPerAllConnectedItems();
         Logger.log(     // @system-log-start
             "initConnectors",

@@ -4,6 +4,7 @@ Gridifier.EventEmitter = function(gridifier) {
     me._gridifier = null;
 
     me._showCallbacks = [];
+    me._gridSizesChangeCallbacks = [];
 
     this._css = {
     };
@@ -30,10 +31,15 @@ Gridifier.EventEmitter = function(gridifier) {
 Gridifier.EventEmitter.prototype._bindEmitterToGridifier = function() {
     var me = this;
     this._gridifier.onShow = function(callbackFn) { me.onShow.call(me, callbackFn); };
+    this._gridifier.onGridSizesChange = function(callbackFn) { me.onGridSizesChange.call(me, callbackFn); };
 }
 
 Gridifier.EventEmitter.prototype.onShow = function(callbackFn) {
     this._showCallbacks.push(callbackFn);
+}
+
+Gridifier.EventEmitter.prototype.onGridSizesChange = function(callbackFn) {
+    this._gridSizesChangeCallbacks.push(callbackFn);
 }
 
 // @todo -> Add off events
@@ -43,5 +49,11 @@ Gridifier.EventEmitter.prototype.onShow = function(callbackFn) {
 Gridifier.EventEmitter.prototype.emitShowEvent = function(item) {
     for(var i = 0; i < this._showCallbacks.length; i++) {
         this._showCallbacks[i](item);
+    }
+}
+
+Gridifier.EventEmitter.prototype.emitGridSizesChangeEvent = function() {
+    for(var i = 0; i < this._gridSizesChangeCallbacks.length; i++) {
+        this._gridSizesChangeCallbacks[i]();
     }
 }

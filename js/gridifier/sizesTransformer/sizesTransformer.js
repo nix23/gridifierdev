@@ -6,7 +6,8 @@ Gridifier.SizesTransformer = function(gridifier,
                                       guid,
                                       appender,
                                       reversedAppender,
-                                      normalizer) {
+                                      normalizer,
+                                      operation) {
     var me = this;
 
     this._gridifier = null;
@@ -18,6 +19,7 @@ Gridifier.SizesTransformer = function(gridifier,
     this._appender = null;
     this._reversedAppender = null;
     this._normalizer = null;
+    this._operation = null;
 
     this._connectorsCleaner = null;
     this._connectorsSelector = null;
@@ -43,6 +45,7 @@ Gridifier.SizesTransformer = function(gridifier,
         me._appender = appender;
         me._reversedAppender = reversedAppender;
         me._normalizer = normalizer;
+        me._operation = operation;
 
         if(me._settings.isVerticalGrid()) {
             me._connectorsCleaner = new Gridifier.VerticalGrid.ConnectorsCleaner(
@@ -79,7 +82,8 @@ Gridifier.SizesTransformer = function(gridifier,
                 me._normalizer,
                 me,
                 me._connectorsCleaner,
-                me._transformedItemMarker
+                me._transformedItemMarker,
+                me._operation
             );
         }
         else if(me._settings.isHorizontalGrid()) {
@@ -93,7 +97,8 @@ Gridifier.SizesTransformer = function(gridifier,
                 me._normalizer,
                 me,
                 me._connectorsCleaner,
-                me._transformedItemMarker
+                me._transformedItemMarker,
+                me._operation
             );
         }
 

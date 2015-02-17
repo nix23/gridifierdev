@@ -4,7 +4,8 @@ Gridifier.HorizontalGrid.ReversedAppender = function(gridifier,
                                                      connections,
                                                      guid,
                                                      renderer,
-                                                     normalizer) {
+                                                     normalizer,
+                                                     operation) {
     var me = this;
 
     this._gridifier = null;
@@ -20,7 +21,8 @@ Gridifier.HorizontalGrid.ReversedAppender = function(gridifier,
     this._connectionsIntersector = null;
     this._guid = null;
     this._renderer = null;
-    this._normalizer = normalizer;
+    this._normalizer = null;
+    this._operation = null;
 
     this._css = {
     };
@@ -46,6 +48,7 @@ Gridifier.HorizontalGrid.ReversedAppender = function(gridifier,
         me._guid = guid;
         me._renderer = renderer;
         me._normalizer = normalizer;
+        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -108,12 +111,12 @@ Gridifier.HorizontalGrid.ReversedAppender.prototype.reversedAppend = function(it
 }
 
 Gridifier.HorizontalGrid.ReversedAppender.prototype._initConnectors = function() {
-    if(this._gridifier.isInitialOperation(Gridifier.OPERATIONS.REVERSED_APPEND)) {
+    if(this._operation.isInitialOperation(Gridifier.OPERATIONS.REVERSED_APPEND)) {
         this.createInitialConnector();
         return;
     }
 
-    if(!this._gridifier.isCurrentOperationSameAsPrevious(Gridifier.OPERATIONS.REVERSED_APPEND)) {
+    if(!this._operation.isCurrentOperationSameAsPrevious(Gridifier.OPERATIONS.REVERSED_APPEND)) {
         this.recreateConnectorsPerAllConnectedItems();
         Logger.log(                     // @system-log-start
             "initConnectors",

@@ -7,7 +7,8 @@ Gridifier.HorizontalGrid.TransformerConnectors = function(gridifier,
                                                           normalizer,
                                                           sizesTransformer,
                                                           connectorsCleaner,
-                                                          transformedItemMarker) {
+                                                          transformedItemMarker,
+                                                          operation) {
     var me = this;
 
     this._gridifier = null;
@@ -22,6 +23,7 @@ Gridifier.HorizontalGrid.TransformerConnectors = function(gridifier,
     this._connectorsCleaner = null;
     this._transformedItemMarker = null;
     this._itemsReappender = null;
+    this._operation = null;
 
     this._css = {
     };
@@ -37,6 +39,7 @@ Gridifier.HorizontalGrid.TransformerConnectors = function(gridifier,
         me._sizesTransformer = sizesTransformer;
         me._connectorsCleaner = connectorsCleaner;
         me._transformedItemMarker = transformedItemMarker;
+        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -60,11 +63,11 @@ Gridifier.HorizontalGrid.TransformerConnectors.prototype.setItemsReappenderInsta
 Gridifier.HorizontalGrid.TransformerConnectors.prototype.recreateConnectorsPerFirstItemReappendOnTransform = function(firstItemToReappend,
                                                                                                                       firstConnectionToReappend) {
     if(this._itemsReappender.isReversedAppendShouldBeUsedPerItemInsert(firstItemToReappend)) {
-        this._gridifier.setLastOperation(Gridifier.OPERATIONS.REVERSED_APPEND);
+        this._operation.setLastOperation(Gridifier.OPERATIONS.REVERSED_APPEND);
         this._recreateConnectorsPerReversedItemReappend(firstItemToReappend, firstConnectionToReappend);
     }
     else {
-        this._gridifier.setLastOperation(Gridifier.OPERATIONS.APPEND);
+        this._operation.setLastOperation(Gridifier.OPERATIONS.APPEND);
         this._recreateConnectorsPerDefaultItemReappend(firstItemToReappend, firstConnectionToReappend);
     }
 }

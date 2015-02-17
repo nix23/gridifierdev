@@ -54,13 +54,13 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridType = gridType;
         me._gridifierSettings = gridifierSettings;
         
-        //me._gridifierSettings.prependType = "mirroredPrepend";
+        me._gridifierSettings.prependType = "mirroredPrepend";
         //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
-        //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
-        //me._gridifierSettings.alignmentType = "center";
+        me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
+        me._gridifierSettings.alignmentType = "center";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
-         me._gridifierSettings.dragifier = true;
+         me._gridifierSettings.dragifier = false;
 
         me._attachView();
         me._gridifierDynamicSettings = new DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings();
@@ -357,16 +357,23 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         });
 
         // @todo -> Listen for correct event
-        $(me._gridifier).on("gridifier.gridSizesChange", function() {
+        me._gridifier.onGridSizesChange(function() {
             $(me).trigger(DemoLayoutBuilder.DemoLayout.EVENT_DEMO_LAYOUT_SIZES_CHANGE);
         });
 
         $(me._grid).on(DemoLayoutBuilder.DemoLayout.HorizontalGrid.EVENT_GRID_VERTICAL_RESIZE, function() {
+            me._gridifier.triggerResize();
+            $(me).trigger(DemoLayoutBuilder.DemoLayout.EVENT_DEMO_LAYOUT_SIZES_CHANGE);
+        });
+
+        $(me._grid).on(DemoLayoutBuilder.DemoLayout.VerticalGrid.EVENT_GRID_SIZES_CHANGE, function() {
+            me._gridifier.triggerResize();
             $(me).trigger(DemoLayoutBuilder.DemoLayout.EVENT_DEMO_LAYOUT_SIZES_CHANGE);
         });
 
         // @todo -> Replace this.(Tmp for testing)
-        //me._$view.on("click", ".gridItem", function() { ///console.log("toggle");
+        me._$view.on("click", ".gridItem", function() { ///console.log("toggle");
+            me._gridifier.transformSizes($(this), "*2", "*2");
            //me._gridifier.toggleSizes($(this), "*2", "*2");
             // if($(this).hasClass("transformedItem")) {
             //     $(this).removeClass("transformedItem");
@@ -378,7 +385,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
                 // me._gridifier.transformSizes($(this), "50%", "400px");
                 //me._gridifier.transformSizes($(this), "400px", "400px");
             //}
-        //});
+        });
 
         // @todo -> Replace this.(tmp for testing)
         me._$gridTopControlsView.find(".gridControlsHeadingMenu").on("click", function() {

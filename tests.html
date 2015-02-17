@@ -56,15 +56,30 @@
     <script src="js/services/accordion.js"></script>
     <script src="js/services/browserDetector.js"></script>
     <script src="js/services/resizeEventNormalizer.js"></script>
+    <script src="js/services/event.js"></script>
 
     <!-- Gridifier includes -->
     <script src="js/gridifier/gridifier.js"></script>
-    <script src="js/gridifier/collector.js"></script>
-    <script src="js/gridifier/settings.js"></script>
-    <script src="js/gridifier/error.js"></script>
-    <script src="js/gridifier/guid.js"></script>
-    <script src="js/gridifier/normalizer.js"></script>
-    <script src="js/gridifier/eventEmitter.js"></script>
+
+    <script src="js/gridifier/core/collector.js"></script>
+    <script src="js/gridifier/core/connections.js"></script>
+    <script src="js/gridifier/core/settings.js"></script>
+    <script src="js/gridifier/core/error.js"></script>
+    <script src="js/gridifier/core/guid.js"></script>
+    <script src="js/gridifier/core/normalizer.js"></script>
+    <script src="js/gridifier/core/eventEmitter.js"></script>
+    <script src="js/gridifier/core/operation.js"></script>
+
+    <script src="js/gridifier/operations/queue.js"></script>
+    <script src="js/gridifier/operations/prepend.js"></script>
+    <script src="js/gridifier/operations/append.js"></script>
+
+    <script src="js/gridifier/transformerOperations/optionsParser.js"></script>
+    <script src="js/gridifier/transformerOperations/toggle.js"></script>
+    <script src="js/gridifier/transformerOperations/transform.js"></script>
+
+    <script src="js/gridifier/grid/grid.js"></script>
+    <script src="js/gridifier/grid/gridSizesUpdater.js"></script>
 
     <script src="js/gridifier/discretizer/discretizer.js"></script>
     <script src="js/gridifier/discretizer/horizontalCore.js"></script>
@@ -103,6 +118,7 @@
     
     <script src="js/gridifier/horizontalGrid/connections/connections.js"></script>
     <script src="js/gridifier/horizontalGrid/connections/connectionsIntersector.js"></script>
+    <script src="js/gridifier/horizontalGrid/connections/connectionsHorizontalIntersector.js"></script>
     <script src="js/gridifier/horizontalGrid/connections/connectionsRanges.js"></script>
     <script src="js/gridifier/horizontalGrid/connections/connectionsSorter.js"></script>
 
@@ -113,6 +129,7 @@
 
     <script src="js/gridifier/verticalGrid/connections/connections.js"></script>
     <script src="js/gridifier/verticalGrid/connections/connectionsIntersector.js"></script>
+    <script src="js/gridifier/verticalGrid/connections/connectionsVerticalIntersector.js"></script>
     <script src="js/gridifier/verticalGrid/connections/connectionsRanges.js"></script>
     <script src="js/gridifier/verticalGrid/connections/connectionsSorter.js"></script>
 

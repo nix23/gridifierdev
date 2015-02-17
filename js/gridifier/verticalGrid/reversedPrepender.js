@@ -4,7 +4,8 @@ Gridifier.VerticalGrid.ReversedPrepender = function(gridifier,
                                                     connections, 
                                                     guid, 
                                                     renderer, 
-                                                    normalizer) {
+                                                    normalizer,
+                                                    operation) {
     var me = this;
 
     this._gridifier = null;
@@ -21,6 +22,7 @@ Gridifier.VerticalGrid.ReversedPrepender = function(gridifier,
     this._guid = null;
     this._renderer = null;
     this._normalizer = null;
+    this._operation = null;
 
     this._css = {
     };
@@ -46,6 +48,7 @@ Gridifier.VerticalGrid.ReversedPrepender = function(gridifier,
         me._guid = guid;
         me._renderer = renderer;
         me._normalizer = normalizer;
+        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -127,12 +130,12 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype.reversedPrepend = function(it
 }
 
 Gridifier.VerticalGrid.ReversedPrepender.prototype._initConnectors = function() {
-    if(this._gridifier.isInitialOperation(Gridifier.OPERATIONS.REVERSED_PREPEND)) {
+    if(this._operation.isInitialOperation(Gridifier.OPERATIONS.REVERSED_PREPEND)) {
         this.createInitialConnector();
         return;
     }
 
-    if(!this._gridifier.isCurrentOperationSameAsPrevious(Gridifier.OPERATIONS.REVERSED_PREPEND)) {
+    if(!this._operation.isCurrentOperationSameAsPrevious(Gridifier.OPERATIONS.REVERSED_PREPEND)) {
         this.recreateConnectorsPerAllConnectedItems();
         Logger.log(     // @system-log-start
             "initConnectors",
