@@ -174,11 +174,12 @@ var Dom = {
         prefixedBackfaceVisibilityProps: ["WebkitBackfaceVisibility", "MozBackfaceVisibility", "backfaceVisibility"],
 
         transition: function(DOMElem, propertyValue) {
-            for(var i = 0; i < this.prefixedTransitionProps.length; i++)
-                DOMElem.style[this.prefixedTransitionProps[i]] = propertyValue;
+            // for(var i = 0; i < this.prefixedTransitionProps.length; i++)
+            //     DOMElem.style[this.prefixedTransitionProps[i]] = propertyValue;
+            DOMElem.style[Prefixer.get("transition", DOMElem)] = propertyValue;
         },
 
-        transitionProperty: function(DOMElem, property) {
+        transitionProperty: function(DOMElem, property) { 
             var currentTransition = DOMElem.style[Prefixer.get("transition", DOMElem)];
             if(currentTransition.length == 0) {
                 DOMElem.style[Prefixer.get("transition", DOMElem)] = property;
@@ -204,8 +205,9 @@ var Dom = {
         },
 
         transform: function(DOMElem, propertyValue) {
-            for(var i = 0; i < this.prefixedTransformProps.length; i++)
-                DOMElem.style[this.prefixedTransformProps[i]] = propertyValue;
+            // for(var i = 0; i < this.prefixedTransformProps.length; i++)
+            //     DOMElem.style[this.prefixedTransformProps[i]] = propertyValue;
+            DOMElem.style[Prefixer.get("transform", DOMElem)] = propertyValue;
         },
 
         // @todo -> Process array of values???

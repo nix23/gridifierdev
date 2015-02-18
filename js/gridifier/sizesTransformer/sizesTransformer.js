@@ -71,36 +71,20 @@ Gridifier.SizesTransformer = function(gridifier,
             me._connections, me._connectionsSorter, me._settings
         );
 
-        if(me._settings.isVerticalGrid()) {
-            me._transformerConnectors = new Gridifier.VerticalGrid.TransformerConnectors(
-                me._gridifier,
-                me._connectors,
-                me._connections,
-                me._guid,
-                me._appender,
-                me._reversedAppender,
-                me._normalizer,
-                me,
-                me._connectorsCleaner,
-                me._transformedItemMarker,
-                me._operation
-            );
-        }
-        else if(me._settings.isHorizontalGrid()) {
-            me._transformerConnectors = new Gridifier.HorizontalGrid.TransformerConnectors(
-                me._gridifier,
-                me._connectors,
-                me._connections,
-                me._guid,
-                me._appender,
-                me._reversedAppender,
-                me._normalizer,
-                me,
-                me._connectorsCleaner,
-                me._transformedItemMarker,
-                me._operation
-            );
-        }
+        me._transformerConnectors = new Gridifier.TransformerConnectors(
+            me._gridifier,
+            me._settings,
+            me._connectors,
+            me._connections,
+            me._guid,
+            me._appender,
+            me._reversedAppender,
+            me._normalizer,
+            me,
+            me._connectorsCleaner,
+            me._transformedItemMarker,
+            me._operation
+        );
 
         me._itemsReappender = new Gridifier.SizesTransformer.ItemsReappender(
             me._gridifier,

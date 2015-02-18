@@ -1,17 +1,19 @@
-Gridifier.VerticalGrid.TransformerConnectors = function(gridifier,
-                                                        connectors,
-                                                        connections,
-                                                        guid,
-                                                        appender,
-                                                        reversedAppender,
-                                                        normalizer,
-                                                        sizesTransformer,
-                                                        connectorsCleaner,
-                                                        transformedItemMarker,
-                                                        operation) {
+Gridifier.TransformerConnectors = function(gridifier,
+                                           settings,
+                                           connectors,
+                                           connections,
+                                           guid,
+                                           appender,
+                                           reversedAppender,
+                                           normalizer,
+                                           sizesTransformer,
+                                           connectorsCleaner,
+                                           transformedItemMarker,
+                                           operation) {
     var me = this;
 
     this._gridifier = null;
+    this._settings = null;
     this._connectors = null;
     this._connections = null;
     this._guid = null;
@@ -30,6 +32,7 @@ Gridifier.VerticalGrid.TransformerConnectors = function(gridifier,
 
     this._construct = function() {
         me._gridifier = gridifier;
+        me._settings = settings;
         me._connectors = connectors;
         me._connections = connections;
         me._guid = guid;
@@ -56,12 +59,12 @@ Gridifier.VerticalGrid.TransformerConnectors = function(gridifier,
     return this;
 }
 
-Gridifier.VerticalGrid.TransformerConnectors.prototype.setItemsReappenderInstance = function(itemsReappender) {
+Gridifier.TransformerConnectors.prototype.setItemsReappenderInstance = function(itemsReappender) {
     this._itemsReappender = itemsReappender;
 }
 
-Gridifier.VerticalGrid.TransformerConnectors.prototype.recreateConnectorsPerFirstItemReappendOnTransform = function(firstItemToReappend,
-                                                                                                                    firstConnectionToReappend) {
+Gridifier.TransformerConnectors.prototype.recreateConnectorsPerFirstItemReappendOnTransform = function(firstItemToReappend,
+                                                                                                       firstConnectionToReappend) {
     if(this._itemsReappender.isReversedAppendShouldBeUsedPerItemInsert(firstItemToReappend)) {
         this._operation.setLastOperation(Gridifier.OPERATIONS.REVERSED_APPEND);
         this._recreateConnectorsPerReversedItemReappend(firstItemToReappend, firstConnectionToReappend);
@@ -73,8 +76,8 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype.recreateConnectorsPerFirs
 }
 
 // @todo -> Change to use firstConnectionToReappend
-Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerReversedItemReappend = function(firstItemToReappend,
-                                                                                                             firstConnectionToReappend) {
+Gridifier.TransformerConnectors.prototype._recreateConnectorsPerReversedItemReappend = function(firstItemToReappend,
+                                                                                                firstConnectionToReappend) {
     this._connections.reinitRanges();
     this._reversedAppender.recreateConnectorsPerAllConnectedItems();
     Logger.log( // @system-log-start
@@ -83,17 +86,26 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerRev
         this._connectors.get(),
         this._connections.get()
     );          // @system-log-end
-    this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
+
+    if(this._settings.isVerticalGrid()) {
+        this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
+        var logFunction = "deleteAllIntersectedFromBottomConnectors"; // @system-log
+    }
+    else if(this._settings.isHorizontalGrid()) {
+        this._connectorsCleaner.deleteAllIntersectedFromRightConnectors();
+        var logFunction = "deleteAllIntersectedFromRightConnectors"; // @system-log
+    }
+
     Logger.log( // @system-log-start
         "recreateConnectorsPerReversedTransformedConnectionAppend",
-        "deleteAllIntersectedFromBottomConnectors",
+        logFunction,
         this._connectors.get(),
         this._connections.get()
     );          // @system-log-end
 }
 
-Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerDefaultItemReappend = function(firstItemToReappend,
-                                                                                                            firstConnectionToReappend) {
+Gridifier.TransformerConnectors.prototype._recreateConnectorsPerDefaultItemReappend = function(firstItemToReappend,
+                                                                                               firstConnectionToReappend) {
     this._connections.reinitRanges();
     this._appender.recreateConnectorsPerAllConnectedItems();
     Logger.log( // @system-log-start
@@ -102,10 +114,19 @@ Gridifier.VerticalGrid.TransformerConnectors.prototype._recreateConnectorsPerDef
         this._connectors.get(),
         this._connections.get()
     );          // @system-log-end
-    this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
+    
+    if(this._settings.isVerticalGrid()) {
+        this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
+        var logFunction = "deleteAllIntersectedFromBottomConnectors"; // @system-log
+    }
+    else if(this._settings.isHorizontalGrid()) {
+        this._connectorsCleaner.deleteAllIntersectedFromRightConnectors();
+        var logFunction = "deleteAllIntersectedFromRightConnectors"; // @system-log
+    }
+
     Logger.log( // @system-log-start
         "recreateConnectorsPerDefaultTransformedConnectionAppend",
-        "deleteAllIntersectedFromBottomConnectors",
+        logFunction,
         this._connectors.get(),
         this._connections.get()
     );          // @system-log-end

@@ -60,7 +60,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         me._gridifierSettings.alignmentType = "center";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
-         me._gridifierSettings.dragifier = false;
+        me._gridifierSettings.dragifier = false;
 
         me._attachView();
         me._gridifierDynamicSettings = new DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings();

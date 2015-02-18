@@ -137,22 +137,22 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             );
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER) {
-            var rendererCoordsChangerFunction = this._settings.getRendererCoordsChanger();
+            var rendererCoordsChangerFunction = this._settings.getCoordsChanger();
             rendererCoordsChangerFunction(connectionToProcess.item, left, top);
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_TRANSFORMED) {
             var targetWidth = this._scheduledConnectionsToProcessData[i].targetWidth;
             var targetHeight = this._scheduledConnectionsToProcessData[i].targetHeight;
 
-            var rendererSizesChangerFunction = this._settings.getRendererSizesChanger();
+            var rendererSizesChangerFunction = this._settings.getSizesChanger();
             rendererSizesChangerFunction(connectionToProcess.item, targetWidth, targetHeight);
 
-            var rendererCoordsChangerFunction = this._settings.getRendererCoordsChanger();
+            var rendererCoordsChangerFunction = this._settings.getCoordsChanger();
             rendererCoordsChangerFunction(connectionToProcess.item, left, top);
         }
         // @todo -> Merge with second cond?
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED) {
-            var rendererCoordsChangerFunction = this._settings.getRendererCoordsChanger();
+            var rendererCoordsChangerFunction = this._settings.getCoordsChanger();
             rendererCoordsChangerFunction(connectionToProcess.item, left, top);
         }
     }

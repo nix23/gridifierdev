@@ -204,7 +204,7 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._adjustDraggableIt
     this._draggableItemConnection.y1 = draggableItemNewCoords.y1;
     this._draggableItemConnection.y2 = draggableItemNewCoords.y2;
 
-    var rendererCoordsChanger = this._settings.getRendererCoordsChanger();
+    var rendererCoordsChanger = this._settings.getCoordsChanger();
     rendererCoordsChanger(this._draggableItem, draggableItemNewCoords.x1, draggableItemNewCoords.y1);
 
     this._dragifierRenderer.render(

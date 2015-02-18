@@ -13,10 +13,9 @@ Prefixer = {
             return propertyName;
         }
 
-        propertyName = propertyName.charAt(0).toUpperCase() + propertyName.slice(1);
-        var prefixedPropertyName;
+        var propertyName = propertyName.charAt(0).toUpperCase() + propertyName.slice(1);
         for(var i = 0; i < this.prefixes.length; i++) {
-            prefixedPropertyName = this.prefixes[i] + propertyName;
+            var prefixedPropertyName = this.prefixes[i] + propertyName;
             if(typeof style[prefixedPropertyName] === "string")
                 return prefixedPropertyName;
         }
@@ -29,11 +28,11 @@ Prefixer = {
         if(typeof style[propertyName] === "string") {
             return propertyName;
         }
-
+        
         var originalPropertyName = propertyName;
         var propertyName = propertyName.charAt(0).toUpperCase() + propertyName.slice(1);
         for(var i = 0; i < this.prefixes.length; i++) {
-            prefixedPropertyName = this.prefixes[i] + propertyName;
+            var prefixedPropertyName = this.prefixes[i] + propertyName; 
             if(typeof style[prefixedPropertyName] === "string")
                 return "-" + this.prefixes[i].toLowerCase() + "-" + originalPropertyName;
         }

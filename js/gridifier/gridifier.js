@@ -276,6 +276,7 @@ Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
 
 // @todo -> Add to items numbers besides GUIDS, and rebuild them on item deletes(Also use in sorting per drag?)
 
+Gridifier.Api = {};
 Gridifier.HorizontalGrid = {};
 Gridifier.VerticalGrid = {};
 Gridifier.Operations = {};
