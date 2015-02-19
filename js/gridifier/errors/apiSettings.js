@@ -123,7 +123,7 @@ Gridifier.ApiSettingsErrors.prototype._markAsApiSettingsError = function() {
     this._isApiSettingsError = true;
 }
 
-Gridifier.ApiSettingsErrors.prototype._invalidOneOfToggleParamsError = function(paramName) {
+Gridifier.ApiSettingsErrors.prototype._invalidOneOfToggleParamsError = function() {
     var msg = this._error.getErrorMsgPrefix();
 
     msg += "Wrong one of the 'toggle' params. It must be an object with show and hide function definitions.";
@@ -139,7 +139,7 @@ Gridifier.ApiSettingsErrors.prototype._invalidOneOfFunctionTypesError = function
     this._errorMsg = msg;
 }
 
-Gridifier.ApiSettingsErrors.prototype._invalidParamValueError = function() {
+Gridifier.ApiSettingsErrors.prototype._invalidParamValueError = function(paramName) {
     var msg = this._error.getErrorMsgPrefix();
 
     msg += "Wrong '" + paramName + "' param value. It must be a function(which will be used by default), ";

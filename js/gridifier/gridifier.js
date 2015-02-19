@@ -8,6 +8,7 @@ Gridifier = function(grid, settings) {
     this._guid = null;
     this._eventEmitter = null;
     this._operation = null;
+    this._resorter = null;
 
     this._connectors = null;
     this._connections = null;
@@ -93,6 +94,10 @@ Gridifier = function(grid, settings) {
             );
         }
 
+        me._resorter = new Gridifier.Resorter(
+            me, me._collector, me._connections, me._settings, me._guid
+        );
+
         me._sizesTransformer = new Gridifier.SizesTransformer(
             me,
             me._settings,
@@ -103,7 +108,8 @@ Gridifier = function(grid, settings) {
             me._appender,
             me._reversedAppender,
             me._normalizer,
-            me._operation
+            me._operation,
+            me._resorter
         );
         me._connections.setSizesTransformerInstance(me._sizesTransformer);
 
@@ -236,6 +242,11 @@ Gridifier.prototype.filterBy = function(filterFunctionName) {
     return this;
 }
 
+Gridifier.prototype.resort = function() {
+    this.retransformAllSizes(true);
+    return this;
+}
+
 Gridifier.prototype.collect = function() {
     ;
 }
@@ -262,8 +273,8 @@ Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchT
     return this;
 }
 
-Gridifier.prototype.retransformAllSizes = function() {
-    this._transformOperation.executeRetransformAllSizes();
+Gridifier.prototype.retransformAllSizes = function(applyResort) {
+    this._transformOperation.executeRetransformAllSizes(applyResort || false);
 }
 
 Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {

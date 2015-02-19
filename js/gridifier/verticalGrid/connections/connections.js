@@ -33,7 +33,7 @@ Gridifier.VerticalGrid.Connections = function(gridifier, guid, settings) {
         );
 
         me._connectionsCore = new Gridifier.Connections(
-            me._gridifier, me, me._guid, me._sizesTransformer, me._sorter
+            me._gridifier, me, me._guid, me._sorter
         );
         me._connectionsVerticalIntersector = new Gridifier.VerticalGrid.ConnectionsVerticalIntersector(
             me, me._settings, me._itemCoordsExtractor
@@ -57,6 +57,7 @@ Gridifier.VerticalGrid.Connections = function(gridifier, guid, settings) {
 
 Gridifier.VerticalGrid.Connections.prototype.setSizesTransformerInstance = function(sizesTransformer) {
     this._sizesTransformer = sizesTransformer;
+    this._connectionsCore.setSizesTransformerInstance(sizesTransformer);
 }
 
 Gridifier.VerticalGrid.Connections.prototype.attachConnectionToRanges = function(connection) {

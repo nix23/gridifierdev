@@ -7,6 +7,8 @@ Gridifier.Collector = function(settings, grid) {
     this._collectorFunction = null;
     this._markingFunction = null;
 
+    this._connectedItemMarker = null;
+
     this._css = {
     };
 
@@ -16,6 +18,8 @@ Gridifier.Collector = function(settings, grid) {
 
         me._createCollectorFunction();
         me._createMarkingFunction();
+
+        me._connectedItemMarker = new Gridifier.ConnectedItemMarker();
     };
 
     this._bindEvents = function() {
@@ -138,6 +142,18 @@ Gridifier.Collector.prototype.collect = function() {
     var items = this._collectorFunction(this._grid);
     // @todo -> Filter only not yet processed items, also check
     // at append and prepend??? (item.attr != grid.itemDataStates.LAYOUTED)
+}
+
+Gridifier.Collector.prototype.collectAllConnectedItems = function() {
+    var items = this._collectorFunction(this._grid);
+
+    var connectedItems = [];
+    for(var i = 0; i < items.length; i++) {
+        if(this._connectedItemMarker.isItemConnected(items[i]))
+            connectedItems.push(items[i]);
+    }
+
+    return connectedItems;
 }
 
 Gridifier.Collector.prototype.toDOMCollection = function(items) {

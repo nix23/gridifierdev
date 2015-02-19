@@ -7,7 +7,8 @@ Gridifier.SizesTransformer = function(gridifier,
                                       appender,
                                       reversedAppender,
                                       normalizer,
-                                      operation) {
+                                      operation,
+                                      resorter) {
     var me = this;
 
     this._gridifier = null;
@@ -20,6 +21,7 @@ Gridifier.SizesTransformer = function(gridifier,
     this._reversedAppender = null;
     this._normalizer = null;
     this._operation = null;
+    this._resorter = null;
 
     this._connectorsCleaner = null;
     this._connectorsSelector = null;
@@ -46,6 +48,7 @@ Gridifier.SizesTransformer = function(gridifier,
         me._reversedAppender = reversedAppender;
         me._normalizer = normalizer;
         me._operation = operation;
+        me._resorter = resorter;
 
         if(me._settings.isVerticalGrid()) {
             me._connectorsCleaner = new Gridifier.VerticalGrid.ConnectorsCleaner(
@@ -182,7 +185,7 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transfo
     setTimeout(function() { applyTransform.call(me); }, 0);
 }
 
-Gridifier.SizesTransformer.prototype.retransformAllConnections = function() {
+Gridifier.SizesTransformer.prototype.retransformAllConnections = function(applyResort) {
     var connections = this._connections.get();
 
     if(!this._itemsReappender.isReappendQueueEmpty()) {
@@ -205,6 +208,9 @@ Gridifier.SizesTransformer.prototype.retransformAllConnections = function() {
     
     if(connections.length == 0)
         return;
+
+    if(applyResort)
+        this._resorter.resort();
 
     var applyRetransform = function() {
         connections = this._connectionsSorter.sortConnectionsPerReappend(connections);

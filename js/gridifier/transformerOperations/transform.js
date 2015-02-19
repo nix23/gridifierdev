@@ -87,10 +87,10 @@ Gridifier.TransformerOperations.Transform.prototype._parseTransformationData = f
     return transformationData;
 }
 
-Gridifier.TransformerOperations.Transform.prototype.executeRetransformAllSizes = function() {
+Gridifier.TransformerOperations.Transform.prototype.executeRetransformAllSizes = function(applyResort) {
     Logger.startLoggingOperation(   // @system-log-start
         Logger.OPERATION_TYPES.TRANSFORM_SIZES,
         "retransformAllSizes"
     );                              // @system-log-end
-    this._sizesTransformer.retransformAllConnections();
+    this._sizesTransformer.retransformAllConnections(applyResort);
 }

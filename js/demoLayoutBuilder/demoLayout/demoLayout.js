@@ -59,8 +59,48 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         me._gridifierSettings.alignmentType = "center";
-        me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
+        //me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
         me._gridifierSettings.dragifier = false;
+
+        // me._gridifierSettings.sort = function(firstItem, secondItem) { 
+        //     var firstItemClassParts = firstItem.getAttribute("class").split(" ");
+        //     var secondItemClassParts = secondItem.getAttribute("class").split(" ");
+
+        //     var firstItemColorClass = "";
+        //     var secondItemColorClass = "";
+
+        //     for(var i = 0; i < firstItemClassParts.length; i++) {
+        //         if(firstItemClassParts[i].search("Bg") !== -1) {
+        //             firstItemColorClass = firstItemClassParts[i];
+        //             break;
+        //         }
+        //     }
+
+        //     for(var i = 0; i < secondItemClassParts.length; i++) {
+        //         if(secondItemClassParts[i].search("Bg") !== -1) {
+        //             secondItemColorClass = secondItemClassParts[i];
+        //             break;
+        //         }
+        //     }
+
+        //     var classNameToOrderNumber = function(className) {
+        //         if(className == "gridFirstBg") return 1;
+        //         else if(className == "gridSecondBg") return 2;
+        //         else if(className == "gridThirdBg") return 3;
+        //         else if(className == "gridFourthBg") return 4;
+        //         else if(className == "gridFifthBg") return 5;
+        //     }
+
+        //     var firstItemOrderNum = classNameToOrderNumber(firstItemColorClass);
+        //     var secondItemOrderNum = classNameToOrderNumber(secondItemColorClass);
+
+        //     if(firstItemOrderNum < secondItemOrderNum)
+        //         return -1;
+        //     else if(firstItemOrderNum == secondItemOrderNum)
+        //         return 0;
+        //     else if(firstItemOrderNum > secondItemOrderNum)
+        //         return 1;
+        // };
 
         me._attachView();
         me._gridifierDynamicSettings = new DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings();
@@ -245,6 +285,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         Logger.setGrid(me._grid.getGrid().get(0));
         
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
+        window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
 
         // me._gridifier._settings.setRendererCoordsChanger('default');
         // me._gridifier._settings.setRendererSizesChanger('default');

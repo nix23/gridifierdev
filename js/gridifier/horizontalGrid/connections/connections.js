@@ -14,8 +14,6 @@ Gridifier.HorizontalGrid.Connections = function(gridifier, guid, settings) {
     this._ranges = null;
     this._sorter = null;
 
-    this._lastColHorizontallyExpandedConnections = null;
-
     this._css = {
     };
 
@@ -35,7 +33,7 @@ Gridifier.HorizontalGrid.Connections = function(gridifier, guid, settings) {
         );
 
         me._connectionsCore = new Gridifier.Connections(
-            me._gridifier, me, me._guid, me._sizesTransformer, me._sorter
+            me._gridifier, me, me._guid, me._sorter
         );
         me._connectionsHorizontalIntersector = new Gridifier.HorizontalGrid.ConnectionsHorizontalIntersector(
             me, me._settings, me._itemCoordsExtractor
@@ -59,6 +57,7 @@ Gridifier.HorizontalGrid.Connections = function(gridifier, guid, settings) {
 
 Gridifier.HorizontalGrid.Connections.prototype.setSizesTransformerInstance = function(sizesTransformer) {
     this._sizesTransformer = sizesTransformer;
+    this._connectionsCore.setSizesTransformerInstance(sizesTransformer);
 }
 
 Gridifier.HorizontalGrid.Connections.prototype.attachConnectionToRanges = function(connection) {

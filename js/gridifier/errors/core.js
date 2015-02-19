@@ -67,7 +67,7 @@ Gridifier.CoreErrors.prototype._markAsCoreError = function() {
 Gridifier.CoreErrors.prototype._notDomElementError = function() {
     var msg = this._error.getErrorMsgPrefix();
     
-    msg += "Can't get layout object. Currently gridifier supports ";
+    msg += "Can't get grid layout DOM element. Currently gridifier supports ";
     msg += "native DOM elements, as well as jQuery objects. ";
 
     this._errorMsg = msg;
@@ -84,9 +84,9 @@ Gridifier.CoreErrors.prototype._connectionByItemNotFoundError = function() {
     var msg = this._error.getErrorMsgPrefix();
     var error = this._error.getErrorObjectParam();
 
-    msg += "Item, sizes of which were requested to transform, is not connected to Gridifier.\n";
-    msg += "Transformed item: \n" + error.item + "\n";
-    msg += "Gridifier items:\n";
+    msg += "Can't find connection by item.\n";
+    msg += "Item: \n" + error.item + "\n";
+    msg += "Connections:\n";
     for(var i = 0; i < error.connections.length; i++)
         msg += error.connections[i] + "\n";
 

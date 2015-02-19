@@ -1,7 +1,6 @@
 Gridifier.Connections = function(gridifier,
                                  connections,
                                  guid,
-                                 sizesTransformer,
                                  connectionsSorter) {
     var me = this;
 
@@ -10,6 +9,7 @@ Gridifier.Connections = function(gridifier,
     this._guid = null;
     this._sizesTransformer = null;
     this._connectionsSorter = null;
+    this._connectedItemMarker = null;
 
     this._css = {
     };
@@ -18,8 +18,8 @@ Gridifier.Connections = function(gridifier,
         me._gridifier = gridifier;
         me._connections = connections;
         me._guid = guid;
-        me._sizesTransformer = sizesTransformer;
         me._connectionsSorter = connectionsSorter;
+        me._connectedItemMarker = new Gridifier.ConnectedItemMarker();
     };
 
     this._bindEvents = function() {
@@ -35,6 +35,10 @@ Gridifier.Connections = function(gridifier,
 
     this._construct();
     return this;
+}
+
+Gridifier.Connections.prototype.setSizesTransformerInstance = function(sizesTransformer) {
+    this._sizesTransformer = sizesTransformer;
 }
 
 Gridifier.Connections.prototype.findConnectionByItem = function(item) {
@@ -108,6 +112,8 @@ Gridifier.Connections.prototype.createItemConnection = function(item, itemConnec
         connection.verticalOffset = 0;
     if(!connection.hasOwnProperty(Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT))
         connection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = false;
+
+    this._connectedItemMarker.markItemAsConnected(item);
 
     return connection;
 }
