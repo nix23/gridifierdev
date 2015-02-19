@@ -40,6 +40,13 @@ Gridifier.Renderer.Connections.prototype.markConnectionItemAsRendered = function
     );
 }
 
+Gridifier.Renderer.Connections.prototype.unmarkConnectionItemAsRendered = function(connection) {
+    Dom.css.removeClass(
+        connection.item,
+        Gridifier.Renderer.Connections.CONNECTION_RENDERED_ITEM_DATA_CLASS
+    );
+}
+
 Gridifier.Renderer.Connections.prototype.getCssLeftPropertyValuePerConnection = function(connection) {
     if(this._settings.isVerticalGrid()) {
         // @old -> var left = connection.x1 / (this._gridifier.getGridX2() + 1) * 100;

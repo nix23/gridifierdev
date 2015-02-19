@@ -48,6 +48,10 @@ Gridifier.GUID.prototype.setItemGUID = function(item, itemGUID) {
     );
 }
 
+Gridifier.GUID.prototype.removeItemGUID = function(item) {
+    item.removeAttribute(Gridifier.GUID.GUID_DATA_ATTR);
+}
+
 Gridifier.GUID.prototype.markNextAppendedItem = function(item) {
     this._maxItemGUID++;
     item.setAttribute(Gridifier.GUID.GUID_DATA_ATTR, this._maxItemGUID);

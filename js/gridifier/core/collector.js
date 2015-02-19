@@ -89,6 +89,17 @@ Gridifier.Collector.prototype.ensureAllItemsAreAttachedToGrid = function(items) 
     }
 }
 
+Gridifier.Collector.prototype.ensureAllItemsAreConnectedToGrid = function(items) {
+    for(var i = 0; i < items.length; i++) {
+        if(!this._connectedItemMarker.isItemConnected(items[i])) {
+            new Gridifier.Error(
+                Gridifier.Error.ERROR_TYPES.COLLECTOR.ITEM_NOT_CONNECTED_TO_GRID,
+                items[i]
+            );
+        }
+    }
+}
+
 Gridifier.Collector.prototype._isItemWiderThanGridWidth = function(item) {
     return SizesResolverManager.outerWidth(item, true) > SizesResolverManager.outerWidth(this._grid);
 }
@@ -140,8 +151,7 @@ Gridifier.Collector.prototype.ensureAllItemsCanBeAttachedToGrid = function(items
 
 Gridifier.Collector.prototype.collect = function() {
     var items = this._collectorFunction(this._grid);
-    // @todo -> Filter only not yet processed items, also check
-    // at append and prepend??? (item.attr != grid.itemDataStates.LAYOUTED)
+    return items;
 }
 
 Gridifier.Collector.prototype.collectAllConnectedItems = function() {
@@ -154,6 +164,18 @@ Gridifier.Collector.prototype.collectAllConnectedItems = function() {
     }
 
     return connectedItems;
+}
+
+Gridifier.Collector.prototype.collectAllDisconnectedItems = function() {
+    var items = this._collectorFunction(this._grid);
+
+    var disconnectedItems = [];
+    for(var i = 0; i < items.length; i++) {
+        if(!this._connectedItemMarker.isItemConnected(items[i]))
+            disconnectedItems.push(items[i]);
+    }
+
+    return disconnectedItems;
 }
 
 Gridifier.Collector.prototype.toDOMCollection = function(items) {

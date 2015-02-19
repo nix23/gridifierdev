@@ -21,7 +21,7 @@ Gridifier.Settings = function(settings, eventEmitter) {
     this._sortDispersionMode = null;
     this._sortDispersionValue = null;
 
-    // @todo -> Pass global param duration to gridifier?
+    // @todo -> Pass global param duration to gridifier?(Or render/show duration???) Pass them as params in API calls???
     // @todo -> Move this functions to separate files to allow easily override them?
     //               User should have the ability to overide rotateX and rotateY in such manner,
     //               that they would call for example scale in ie10/ie9 etc....

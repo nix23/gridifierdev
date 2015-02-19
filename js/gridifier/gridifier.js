@@ -9,6 +9,8 @@ Gridifier = function(grid, settings) {
     this._eventEmitter = null;
     this._operation = null;
     this._resorter = null;
+    this._filtrator = null;
+    this._disconnector = null;
 
     this._connectors = null;
     this._connections = null;
@@ -97,6 +99,12 @@ Gridifier = function(grid, settings) {
         me._resorter = new Gridifier.Resorter(
             me, me._collector, me._connections, me._settings, me._guid
         );
+        me._disconnector = new Gridifier.Disconnector(
+            me, me._collector, me._connections, me._connectors, me._settings, me._guid, me._appender, me._reversedAppender
+        );
+        me._filtrator = new Gridifier.Filtrator(
+            me, me._collector, me._connections, me._settings, me._guid, me._disconnector
+        );
 
         me._sizesTransformer = new Gridifier.SizesTransformer(
             me,
@@ -108,8 +116,7 @@ Gridifier = function(grid, settings) {
             me._appender,
             me._reversedAppender,
             me._normalizer,
-            me._operation,
-            me._resorter
+            me._operation
         );
         me._connections.setSizesTransformerInstance(me._sizesTransformer);
 
@@ -236,19 +243,33 @@ Gridifier.prototype.sortBy = function(sortFunctionName) {
     return this;
 }
 
-Gridifier.prototype.filterBy = function(filterFunctionName) {
-    // @todo -> Drop from connections unfiltered items
+Gridifier.prototype.filterBy = function(filterFunctionName) { 
+    this._sizesTransformer.stopRetransformAllConnectionsQueue();
     this._settings.setFilter(filterFunctionName);
+    this._filtrator.filter();
+    this.retransformAllSizes();
+
     return this;
 }
 
 Gridifier.prototype.resort = function() {
-    this.retransformAllSizes(true);
+    this._sizesTransformer.stopRetransformAllConnectionsQueue();
+    this._resorter.resort();
+    this.retransformAllSizes();
+
     return this;
 }
 
 Gridifier.prototype.collect = function() {
     ;
+}
+
+Gridifier.prototype.disconnect = function(items) {
+    this._sizesTransformer.stopRetransformAllConnectionsQueue();
+    this._disconnector.disconnect(items);
+    this.retransformAllSizes();
+
+    return this;
 }
 
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
@@ -273,8 +294,8 @@ Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchT
     return this;
 }
 
-Gridifier.prototype.retransformAllSizes = function(applyResort) {
-    this._transformOperation.executeRetransformAllSizes(applyResort || false);
+Gridifier.prototype.retransformAllSizes = function() {
+    this._transformOperation.executeRetransformAllSizes();
 }
 
 Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {

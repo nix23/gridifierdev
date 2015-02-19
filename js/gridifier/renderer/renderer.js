@@ -63,6 +63,22 @@ Gridifier.Renderer.prototype.showConnections = function(connections) {
     }
 }
 
+Gridifier.Renderer.prototype.hideConnections = function(connections) {
+    var me = this;
+
+    if(!Dom.isArray(connections))
+        var connections = [connections];
+
+    for(var i = 0; i < connections.length; i++) {
+        var left = this._rendererConnections.getCssLeftPropertyValuePerConnection(connections[i]);
+        var top = this._rendererConnections.getCssTopPropertyValuePerConnection(connections[i]);
+        this._rendererConnections.unmarkConnectionItemAsRendered(connections[i]);
+
+        this._rendererSchedulator.reinit();
+        this._rendererSchedulator.scheduleHide(connections[i], left, top);
+    }
+}
+
 Gridifier.Renderer.prototype.renderTransformedConnections = function(connections) {
     for(var i = 0; i < connections.length; i++) {
         var left = this._rendererConnections.getCssLeftPropertyValuePerConnection(connections[i]);

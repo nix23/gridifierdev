@@ -130,7 +130,8 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
             // @todo -> Change other transition params to transform
             // @todo -> Apply prefixer to all settings
             //Dom.css3.transitionProperty(item, Prefixer.getForCSS('transform', item) +" 1ms ease");
-            Dom.css3.transitionProperty(item, "none");
+            //Dom.css3.transitionProperty(item, "none");
+            Dom.css3.transition(item, "none");
             
             // @todo -> Make multiple transform. Replace in all other settings
             //          (Rewrite all transitions and transforms in such manners)
@@ -149,20 +150,24 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
             }, 20); 
         },
 
-        "hide": function(item) {
+        "hide": function(item, itemClone, grid) {
+            itemClone.style.visibility = "visible";
+            item.style.visibility = "hidden";
+
             if(!Dom.isBrowserSupportingTransitions()) {
-                item.style.visibility = "hidden";
+                itemClone.style.visibility = "hidden";
                 // @todo -> Send event
                 return;
             }
 
-            Dom.css3.transition(item, "transform 1000ms ease");
-            Dom.css3.transform(item, "scale(0)");
+            Dom.css3.transition(itemClone, Prefixer.getForCSS('transform', itemClone) + " 900ms ease");
+            //Dom.css3.transition(item, "transform 1000ms ease");
+            Dom.css3.transform(itemClone, "scale(0)");
+            //Dom.css3.transformProperty(item, "scale", 0);
             setTimeout(function() {
-                item.style.visibility = "hidden";
-                Dom.css3.transition(item, "transform 0s ease");
-                Dom.css3.transform(item, "scale(1)");
-            }, 20);
+                grid.removeChild(itemClone);
+                // @todo -> Emit event
+            }, 920);
             // Send event through global Gridifier.Event Object
         }
     };

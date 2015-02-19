@@ -41,7 +41,7 @@ Gridifier.Renderer.Schedulator = function(gridifier, settings, renderer) {
 
 Gridifier.Renderer.Schedulator.PROCESS_SCHEDULED_CONNECTIONS_TIMEOUT = 20;
 Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES = {
-    SHOW: 0, RENDER: 1, RENDER_TRANSFORMED: 2, RENDER_DEPENDED: 3
+    SHOW: 0, HIDE: 1, RENDER: 2, RENDER_TRANSFORMED: 3, RENDER_DEPENDED: 4
 };
 
 Gridifier.Renderer.Schedulator.prototype.reinit = function() {
@@ -58,6 +58,16 @@ Gridifier.Renderer.Schedulator.prototype.scheduleShow = function(connection, lef
     this._scheduledConnectionsToProcessData.push({
         connection: connection,
         processingType: Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.SHOW,
+        left: left,
+        top: top
+    });
+    this._schedule();
+}
+
+Gridifier.Renderer.Schedulator.prototype.scheduleHide = function(connection, left, top) {
+    this._scheduledConnectionsToProcessData.push({
+        connection: connection,
+        processingType: Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE,
         left: left,
         top: top
     });
@@ -133,6 +143,20 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var toggleFunction = this._settings.getToggle();
             toggleFunction.show(
                 connectionToProcess.item,
+                this._gridifier.getGrid()
+            );
+        }
+        else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
+            Dom.css.set(connectionToProcess.disconnectedItemClone, {
+                position: "absolute",
+                left: left,
+                top: top
+            });
+
+            var toggleFunction = this._settings.getToggle();
+            toggleFunction.hide(
+                connectionToProcess.item,
+                connectionToProcess.disconnectedItemClone,
                 this._gridifier.getGrid()
             );
         }

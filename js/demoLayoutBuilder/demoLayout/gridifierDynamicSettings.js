@@ -130,12 +130,14 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.TOGGLE_FUNCTIONS = {
 }
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.FILTER_FUNCTIONS = {
-    ALL: 0, BLUE: 1, VIOLET: 2, RED: 3, YELLOW: 4, GREEN: 5
+    ALL: "all", BLUE: "blue", VIOLET: "violet", RED: "red", YELLOW: "yellow", GREEN: "green"
 }
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.SORT_FUNCTIONS = {
     BY_GUID: 0, BY_ITEM_COLOR: 1
 }
+
+DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.EVENT_FILTER_SELECTED = "DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.EVENT_FILTER_SELECTED";
 
 /* Item sizes */
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.getAllItemSizes = function() {
@@ -308,26 +310,32 @@ DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.isVisibilityTogg
 /* Filter functions */
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setAllFilterFunction = function() {
     this._filterFunction = DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.FILTER_FUNCTIONS.ALL;
+    $(this).trigger(DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.EVENT_FILTER_SELECTED, [this._filterFunction]);
 }
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setBlueFilterFunction = function() {
     this._filterFunction = DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.FILTER_FUNCTIONS.BLUE;
+    $(this).trigger(DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.EVENT_FILTER_SELECTED, [this._filterFunction]);
 }
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setVioletFilterFunction = function() {
     this._filterFunction = DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.FILTER_FUNCTIONS.VIOLET;
+    $(this).trigger(DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.EVENT_FILTER_SELECTED, [this._filterFunction]);
 }
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setRedFilterFunction = function() {
     this._filterFunction = DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.FILTER_FUNCTIONS.RED;
+    $(this).trigger(DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.EVENT_FILTER_SELECTED, [this._filterFunction]);
 }
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setYellowFilterFunction = function() {
     this._filterFunction = DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.FILTER_FUNCTIONS.YELLOW;
+    $(this).trigger(DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.EVENT_FILTER_SELECTED, [this._filterFunction]);
 }
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.setGreenFilterFunction = function() {
     this._filterFunction = DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.FILTER_FUNCTIONS.GREEN;
+    $(this).trigger(DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.EVENT_FILTER_SELECTED, [this._filterFunction]);
 }
 
 DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.prototype.isAllFilterFunction = function() {

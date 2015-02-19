@@ -50,6 +50,10 @@ Gridifier.CollectorErrors.prototype._parseIfIsCollectorError = function(errorTyp
         this._markAsCollectorError();
         this._itemNotAttachedToGridError();
     }
+    else if(errorType == errors.ITEM_NOT_CONNECTED_TO_GRID) {
+        this._markAsCollectorError();
+        this._itemNotConnectedToGridError();
+    }
     else if(errorType == errors.ITEM_WIDER_THAN_GRID_WIDTH) {
         this._markAsCollectorError();
         this._itemWiderThanGridWidthError();
@@ -77,6 +81,15 @@ Gridifier.CollectorErrors.prototype._itemNotAttachedToGridError = function() {
     var msg = this._error.getErrorMsgPrefix();
 
     msg += "One of the appended/prepended items is not attached to grid. Item: '";
+    msg += this._error.getErrorParam() + "'.";
+
+    this._errorMsg = msg;
+}
+
+Gridifier.CollectorErrors.prototype._itemNotConnectedToGridError = function() {
+    var msg = this._error.getErrorMsgPrefix();
+
+    msg += "One of items is not connected to grid. Item: '";
     msg += this._error.getErrorParam() + "'.";
 
     this._errorMsg = msg;

@@ -59,7 +59,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         me._gridifierSettings.alignmentType = "center";
-        //me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
+        me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
         me._gridifierSettings.dragifier = false;
 
         // me._gridifierSettings.sort = function(firstItem, secondItem) { 
@@ -101,6 +101,45 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //     else if(firstItemOrderNum > secondItemOrderNum)
         //         return 1;
         // };
+
+        var itemFilterCore = function(item, itemClassName) {
+            var itemClassParts = item.getAttribute("class").split(" ");
+            var itemClass = "";
+
+            for(var i = 0; i < itemClassParts.length; i++) {
+                if(itemClassParts[i].search('Bg') !== -1) {
+                    itemClass = itemClassParts[i];
+                    break;
+                }
+            }
+
+            if(itemClass == itemClassName)
+                return true;
+            else
+                return false;
+        }
+
+        me._gridifierSettings.filter = {
+            "blue": function(item) {
+                return itemFilterCore(item, "gridFirstBg");
+            },
+
+            "violet": function(item) {
+                return itemFilterCore(item, "gridSecondBg");
+            },
+
+            "red": function(item) {
+                return itemFilterCore(item, "gridFourthBg");
+            },
+
+            "yellow": function(item) {
+                return itemFilterCore(item, "gridThirdBg");
+            },
+
+            "green": function(item) {
+                return itemFilterCore(item, "gridFifthBg");
+            }
+        };
 
         me._attachView();
         me._gridifierDynamicSettings = new DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings();
@@ -414,7 +453,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
         // @todo -> Replace this.(Tmp for testing)
         me._$view.on("click", ".gridItem", function() { ///console.log("toggle");
-            me._gridifier.transformSizes($(this), "*2", "*2");
+            me._gridifier.disconnect($(this));
+            //me._gridifier.transformSizes($(this), "*2", "*2");
            //me._gridifier.toggleSizes($(this), "*2", "*2");
             // if($(this).hasClass("transformedItem")) {
             //     $(this).removeClass("transformedItem");
@@ -430,7 +470,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
         // @todo -> Replace this.(tmp for testing)
         me._$gridTopControlsView.find(".gridControlsHeadingMenu").on("click", function() {
-            var $gridItems = $("#demoLayout .gridView").find(".gridItem");
+            var $gridItems = $("#demoLayout .gridView").find(".gridItem"); // @todo -> find only layouted items
             if($gridItems.length < 2)
                 return;
 
@@ -441,6 +481,10 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
                 [$secondGridItem, "*2", "*2"],
                 [$firstGridItem, "*2", "*2"]
             ]);
+        });
+
+        $(me._gridifierDynamicSettings).on(DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.EVENT_FILTER_SELECTED, function(event, filterName) {
+            me._gridifier.filterBy(filterName);
         });
     }
 

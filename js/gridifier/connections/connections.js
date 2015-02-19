@@ -113,7 +113,8 @@ Gridifier.Connections.prototype.createItemConnection = function(item, itemConnec
     if(!connection.hasOwnProperty(Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT))
         connection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = false;
 
-    this._connectedItemMarker.markItemAsConnected(item);
+    if(!this._connectedItemMarker.isItemConnected(item))
+        this._connectedItemMarker.markItemAsConnected(item);
 
     return connection;
 }
