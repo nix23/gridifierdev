@@ -178,7 +178,7 @@ Gridifier.Operations.Queue.prototype.scheduleInsertBeforeOperation = function(it
     var scheduleInsertBefore = function(items, beforeItem) {
         setTimeout(function() { 
             if(me._sizesTransformer.isTransformerQueueEmpty()) {
-                me._executeInsertBeforeOperation.call(me, items);
+                me._executeInsertBeforeOperation.call(me, items, beforeItem);
             }
             else {
                 me._queuedOperations.push({
@@ -199,7 +199,7 @@ Gridifier.Operations.Queue.prototype.scheduleInsertBeforeOperation = function(it
     }
 
     if(typeof batchSize == "undefined") {
-        scheduleInsertBefore.call(me, items);
+        scheduleInsertBefore.call(me, items, beforeItem);
         return;
     }
 
@@ -208,6 +208,48 @@ Gridifier.Operations.Queue.prototype.scheduleInsertBeforeOperation = function(it
     for(var i = 0; i < itemBatches.length; i++) {
         (function(itemBatch, i) {
             setTimeout(function() { scheduleInsertBefore.call(me, itemBatch, beforeItem); }, batchTimeout * i);
+        })(itemBatches[i], i);
+    }
+}
+
+Gridifier.Operations.Queue.prototype.scheduleInsertAfterOperation = function(items,
+                                                                             afterItem,
+                                                                             batchSize,
+                                                                             batchTimeout) {
+    var me = this;
+    var scheduleInsertAfter = function(items, afterItem) {
+        setTimeout(function() {
+            if(me._sizesTransformer.isTransformerQueueEmpty()) {
+                me._executeInsertAfterOperation.call(me, items, afterItem);
+            }
+            else {
+                me._queuedOperations.push({
+                    queuedOperationType: Gridifier.Operations.Queue.QUEUED_OPERATION_TYPES.INSERT_AFTER,
+                    items: items,
+                    afterItem: afterItem
+                });
+
+                if(me._isWaitingForTransformerQueueRelease)
+                    return;
+
+                setTimeout(function() {
+                    me._isWaitingForTransformerQueueRelease = true;
+                    me._processQueuedOperations.call(me);
+                }, Gridifier.Operations.Queue.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
+            }
+        }, 0);
+    }
+
+    if(typeof batchSize == "undefined") {
+        scheduleInsertAfter.call(me, items, afterItem);
+        return;
+    }
+
+    var batchTimeout = batchTimeout || Gridifier.Operations.Queue.DEFAULT_BATCH_TIMEOUT;
+    var itemBatches = this._packItemsToBatches(items, batchSize);
+    for(var i = 0; i < itemBatches.length; i++) {
+        (function(itemBatch, i) {
+            setTimeout(function() { scheduleInsertAfter.call(me, itemBatch, afterItem); }, batchTimeout * i);
         })(itemBatches[i], i);
     }
 }
@@ -265,6 +307,12 @@ Gridifier.Operations.Queue.prototype._processQueuedOperations = function() {
                 this._queuedOperations[i].beforeItem
             );
         }
+        else if(this._queuedOperations[i].queuedOperationType == queuedOperationTypes.INSERT_AFTER) {
+            this._executeInsertAfterOperation(
+                this._queuedOperations[i].items,
+                this._queuedOperations[i].afterItem
+            );
+        }
         else {
             var operationType = this._queuedOperations[i].queuedOperationType;
             throw new Error("Unknown queued operation type = '" + operationType + "'");
@@ -317,4 +365,8 @@ Gridifier.Operations.Queue.prototype._executeAppendOperation = function(items) {
 
 Gridifier.Operations.Queue.prototype._executeInsertBeforeOperation = function(items, beforeItem) {
     this._appendOperation.executeInsertBefore(items, beforeItem);
+}
+
+Gridifier.Operations.Queue.prototype._executeInsertAfterOperation = function(items, afterItem) { 
+    this._appendOperation.executeInsertAfter(items, afterItem);
 }

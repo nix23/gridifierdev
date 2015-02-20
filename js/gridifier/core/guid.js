@@ -38,7 +38,7 @@ Gridifier.GUID.prototype.reinitMaxGUID = function(newMaxGUID) {
         this._maxItemGUID = newMaxGUID;
 }
 
-Gridifier.GUID.prototype.getItemGUID = function(item) {
+Gridifier.GUID.prototype.getItemGUID = function(item) { 
     return Dom.toInt(item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR));
 }
 

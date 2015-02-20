@@ -83,6 +83,13 @@ Gridifier.Connections.prototype.remapAllItemGUIDS = function() {
     }
 }
 
+Gridifier.Connections.prototype.remapAllItemGUIDSInSortedConnections = function(connections) {
+    for(var i = 0; i < connections.length; i++) {
+        var newConnectionItemGUID = this._guid.markNextAppendedItem(connections[i].item);
+        connections[i].itemGUID = newConnectionItemGUID;
+    }
+}
+
 Gridifier.Connections.prototype.getConnectionsByItemGUIDS = function(itemGUIDS) {
     var connections = this._connections.get();
     var foundConnections = [];

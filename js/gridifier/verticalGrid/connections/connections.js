@@ -105,12 +105,50 @@ Gridifier.VerticalGrid.Connections.prototype.restore = function(connections) {
     this._connections = this._connections.concat(connections);
 }
 
+Gridifier.VerticalGrid.Connections.prototype.restoreOnCustomSortDispersionMode = function(connections) {
+    var currentConnections = this._sorter.sortConnectionsPerReappend(this._connections);
+    var lastConnection = currentConnections[currentConnections.length - 1];
+
+    if(this._settings.isDefaultAppend()) {
+        var minX = lastConnection.x1;
+        var maxY = lastConnection.y1;
+
+        var nextFakeX = minX - 1;
+        for(var i = 0; i < connections.length; i++) {
+            connections[i].x1 = nextFakeX;
+            connections[i].x2 = nextFakeX;
+            connections[i].y1 = maxY;
+            connections[i].y2 = maxY;
+            nextFakeX--;
+        }
+    }
+    else if(this._settings.isReversedAppend()) {
+        var maxX = lastConnection.x2;
+        var maxY = lastConnection.y1;
+
+        var nextFakeX = maxX + 1;
+        for(var i = 0; i < connections.length; i++) {
+            connections[i].x1 = nextFakeX;
+            connections[i].x2 = nextFakeX;
+            connections[i].y1 = maxY;
+            connections[i].y2 = maxY;
+            nextFakeX++;
+        }
+    }
+
+    this.restore(connections);
+}
+
 Gridifier.VerticalGrid.Connections.prototype.findConnectionByItem = function(item) {
     return this._connectionsCore.findConnectionByItem(item);
 }
 
 Gridifier.VerticalGrid.Connections.prototype.remapAllItemGUIDS = function() {
     this._connectionsCore.remapAllItemGUIDS();
+}
+
+Gridifier.VerticalGrid.Connections.prototype.remapAllItemGUIDSInSortedConnections = function(connections) {
+    this._connectionsCore.remapAllItemGUIDSInSortedConnections(connections);
 }
 
 Gridifier.VerticalGrid.Connections.prototype.add = function(item, itemConnectionCoords) {

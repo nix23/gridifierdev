@@ -274,7 +274,8 @@ Gridifier.prototype.disconnect = function(items) {
 
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     if(this._settings.isMirroredPrepend()) {
-        this.insertBefore(items, batchSize, batchTimeout);
+        // @todo -> should reverse collection
+        this.insertBefore(items, null, batchSize, batchTimeout);
         return this;
     }
 
@@ -290,6 +291,13 @@ Gridifier.prototype.append = function(items, batchSize, batchTimeout) {
 Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchTimeout) {
     this._operationsQueue.scheduleInsertBeforeOperation(
         items, beforeItem, batchSize, batchTimeout
+    );
+    return this;
+}
+
+Gridifier.prototype.insertAfter = function(items, afterItem, batchSize, batchTimeout) {
+    this._operationsQueue.scheduleInsertAfterOperation(
+        items, afterItem, batchSize, batchTimeout
     );
     return this;
 }

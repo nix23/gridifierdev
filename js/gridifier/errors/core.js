@@ -58,6 +58,14 @@ Gridifier.CoreErrors.prototype._parseIfIsCoreError = function(errorType) {
         this._markAsCoreError();
         this._wrongTargetTransformationSizesError();
     }
+    else if(errorType == errors.APPENDER.WRONG_INSERT_BEFORE_TARGET_ITEM) {
+        this._markAsCoreError();
+        this._wrongInsertBeforeTargetItem();
+    }
+    else if(errorType == errors.APPENDER.WRONG_INSERT_AFTER_TARGET_ITEM) {
+        this._markAsCoreError();
+        this._wrongInsertAfterTargetItem();
+    }
 }
 
 Gridifier.CoreErrors.prototype._markAsCoreError = function() {
@@ -101,6 +109,26 @@ Gridifier.CoreErrors.prototype._wrongTargetTransformationSizesError = function()
     msg += "    gridifier.transformSizes(item, '100px', '60%'); // px or % values\n";
     msg += "    gridifier.transformSizes(item, 100, 200.5); // values without postfix will be parsed as px value.";
     msg += "    gridifier.transformSizes(item, '*2', '/0.5'); // values with multiplication or division expressions.";
+
+    this._errorMsg = msg;
+}
+
+Gridifier.CoreErrors.prototype._wrongInsertBeforeTargetItem = function() {
+    var msg = this._error.getErrorMsgPrefix();
+    var error = this._error.getErrorParam();
+
+    msg += "Wrong target item passed to the insertBefore function. It must be item, which was processed by gridifier. ";
+    msg += "Got: " + error + ".";
+
+    this._errorMsg = msg;
+}
+
+Gridifier.CoreErrors.prototype._wrongInsertAfterTargetItem = function() {
+    var msg = this._error.getErrorMsgPrefix();
+    var error = this._error.getErrorParam();
+
+    msg += "Wrong target item passed to the insertAfter function. It must be item, which was processed by gridifier. ";
+    msg += "Got: " + error + ".";
 
     this._errorMsg = msg;
 }

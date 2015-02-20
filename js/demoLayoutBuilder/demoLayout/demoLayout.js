@@ -102,6 +102,24 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //         return 1;
         // };
 
+        // window.createDiv = function() {
+        //     return $("<div/>").css({
+        //         "width": "100px",
+        //         "height": "100px",
+        //         "background": "red",
+        //         "box-sizing": "border-box",
+        //         "border": "px black solid"
+        //     }).get(0);
+        // };
+
+        // window.test = function() {
+        //     var div = window.createDiv();
+        //     var div2 = window.createDiv();
+        //     $("#demoLayout .grid").get(0).appendChild(div2);
+        //     $("#demoLayout .grid").get(0).appendChild(div);
+        //     me._gridifier.insertAfter([div, div2], $("#demoLayout .grid").find("[data-gridifier-item-id=10002]"));
+        // }
+
         var itemFilterCore = function(item, itemClassName) {
             var itemClassParts = item.getAttribute("class").split(" ");
             var itemClass = "";
@@ -486,6 +504,11 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         $(me._gridifierDynamicSettings).on(DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.EVENT_FILTER_SELECTED, function(event, filterName) {
             me._gridifier.filterBy(filterName);
         });
+
+        me._gridifier.onShow(function(item) {
+            var itemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
+            item.innerHTML = itemGUID;
+        });
     }
 
     this._unbindEvents = function() {
@@ -548,13 +571,10 @@ DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
         //            gridItem.renderGUID();
         //     });
         // })($gridItem, gridItem);
-        this._gridifier.onShow(function(item) {
-            var itemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
-            item.innerHTML = itemGUID;
-        });
     }
 
     this._gridifier.append(itemsToAppend);
+    // @todo -> append and prepend by one or by batch????
 }
 
 DemoLayoutBuilder.DemoLayout.prototype._prependNextItems = function() {

@@ -52,6 +52,7 @@ Gridifier.Collector.prototype._createCollectorFunction = function() {
     }
 }
 
+// @todo -> Add by query marking(For recursive grids(> , > . , > #, > el[], etc...))
 Gridifier.Collector.prototype._createMarkingFunction = function() {
     var gridItemMarkingValue = this._settings.getGridItemMarkingType();
 

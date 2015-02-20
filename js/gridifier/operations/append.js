@@ -90,35 +90,46 @@ Gridifier.Operations.Append.prototype._append = function(item) {
 Gridifier.Operations.Append.prototype.executeInsertBefore = function(items, beforeItem) {
     var connections = this._connections.get();
     if(connections.length == 0) {
-        this._append(items);
+        this.execute(items);
         return;
     }
 
     var connectionsToRetransform = [];
     connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
 
-    if(typeof beforeItem == "undefined") {
+    if(typeof beforeItem == "undefined" || beforeItem == null) {
         var beforeItem = connections[0].item;
     }
     else {
-        // @todo -> Ensure beforeItem exists(transform to DOM, than Check by guids)
-        // (Or check in cycle)
+        var beforeItem = (this._collector.toDOMCollection(beforeItem))[0];
+        // This check is required, if afterItem is jQuery find result without DOMElem
+        if(typeof beforeItem == "undefined" || beforeItem == null)
+            var beforeItem = connections[0].item;
     }
 
-    var lastConnectionGUID = null;
+    var beforeItemGUID = null;
+    var targetItemFound = false;
     for(var i = 0; i < connections.length; i++) {
         if(this._guid.getItemGUID(connections[i].item) == this._guid.getItemGUID(beforeItem)) {
+            targetItemFound = true;
+            beforeItemGUID = connections[i].itemGUID;
             connectionsToRetransform = connectionsToRetransform.concat(
                 connections.splice(i, connections.length - i)
             );
             break;
         }
-
-        lastConnectionGUID = connections[i].itemGUID;
+    }
+    
+    if(!targetItemFound) {
+        new Gridifier.Error(
+            Gridifier.Error.ERROR_TYPES.APPENDER.WRONG_INSERT_BEFORE_TARGET_ITEM,
+            beforeItem
+        );
+        return;
     }
     
     this._connections.reinitRanges();
-    this._guid.reinitMaxGUID(lastConnectionGUID);
+    this._guid.reinitMaxGUID(beforeItemGUID - 1);
 
     if(this._settings.isDefaultAppend())
         this._appender.recreateConnectorsPerAllConnectedItems();
@@ -126,8 +137,79 @@ Gridifier.Operations.Append.prototype.executeInsertBefore = function(items, befo
         this._reversedAppender.recreateConnectorsPerAllConnectedItems();
 
     this.execute(items);
-    this._connections.restore(connectionsToRetransform);
-    this._connections.remapAllItemGUIDS();
+    // @todo -> Process customSd mode
+    if(this._settings.isDisabledSortDispersion()) {
+        this._connections.restore(connectionsToRetransform);
+        this._connections.remapAllItemGUIDSInSortedConnections(connectionsToRetransform);
+    }
+    else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+        this._connections.restoreOnCustomSortDispersionMode(connectionsToRetransform);
+        this._connections.remapAllItemGUIDS();
+    }
 
     this._sizesTransformer.retransformFrom(connectionsToRetransform[0]);
+}
+
+Gridifier.Operations.Append.prototype.executeInsertAfter = function(items, afterItem) {
+    var connections = this._connections.get();
+    if(connections.length == 0) {
+        this.execute(items);
+        return;
+    }
+
+    var connectionsToRetransform = [];
+    connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
+
+    if(typeof afterItem == "undefined" || afterItem == null) {
+        var afterItem = connections[connections.length - 1].item;
+    }
+    else {
+        var afterItem = (this._collector.toDOMCollection(afterItem))[0];
+        // This check is required, if afterItem is jQuery find result without DOMElem
+        if(typeof afterItem == "undefined" || afterItem == null)
+            var afterItem = connections[connections.length - 1].item;
+    }
+
+    var afterItemGUID = null;
+    var targetItemFound = false;
+    for(var i = 0; i < connections.length; i++) {
+        if(this._guid.getItemGUID(connections[i].item) == this._guid.getItemGUID(afterItem)) {
+            targetItemFound = true;
+            afterItemGUID = connections[i].itemGUID;
+            connectionsToRetransform = connectionsToRetransform.concat(
+                connections.splice(i + 1, connections.length - i - 1)
+            );
+            break;
+        }
+    }
+
+    if(!targetItemFound) {
+        new Gridifier.Error(
+            Gridifier.Error.ERROR_TYPES.APPENDER.WRONG_INSERT_AFTER_TARGET_ITEM,
+            afterItem
+        );
+        return;
+    }
+
+    this._connections.reinitRanges();
+    this._guid.reinitMaxGUID(afterItemGUID + 1);
+
+    if(this._settings.isDefaultAppend())
+        this._appender.recreateConnectorsPerAllConnectedItems();
+    else if(this._settings.isReversedAppend())
+        this._reversedAppender.recreateConnectorsPerAllConnectedItems();
+
+    this.execute(items);
+    // @todo -> Process custom SD
+    if(this._settings.isDisabledSortDispersion()) {
+        this._connections.restore(connectionsToRetransform);
+        this._connections.remapAllItemGUIDSInSortedConnections(connectionsToRetransform);
+    }
+    else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+        this._connections.restoreOnCustomSortDispersionMode(connectionsToRetransform);
+        this._connections.remapAllItemGUIDS();
+    }
+
+    if(connectionsToRetransform.length > 0)
+        this._sizesTransformer.retransformFrom(connectionsToRetransform[0]);
 }
