@@ -145,7 +145,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 Dom.css3.transformProperty(item, "scale", 1);
                 setTimeout(function() {
                     //Dom.css3.transitionProperty(item, "none");
-                    me._eventEmitter.emitShowEvent(item);
+                    me._eventEmitter.emitShowEvent(item); // @pass event emitter to call
                 }, 1020);
             }, 20); 
         },
@@ -165,9 +165,10 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
             Dom.css3.transform(itemClone, "scale(0)");
             //Dom.css3.transformProperty(item, "scale", 0);
             setTimeout(function() {
+                itemClone.style.visibility = "hidden";
                 grid.removeChild(itemClone);
                 // @todo -> Emit event
-            }, 920);
+            },820); // setTimeout should be smaller(Flickering bug in Webkit)
             // Send event through global Gridifier.Event Object
         }
     };

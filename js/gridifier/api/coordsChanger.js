@@ -94,6 +94,7 @@ Gridifier.Api.CoordsChanger.prototype._addSimultaneousCSS3TransitionCoordsChange
         
         Dom.css3.transitionProperty(item, Prefixer.getForCSS('transform', item) + " 900ms ease");
         //, width 600ms ease, height 600ms ease");
+        // @todo -> Is it required?
         Dom.css3.perspective(item, "1000");
         Dom.css3.backfaceVisibility(item, "hidden");
         Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px,0px");
