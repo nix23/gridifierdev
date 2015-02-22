@@ -1,4 +1,4 @@
-Prefixer = {
+var Prefixer = {
     prefixes: ['Moz', 'Webkit', 'ms', 'Ms', 'Khtml', 'O'],
 
     init: function() {

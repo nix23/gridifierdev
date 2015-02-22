@@ -28,6 +28,10 @@ $(document).ready(function() {
                         response += "-" + me._callWithoutIncludeMarginsParamMarker;
 
                     return response;
+                },
+
+                clearRecursiveSubcallsData: function() {
+                    ;
                 }
             }
             
@@ -51,14 +55,15 @@ $(document).ready(function() {
                 me._testIfCallsWithAllPossibleParamsAreCachedSeparately.call(me);
                 me._testIfSequentialCallsOnDifferentElemsAreCached.call(me);
                 me._testIfUncachedCallAfterCachingActiveTransactionStop.call(me);
+                me._testWithAntialiasingOnTestElem.call(me);
 
                 me._after.call(me);
             });
         },
 
-        _markCachedValuesInOuterWidthCacheArray: function() {
-            for(var i = 0; i < SizesResolverManager._outerWidthCache.length; i++) {
-                var cacheEntry = SizesResolverManager._outerWidthCache[i];
+        _markCachedValuesInOuterWidthCacheArray: function(sizesResolverManager) {
+            for(var i = 0; i < sizesResolverManager._outerWidthCache.length; i++) {
+                var cacheEntry = sizesResolverManager._outerWidthCache[i];
                 var cachedReturnedValues = cacheEntry.cachedReturnedValues;
 
                 if(cachedReturnedValues.withIncludeMarginsParam != null) {
@@ -110,11 +115,13 @@ $(document).ready(function() {
             var testerDiv = document.createElement("div");
             testerDiv.setAttribute(this._testDomElemGUIDDataAttr, this._testDomElemGUID);
 
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+
             var expectedResponse = this._realSizesResolverOuterWidthCallMarker;
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithoutIncludeMarginsParamMarker;
             ok(
-                SizesResolverManager.outerWidth(testerDiv) == expectedResponse,
+                sizesResolverManager.outerWidth(testerDiv, false, true) == expectedResponse,
                 "call with includeMargins = false"
             );
 
@@ -122,7 +129,7 @@ $(document).ready(function() {
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithIncludeMarginsParamMarker;
             ok(
-                SizesResolverManager.outerWidth(testerDiv, true) == expectedResponse,
+                sizesResolverManager.outerWidth(testerDiv, true, true) == expectedResponse,
                 "call with includeMargins = true"
             );
         },
@@ -133,19 +140,21 @@ $(document).ready(function() {
             var testerDiv = document.createElement("div");
             testerDiv.setAttribute(this._testDomElemGUIDDataAttr, this._testDomElemGUID);
 
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+
             var expectedResponse = this._cachedSizesResolverOuterWidthCallMarker;
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithIncludeMarginsParamMarker;
 
-            SizesResolverManager.startCachingTransaction();
-            SizesResolverManager.outerWidth(testerDiv, true);
-            this._markCachedValuesInOuterWidthCacheArray();
+            sizesResolverManager.startCachingTransaction();
+            sizesResolverManager.outerWidth(testerDiv, true, true);
+            this._markCachedValuesInOuterWidthCacheArray(sizesResolverManager);
 
             ok(
-                SizesResolverManager.outerWidth(testerDiv, true) == expectedResponse,
+                sizesResolverManager.outerWidth(testerDiv, true, true) == expectedResponse,
                 "cached call with includeMargins = true"
             );
-            SizesResolverManager.stopCachingTransaction();
+            sizesResolverManager.stopCachingTransaction();
         },
 
         _testIfSecondCallIsCachedWithoutIncludeMarginsParam: function() {
@@ -154,19 +163,21 @@ $(document).ready(function() {
             var testerDiv = document.createElement("div");
             testerDiv.setAttribute(this._testDomElemGUIDDataAttr, this._testDomElemGUID);
 
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+
             var expectedResponse = this._cachedSizesResolverOuterWidthCallMarker;
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithoutIncludeMarginsParamMarker;
 
-            SizesResolverManager.startCachingTransaction();
-            SizesResolverManager.outerWidth(testerDiv);
-            this._markCachedValuesInOuterWidthCacheArray();
+            sizesResolverManager.startCachingTransaction();
+            sizesResolverManager.outerWidth(testerDiv, false, true);
+            this._markCachedValuesInOuterWidthCacheArray(sizesResolverManager);
 
             ok(
-                SizesResolverManager.outerWidth(testerDiv) == expectedResponse,
+                sizesResolverManager.outerWidth(testerDiv, false, true) == expectedResponse,
                 "cached call with includeMargins = false"
             );
-            SizesResolverManager.stopCachingTransaction();
+            sizesResolverManager.stopCachingTransaction();
         },
 
         _testIfCallsWithAllPossibleParamsAreCachedSeparately: function() {
@@ -175,23 +186,25 @@ $(document).ready(function() {
             var testerDiv = document.createElement("div");
             testerDiv.setAttribute(this._testDomElemGUIDDataAttr, this._testDomElemGUID);
 
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+
             var expectedResponsePrefix = this._cachedSizesResolverOuterWidthCallMarker;
             expectedResponsePrefix += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
 
             var withoutParamCallExpectedResponse = expectedResponsePrefix + "-" + this._callWithoutIncludeMarginsParamMarker;
             var withParamCallExpectedResponse = expectedResponsePrefix + "-" + this._callWithIncludeMarginsParamMarker;
 
-            SizesResolverManager.startCachingTransaction();
-            SizesResolverManager.outerWidth(testerDiv);
-            SizesResolverManager.outerWidth(testerDiv, true);
-            this._markCachedValuesInOuterWidthCacheArray();
+            sizesResolverManager.startCachingTransaction();
+            sizesResolverManager.outerWidth(testerDiv, false, true);
+            sizesResolverManager.outerWidth(testerDiv, true, true);
+            this._markCachedValuesInOuterWidthCacheArray(sizesResolverManager);
 
             ok(
-                SizesResolverManager.outerWidth(testerDiv) == withoutParamCallExpectedResponse &&
-                SizesResolverManager.outerWidth(testerDiv, true) == withParamCallExpectedResponse,
+                sizesResolverManager.outerWidth(testerDiv, false, true) == withoutParamCallExpectedResponse &&
+                sizesResolverManager.outerWidth(testerDiv, true, true) == withParamCallExpectedResponse,
                 "cached calls with all possible params"
             );
-            SizesResolverManager.stopCachingTransaction();
+            sizesResolverManager.stopCachingTransaction();
         },
 
         _testIfSequentialCallsOnDifferentElemsAreCached: function() {
@@ -214,17 +227,19 @@ $(document).ready(function() {
             expectedResponsePerSecondTesterDiv += secondTesterDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponsePerSecondTesterDiv += "-" + this._callWithoutIncludeMarginsParamMarker;
 
-            SizesResolverManager.startCachingTransaction();
-            SizesResolverManager.outerWidth(firstTesterDiv);
-            SizesResolverManager.outerWidth(secondTesterDiv);
-            this._markCachedValuesInOuterWidthCacheArray();
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+
+            sizesResolverManager.startCachingTransaction();
+            sizesResolverManager.outerWidth(firstTesterDiv, false, true);
+            sizesResolverManager.outerWidth(secondTesterDiv, false, true);
+            this._markCachedValuesInOuterWidthCacheArray(sizesResolverManager);
 
             ok(
-                SizesResolverManager.outerWidth(firstTesterDiv) == expectedResponsePerFirstTesterDiv &&
-                SizesResolverManager.outerWidth(secondTesterDiv) == expectedResponsePerSecondTesterDiv,
+                sizesResolverManager.outerWidth(firstTesterDiv, false, true) == expectedResponsePerFirstTesterDiv &&
+                sizesResolverManager.outerWidth(secondTesterDiv, false, true) == expectedResponsePerSecondTesterDiv,
                 "cached calls per different elements"
             );
-            SizesResolverManager.stopCachingTransaction();
+            sizesResolverManager.stopCachingTransaction();
         },
 
         _testIfUncachedCallAfterCachingActiveTransactionStop: function() {
@@ -237,17 +252,62 @@ $(document).ready(function() {
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithoutIncludeMarginsParamMarker;
 
-            SizesResolverManager.startCachingTransaction();
-            SizesResolverManager.outerWidth(testerDiv);
-            SizesResolverManager.outerWidth(testerDiv);
-            SizesResolverManager.stopCachingTransaction();
-            SizesResolverManager.startCachingTransaction();
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+
+            sizesResolverManager.startCachingTransaction();
+            sizesResolverManager.outerWidth(testerDiv, false, true);
+            sizesResolverManager.outerWidth(testerDiv, false, true);
+            sizesResolverManager.stopCachingTransaction();
+            sizesResolverManager.startCachingTransaction();
 
             ok(
-                SizesResolverManager.outerWidth(testerDiv) == expectedResponse,
+                sizesResolverManager.outerWidth(testerDiv, false, true) == expectedResponse,
                 "uncached call after activeTransactionCaching stop"
             );
-            SizesResolverManager.stopCachingTransaction();
+            sizesResolverManager.stopCachingTransaction();
+        },
+
+        _testWithAntialiasingOnTestElem: function() {
+            SizesResolver = this._realSizesResolver;
+
+            clearTestData();
+
+            var testerDiv = document.createElement("div");
+            testerDiv.style.width = "100px";
+            testerDiv.style.height = "100px";
+            $testContent.append($(testerDiv));
+
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            sizesResolverManager.startCachingTransaction();
+
+            ok(
+                sizesResolverManager.outerWidth(testerDiv) == 100,
+                "real call with outerWidth antialias value = 0"
+            );
+            ok(
+                sizesResolverManager.outerWidth(testerDiv) == 100,
+                "cached call with outerWidth antialias value = 0"
+            );
+
+            sizesResolverManager.stopCachingTransaction();
+
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            sizesResolverManager.startCachingTransaction();
+            sizesResolverManager.setOuterWidthAntialiasValue(10.1);
+
+            ok(
+                sizesResolverManager.outerWidth(testerDiv) == 89.9,
+                "real call with outerWidth antialias value = 10.1"
+            );
+            ok(
+                sizesResolverManager.outerWidth(testerDiv) == 89.9,
+                "cached call with outerWidth antialias value = 10.1"
+            );
+
+            sizesResolverManager.stopCachingTransaction();
+
+            SizesResolver = this._sizesResolverMock;
+            clearTestData();
         }
     }
 
@@ -281,6 +341,10 @@ $(document).ready(function() {
                         response += "-" + me._callWithoutIncludeMarginsParamMarker;
 
                     return response;
+                },
+
+                clearRecursiveSubcallsData: function() {
+                    ;
                 }
             }
 
@@ -304,14 +368,15 @@ $(document).ready(function() {
                 me._testIfCallsWithAllPossibleParamsAreCachedSeparately.call(me);
                 me._testIfSequentialCallsOnDifferentElemsAreCached.call(me);
                 me._testIfUncachedCallAfterCachingActiveTransactionStop.call(me);
+                me._testWithAntialiasingOnTestElem.call(me);
 
                 me._after.call(me);
             });
         },
 
-        _markCachedValuesInOuterHeightCacheArray: function() {
-            for(var i = 0; i < SizesResolverManager._outerHeightCache.length; i++) {
-                var cacheEntry = SizesResolverManager._outerHeightCache[i];
+        _markCachedValuesInOuterHeightCacheArray: function(sizesResolverManager) {
+            for(var i = 0; i < sizesResolverManager._outerHeightCache.length; i++) {
+                var cacheEntry = sizesResolverManager._outerHeightCache[i];
                 var cachedReturnedValues = cacheEntry.cachedReturnedValues;
 
                 if(cachedReturnedValues.withIncludeMarginsParam != null) {
@@ -344,7 +409,7 @@ $(document).ready(function() {
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithoutIncludeMarginsParamMarker;
             ok(
-                this._sizesResolverMock.outerHeight(testerDiv) == expectedResponse,
+                this._sizesResolverMock.outerHeight(testerDiv, false, true) == expectedResponse,
                 "call sizesResolver outerHeight mock with includeMargins = false"
             );
 
@@ -352,7 +417,7 @@ $(document).ready(function() {
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithIncludeMarginsParamMarker;
             ok(
-                this._sizesResolverMock.outerHeight(testerDiv, true) == expectedResponse,
+                this._sizesResolverMock.outerHeight(testerDiv, true, true) == expectedResponse,
                 "call sizesResolver outerHeight mock with includeMargins = true"
             );
         },
@@ -363,11 +428,13 @@ $(document).ready(function() {
             var testerDiv = document.createElement("div");
             testerDiv.setAttribute(this._testDomElemGUIDDataAttr, this._testDomElemGUID);
 
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+
             var expectedResponse = this._realSizesResolverOuterHeightCallMarker;
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithoutIncludeMarginsParamMarker;
             ok(
-                SizesResolverManager.outerHeight(testerDiv) == expectedResponse,
+                sizesResolverManager.outerHeight(testerDiv, false, true) == expectedResponse,
                 "call with includeMargins = false"
             );
 
@@ -375,7 +442,7 @@ $(document).ready(function() {
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithIncludeMarginsParamMarker;
             ok(
-                SizesResolverManager.outerHeight(testerDiv, true) == expectedResponse,
+                sizesResolverManager.outerHeight(testerDiv, true, true) == expectedResponse,
                 "call with includeMargins = true"
             );
         },
@@ -386,19 +453,21 @@ $(document).ready(function() {
             var testerDiv = document.createElement("div");
             testerDiv.setAttribute(this._testDomElemGUIDDataAttr, this._testDomElemGUID);
 
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+
             var expectedResponse = this._cachedSizesResolverOuterHeightCallMarker;
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithIncludeMarginsParamMarker;
 
-            SizesResolverManager.startCachingTransaction();
-            SizesResolverManager.outerHeight(testerDiv, true);
-            this._markCachedValuesInOuterHeightCacheArray();
+            sizesResolverManager.startCachingTransaction();
+            sizesResolverManager.outerHeight(testerDiv, true, true);
+            this._markCachedValuesInOuterHeightCacheArray(sizesResolverManager);
 
             ok(
-                SizesResolverManager.outerHeight(testerDiv, true) == expectedResponse,
+                sizesResolverManager.outerHeight(testerDiv, true, true) == expectedResponse,
                 "cached call with includeMargins = true"
             );
-            SizesResolverManager.stopCachingTransaction();
+            sizesResolverManager.stopCachingTransaction();
         },
 
         _testIfSecondCallIsCachedWithoutIncludeMarginsParam: function() {
@@ -411,15 +480,17 @@ $(document).ready(function() {
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithoutIncludeMarginsParamMarker;
 
-            SizesResolverManager.startCachingTransaction();
-            SizesResolverManager.outerHeight(testerDiv);
-            this._markCachedValuesInOuterHeightCacheArray();
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+
+            sizesResolverManager.startCachingTransaction();
+            sizesResolverManager.outerHeight(testerDiv, false, true);
+            this._markCachedValuesInOuterHeightCacheArray(sizesResolverManager);
 
             ok(
-                SizesResolverManager.outerHeight(testerDiv) == expectedResponse,
+                sizesResolverManager.outerHeight(testerDiv, false, true) == expectedResponse,
                 "cached call with includeMargins = false"
             );
-            SizesResolverManager.stopCachingTransaction();
+            sizesResolverManager.stopCachingTransaction();
         },
 
         _testIfCallsWithAllPossibleParamsAreCachedSeparately: function() {
@@ -434,17 +505,19 @@ $(document).ready(function() {
             var withoutParamCallExpectedResponse = expectedResponsePrefix + "-" + this._callWithoutIncludeMarginsParamMarker;
             var withParamCallExpectedResponse = expectedResponsePrefix + "-" + this._callWithIncludeMarginsParamMarker;
 
-            SizesResolverManager.startCachingTransaction();
-            SizesResolverManager.outerHeight(testerDiv);
-            SizesResolverManager.outerHeight(testerDiv, true);
-            this._markCachedValuesInOuterHeightCacheArray();
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+
+            sizesResolverManager.startCachingTransaction();
+            sizesResolverManager.outerHeight(testerDiv, false, true);
+            sizesResolverManager.outerHeight(testerDiv, true, true);
+            this._markCachedValuesInOuterHeightCacheArray(sizesResolverManager);
 
             ok(
-                SizesResolverManager.outerHeight(testerDiv) == withoutParamCallExpectedResponse &&
-                SizesResolverManager.outerHeight(testerDiv, true) == withParamCallExpectedResponse,
+                sizesResolverManager.outerHeight(testerDiv, false, true) == withoutParamCallExpectedResponse &&
+                sizesResolverManager.outerHeight(testerDiv, true, true) == withParamCallExpectedResponse,
                 "cached calls with all possible params"
             );
-            SizesResolverManager.stopCachingTransaction();
+            sizesResolverManager.stopCachingTransaction();
         },
 
         _testIfSequentialCallsOnDifferentElemsAreCached: function() {
@@ -467,16 +540,18 @@ $(document).ready(function() {
             expectedResponsePerSecondTesterDiv += secondTesterDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponsePerSecondTesterDiv += "-" + this._callWithoutIncludeMarginsParamMarker;
 
-            SizesResolverManager.startCachingTransaction();
-            SizesResolverManager.outerHeight(firstTesterDiv);
-            SizesResolverManager.outerHeight(secondTesterDiv);
-            this._markCachedValuesInOuterHeightCacheArray();
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+
+            sizesResolverManager.startCachingTransaction();
+            sizesResolverManager.outerHeight(firstTesterDiv, false, true);
+            sizesResolverManager.outerHeight(secondTesterDiv, false, true);
+            this._markCachedValuesInOuterHeightCacheArray(sizesResolverManager);
 
             ok(
-                SizesResolverManager.outerHeight(firstTesterDiv) == expectedResponsePerFirstTesterDiv &&
-                SizesResolverManager.outerHeight(secondTesterDiv) == expectedResponsePerSecondTesterDiv
+                sizesResolverManager.outerHeight(firstTesterDiv, false, true) == expectedResponsePerFirstTesterDiv &&
+                sizesResolverManager.outerHeight(secondTesterDiv, false, true) == expectedResponsePerSecondTesterDiv
             );
-            SizesResolverManager.stopCachingTransaction();
+            sizesResolverManager.stopCachingTransaction();
         },
 
         _testIfUncachedCallAfterCachingActiveTransactionStop: function() {
@@ -489,17 +564,59 @@ $(document).ready(function() {
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithoutIncludeMarginsParamMarker;
 
-            SizesResolverManager.startCachingTransaction();
-            SizesResolverManager.outerHeight(testerDiv);
-            SizesResolverManager.outerHeight(testerDiv);
-            SizesResolverManager.stopCachingTransaction();
-            SizesResolverManager.startCachingTransaction();
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+
+            sizesResolverManager.startCachingTransaction();
+            sizesResolverManager.outerHeight(testerDiv, false, true);
+            sizesResolverManager.outerHeight(testerDiv, false, true);
+            sizesResolverManager.stopCachingTransaction();
+            sizesResolverManager.startCachingTransaction();
 
             ok(
-                SizesResolverManager.outerHeight(testerDiv) == expectedResponse,
+                sizesResolverManager.outerHeight(testerDiv, false, true) == expectedResponse,
                 "uncached call after activeTransactionCaching stop"
             );
-            SizesResolverManager.stopCachingTransaction();
+            sizesResolverManager.stopCachingTransaction();
+        },
+
+        _testWithAntialiasingOnTestElem: function() {
+            SizesResolver = this._realSizesResolver;
+            clearTestData();
+
+            var testerDiv = document.createElement("div");
+            testerDiv.style.width = "100px";
+            testerDiv.style.height = "100px";
+            $testContent.append($(testerDiv));
+
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            sizesResolverManager.startCachingTransaction();
+
+            ok(
+                sizesResolverManager.outerHeight(testerDiv) == 100,
+                "real call with outerHeight antialias value = 0"
+            );
+            ok(
+                sizesResolverManager.outerHeight(testerDiv) == 100,
+                "real call with outerHeight antialias value = 0"
+            );
+
+            sizesResolverManager.stopCachingTransaction();
+
+            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            sizesResolverManager.startCachingTransaction();
+            sizesResolverManager.setOuterHeightAntialiasValue(10.1);
+
+            ok(
+                sizesResolverManager.outerHeight(testerDiv) == 89.9,
+                "real call with outerHeight antialias value = 10.1"
+            );
+            ok(
+                sizesResolverManager.outerHeight(testerDiv) == 89.9,
+                "cached call with outerHeight antialias  value = 10.1"
+            );
+
+            sizesResolverManager.stopCachingTransaction();
+            clearTestData();
         }
     }
 

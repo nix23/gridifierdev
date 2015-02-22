@@ -57,8 +57,8 @@ Gridifier.ConnectorsShifter.prototype._createShiftedConnector = function(x, y, c
     var shiftedConnector = {
         type: connector.type,
         side: Gridifier.ConnectorsShifter.SIDE,
-        x: Dom.toInt(x),
-        y: Dom.toInt(y),
+        x: parseFloat(x),
+        y: parseFloat(y),
         itemGUID: Dom.toInt(connector.itemGUID)
     };
     

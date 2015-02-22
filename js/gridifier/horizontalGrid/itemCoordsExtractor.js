@@ -1,7 +1,8 @@
-Gridifier.HorizontalGrid.ItemCoordsExtractor = function(gridifier) {
+Gridifier.HorizontalGrid.ItemCoordsExtractor = function(gridifier, sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
+    this._sizesResolverManager = null;
     this._transformedItemMarker = null;
 
     this._css = {
@@ -9,6 +10,7 @@ Gridifier.HorizontalGrid.ItemCoordsExtractor = function(gridifier) {
 
     this._construct = function() {
         me._gridifier = gridifier;
+        me._sizesResolverManager = sizesResolverManager;
         me._transformedItemMarker = new Gridifier.SizesTransformer.TransformedItemMarker();
     };
 
@@ -38,8 +40,8 @@ Gridifier.HorizontalGrid.ItemCoordsExtractor.prototype._getItemSizesPerAppend = 
     }
     else {
         return {
-            targetWidth: SizesResolverManager.outerWidth(item, true),
-            targetHeight: SizesResolverManager.outerHeight(item, true)
+            targetWidth: this._sizesResolverManager.outerWidth(item, true),
+            targetHeight: this._sizesResolverManager.outerHeight(item, true)
         };
     }
 }
@@ -54,8 +56,8 @@ Gridifier.HorizontalGrid.ItemCoordsExtractor.prototype.connectorToAppendedItemCo
     return {
         x1: parseFloat(connector.x),
         x2: parseFloat(connector.x + targetSizes.targetWidth - 1),
-        y1: Dom.toInt(connector.y),
-        y2: Dom.toInt(connector.y + targetSizes.targetHeight - 1)
+        y1: parseFloat(connector.y),
+        y2: parseFloat(connector.y + targetSizes.targetHeight - 1)
     };
 }
 
@@ -65,8 +67,8 @@ Gridifier.HorizontalGrid.ItemCoordsExtractor.prototype.connectorToReversedAppend
     return {
         x1: parseFloat(connector.x),
         x2: parseFloat(connector.x + targetSizes.targetWidth - 1),
-        y1: Dom.toInt(connector.y - targetSizes.targetHeight + 1),
-        y2: Dom.toInt(connector.y)
+        y1: parseFloat(connector.y - targetSizes.targetHeight + 1),
+        y2: parseFloat(connector.y)
     };
 }
 
@@ -76,8 +78,8 @@ Gridifier.HorizontalGrid.ItemCoordsExtractor.prototype.connectorToPrependedItemC
     return {
         x1: parseFloat(connector.x - targetSizes.targetWidth + 1),
         x2: parseFloat(connector.x),
-        y1: Dom.toInt(connector.y - targetSizes.targetHeight + 1),
-        y2: Dom.toInt(connector.y)
+        y1: parseFloat(connector.y - targetSizes.targetHeight + 1),
+        y2: parseFloat(connector.y)
     };
 }
 
@@ -87,7 +89,7 @@ Gridifier.HorizontalGrid.ItemCoordsExtractor.prototype.connectorToReversedPrepen
     return {
         x1: parseFloat(connector.x - targetSizes.targetWidth + 1),
         x2: parseFloat(connector.x),
-        y1: Dom.toInt(connector.y),
-        y2: Dom.toInt(connector.y + targetSizes.targetHeight - 1)
+        y1: parseFloat(connector.y),
+        y2: parseFloat(connector.y + targetSizes.targetHeight - 1)
     };
 }

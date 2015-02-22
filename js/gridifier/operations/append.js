@@ -6,7 +6,8 @@ Gridifier.Operations.Append = function(gridSizesUpdater,
                                        settings,
                                        appender,
                                        reversedAppender,
-                                       sizesTransformer) {
+                                       sizesTransformer,
+                                       sizesResolverManager) {
     var me = this;
 
     this._gridSizesUpdater = null;
@@ -18,6 +19,7 @@ Gridifier.Operations.Append = function(gridSizesUpdater,
     this._appender = null;
     this._reversedAppender = null;
     this._sizesTransformer = null;
+    this._sizesResolverManager = null;
 
     this._css = {
     };
@@ -32,6 +34,7 @@ Gridifier.Operations.Append = function(gridSizesUpdater,
         me._appender = appender;
         me._reversedAppender = reversedAppender;
         me._sizesTransformer = sizesTransformer;
+        me._sizesResolverManager = sizesResolverManager;
     };
 
     this._bindEvents = function() {
@@ -51,7 +54,7 @@ Gridifier.Operations.Append = function(gridSizesUpdater,
 
 Gridifier.Operations.Append.prototype.execute = function(items) {
     var items = this._collector.toDOMCollection(items);
-    SizesResolverManager.startCachingTransaction();
+    this._sizesResolverManager.startCachingTransaction();
 
     this._collector.ensureAllItemsAreAttachedToGrid(items);
     this._collector.ensureAllItemsCanBeAttachedToGrid(items);
@@ -64,7 +67,7 @@ Gridifier.Operations.Append.prototype.execute = function(items) {
         this._append(items[i]);
     }
 
-    SizesResolverManager.stopCachingTransaction();
+    this._sizesResolverManager.stopCachingTransaction();
     this._gridSizesUpdater.scheduleGridSizesUpdate();
 }
 

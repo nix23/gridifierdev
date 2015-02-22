@@ -1,11 +1,13 @@
 Gridifier.Discretizer = function(gridifier,
                                  connections,
-                                 settings) {
+                                 settings,
+                                 sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
     this._connections = null;
     this._settings = null;
+    this._sizesResolverManager = null;
 
     this._discretizerCore = null;
 
@@ -21,15 +23,16 @@ Gridifier.Discretizer = function(gridifier,
         me._gridifier = gridifier;
         me._connections = connections;
         me._settings = settings;
+        me._sizesResolverManager = sizesResolverManager;
 
         if(me._settings.isVerticalGrid()) {
             me._discretizerCore = new Gridifier.Discretizer.VerticalCore(
-                me._gridifier, me._settings
+                me._gridifier, me._settings, me._sizesResolverManager
             );
         }
         else if(me._settings.isHorizontalGrid()) {
             me._discretizerCore = new Gridifier.Discretizer.HorizontalCore(
-                me._gridifier, me._settings
+                me._gridifier, me._settings, me._sizesResolverManager
             );
         }
 
@@ -40,9 +43,9 @@ Gridifier.Discretizer = function(gridifier,
         }
         else {
             me._discretizationDemonstrator = {
-                create: function() { ; },
-                update: function() { ; },
-                delete: function() { ; }
+                "create": function() { return; },
+                "update": function() { return; },
+                "delete": function() { return; }
             };
         }
 
@@ -217,5 +220,5 @@ Gridifier.Discretizer.prototype.updateDemonstrator = function() {
 }
 
 Gridifier.Discretizer.prototype.deleteDemonstrator = function() {
-    this._discretizationDemonstrator.delete();
+    this._discretizationDemonstrator["delete"].call(this);
 }

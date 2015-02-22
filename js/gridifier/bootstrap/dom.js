@@ -288,4 +288,3 @@ var Dom = {
         }
     }
 }
-Dom.init();

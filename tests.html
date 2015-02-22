@@ -48,19 +48,24 @@
 
     <script src="js/services/cssCalcNormalizer.js"></script>
     <script src="js/services/profiler.js"></script>
-    <script src="js/services/prefixer.js"></script>
-    <script src="js/services/sizesResolver.js"></script>
-    <script src="js/services/sizesResolverManager.js"></script>
-    <script src="js/services/domAbstractionLayer.js"></script>
     <script src="js/services/view.js"></script>
     <script src="js/services/accordion.js"></script>
     <script src="js/services/browserDetector.js"></script>
     <script src="js/services/resizeEventNormalizer.js"></script>
-    <script src="js/services/event.js"></script>
 
     <!-- Gridifier includes -->
     <script src="js/gridifier/gridifier.js"></script>
 
+    <script src="js/gridifier/bootstrap/event.js"></script>
+    <script src="js/gridifier/bootstrap/prefixer.js"></script>
+    <script src="js/gridifier/bootstrap/dom.js"></script>
+    <script src="js/gridifier/bootstrap/sizesResolver/sizesResolver.js"></script>
+    <script src="js/gridifier/bootstrap/sizesResolver/init.js"></script>
+    <script src="js/gridifier/bootstrap/sizesResolver/outerWidth.js"></script>
+    <script src="js/gridifier/bootstrap/sizesResolver/outerHeight.js"></script>
+    <script src="js/gridifier/bootstrap/bootstrap.js"></script>
+
+    <script src="js/gridifier/core/sizesResolverManager.js"></script>
     <script src="js/gridifier/core/collector.js"></script>
     <script src="js/gridifier/core/guid.js"></script>
     <script src="js/gridifier/core/normalizer.js"></script>
@@ -183,27 +188,30 @@
             }
         });
     </script>
+
+    <script src="tests/bootstrap/sizesResolver/outerWidth/pxWidthGrid.js"></script>
+    <script src="tests/bootstrap/sizesResolver/outerWidth/pxWidthPxPaddingGrid.js"></script>
+    <script src="tests/bootstrap/sizesResolver/outerWidth/pxWidthPxMarginGrid.js"></script>
+    <script src="tests/bootstrap/sizesResolver/outerWidth/pxWidthPxBorderGrid.js"></script>
+    <script src="tests/bootstrap/sizesResolver/outerWidth/ptWidthGrid.js"></script>
+    <script src="tests/bootstrap/sizesResolver/outerWidth/ptWidthPtPaddingGrid.js"></script>
+    <script src="tests/bootstrap/sizesResolver/outerWidth/ptWidthPtMarginGrid.js"></script>
+    <script src="tests/bootstrap/sizesResolver/outerHeight/pxHeightGrid.js"></script>
+    <script src="tests/bootstrap/sizesResolver/outerHeight/pxHeightPxPaddingGrid.js"></script>
+    <script src="tests/bootstrap/sizesResolver/outerHeight/pxHeightPxMarginGrid.js"></script>
+    <script src="tests/bootstrap/sizesResolver/outerHeight/pxHeightPxBorderGrid.js"></script>
+    <script src="tests/bootstrap/sizesResolver/outerHeight/ptHeightGrid.js"></script>
+    <script src="tests/bootstrap/sizesResolver/outerHeight/ptHeightPtPaddingGrid.js"></script>
+    <script src="tests/bootstrap/sizesResolver/outerHeight/ptHeightPtMarginGrid.js"></script>
+
+    <script src="tests/bootstrap/dom.js"></script>
+    <script src="tests/bootstrap/sizesResolver/sizesResolver.js"></script>
+
+    <script src="tests/core/sizesResolverManager.js"></script>
     
-    <script src="tests/services/sizesResolverManager.js"></script>
-    <script src="tests/services/sizesResolver/outerWidth/pxWidthGrid.js"></script>
-    <script src="tests/services/sizesResolver/outerWidth/pxWidthPxPaddingGrid.js"></script>
-    <script src="tests/services/sizesResolver/outerWidth/pxWidthPxMarginGrid.js"></script>
-    <script src="tests/services/sizesResolver/outerWidth/pxWidthPxBorderGrid.js"></script>
-    <script src="tests/services/sizesResolver/outerWidth/ptWidthGrid.js"></script>
-    <script src="tests/services/sizesResolver/outerWidth/ptWidthPtPaddingGrid.js"></script>
-    <script src="tests/services/sizesResolver/outerWidth/ptWidthPtMarginGrid.js"></script>
-    <script src="tests/services/sizesResolver/outerHeight/pxHeightGrid.js"></script>
-    <script src="tests/services/sizesResolver/outerHeight/pxHeightPxPaddingGrid.js"></script>
-    <script src="tests/services/sizesResolver/outerHeight/pxHeightPxMarginGrid.js"></script>
-    <script src="tests/services/sizesResolver/outerHeight/pxHeightPxBorderGrid.js"></script>
-    <script src="tests/services/sizesResolver/outerHeight/ptHeightGrid.js"></script>
-    <script src="tests/services/sizesResolver/outerHeight/ptHeightPtPaddingGrid.js"></script>
-    <script src="tests/services/sizesResolver/outerHeight/ptHeightPtMarginGrid.js"></script>
-    <script src="tests/services/sizesResolver.js"></script>
-    <script src="tests/services/domAbstractionLayer.js"></script>
-    
-    <script src="tests/gridifier/sizesTransformer.js"></script>
-    <script src="tests/gridifier/discretizer/verticalCore.js"></script>
-    <script src="tests/gridifier/discretizer/horizontalCore.js"></script>
+    <script src="tests/sizesTransformer/sizesTransformer.js"></script>
+
+    <script src="tests/discretizer/verticalCore.js"></script>
+    <script src="tests/discretizer/horizontalCore.js"></script>
 </body>
 </html>

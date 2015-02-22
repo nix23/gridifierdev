@@ -91,9 +91,17 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         //width: itemSizes.width,
         //height: itemSizes.height,
         //height: "30%",
-        width: "100px",
-        height: "0px",
-        "padding-bottom": "15%",
+
+        width: "33.43%",
+        height: "60px",
+        // width: "60px",
+        // height: "60px",
+        //"padding-bottom": "15%",
+
+        // width: "100px",
+        // height: "100px",
+
+
         // width: "100px",
         // height: "100px",
 
@@ -144,12 +152,13 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         //height: "80%",
         //"margin-left": "10%",
         //"margin-top": "10%",
-        width: "100%",
+        width: "100.0%",
         height: "100%",
         // @todo -> Make Crossbrowser
         //background: "url(img/gridItemBg9.png)",
         //background: "url(img/test2.png)",
         background: bgs,
+        //background: "black",
         "background-size": "cover",
         "background-repeat": "no-repeat",
         "background-position": "center center"

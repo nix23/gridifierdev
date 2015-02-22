@@ -65,18 +65,18 @@ Gridifier.Discretizer.Demonstrator.prototype._bindDemonstratorDeleteOnClick = fu
    var me = this;
    $(this._demonstrator).on("click", function() {
         $(this).off("click");
-        me.delete();
+        me["delete"].call(me);
     });
 }
 
 Gridifier.Discretizer.Demonstrator.prototype.update = function(cells) {
     if(this._demonstrator != null)
-        this.delete();
+        this["delete"].call(this);
 
     this.create(cells);
 }
 
-Gridifier.Discretizer.Demonstrator.prototype.delete = function() {
+Gridifier.Discretizer.Demonstrator.prototype["delete"] = function() {
     if(this._demonstrator == null)
         return;
     

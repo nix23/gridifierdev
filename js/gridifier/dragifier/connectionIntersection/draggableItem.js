@@ -4,7 +4,8 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
                                                                    connections,
                                                                    connectors,
                                                                    guid,
-                                                                   settings) {
+                                                                   settings,
+                                                                   sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
@@ -15,6 +16,7 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
     this._connectionsIntersector = null;
     this._guid = null;
     this._settings = null;
+    this._sizesResolverManager = null;
 
     this._dragifierCore = null;
     this._dragifierRenderer = null;
@@ -34,6 +36,7 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
         me._connectors = connectors;
         me._guid = guid;
         me._settings = settings;
+        me._sizesResolverManager = sizesResolverManager;
 
         me._dragIdentifiers = [];
 
@@ -46,7 +49,7 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
             me._settings
         );
         me._dragifierCore = new Gridifier.Dragifier.Core(
-            me._gridifier, me._appender, me._reversedAppender, me._connectors, me._settings, me._dragifierRenderer
+            me._gridifier, me._appender, me._reversedAppender, me._connectors, me._settings, me._dragifierRenderer, me._sizesResolverManager
         );
 
         me._bindEvents();

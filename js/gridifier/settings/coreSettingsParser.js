@@ -211,10 +211,10 @@ Gridifier.CoreSettingsParser.prototype.parseDragifierSettings = function() {
 
         if(typeof this._settings.dragifier == "boolean") {
             if(this._settingsCore.isByClassGridItemMarkingStrategy()) {
-                var dragifierItemSelector = "." + this._gridItemMarkingValue;
+                var dragifierItemSelector = "." + this._settingsCore.getGridItemMarkingValue();
             }
-            else if(this.isByDataAttrGridItemMarkingStrategy()) {
-                var dragifierItemSelector = "[" + this._gridItemMarkingValue + "]";
+            else if(this._settingsCore.isByDataAttrGridItemMarkingStrategy()) {
+                var dragifierItemSelector = "[" + this._settingsCore.getGridItemMarkingValue() + "]";
             }
         }
         else {
@@ -229,10 +229,10 @@ Gridifier.CoreSettingsParser.prototype.parseDragifierSettings = function() {
 
     var shouldEnableDragifierOnInit = false;
     if(this._settingsCore.isByClassGridItemMarkingStrategy()) {
-        var dragifierItemSelector = "." + this._gridItemMarkingValue;
+        var dragifierItemSelector = "." + this._settingsCore.getGridItemMarkingValue();
     }
     else if(this._settingsCore.isByDataAttrGridItemMarkingStrategy()) {
-        var dragifierItemSelector = "[" + this._gridItemMarkingValue + "]";
+        var dragifierItemSelector = "[" + this._settingsCore.getGridItemMarkingValue() + "]";
     }
 
     return {

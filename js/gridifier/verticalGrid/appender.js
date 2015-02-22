@@ -1,5 +1,6 @@
 Gridifier.VerticalGrid.Appender = function(gridifier, 
                                            settings, 
+                                           sizesResolverManager,
                                            connectors, 
                                            connections, 
                                            guid, 
@@ -10,6 +11,7 @@ Gridifier.VerticalGrid.Appender = function(gridifier,
 
     this._gridifier = null;
     this._settings = null;
+    this._sizesResolverManager = null;
 
     this._connectors = null;
     this._connections = null;
@@ -30,6 +32,7 @@ Gridifier.VerticalGrid.Appender = function(gridifier,
     this._construct = function() {
         me._gridifier = gridifier;
         me._settings = settings;
+        me._sizesResolverManager = sizesResolverManager;
 
         me._connectors = connectors;
         me._connections = connections;
@@ -42,7 +45,7 @@ Gridifier.VerticalGrid.Appender = function(gridifier,
         );
         me._connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(me._guid);
         me._connectorsSorter = new Gridifier.VerticalGrid.ConnectorsSorter();
-        me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor(me._gridifier);
+        me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor(me._gridifier, me._sizesResolverManager);
         me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(me._connections);
 
         me._guid = guid;
@@ -154,7 +157,7 @@ Gridifier.VerticalGrid.Appender.prototype._initConnectors = function() {
 Gridifier.VerticalGrid.Appender.prototype.createInitialConnector = function() {
     this._connectors.addAppendConnector(
         Gridifier.Connectors.SIDES.LEFT.TOP,
-        Dom.toInt(this._gridifier.getGridX2()),
+        parseFloat(this._gridifier.getGridX2()),
         0
     );
     Logger.log(                 // @system-log-start
@@ -181,18 +184,16 @@ Gridifier.VerticalGrid.Appender.prototype._addItemConnectors = function(itemCoor
     if((itemCoords.x1 - 1) >= 0) {
         this._connectors.addAppendConnector(
             Gridifier.Connectors.SIDES.LEFT.TOP,
-            //Dom.toInt(itemCoords.x1 - 1),
             parseFloat(itemCoords.x1 - 1),
-            Dom.toInt(itemCoords.y1),
+            parseFloat(itemCoords.y1),
             Dom.toInt(itemGUID)
         );
     }
 
     this._connectors.addAppendConnector(
         Gridifier.Connectors.SIDES.BOTTOM.RIGHT,
-        //Dom.toInt(itemCoords.x2),
         parseFloat(itemCoords.x2),
-        Dom.toInt(itemCoords.y2 + 1),
+        parseFloat(itemCoords.y2 + 1),
         Dom.toInt(itemGUID)
     );
 }
@@ -319,6 +320,6 @@ Gridifier.VerticalGrid.Appender.prototype._findItemConnectionCoords = function(i
             break;
         }
     }
-
+    
     return itemConnectionCoords;
 }

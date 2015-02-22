@@ -1,8 +1,9 @@
-Gridifier.Discretizer.HorizontalCore = function(gridifier, settings) {
+Gridifier.Discretizer.HorizontalCore = function(gridifier, settings, sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
     this._settings = null;
+    this._sizesResolverManager = null;
 
     this._css = {
     };
@@ -10,6 +11,7 @@ Gridifier.Discretizer.HorizontalCore = function(gridifier, settings) {
     this._construct = function() {
         me._gridifier = gridifier;
         me._settings = settings;
+        me._sizesResolverManager = sizesResolverManager;
 
         me._bindEvents();
     };
@@ -152,7 +154,7 @@ Gridifier.Discretizer.HorizontalCore.prototype.discretizeGridWithReversedAppend 
 Gridifier.Discretizer.HorizontalCore.prototype.normalizeItemNewConnectionHorizontalCoords = function(item,
                                                                                                      newConnectionCoords) {
     var newConnectionWidth = newConnectionCoords.x2 - newConnectionCoords.x1 + 1;
-    var itemWidth = SizesResolverManager.outerWidth(item, true);
+    var itemWidth = this._sizesResolverManager.outerWidth(item, true);
 
     if(newConnectionWidth < itemWidth) {
         newConnectionCoords.x2 = newConnectionCoords.x1 + itemWidth - 1;
@@ -179,7 +181,7 @@ Gridifier.Discretizer.HorizontalCore.prototype.normalizeItemNewConnectionHorizon
 Gridifier.Discretizer.HorizontalCore.prototype.normalizeItemNewConnectionVerticalCoords = function(item,
                                                                                                    newConnectionCoords) {
     var newConnectionHeight = newConnectionCoords.y2 - newConnectionCoords.y1 + 1;
-    var itemHeight = SizesResolverManager.outerHeight(item, true);
+    var itemHeight = this._sizesResolverManager.outerHeight(item, true);
 
     if(newConnectionHeight < itemHeight) {
         if(this._settings.isDefaultAppend()) {

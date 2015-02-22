@@ -7,7 +7,8 @@ Gridifier.SizesTransformer = function(gridifier,
                                       appender,
                                       reversedAppender,
                                       normalizer,
-                                      operation) {
+                                      operation,
+                                      sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
@@ -20,6 +21,7 @@ Gridifier.SizesTransformer = function(gridifier,
     this._reversedAppender = null;
     this._normalizer = null;
     this._operation = null;
+    this._sizesResolverManager = null;
 
     this._connectorsCleaner = null;
     this._connectorsSelector = null;
@@ -46,6 +48,7 @@ Gridifier.SizesTransformer = function(gridifier,
         me._reversedAppender = reversedAppender;
         me._normalizer = normalizer;
         me._operation = operation;
+        me._sizesResolverManager = sizesResolverManager;
 
         if(me._settings.isVerticalGrid()) {
             me._connectorsCleaner = new Gridifier.VerticalGrid.ConnectorsCleaner(
@@ -64,7 +67,7 @@ Gridifier.SizesTransformer = function(gridifier,
             me._connectionsSorter
         );
         me._itemNewPxSizesFinder = new Gridifier.SizesTransformer.ItemNewPxSizesFinder(
-            me._gridifier, me._connections
+            me._gridifier, me._connections, me._sizesResolverManager
         );
         me._transformedItemMarker = new Gridifier.SizesTransformer.TransformedItemMarker();
         me._itemsToReappendFinder = new Gridifier.SizesTransformer.ItemsToReappendFinder(

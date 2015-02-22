@@ -3,7 +3,8 @@ Gridifier.Operations.Prepend = function(gridSizesUpdater,
                                         guid, 
                                         settings,
                                         prepender,
-                                        reversedPrepender) {
+                                        reversedPrepender,
+                                        sizesResolverManager) {
     var me = this;
 
     this._gridSizesUpdater = null;
@@ -12,6 +13,7 @@ Gridifier.Operations.Prepend = function(gridSizesUpdater,
     this._settings = null;
     this._prepender = null;
     this._reversedPrepender = null;
+    this._sizesResolverManager = null;
 
     this._css = {
     };
@@ -23,6 +25,7 @@ Gridifier.Operations.Prepend = function(gridSizesUpdater,
         me._settings = settings;
         me._prepender = prepender;
         me._reversedPrepender = reversedPrepender;
+        me._sizesResolverManager = sizesResolverManager;
     };
 
     this._bindEvents = function() {
@@ -42,7 +45,7 @@ Gridifier.Operations.Prepend = function(gridSizesUpdater,
 
 Gridifier.Operations.Prepend.prototype.execute = function(items) {
     var items = this._collector.toDOMCollection(items);
-    SizesResolverManager.startCachingTransaction();
+    this._sizesResolverManager.startCachingTransaction();
 
     this._collector.ensureAllItemsAreAttachedToGrid(items);
     this._collector.ensureAllItemsCanBeAttachedToGrid(items);
@@ -55,7 +58,7 @@ Gridifier.Operations.Prepend.prototype.execute = function(items) {
         this._prepend(items[i]);
     }
 
-    SizesResolverManager.stopCachingTransaction();
+    this._sizesResolverManager.stopCachingTransaction();
     this._gridSizesUpdater.scheduleGridSizesUpdate();
 }
 

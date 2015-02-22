@@ -4,7 +4,8 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
                                                                connections,
                                                                connectors,
                                                                guid,
-                                                               settings) {
+                                                               settings,
+                                                               sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
@@ -14,6 +15,7 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
     this._connectors = null;
     this._guid = null;
     this._settings = null;
+    this._sizesResolverManager = null;
 
     this._dragifierCore = null;
     this._discretizer = null;
@@ -37,16 +39,17 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
         me._connectors = connectors;
         me._guid = guid;
         me._settings = settings;
+        me._sizesResolverManager = sizesResolverManager;
 
         me._dragIdentifiers = [];
         me._dragifierRenderer = new Gridifier.Dragifier.Renderer(
             me._settings
         );
         me._dragifierCore = new Gridifier.Dragifier.Core(
-            me._gridifier, me._appender, me._reversedAppender, me._connectors, me._settings, me._dragifierRenderer
+            me._gridifier, me._appender, me._reversedAppender, me._connectors, me._settings, me._dragifierRenderer, me._sizesResolverManager
         );
         me._discretizer = new Gridifier.Discretizer(
-            me._gridifier, me._connections, me._settings
+            me._gridifier, me._connections, me._settings, me._sizesResolverManager
         );
         me._dragifierCells = new Gridifier.Dragifier.Cells(
             me._discretizer

@@ -4,7 +4,8 @@ Gridifier.Dragifier = function(gridifier,
                                connections,
                                connectors,
                                guid,
-                               settings) {
+                               settings,
+                               sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
@@ -14,6 +15,7 @@ Gridifier.Dragifier = function(gridifier,
     this._connectors = null;
     this._guid = null;
     this._settings = null;
+    this._sizesResolverManager = null;
 
     this._draggableItems = [];
     this._isDragging = false;
@@ -29,6 +31,7 @@ Gridifier.Dragifier = function(gridifier,
         me._connectors = connectors;
         me._guid = guid;
         me._settings = settings;
+        me._sizesResolverManager = sizesResolverManager;
 
         if(me._settings.shouldEnableDragifierOnInit()) {
             me._bindEvents();
@@ -43,7 +46,7 @@ Gridifier.Dragifier = function(gridifier,
         // @todo -> Replace with native events
         $(me._gridifier.getGrid()).on("touchstart", draggableItemSelector, function(event) {
             event.preventDefault();
-            SizesResolverManager.startCachingTransaction();
+            me._sizesResolverManager.startCachingTransaction();
             me._isDragging = true;
 
             if(me._isAlreadyDraggable($(this).get(0))) {
@@ -84,7 +87,7 @@ Gridifier.Dragifier = function(gridifier,
 
                 if(me._draggableItems.length == 0) {
                     me._isDragging = false;
-                    SizesResolverManager.stopCachingTransaction();
+                    me._sizesResolverManager.stopCachingTransaction();
                 }
             }, 0);
         });
@@ -108,7 +111,7 @@ Gridifier.Dragifier = function(gridifier,
 
         $(me._gridifier.getGrid()).on("mousedown", draggableItemSelector, function(event) {
             event.preventDefault();
-            SizesResolverManager.startCachingTransaction();
+            me._sizesResolverManager.startCachingTransaction();
             me._isDragging = true;
 
             var draggableItem = me._createDraggableItem();
@@ -124,7 +127,7 @@ Gridifier.Dragifier = function(gridifier,
                 me._draggableItems[0].unbindDraggableItem();
                 me._draggableItems.splice(0, 1);
                 me._isDragging = false;
-                SizesResolverManager.stopCachingTransaction();
+                me._sizesResolverManager.stopCachingTransaction();
             }, 0);
         });
 
@@ -158,7 +161,8 @@ Gridifier.Dragifier.prototype._createDraggableItem = function() {
             this._connections, 
             this._connectors, 
             this._guid, 
-            this._settings
+            this._settings,
+            this._sizesResolverManager
         );
     }
     else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
@@ -169,7 +173,8 @@ Gridifier.Dragifier.prototype._createDraggableItem = function() {
             this._connections, 
             this._connectors, 
             this._guid, 
-            this._settings
+            this._settings,
+            this._sizesResolverManager
         );
     }
 

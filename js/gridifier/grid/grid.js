@@ -1,14 +1,16 @@
-Gridifier.Grid = function(grid) {
+Gridifier.Grid = function(grid, sizesResolverManager) {
     var me = this;
 
-    me._grid = null;
-    me._collector = null;
+    this._grid = null;
+    this._collector = null;
+    this._sizesResolverManager = null;
 
     this._css = {
     };
 
     this._construct = function() {
         me._grid = grid;
+        me._sizesResolverManager = sizesResolverManager;
 
         me._extractGrid(grid);
         me._adjustGridCss();
@@ -50,11 +52,11 @@ Gridifier.Grid.prototype.getGrid = function() {
 }
 
 Gridifier.Grid.prototype.getGridX2 = function() {
-    return SizesResolverManager.outerWidth(this._grid) - 1;
+    return this._sizesResolverManager.outerWidth(this._grid, false, true) - 1;
 }
 
 Gridifier.Grid.prototype.getGridY2 = function() {
-    return SizesResolverManager.outerHeight(this._grid) - 1;
+    return this._sizesResolverManager.outerHeight(this._grid, false, true) - 1;
 }
 
 Gridifier.Grid.prototype.addToGrid = function(items) {

@@ -1,5 +1,6 @@
 Gridifier.VerticalGrid.ReversedPrepender = function(gridifier, 
                                                     settings, 
+                                                    sizesResolverManager,
                                                     connectors, 
                                                     connections, 
                                                     guid, 
@@ -10,6 +11,7 @@ Gridifier.VerticalGrid.ReversedPrepender = function(gridifier,
 
     this._gridifier = null;
     this._settings = null;
+    this._sizesResolverManager = null;
 
     this._connectors = null;
     this._connections = null;
@@ -30,6 +32,7 @@ Gridifier.VerticalGrid.ReversedPrepender = function(gridifier,
     this._construct = function() {
         me._gridifier = gridifier;
         me._settings = settings;
+        me._sizesResolverManager = sizesResolverManager;
 
         me._connectors = connectors;
         me._connections = connections;
@@ -42,7 +45,7 @@ Gridifier.VerticalGrid.ReversedPrepender = function(gridifier,
         );
         me._connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(me._guid);
         me._connectorsSorter = new Gridifier.VerticalGrid.ConnectorsSorter();
-        me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor(me._gridifier);
+        me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor(me._gridifier, me._sizesResolverManager);
         me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(me._connections);
 
         me._guid = guid;
@@ -191,7 +194,7 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype._addItemConnectors = function
         this._connectors.addPrependConnector(
             Gridifier.Connectors.SIDES.LEFT.BOTTOM,
             parseFloat(itemCoords.x1 - 1),
-            Dom.toInt(itemCoords.y2),
+            parseFloat(itemCoords.y2),
             Dom.toInt(itemGUID)
         );
     }
@@ -199,7 +202,7 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype._addItemConnectors = function
     this._connectors.addPrependConnector(
         Gridifier.Connectors.SIDES.TOP.RIGHT,
         parseFloat(itemCoords.x2),
-        Dom.toInt(itemCoords.y1 - 1),
+        parseFloat(itemCoords.y1 - 1),
         Dom.toInt(itemGUID)
     );
 }

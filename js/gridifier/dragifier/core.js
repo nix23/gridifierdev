@@ -3,7 +3,8 @@ Gridifier.Dragifier.Core = function(gridifier,
                                     reversedAppender,
                                     connectors,
                                     settings,
-                                    dragifierRenderer) {
+                                    dragifierRenderer,
+                                    sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
@@ -12,6 +13,7 @@ Gridifier.Dragifier.Core = function(gridifier,
     this._connectors = null;
     this._settings = null;
     this._dragifierRenderer = null;
+    this._sizesResolverManager = null;
 
     this._cursorOffsetXFromDraggableItemCenter = null;
     this._cursorOffsetYFromDraggableItemCenter = null;
@@ -29,6 +31,7 @@ Gridifier.Dragifier.Core = function(gridifier,
         me._connectors = connectors;
         me._settings = settings;
         me._dragifierRenderer = dragifierRenderer;
+        me._sizesResolverManager = sizesResolverManager;
 
         me._bindEvents();
     };
@@ -51,11 +54,11 @@ Gridifier.Dragifier.Core = function(gridifier,
 Gridifier.Dragifier.Core.prototype.determineInitialCursorOffsetsFromDraggableItemCenter = function(draggableItem,
                                                                                                    cursorX, 
                                                                                                    cursorY) {
-    var draggableItemOffsetLeft = SizesResolverManager.offsetLeft(draggableItem);
-    var draggableItemOffsetTop = SizesResolverManager.offsetTop(draggableItem);
+    var draggableItemOffsetLeft = this._sizesResolverManager.offsetLeft(draggableItem);
+    var draggableItemOffsetTop = this._sizesResolverManager.offsetTop(draggableItem);
 
-    var draggableItemWidth = SizesResolverManager.outerWidth(draggableItem, true);
-    var draggableItemHeight = SizesResolverManager.outerHeight(draggableItem, true);
+    var draggableItemWidth = this._sizesResolverManager.outerWidth(draggableItem, true);
+    var draggableItemHeight = this._sizesResolverManager.outerHeight(draggableItem, true);
 
     var draggableItemCenterX = draggableItemOffsetLeft + (draggableItemWidth / 2);
     var draggableItemCenterY = draggableItemOffsetTop + (draggableItemHeight / 2);
@@ -65,8 +68,8 @@ Gridifier.Dragifier.Core.prototype.determineInitialCursorOffsetsFromDraggableIte
 }
 
 Gridifier.Dragifier.Core.prototype.determineGridOffsets = function() {
-    this._gridOffsetLeft = SizesResolverManager.offsetLeft(this._gridifier.getGrid());
-    this._gridOffsetTop = SizesResolverManager.offsetTop(this._gridifier.getGrid());
+    this._gridOffsetLeft = this._sizesResolverManager.offsetLeft(this._gridifier.getGrid());
+    this._gridOffsetTop = this._sizesResolverManager.offsetTop(this._gridifier.getGrid());
 }
 
 Gridifier.Dragifier.Core.prototype.createDraggableItemClone = function(draggableItem) {
@@ -77,16 +80,16 @@ Gridifier.Dragifier.Core.prototype.createDraggableItemClone = function(draggable
     Dom.css3.transition(draggableItemClone, "All 0ms ease");
     draggableItemClone.style.zIndex = 10; // @endtodo
 
-    var cloneWidth = SizesResolverManager.outerWidth(draggableItem);
-    var cloneHeight = SizesResolverManager.outerHeight(draggableItem);
+    var cloneWidth = this._sizesResolverManager.outerWidth(draggableItem);
+    var cloneHeight = this._sizesResolverManager.outerHeight(draggableItem);
     draggableItemClone.style.width = cloneWidth + "px";
     draggableItemClone.style.height = cloneHeight + "px";
     draggableItemClone.style.margin = "0px";
 
     document.body.appendChild(draggableItemClone);
 
-    var draggableItemOffsetLeft = SizesResolverManager.offsetLeft(draggableItem);
-    var draggableItemOffsetTop = SizesResolverManager.offsetTop(draggableItem);
+    var draggableItemOffsetLeft = this._sizesResolverManager.offsetLeft(draggableItem);
+    var draggableItemOffsetTop = this._sizesResolverManager.offsetTop(draggableItem);
 
     draggableItemClone.style.left = draggableItemOffsetLeft +"px";
     draggableItemClone.style.top = draggableItemOffsetTop + "px";
@@ -101,14 +104,14 @@ Gridifier.Dragifier.Core.prototype.createDraggableItemClone = function(draggable
 }
 
 Gridifier.Dragifier.Core.prototype.createDraggableItemPointer = function(draggableItem) {
-    var draggableItemOffsetLeft = SizesResolverManager.offsetLeft(draggableItem, true);
-    var draggableItemOffsetTop = SizesResolverManager.offsetTop(draggableItem, true);
+    var draggableItemOffsetLeft = this._sizesResolverManager.offsetLeft(draggableItem, true);
+    var draggableItemOffsetTop = this._sizesResolverManager.offsetTop(draggableItem, true);
 
     // @todo -> Add mixed options
     var draggableItemPointer = document.createElement("div");
     Dom.css.set(draggableItemPointer, {
-        width: SizesResolverManager.outerWidth(draggableItem, true) + "px",
-        height: SizesResolverManager.outerHeight(draggableItem, true) + "px",
+        width: this._sizesResolverManager.outerWidth(draggableItem, true) + "px",
+        height: this._sizesResolverManager.outerHeight(draggableItem, true) + "px",
         position: "absolute",
         left: (draggableItemOffsetLeft - this._gridOffsetLeft) + "px",
         top: (draggableItemOffsetTop - this._gridOffsetTop) + "px",
@@ -128,8 +131,8 @@ Gridifier.Dragifier.Core.prototype.createDraggableItemPointer = function(draggab
 Gridifier.Dragifier.Core.prototype.calculateDraggableItemCloneNewDocumentPosition = function(draggableItem,
                                                                                              cursorX,
                                                                                              cursorY) {
-    var itemSideWidth = SizesResolverManager.outerWidth(draggableItem, true) / 2;
-    var itemSideHeight = SizesResolverManager.outerHeight(draggableItem, true) / 2;
+    var itemSideWidth = this._sizesResolverManager.outerWidth(draggableItem, true) / 2;
+    var itemSideHeight = this._sizesResolverManager.outerHeight(draggableItem, true) / 2;
 
     return {
         x: cursorX - itemSideWidth - (this._cursorOffsetXFromDraggableItemCenter * -1),
@@ -141,9 +144,9 @@ Gridifier.Dragifier.Core.prototype.calculateDraggableItemCloneNewGridPosition = 
                                                                                          newDocumentPosition) {
     var draggableItemCloneNewGridPosition = {
         x1: newDocumentPosition.x,
-        x2: newDocumentPosition.x + SizesResolverManager.outerWidth(draggableItem, true) - 1,
+        x2: newDocumentPosition.x + this._sizesResolverManager.outerWidth(draggableItem, true) - 1,
         y1: newDocumentPosition.y,
-        y2: newDocumentPosition.y + SizesResolverManager.outerHeight(draggableItem, true) - 1
+        y2: newDocumentPosition.y + this._sizesResolverManager.outerHeight(draggableItem, true) - 1
     };
 
     draggableItemCloneNewGridPosition.x1 -= this._gridOffsetLeft;

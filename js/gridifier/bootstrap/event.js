@@ -1,4 +1,4 @@
-Event = (function() {
+var Event = (function() {
     var guid = 0;
     
     function fixEvent(event) {

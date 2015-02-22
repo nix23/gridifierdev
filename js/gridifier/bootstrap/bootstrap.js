@@ -1,0 +1,2 @@
+Dom.init();
+SizesResolver.init();

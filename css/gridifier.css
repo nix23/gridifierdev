@@ -246,6 +246,6 @@ body {
     background: rgb(170,170,170);
 }
 
-/*@media screen and ( max-width: 1200px ) {
+@media screen and ( max-width: 1200px ) {
   .gridItem { width: 100% !important; }
-}*/
+}

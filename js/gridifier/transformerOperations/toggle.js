@@ -1,13 +1,16 @@
 Gridifier.TransformerOperations.Toggle = function(collector,
                                                   connections,
                                                   guid,
-                                                  sizesTransformer) {
+                                                  sizesTransformer,
+                                                  sizesResolverManager) {
     var me = this;
 
     this._collector = null;
     this._connections = null;
     this._guid = null;
     this._sizesTransformer = null;
+    this._sizesResolverManager = null;
+
     this._optionsParser = null;
     this._loggerLegend = null; // @system-log
 
@@ -19,9 +22,10 @@ Gridifier.TransformerOperations.Toggle = function(collector,
         me._connections = connections;
         me._guid = guid;
         me._sizesTransformer = sizesTransformer;
+        me._sizesResolverManager = sizesResolverManager;
 
         me._optionsParser = new Gridifier.TransformerOperations.OptionsParser(
-            me._collector
+            me._collector, me._sizesResolverManager
         );
     };
 
@@ -53,13 +57,13 @@ Gridifier.TransformerOperations.Toggle.prototype.execute = function(maybeItem, n
     );                              // @system-log-end
     this._sizesTransformer.transformConnectionSizes(transformationData);
     // @todo -> will it work(SizesTransfomer has async action inside)
-    SizesResolverManager.stopCachingTransaction();
+    this._sizesResolverManager.stopCachingTransaction();
     // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
 }
 
 Gridifier.TransformerOperations.Toggle.prototype._parseTransformationData = function(itemsToTransform,
                                                                                      sizesToTransform) {
-    var itemNewRawSizesFinder = new Gridifier.SizesTransformer.ItemNewRawSizesFinder();
+    var itemNewRawSizesFinder = new Gridifier.SizesTransformer.ItemNewRawSizesFinder(this._sizesResolverManager);
     var transformationData = [];
     this._loggerLegend = ""; // @system-log
 

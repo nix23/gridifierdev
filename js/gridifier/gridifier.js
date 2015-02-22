@@ -11,6 +11,7 @@ Gridifier = function(grid, settings) {
     this._resorter = null;
     this._filtrator = null;
     this._disconnector = null;
+    this._sizesResolverManager = null;
 
     this._connectors = null;
     this._connections = null;
@@ -33,19 +34,20 @@ Gridifier = function(grid, settings) {
     };
 
     this._construct = function() {
-        me._grid = new Gridifier.Grid(grid);
+        me._sizesResolverManager = new Gridifier.SizesResolverManager();
+        me._grid = new Gridifier.Grid(grid, me._sizesResolverManager);
         me._eventEmitter = new Gridifier.EventEmitter(me);
-        me._settings = new Gridifier.Settings(settings, me._eventEmitter);
-        me._collector = new Gridifier.Collector(me._settings,  me.getGrid());
+        me._settings = new Gridifier.Settings(settings, me._eventEmitter, me._sizesResolverManager);
+        me._collector = new Gridifier.Collector(me._settings,  me.getGrid(), me._sizesResolverManager);
         me._guid = new Gridifier.GUID();
-        me._normalizer = new Gridifier.Normalizer();
+        me._normalizer = new Gridifier.Normalizer(me, me._sizesResolverManager);
         me._operation = new Gridifier.Operation();
 
         me._grid.setCollectorInstance(me._collector);
 
         if(me._settings.isVerticalGrid()) {
             me._connections = new Gridifier.VerticalGrid.Connections(
-                me, me._guid, me._settings
+                me, me._guid, me._settings, me._sizesResolverManager
             );
             me._connectionsSorter = new Gridifier.VerticalGrid.ConnectionsSorter(
                 me._connections, me._settings, me._guid
@@ -53,7 +55,7 @@ Gridifier = function(grid, settings) {
         }
         else if(me._settings.isHorizontalGrid()) {
             me._connections = new Gridifier.HorizontalGrid.Connections(
-                me, me._guid, me._settings
+                me, me._guid, me._settings, me._sizesResolverManager
             );
             me._connectionsSorter = new Gridifier.HorizontalGrid.ConnectionsSorter(
                 me._connections, me._settings, me._guid
@@ -69,30 +71,30 @@ Gridifier = function(grid, settings) {
 
         if(me._settings.isVerticalGrid()) {
             me._prepender = new Gridifier.VerticalGrid.Prepender(
-                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
+                me, me._settings, me._sizesResolverManager, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
             );
             me._reversedPrepender = new Gridifier.VerticalGrid.ReversedPrepender(
-                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
+                me, me._settings, me._sizesResolverManager, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
             );
             me._appender = new Gridifier.VerticalGrid.Appender(
-                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
+                me, me._settings, me._sizesResolverManager, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
             );
             me._reversedAppender = new Gridifier.VerticalGrid.ReversedAppender(
-                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
+                me, me._settings, me._sizesResolverManager, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
             );
         }
         else if(me._settings.isHorizontalGrid()) {
             me._prepender = new Gridifier.HorizontalGrid.Prepender(
-                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
+                me, me._settings, me._sizesResolverManager, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
             );
             me._reversedPrepender = new Gridifier.HorizontalGrid.ReversedPrepender(
-                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
+                me, me._settings, me._sizesResolverManager, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
             );
             me._appender = new Gridifier.HorizontalGrid.Appender(
-                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
+                me, me._settings, me._sizesResolverManager, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
             );
             me._reversedAppender = new Gridifier.HorizontalGrid.ReversedAppender(
-                me, me._settings, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
+                me, me._settings, me._sizesResolverManager, me._connectors, me._connections, me._guid, me._renderer, me._normalizer, me._operation
             );
         }
 
@@ -116,15 +118,16 @@ Gridifier = function(grid, settings) {
             me._appender,
             me._reversedAppender,
             me._normalizer,
-            me._operation
+            me._operation,
+            me._sizesResolverManager
         );
         me._connections.setSizesTransformerInstance(me._sizesTransformer);
 
         me._toggleOperation = new Gridifier.TransformerOperations.Toggle(
-            me._collector, me._connections, me._guid, me._sizesTransformer
+            me._collector, me._connections, me._guid, me._sizesTransformer, me._sizesResolverManager
         );
         me._transformOperation = new Gridifier.TransformerOperations.Transform(
-            me._collector, me._connections, me._guid, me._sizesTransformer
+            me._collector, me._connections, me._guid, me._sizesTransformer, me._sizesResolverManager
         );
 
         me._operationsQueue = new Gridifier.Operations.Queue(
@@ -138,7 +141,8 @@ Gridifier = function(grid, settings) {
             me._reversedPrepender,
             me._appender,
             me._reversedAppender,
-            me._sizesTransformer
+            me._sizesTransformer,
+            me._sizesResolverManager
         );
 
         // @todo -> Remove from local var
@@ -149,7 +153,8 @@ Gridifier = function(grid, settings) {
             me._connections, 
             me._connectors, 
             me._guid, 
-            me._settings
+            me._settings,
+            me._sizesResolverManager
         );
 
         // @todo -> run first iteration?(Process items that were at start)
@@ -217,9 +222,9 @@ Gridifier.prototype.scheduleGridSizesUpdate = function() {
 }
 
 Gridifier.prototype.triggerResize = function() {
-    SizesResolverManager.startCachingTransaction();
+    this._sizesResolverManager.startCachingTransaction();
     this.retransformAllSizes();
-    SizesResolverManager.stopCachingTransaction();
+    this._sizesResolverManager.stopCachingTransaction();
 }
 
 // Write tests soon per everything :}
@@ -272,6 +277,24 @@ Gridifier.prototype.disconnect = function(items) {
     return this;
 }
 
+Gridifier.prototype.setCoordsChanger = function(coordsChangerName) {
+    this._settings.setCoordsChanger(coordsChangerName);
+    return this;
+}
+
+Gridifier.prototype.setSizesChanger = function(sizesChangerName) {
+    this._settings.setSizesChanger(sizesChangerName);
+    return this;
+}
+
+Gridifier.prototype.setItemWidthPercentageAntialias = function(itemWidthPtAntialias) {
+    this._normalizer.setItemWidthAntialiasPercentageValue(itemWidthPtAntialias);
+}
+
+Gridifier.prototype.setItemHeightPercentageAntialias = function(itemHeightPtAntialias) {
+    this._normalizer.setItemHeightAntialiasPercentageValue(itemHeightPtAntialias);
+}
+
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     if(this._settings.isMirroredPrepend()) {
         // @todo -> should reverse collection
@@ -303,14 +326,17 @@ Gridifier.prototype.insertAfter = function(items, afterItem, batchSize, batchTim
 }
 
 Gridifier.prototype.retransformAllSizes = function() {
+    this._normalizer.updateItemAntialiasValues();
     this._transformOperation.executeRetransformAllSizes();
 }
 
 Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {
+    this._normalizer.updateItemAntialiasValues();
     this._toggleOperation.execute(maybeItem, newWidth, newHeight);
 }
 
 Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
+    this._normalizer.updateItemAntialiasValues();
     this._transformOperation.execute(maybeItem, newWidth, newHeight);
 }
 

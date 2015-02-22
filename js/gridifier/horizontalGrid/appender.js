@@ -1,5 +1,6 @@
 Gridifier.HorizontalGrid.Appender = function(gridifier, 
                                              settings, 
+                                             sizesResolverManager,
                                              connectors, 
                                              connections, 
                                              guid, 
@@ -10,6 +11,7 @@ Gridifier.HorizontalGrid.Appender = function(gridifier,
 
     this._gridifier = null;
     this._settings = null;
+    this._sizesResolverManager = null;
 
     this._connectors = null;
     this._connections = null;
@@ -30,6 +32,7 @@ Gridifier.HorizontalGrid.Appender = function(gridifier,
     this._construct = function() {
         me._gridifier = gridifier;
         me._settings = settings;
+        me._sizesResolverManager = sizesResolverManager;
 
         me._connectors = connectors;
         me._connections = connections;
@@ -42,7 +45,7 @@ Gridifier.HorizontalGrid.Appender = function(gridifier,
         );
         me._connectorsSelector = new Gridifier.HorizontalGrid.ConnectorsSelector(me._guid);
         me._connectorsSorter = new Gridifier.HorizontalGrid.ConnectorsSorter();
-        me._itemCoordsExtractor = new Gridifier.HorizontalGrid.ItemCoordsExtractor(me._gridifier);
+        me._itemCoordsExtractor = new Gridifier.HorizontalGrid.ItemCoordsExtractor(me._gridifier, me._sizesResolverManager);
         me._connectionsIntersector = new Gridifier.HorizontalGrid.ConnectionsIntersector(me._connections);
 
         me._guid = guid;
@@ -169,18 +172,16 @@ Gridifier.HorizontalGrid.Appender.prototype._addItemConnectors = function(itemCo
     if((itemCoords.y2 + 1) <= this._gridifier.getGridY2()) {
         this._connectors.addAppendConnector(
             Gridifier.Connectors.SIDES.BOTTOM.LEFT,
-            //Dom.toInt(itemCoords.x1 - 1),
             parseFloat(itemCoords.x1),
-            Dom.toInt(itemCoords.y2 + 1),
+            parseFloat(itemCoords.y2 + 1),
             Dom.toInt(itemGUID)
         );
     }
 
     this._connectors.addAppendConnector(
         Gridifier.Connectors.SIDES.RIGHT.TOP,
-        //Dom.toInt(itemCoords.x2),
         parseFloat(itemCoords.x2 + 1),
-        Dom.toInt(itemCoords.y1),
+        parseFloat(itemCoords.y1),
         Dom.toInt(itemGUID)
     );
 }

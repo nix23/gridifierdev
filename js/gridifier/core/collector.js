@@ -1,8 +1,9 @@
-Gridifier.Collector = function(settings, grid) {
+Gridifier.Collector = function(settings, grid, sizesResolverManager) {
     var me = this;
 
     this._settings = null;
     this._grid = null;
+    this._sizesResolverManager = null;
 
     this._collectorFunction = null;
     this._markingFunction = null;
@@ -15,6 +16,7 @@ Gridifier.Collector = function(settings, grid) {
     this._construct = function() {
         me._settings = settings;
         me._grid = grid;
+        me._sizesResolverManager = sizesResolverManager;
 
         me._createCollectorFunction();
         me._createMarkingFunction();
@@ -102,11 +104,11 @@ Gridifier.Collector.prototype.ensureAllItemsAreConnectedToGrid = function(items)
 }
 
 Gridifier.Collector.prototype._isItemWiderThanGridWidth = function(item) {
-    return SizesResolverManager.outerWidth(item, true) > SizesResolverManager.outerWidth(this._grid);
+    return this._sizesResolverManager.outerWidth(item, true) > this._sizesResolverManager.outerWidth(this._grid, false, true);
 }
 
 Gridifier.Collector.prototype._isItemTallerThanGridHeight = function(item) {
-    return SizesResolverManager.outerHeight(item, true) > SizesResolverManager.outerHeight(this._grid);
+    return this._sizesResolverManager.outerHeight(item, true) > this._sizesResolverManager.outerHeight(this._grid, false, true);
 }
 
 Gridifier.Collector.prototype.canItemBeAttachedToGrid = function(item) {
@@ -120,8 +122,8 @@ Gridifier.Collector.prototype.throwWrongItemSizesError = function(item) {
     if(this._settings.isVerticalGrid()) {
         var errorParam = {
             item: item, 
-            itemWidth: SizesResolverManager.outerWidth(item, true),
-            gridWidth: SizesResolverManager.outerWidth(this._grid)
+            itemWidth: this._sizesResolverManager.outerWidth(item, true),
+            gridWidth: this._sizesResolverManager.outerWidth(this._grid, false, true)
         };
 
         var errorType = Gridifier.Error.ERROR_TYPES.COLLECTOR.ITEM_WIDER_THAN_GRID_WIDTH;
@@ -129,8 +131,8 @@ Gridifier.Collector.prototype.throwWrongItemSizesError = function(item) {
     else if(this._settings.isHorizontalGrid()) {
         var errorParam = {
             item: item,
-            itemHeight: SizesResolverManager.outerHeight(item, true),
-            gridHeight: SizesResolverManager.outerHeight(this._grid)
+            itemHeight: this._sizesResolverManager.outerHeight(item, true),
+            gridHeight: this._sizesResolverManager.outerHeight(this._grid, false, true)
         };
 
         var errorType = Gridifier.Error.ERROR_TYPES.COLLECTOR.ITEM_TALLER_THAN_GRID_HEIGHT;

@@ -1,8 +1,9 @@
-Gridifier.Api.Rotate = function(settings, eventEmitter) {
+Gridifier.Api.Rotate = function(settings, eventEmitter, sizesResolverManager) {
     var me = this;
 
     this._settings = null;
     this._eventEmitter = null;
+    this._sizesResolverManager = null;
 
     this._css = {
     };
@@ -10,6 +11,7 @@ Gridifier.Api.Rotate = function(settings, eventEmitter) {
     this._construct = function() {
         me._settings = settings;
         me._eventEmitter = eventEmitter;
+        me._sizesResolverManager = sizesResolverManager;
     };
 
     this._bindEvents = function() {
@@ -87,12 +89,12 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
 Gridifier.Api.Rotate.prototype._createScene = function(item, grid) {
     var scene = document.createElement("div");
     Dom.css.set(scene, {
-        width: SizesResolverManager.outerWidth(item, true) + "px",
-        height: SizesResolverManager.outerHeight(item, true) + "px",
+        width: this.sizesResolverManager.outerWidth(item, true) + "px",
+        height: this.sizesResolverManager.outerHeight(item, true) + "px",
         position: "absolute",
         // @todo -> Pass here original left and top values????
-        top: SizesResolverManager.positionTop(item) + "px",
-        left: SizesResolverManager.positionLeft(item) + "px"
+        top: this.sizesResolverManager.positionTop(item) + "px",
+        left: this.sizesResolverManager.positionLeft(item) + "px"
     });
     Dom.css3.perspective(scene, "200px"); 
     grid.appendChild(scene);
@@ -118,8 +120,8 @@ Gridifier.Api.Rotate.prototype._createItemClone = function(item) {
         left: "0px",
         top: "0px",
         visibility: "visible",
-        width: SizesResolverManager.outerWidth(item, true) + "px",
-        height: SizesResolverManager.outerHeight(item, true) + "px"
+        width: this.sizesResolverManager.outerWidth(item, true) + "px",
+        height: this.sizesResolverManager.outerHeight(item, true) + "px"
     });
 
     return itemClone;

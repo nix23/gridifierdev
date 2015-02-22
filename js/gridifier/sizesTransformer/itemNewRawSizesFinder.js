@@ -1,10 +1,13 @@
-Gridifier.SizesTransformer.ItemNewRawSizesFinder = function() {
+Gridifier.SizesTransformer.ItemNewRawSizesFinder = function(sizesResolverManager) {
     var me = this;
+
+    this._sizesResolverManager = null;
 
     this._css = {
     };
 
     this._construct = function() {
+        me._sizesResolverManager = sizesResolverManager;
     };
 
     this._bindEvents = function() {
@@ -85,13 +88,13 @@ Gridifier.SizesTransformer.ItemNewRawSizesFinder.prototype._getItemRawSize = fun
         if(SizesResolver.hasPercentageCSSValue("width", item, itemComputedCSS))
             return SizesResolver.getPercentageCSSValue("width", item, itemComputedCSS);
         else 
-            return SizesResolverManager.outerWidth(item) + "px";
+            return this._sizesResolverManager.outerWidth(item) + "px";
     }
     else if(sizeType == sizeTypes.height) {
         if(SizesResolver.hasPercentageCSSValue("height", item, itemComputedCSS))
             return SizesResolver.getPercentageCSSValue("height", item, itemComputedCSS);
         else
-            return SizesResolverManager.outerHeight(item) + "px";
+            return this._sizesResolverManager.outerHeight(item) + "px";
     }
 }
 

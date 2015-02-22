@@ -49,8 +49,6 @@ Gridifier.Renderer.Connections.prototype.unmarkConnectionItemAsRendered = functi
 
 Gridifier.Renderer.Connections.prototype.getCssLeftPropertyValuePerConnection = function(connection) {
     if(this._settings.isVerticalGrid()) {
-        // @old -> var left = connection.x1 / (this._gridifier.getGridX2() + 1) * 100;
-        // @old -> left = this._normalizer.normalizeFractionalValueForRender(left) + "%";
         var left = connection.x1 + "px";
     }
     else if(this._settings.isHorizontalGrid()) {

@@ -1,8 +1,9 @@
-Gridifier.Api.Toggle = function(settings, eventEmitter) {
+Gridifier.Api.Toggle = function(settings, eventEmitter, sizesResolverManager) {
     var me = this;
 
     this._settings = null;
     this._eventEmitter = null;
+    this._sizesResolverManager = null;
 
     this._rotateApi = null;
 
@@ -15,9 +16,10 @@ Gridifier.Api.Toggle = function(settings, eventEmitter) {
     this._construct = function() {
         me._settings = settings;
         me._eventEmitter = eventEmitter;
+        me._sizesResolverManager = sizesResolverManager;
 
         me._rotateApi = new Gridifier.Api.Rotate(
-            me._settings, me._eventEmitter
+            me._settings, me._eventEmitter, me._sizesResolverManager
         );
 
         me._toggleFunctions = {};

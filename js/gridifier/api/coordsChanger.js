@@ -56,8 +56,8 @@ Gridifier.Api.CoordsChanger.prototype.getCoordsChangerFunction = function() {
 }
 
 Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
-    this._coordsChangerFunctions["default"] = function(item, newLeft, newTop) {
-        Dom.css3.transitionProperty(item, "left 0ms ease, top 0ms ease");
+    this._coordsChangerFunctions["default"] = function(item, newLeft, newTop) { 
+        //Dom.css3.transitionProperty(item, "left 0ms ease, top 0ms ease"); If !ie8(isSupporting)
         Dom.css.set(item, {
             left: newLeft,
             top: newTop

@@ -1,13 +1,15 @@
-Gridifier.TransformerOperations.OptionsParser = function(collector) {
+Gridifier.TransformerOperations.OptionsParser = function(collector, sizesResolverManager) {
     var me = this;
 
     this._collector = null;
+    this._sizesResolverManager = null;
 
     this._css = {
     };
 
     this._construct = function() {
         me._collector = collector;
+        me._sizesResolverManager = sizesResolverManager;
     };
 
     this._bindEvents = function() {
@@ -38,7 +40,7 @@ Gridifier.TransformerOperations.OptionsParser.prototype.parseItemsToTransform = 
     }
 
     itemsToTransform = this._collector.toDOMCollection(itemsToTransform);
-    SizesResolverManager.startCachingTransaction();
+    this._sizesResolverManager.startCachingTransaction();
 
     this._collector.ensureAllItemsAreAttachedToGrid(itemsToTransform);
     this._collector.ensureAllItemsCanBeAttachedToGrid(itemsToTransform);

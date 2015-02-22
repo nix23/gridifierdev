@@ -1,9 +1,11 @@
 Gridifier.SizesTransformer.ItemNewPxSizesFinder = function(gridifier,
-                                                           connections) {
+                                                           connections,
+                                                           sizesResolverManager) {
     var me = this;
 
     me._gridifier = null;
     me._connections = null;
+    me._sizesResolverManager = null;
 
     this._css = {
     };
@@ -11,6 +13,7 @@ Gridifier.SizesTransformer.ItemNewPxSizesFinder = function(gridifier,
     this._construct = function() {
         me._gridifier = gridifier;
         me._connections = connections;
+        me._sizesResolverManager = sizesResolverManager;
     };
 
     this._bindEvents = function() {
@@ -45,7 +48,7 @@ Gridifier.SizesTransformer.ItemNewPxSizesFinder.prototype._calculateNewPxSizesPe
                                                                                                            widthToTransform,
                                                                                                            heightToTransform) {
     var transformedItemClone = transformedItem.cloneNode();
-    SizesResolverManager.unmarkAsCached(transformedItemClone);
+    this._sizesResolverManager.unmarkAsCached(transformedItemClone);
 
     Dom.css.set(transformedItemClone, {
         position: "absolute",
@@ -58,8 +61,8 @@ Gridifier.SizesTransformer.ItemNewPxSizesFinder.prototype._calculateNewPxSizesPe
 
     this._gridifier.getGrid().appendChild(transformedItemClone);
     var pxSizes = {
-        width: SizesResolverManager.outerWidth(transformedItemClone, true),
-        height: SizesResolverManager.outerHeight(transformedItemClone, true)
+        width: this._sizesResolverManager.outerWidth(transformedItemClone, true),
+        height: this._sizesResolverManager.outerHeight(transformedItemClone, true)
     };
     this._gridifier.getGrid().removeChild(transformedItemClone);
 

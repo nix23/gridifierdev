@@ -1,7 +1,8 @@
 Gridifier.Connections = function(gridifier,
                                  connections,
                                  guid,
-                                 connectionsSorter) {
+                                 connectionsSorter,
+                                 sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
@@ -9,6 +10,7 @@ Gridifier.Connections = function(gridifier,
     this._guid = null;
     this._sizesTransformer = null;
     this._connectionsSorter = null;
+    this._sizesResolverManager = null;
     this._connectedItemMarker = null;
 
     this._css = {
@@ -19,6 +21,7 @@ Gridifier.Connections = function(gridifier,
         me._connections = connections;
         me._guid = guid;
         me._connectionsSorter = connectionsSorter;
+        me._sizesResolverManager = sizesResolverManager;
         me._connectedItemMarker = new Gridifier.ConnectedItemMarker();
     };
 
@@ -162,7 +165,7 @@ Gridifier.Connections.prototype.getMinConnectionWidth = function() {
     var getConnectionWidth = function(i) {
         if(connections[i].x1 >= connections[i].x2 || connections[i].x1 < 0
             || connections[i].x2 > gridX2) {
-            var connectionWidth = SizesResolverManager.outerWidth(connections[i].item, true);
+            var connectionWidth = me._sizesResolverManager.outerWidth(connections[i].item, true);
         }
         else {
             var connectionWidth = connections[i].x2 - connections[i].x1 + 1;
@@ -195,7 +198,7 @@ Gridifier.Connections.prototype.getMinConnectionHeight = function() {
     var getConnectionHeight = function(i) {
         if(connections[i].y1 >= connections[i].y2 || connections[i].y1 < 0
             || connections[i].y2 > gridY2) {
-            var connectionHeight = SizesResolverManager.outerHeight(connections[i].item, true);
+            var connectionHeight = me._sizesResolverManager.outerHeight(connections[i].item, true);
         }
         else {
             var connectionHeight = connections[i].y2 - connections[i].y1 + 1;

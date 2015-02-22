@@ -1,8 +1,9 @@
-Gridifier.Settings = function(settings, eventEmitter) {
+Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
     var me = this;
 
     this._settings = null;
     this._eventEmitter = null;
+    this._sizesResolverManager = null;
 
     this._coreSettingsParser = null;
     this._apiSettingsParser = null;
@@ -44,11 +45,12 @@ Gridifier.Settings = function(settings, eventEmitter) {
     this._construct = function() {
         me._settings = settings;
         me._eventEmitter = eventEmitter;
+        me._sizesResolverManager = sizesResolverManager;
 
         me._coreSettingsParser = new Gridifier.CoreSettingsParser(me, me._settings);
         me._apiSettingsParser = new Gridifier.ApiSettingsParser(me, me._settings);
 
-        me._toggleApi = new Gridifier.Api.Toggle(me, me._eventEmitter);
+        me._toggleApi = new Gridifier.Api.Toggle(me, me._eventEmitter, me._sizesResolverManager);
         me._sortApi = new Gridifier.Api.Sort(me, me._eventEmitter);
         me._filterApi = new Gridifier.Api.Filter(me, me._eventEmitter);
         me._coordsChangerApi = new Gridifier.Api.CoordsChanger(me, me._eventEmitter);
@@ -87,10 +89,10 @@ Gridifier.Settings.prototype._parse = function() {
     this._apiSettingsParser.parseSizesChangerOptions(this._sizesChangerApi);
 
     var gridItemMarkingStrategyData = this._coreSettingsParser.parseGridItemMarkingStrategy();
-    var dragifierData = this._coreSettingsParser.parseDragifierSettings();
-
     this._gridItemMarkingStrategyType = gridItemMarkingStrategyData.gridItemMarkingStrategyType;
     this._gridItemMarkingValue = gridItemMarkingStrategyData.gridItemMarkingValue;
+    
+    var dragifierData = this._coreSettingsParser.parseDragifierSettings();
     this._shouldEnableDragifierOnInit = dragifierData.shouldEnableDragifierOnInit;
     this._dragifierItemSelector = dragifierData.dragifierItemSelector;
 }
