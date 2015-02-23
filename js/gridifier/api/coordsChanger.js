@@ -92,7 +92,7 @@ Gridifier.Api.CoordsChanger.prototype._addSimultaneousCSS3TransitionCoordsChange
         // @todo -> correctly parse params
         // @todo -> set transitions only in this func-on, or separate transition setter???
         
-        Dom.css3.transitionProperty(item, Prefixer.getForCSS('transform', item) + " 900ms ease");
+        Dom.css3.transitionProperty(item, Prefixer.getForCSS('transform', item) + " 500ms ease");
         //, width 600ms ease, height 600ms ease");
         // @todo -> Is it required?
         Dom.css3.perspective(item, "1000");

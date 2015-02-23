@@ -80,54 +80,70 @@ Gridifier.TransformerConnectors.prototype._recreateConnectorsPerReversedItemReap
                                                                                                 firstConnectionToReappend) {
     this._connections.reinitRanges();
     this._reversedAppender.recreateConnectorsPerAllConnectedItems();
-    Logger.log( // @system-log-start
+    /* @system-log-start */
+    Logger.log(
         "recreateConnectorsPerReversedTransformedConnectionAppend",
         "recreateConnectorsPerAllConnectedItems(ra)",
         this._connectors.get(),
         this._connections.get()
-    );          // @system-log-end
+    );
+    /* @system-log-end */
 
     if(this._settings.isVerticalGrid()) {
         this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
-        var logFunction = "deleteAllIntersectedFromBottomConnectors"; // @system-log
+        /* @system-log-start */
+        var logFunction = "deleteAllIntersectedFromBottomConnectors";
+        /* @system-log-end */
     }
     else if(this._settings.isHorizontalGrid()) {
         this._connectorsCleaner.deleteAllIntersectedFromRightConnectors();
-        var logFunction = "deleteAllIntersectedFromRightConnectors"; // @system-log
+        /* @system-log-start */
+        var logFunction = "deleteAllIntersectedFromRightConnectors";
+        /* @system-log-end */
     }
 
-    Logger.log( // @system-log-start
+    /* @system-log-start */
+    Logger.log(
         "recreateConnectorsPerReversedTransformedConnectionAppend",
         logFunction,
         this._connectors.get(),
         this._connections.get()
-    );          // @system-log-end
+    );
+    /* @system-log-end */
 }
 
 Gridifier.TransformerConnectors.prototype._recreateConnectorsPerDefaultItemReappend = function(firstItemToReappend,
                                                                                                firstConnectionToReappend) {
     this._connections.reinitRanges();
     this._appender.recreateConnectorsPerAllConnectedItems();
-    Logger.log( // @system-log-start
+    /* @system-log-start */
+    Logger.log(
         "recreateConnectorsPerDefaultTransformedConnectionAppend",
         "recreateConnectorsPerAllConnectedItems",
         this._connectors.get(),
         this._connections.get()
-    );          // @system-log-end
+    );
+    /* @system-log-end */
     
     if(this._settings.isVerticalGrid()) {
         this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
-        var logFunction = "deleteAllIntersectedFromBottomConnectors"; // @system-log
+        /* @system-log-start */
+        var logFunction = "deleteAllIntersectedFromBottomConnectors";
+        /* @system-log-end */
     }
     else if(this._settings.isHorizontalGrid()) {
         this._connectorsCleaner.deleteAllIntersectedFromRightConnectors();
-        var logFunction = "deleteAllIntersectedFromRightConnectors"; // @system-log
+        /* @system-log-start */
+        var logFunction = "deleteAllIntersectedFromRightConnectors";
+        /* @system-log-end */
     }
 
-    Logger.log( // @system-log-start
+    /* @system-log-start */
+    Logger.log(
         "recreateConnectorsPerDefaultTransformedConnectionAppend",
         logFunction,
         this._connectors.get(),
         this._connections.get()
-    );          // @system-log-end
+    );
+    /* @system-log-end */
 }

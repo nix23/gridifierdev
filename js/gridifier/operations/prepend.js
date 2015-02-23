@@ -64,19 +64,27 @@ Gridifier.Operations.Prepend.prototype.execute = function(items) {
 
 Gridifier.Operations.Prepend.prototype._prepend = function(item) {
     if(this._settings.isDefaultPrepend()) {
-        Logger.startLoggingOperation(       // @system-log-start
+        /* @system-log-start */
+        Logger.startLoggingOperation(
             Logger.OPERATION_TYPES.PREPEND,
             "Item GUID: " + this._guid.getItemGUID(item)
-        );                                  // @system-log-end
+        );
+        /* @system-log-end */
         this._prepender.prepend(item);
-        Logger.stopLoggingOperation(); // @system-log
+        /* @system-log-start */
+        Logger.stopLoggingOperation();
+        /* @system-log-end */
     }
     else if(this._settings.isReversedPrepend()) {
-        Logger.startLoggingOperation(       // @system-log-start
+        /* @system-log-start */
+        Logger.startLoggingOperation(
             Logger.OPERATION_TYPES.REVERSED_PREPEND,
             "Item GUID: " + this._guid.getItemGUID(item)
-        );                                  // @system-log-end
+        );
+        /* @system-log-end */
         this._reversedPrepender.reversedPrepend(item);
-        Logger.stopLoggingOperation(); // @system-log
+        /* @system-log-start */
+        Logger.stopLoggingOperation();
+        /* @system-log-end */
     }
 }

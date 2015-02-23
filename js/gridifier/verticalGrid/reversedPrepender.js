@@ -73,46 +73,56 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype.reversedPrepend = function(it
     this._initConnectors();
 
     var connection = this._createConnectionPerItem(item);
-    Logger.log(                 // @system-log-start
+    /* @system-log-start */
+    Logger.log(
         "connection created",
         "---",
         this._connectors.get(),
         this._connections.get()
-    );                          // @system-log-end
+    );
+    /* @system-log-end */
     var wereItemsNormalized = this._connections.normalizeVerticalPositionsOfAllConnectionsAfterPrepend(
         connection, this._connectors.get()
     );
-    Logger.log( // @system-log-start
+    /* @system-log-start */
+    Logger.log(
         "normalizeVerticalPositionsOfAllConnectionsAfterPrepend",
         "---",
         this._connectors.get(),
         this._connections.get()
-    );          // @system-log-end
+    );
+    /* @system-log-end */
     this._connections.attachConnectionToRanges(connection);
 
     this._connectorsCleaner.deleteAllTooLowConnectorsFromMostTopConnector();
-    Logger.log(                 // @system-log-start
+    /* @system-log-start */
+    Logger.log(
         "deleteAllTooLowConnectorsFromMostTopConnector",
         "---",
         this._connectors.get(),
         this._connections.get()
-    );                          // @system-log-end
+    );
+    /* @system-log-end */
     this._connectorsCleaner.deleteAllIntersectedFromTopConnectors();
-    Logger.log( // @system-log-start
+    /* @system-log-start */
+    Logger.log(
         "deleteAllIntersectedFromTopConnectors",
         "---",
         this._connectors.get(),
         this._connections.get()
-    );          // @system-log-end
+    );
+    /* @system-log-end */
 
     if(wereItemsNormalized) {
         this._renderer.renderConnections(this._connections.get(), [connection]);
-        Logger.log( // @system-log-start
+        /* @system-log-start */
+        Logger.log(
             "renderConnectionsAfterPrependNormalization",
             "",
             this._connectors.get(),
             this._connections.get()
-        );          // @system-log-end
+        );
+        /* @system-log-end */
     }
 
     if(this._settings.isDefaultIntersectionStrategy())
@@ -140,26 +150,32 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype._initConnectors = function() 
 
     if(!this._operation.isCurrentOperationSameAsPrevious(Gridifier.OPERATIONS.REVERSED_PREPEND)) {
         this.recreateConnectorsPerAllConnectedItems();
-        Logger.log(     // @system-log-start
+        /* @system-log-start */
+        Logger.log(
             "initConnectors",
             "isCurrentOperationSameAsPrevious -> recreateConnectorsPerAllConnectedItems",
             this._connectors.get(),
             this._connections.get()
-        );              // @system-log-end
+        );
+        /* @system-log-end */
         this._connectorsCleaner.deleteAllIntersectedFromTopConnectors();
-        Logger.log(                 // @system-log-start
+        /* @system-log-start */
+        Logger.log(
             "initConnectors",
             "isCurrentOperationSameAsPrevious -> deleteAllIntersectedFromTopConnectors",
             this._connectors.get(),
             this._connections.get()
-        );                          // @system-log-end
+        );
+        /* @system-log-end */
         this._connectorsCleaner.deleteAllTooLowConnectorsFromMostTopConnector();
-        Logger.log(                 // @system-log-start
+        /* @system-log-start */
+        Logger.log(
             "initConnectors",
             "isCurrentOperationSameAsPrevious -> deleteAllTooLowConnectorsFromMostTopConnector",
             this._connectors.get(),
             this._connections.get()
-        );                          // @system-log-end
+        );
+        /* @system-log-end */
     }
 }
 
@@ -169,12 +185,14 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype.createInitialConnector = func
         this._gridifier.getGridX2(),
         0
     );
-    Logger.log(                 // @system-log-start
+    /* @system-log-start */
+    Logger.log(
         "initConnectors",
         "isInitialOperation -> createInitialConnector",
         this._connectors.get(),
         this._connections.get()
-    );                          // @system-log-end
+    );
+    /* @system-log-end */
 }
 
 Gridifier.VerticalGrid.ReversedPrepender.prototype.recreateConnectorsPerAllConnectedItems = function() {
@@ -214,12 +232,14 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype._createConnectionPerItem = fu
     var connection = this._connections.add(item, itemConnectionCoords);
     if(this._settings.isNoIntersectionsStrategy()) {
         this._connections.expandVerticallyAllRowConnectionsToMostTall(connection);
-        Logger.log(  // @system-log-start
+        /* @system-log-start */
+        Logger.log(
             "createConnectionPerItem",
             "isNoIntersectionsStrategy -> expandVerticallyAllRowConnectionsToMostTall",
             sortedConnectors,
             this._connections.get()
-        );          // @system-log-end
+        );
+        /* @system-log-end */
     }
     this._addItemConnectors(itemConnectionCoords, this._guid.getItemGUID(item));
 
@@ -233,12 +253,14 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype._filterConnectorsPerNextConne
         this._connectorsShifter.attachConnectors(connectors);
         this._connectorsShifter.shiftAllConnectors();
         connectors = this._connectorsShifter.getAllConnectors();
-        Logger.log(                     // @system-log-start
+        /* @system-log-start */
+        Logger.log(
             "createConnectionPerItem",
             "filterConnectorsPerNextConnection -> isDefaultIntersectionStrategy() -> shiftAllConnectors",
             connectors,
             this._connections.get()
-        );                              // @system-log-end
+        );
+        /* @system-log-end */
     }
     else if(this._settings.isNoIntersectionsStrategy()) {
         var connectorsSide = Gridifier.Connectors.SIDES.TOP.RIGHT;
@@ -246,22 +268,26 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype._filterConnectorsPerNextConne
         this._connectorsSelector.attachConnectors(connectors);
         this._connectorsSelector.selectOnlyMostTopConnectorFromSide(connectorsSide);
         connectors = this._connectorsSelector.getSelectedConnectors();
-        Logger.log(                     // @system-log-start
+        /* @system-log-start */
+        Logger.log(
             "createConnectionPerItem",
             "filterConnectorsPerNextConnection -> isNoIntersectionsStrategy() -> selectOnlyMostTopConnectorFromSide(TOP.RIGHT)",
             connectors,
             this._connections.get()
-        );                              // @system-log-end
+        );
+        /* @system-log-end */
         
         this._connectorsShifter.attachConnectors(connectors);
         this._connectorsShifter.shiftAllWithSpecifiedSideToRightGridCorner(connectorsSide);
         connectors = this._connectorsShifter.getAllConnectors();
-        Logger.log(                     // @system-log-start
+        /* @system-log-start */
+        Logger.log(
             "createConnectionPerItem",
             "filterConnectorsPerNextConnection -> isNoIntersectionsStrategy() -> shiftAllWithSpecifiedSideToLeftGridCorner(TOP.RIGHT)",
             connectors,
             this._connections.get()
-        );                              // @system-log-end
+        );
+        /* @system-log-end */
     }
 
     this._connectorsSorter.attachConnectors(connectors);
@@ -272,23 +298,31 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype._filterConnectorsPerNextConne
 
 Gridifier.VerticalGrid.ReversedPrepender.prototype._findItemConnectionCoords = function(item, sortedConnectors) {
     var itemConnectionCoords = null;
-    Logger.startLoggingFindItemConnectionCoords(); // @system-log
+    /* @system-log-start */
+    Logger.startLoggingFindItemConnectionCoords();
+    /* @system-log-end */
 
     for(var i = 0; i < sortedConnectors.length; i++) {
-        Logger.logFindItemConnectionCoordsInspectConnector(sortedConnectors[i], this._connections.get()); // @system-log
+        /* @system-log-start */
+        Logger.logFindItemConnectionCoordsInspectConnector(sortedConnectors[i], this._connections.get());
+        /* @system-log-end */
         var itemCoords = this._itemCoordsExtractor.connectorToReversedPrependedItemCoords(item, sortedConnectors[i]);
         if(itemCoords.x1 < this._normalizer.normalizeLowRounding(0)) {
-            Logger.logFindItemConnectionCoordsOutOfLayoutBounds(   // @system-log-start
+            /* @system-log-start */
+            Logger.logFindItemConnectionCoordsOutOfLayoutBounds(
                 sortedConnectors[i], itemCoords, this._connections.get()
-            );                                                     // @system-log-end
+            );
+            /* @system-log-end */
             continue;
         }
 
         var maybeIntersectableConnections = this._connectionsIntersector.findAllMaybeIntersectableConnectionsOnPrepend(sortedConnectors[i]);
         if(this._connectionsIntersector.isIntersectingAnyConnection(maybeIntersectableConnections, itemCoords)) {
-            Logger.logFindItemConnectionCoordsIntersectionFound( // @system-log-start
+            /* @system-log-start */
+            Logger.logFindItemConnectionCoordsIntersectionFound(
                 sortedConnectors[i], itemCoords, maybeIntersectableConnections, this._connections.get()
-            );                                                   // @system-log-end
+            );
+            /* @system-log-end */
             continue;
         }
 
@@ -296,26 +330,32 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype._findItemConnectionCoords = f
 
         var connectionsAboveCurrent = this._connections.getAllConnectionsAboveY(itemCoords.y1);
         if(this._connections.isAnyConnectionItemGUIDBiggerThan(connectionsAboveCurrent, item)) {
-            Logger.logFindItemConnectionCoordsWrongSorting( // @system-log-start
+            /* @system-log-start */
+            Logger.logFindItemConnectionCoordsWrongSorting( 
                 sortedConnectors[i], itemCoords, connectionsAboveCurrent, this._connections.get()
-            );                                              // @system-log-end
+            );
+            /* @system-log-end */
             continue;
         }
 
         if(this._settings.isNoIntersectionsStrategy()) {
             if(this._connections.isIntersectingMoreThanOneConnectionItemVertically(itemConnectionCoords)) {
-                Logger.logFindItemConnectionCoordsVerticalIntersectionsError( // @system-log-start
+                /* @system-log-start */
+                Logger.logFindItemConnectionCoordsVerticalIntersectionsError(
                     sortedConnectors[i], itemCoords, this._connections.get()
-                );                                                            // @system-log-end
+                );
+                /* @system-log-end */
                 itemConnectionCoords = null;
             }
         }
 
         if(itemConnectionCoords != null) {
-            Logger.logFindItemConnectionCoordsFound( // @system-log
+            /* @system-log-start */
+            Logger.logFindItemConnectionCoordsFound(
                 sortedConnectors[i], itemConnectionCoords, item, this._connections.get()
-            );                                       // @system-log
-            Logger.stopLoggingFindItemConnectionCoords(); // @system-log
+            );
+            Logger.stopLoggingFindItemConnectionCoords();
+            /* @system-log-end */
             break;
         }
     }

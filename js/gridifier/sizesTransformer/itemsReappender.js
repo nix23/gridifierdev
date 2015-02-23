@@ -24,7 +24,7 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
     this._transformedItemMarker = null;
 
     this._reappendQueue = null;
-    this._batchSize = 2;
+    this._batchSize = 12;
     this._reappendNextQueuedItemsBatchTimeout = null;
     this._reappendedQueueData = null;
     this._reappendStartViewportWidth = null;
@@ -153,12 +153,14 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
         else if(this._settings.isHorizontalGrid())
             // @todo -> Delete horizontal grid connectors here
             ;
-        Logger.log( // @system-log-start
+        /* @system-log-start */
+        Logger.log( 
             "reappendItems",
             "deleteAllIntersectedFromBottomOrXXXConnectors",
             this._connectors.get(),
             this._connections.get()
-        );          // @system-log-end
+        );
+        /* @system-log-end */
 
         //this._lastReappendedItemGUID = this._guid.getItemGUID(nextItemToReappend);
         reappendedItemGUIDS.push(this._guid.getItemGUID(nextItemToReappend));
@@ -170,7 +172,9 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
     this._reappendedQueueData = this._reappendedQueueData.concat(this._reappendQueue.splice(0, batchSize));
     if(this._reappendQueue.length == 0) {
         this._reappendNextQueuedItemsBatchTimeout = null;
-        Logger.stopLoggingOperation(); // @system-log
+        /* @system-log-start */
+        Logger.stopLoggingOperation();
+        /* @system-log-end */
         return;
     }
 
@@ -183,21 +187,29 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
 
 Gridifier.SizesTransformer.ItemsReappender.prototype._reappendItem = function(reappendType,
                                                                               itemToReappend) {
-    var isTransformedItem = this._transformedItemMarker.isTransformedItem(itemToReappend); // @system-log
-    var loggerItemType = (isTransformedItem) ? "Transformed" : "Depended";                 // @system-log
+    /* @system-log-start */
+    var isTransformedItem = this._transformedItemMarker.isTransformedItem(itemToReappend);
+    var loggerItemType = (isTransformedItem) ? "Transformed" : "Depended";
+    /* @system-log-end */
     if(reappendType == Gridifier.APPEND_TYPES.REVERSED_APPEND) {
-        Logger.startLoggingSubaction(   // @system-log-start
+        /* @system-log-start */
+        Logger.startLoggingSubaction(
             "reappend" + loggerItemType + "ItemWithReversedAppend",
             "reversedAppend item with GUID: " + this._guid.getItemGUID(itemToReappend)
-        );                              // @system-log-end
+        );
+        /* @system-log-end */
         this._reversedAppender.reversedAppend(itemToReappend);
     }
     else if(reappendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND) {
-        Logger.startLoggingSubaction(   // @system-log-start
+        /* @system-log-start */
+        Logger.startLoggingSubaction(
             "reappend" + loggerItemType + "ItemWithDefaultAppend",
             "defaultAppend item with GUID: " + this._guid.getItemGUID(itemToReappend)
-        );                              // @system-log-end
+        );
+        /* @system-log-end */
         this._appender.append(itemToReappend);
     }
-    Logger.stopLoggingSubaction(); // @system-log
+    /* @system-log-start */
+    Logger.stopLoggingSubaction();
+    /* @system-log-end */
 }

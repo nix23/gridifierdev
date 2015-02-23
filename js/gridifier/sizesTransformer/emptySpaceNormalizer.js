@@ -66,12 +66,14 @@ Gridifier.SizesTransformer.EmptySpaceNormalizer.prototype._applyNoIntersectionsS
         connections[i].y1 -= verticalDecrease;
         connections[i].y2 -= verticalDecrease;
     }
-    Logger.log( // @system-log-start
+    /* @system-log-start */
+    Logger.log(
         "applyNoIntersectionsStrategyTopFreeSpaceFixOnPrependedItemTransform",
         "sizesTransformer subcall",
         this._connectors.get(),
         this._connections.get()
-    );          // @system-log-end
+    );
+    /* @system-log-end */
 }
 
 Gridifier.SizesTransformer.EmptySpaceNormalizer.prototype._applyNoIntersectionsStrategyLeftFreeSpaceFixOnPrependedItemTransform = function() {

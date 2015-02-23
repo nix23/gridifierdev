@@ -12,7 +12,9 @@ Gridifier.TransformerOperations.Toggle = function(collector,
     this._sizesResolverManager = null;
 
     this._optionsParser = null;
-    this._loggerLegend = null; // @system-log
+    /* @system-log-start */
+    this._loggerLegend = null;
+    /* @system-log-end */
 
     this._css = {
     };
@@ -51,10 +53,12 @@ Gridifier.TransformerOperations.Toggle.prototype.execute = function(maybeItem, n
     var sizesToTransform = this._optionsParser.parseSizesToTransform(maybeItem, newWidth, newHeight);
     var transformationData = this._parseTransformationData(itemsToTransform, sizesToTransform);
 
-    Logger.startLoggingOperation(   // @system-log-start
+    /* @system-log-start */
+    Logger.startLoggingOperation(
         Logger.OPERATION_TYPES.TOGGLE_SIZES,
         this._loggerLegend
-    );                              // @system-log-end
+    );
+    /* @system-log-end */
     this._sizesTransformer.transformConnectionSizes(transformationData);
     // @todo -> will it work(SizesTransfomer has async action inside)
     this._sizesResolverManager.stopCachingTransaction();
@@ -65,7 +69,9 @@ Gridifier.TransformerOperations.Toggle.prototype._parseTransformationData = func
                                                                                      sizesToTransform) {
     var itemNewRawSizesFinder = new Gridifier.SizesTransformer.ItemNewRawSizesFinder(this._sizesResolverManager);
     var transformationData = [];
-    this._loggerLegend = ""; // @system-log
+    /* @system-log-start */
+    this._loggerLegend = ""; 
+    /* @system-log-end */
 
     for(var i = 0; i < itemsToTransform.length; i++) {
         var connectionToTransform = this._connections.findConnectionByItem(itemsToTransform[i]);
@@ -83,11 +89,13 @@ Gridifier.TransformerOperations.Toggle.prototype._parseTransformationData = func
                 connectionToTransform, sizesToTransform[i][0], sizesToTransform[i][1]
             );
         }
-        this._loggerLegend += "Item GUID: " + this._guid.getItemGUID(connectionToTransform.item); // @system-log-start
+        /* @system-log-start */
+        this._loggerLegend += "Item GUID: " + this._guid.getItemGUID(connectionToTransform.item);
         this._loggerLegend += " new width: " + sizesToTransform[i][0] + " new height: " + sizesToTransform[i][1];
         this._loggerLegend += " targetWidth: " + targetSizesToTransform.targetWidth;
         this._loggerLegend += " targetHeight: " + targetSizesToTransform.targetHeight;
-        this._loggerLegend += "<br><br>";                                                         // @system-log-end
+        this._loggerLegend += "<br><br>";
+        /* @system-log-end */
 
         transformationData.push({
             connectionToTransform: connectionToTransform,

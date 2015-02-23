@@ -35,7 +35,7 @@ Gridifier.VerticalGrid.ConnectionsIntersector.prototype.isIntersectingAnyConnect
 }
 
 Gridifier.VerticalGrid.ConnectionsIntersector.prototype.getAllConnectionsWithIntersectedCenter = function(maybeIntersectionCoords) {
-    return this._intersectorCore.getAllConnectionsWithIntersectedCenter(maybeIntersectionConnections);
+    return this._intersectorCore.getAllConnectionsWithIntersectedCenter(maybeIntersectionCoords);
 }
 
 Gridifier.VerticalGrid.ConnectionsIntersector.prototype.findAllMaybeIntersectableConnectionsOnAppend = function(connector) {

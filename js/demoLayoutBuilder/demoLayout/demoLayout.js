@@ -60,7 +60,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         //me._gridifierSettings.alignmentType = "center";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
-        me._gridifierSettings.dragifier = false;
+        me._gridifierSettings.dragifier = true;
 
         // me._gridifierSettings.sort = function(firstItem, secondItem) { 
         //     var firstItemClassParts = firstItem.getAttribute("class").split(" ");
@@ -210,19 +210,19 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
 
 
-        me._gridifierDynamicSettings._batchSize = 5;
+        me._gridifierDynamicSettings._batchSize = 50;
         for(var i = 0; i < 50; i++) {
             if(i % 2 == 0) {
-                var width = "100px";
-                var height = "50px";
-                // var width = "300px";
-                // var height = "150px";
+                // var width = "100px";
+                // var height = "50px";
+                var width = "200px";
+                var height = "200px";
             }
             else {
-               var width = "50px";
+               // var width = "50px";
+               //  var height = "100px";
+                var width = "100px";
                 var height = "100px";
-                // var width = "150px";
-                // var height = "300px";
             }
 
             me._gridifierDynamicSettings._itemSizes[i].width = width;
@@ -343,8 +343,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
         window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
-        me._gridifier.setCoordsChanger("default");
-        me._gridifier.setItemWidthPercentageAntialias(0.1);
+        //me._gridifier.setCoordsChanger("default");
+        //me._gridifier.setItemWidthPercentageAntialias(0.1);
         //me._gridifier.setItemHeightPercentageAntialias(0.1);
         // me._gridifier._settings.setRendererCoordsChanger('default');
         // me._gridifier._settings.setRendererSizesChanger('default');
@@ -473,7 +473,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
         // @todo -> Replace this.(Tmp for testing)
         me._$view.on("click", ".gridItem", function() { ///console.log("toggle");
-            me._gridifier.disconnect($(this));
+            //me._gridifier.disconnect($(this));
             //me._gridifier.transformSizes($(this), "*2", "*2");
            //me._gridifier.toggleSizes($(this), "*2", "*2");
             // if($(this).hasClass("transformedItem")) {

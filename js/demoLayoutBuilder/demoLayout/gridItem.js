@@ -88,12 +88,15 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         var borderColor = "blue";
 
     this._$gridItem.css({
-        //width: itemSizes.width,
-        //height: itemSizes.height,
+        width: itemSizes.width,
+        height: itemSizes.height,
         //height: "30%",
 
-        width: "33.43%",
-        height: "60px",
+        // width: "33.43%",
+        // height: "60px",
+
+
+
         // width: "60px",
         // height: "60px",
         //"padding-bottom": "15%",
@@ -156,8 +159,8 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         height: "100%",
         // @todo -> Make Crossbrowser
         //background: "url(img/gridItemBg9.png)",
-        //background: "url(img/test2.png)",
-        background: bgs,
+        background: "url(img/test2.png)",
+        //background: bgs,
         //background: "black",
         "background-size": "cover",
         "background-repeat": "no-repeat",

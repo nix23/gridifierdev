@@ -73,20 +73,28 @@ Gridifier.Operations.Append.prototype.execute = function(items) {
 
 Gridifier.Operations.Append.prototype._append = function(item) {
     if(this._settings.isDefaultAppend()) {
-        Logger.startLoggingOperation(                   // @system-log-start
+        /* @system-log-start */
+        Logger.startLoggingOperation(
             Logger.OPERATION_TYPES.APPEND,
             "Item GUID: " + this._guid.getItemGUID(item)
-        );                                              // @system-log-end
+        );
+        /* @system-log-end */
         this._appender.append(item);
-        Logger.stopLoggingOperation();// @system-log
+        /* @system-log-start */
+        Logger.stopLoggingOperation();
+        /* @system-log-end */
     }
     else if(this._settings.isReversedAppend()) {
-        Logger.startLoggingOperation(                   // @system-log-start
+        /* @system-log-start */
+        Logger.startLoggingOperation(
             Logger.OPERATION_TYPES.REVERSED_APPEND,
             "Item GUID: " + this._guid.getItemGUID(item)
-        );                                              // @system-log-end
+        );
+        /* @system-log-end */
         this._reversedAppender.reversedAppend(item);
-        Logger.stopLoggingOperation();// @system-log
+        /* @system-log-start */
+        Logger.stopLoggingOperation();
+        /* @system-log-end */
     }
 }
 
