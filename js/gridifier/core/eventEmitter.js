@@ -4,7 +4,9 @@ Gridifier.EventEmitter = function(gridifier) {
     me._gridifier = null;
 
     me._showCallbacks = [];
+    me._hideCallbacks = [];
     me._gridSizesChangeCallbacks = [];
+    me._transformCallbacks = [];
 
     this._css = {
     };
@@ -31,11 +33,21 @@ Gridifier.EventEmitter = function(gridifier) {
 Gridifier.EventEmitter.prototype._bindEmitterToGridifier = function() {
     var me = this;
     this._gridifier.onShow = function(callbackFn) { me.onShow.call(me, callbackFn); };
+    this._gridifier.onHide = function(callbackFn) { me.onHide.call(me, callbackFn); };
     this._gridifier.onGridSizesChange = function(callbackFn) { me.onGridSizesChange.call(me, callbackFn); };
+    this._gridifier.onTransform = function(callbackFn) { me.onTransform.call(me, callbackFn); };
 }
 
 Gridifier.EventEmitter.prototype.onShow = function(callbackFn) {
     this._showCallbacks.push(callbackFn);
+}
+
+Gridifier.EventEmitter.prototype.onHide = function(callbackFn) {
+    this._hideCallbacks.push(callbackFn);
+}
+
+Gridifier.EventEmitter.prototype.onTransform = function(callbackFn) {
+    this._transformCallbacks.push(callbackFn);
 }
 
 Gridifier.EventEmitter.prototype.onGridSizesChange = function(callbackFn) {
@@ -43,6 +55,7 @@ Gridifier.EventEmitter.prototype.onGridSizesChange = function(callbackFn) {
 }
 
 // @todo -> Add off events
+// @todo -> Add once events
 // @todo -> Think about event types 
 //          (Otsilatj eventi -> onDelete, onResize, onAdd, onReady. Event proxy? (backbone, window).)
 
@@ -52,8 +65,20 @@ Gridifier.EventEmitter.prototype.emitShowEvent = function(item) {
     }
 }
 
+Gridifier.EventEmitter.prototype.emitHideEvent = function(item) {
+    for(var i = 0; i < this._hideCallbacks.length; i++) {
+        this._hideCallbacks[i](item);
+    }
+}
+
 Gridifier.EventEmitter.prototype.emitGridSizesChangeEvent = function() {
     for(var i = 0; i < this._gridSizesChangeCallbacks.length; i++) {
         this._gridSizesChangeCallbacks[i]();
+    }
+}
+
+Gridifier.EventEmitter.prototype.emitTransformEvent = function(item, newWidth, newHeight, newLeft, newTop) {
+    for(var i = 0; i < this._transformCallbacks.length; i++) {
+        this._transformCallbacks[i](item, newWidth, newHeight, newLeft, newTop);
     }
 }

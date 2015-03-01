@@ -108,7 +108,7 @@ Gridifier = function(grid, settings) {
             me, me._collector, me._connections, me._settings, me._guid, me._disconnector
         );
 
-        me._sizesTransformer = new Gridifier.SizesTransformer(
+        me._sizesTransformer = new Gridifier.SizesTransformer.Core(
             me,
             me._settings,
             me._connectors,
@@ -206,6 +206,14 @@ Gridifier.prototype.getGridY2 = function() {
 
 Gridifier.prototype.getGrid = function() {
     return this._grid.getGrid();
+}
+
+Gridifier.prototype.getCalculatedGridWidth = function() {
+    return this._connections.getMaxX2();
+}
+
+Gridifier.prototype.getCalculatedGridHeight = function() {
+    return this._connections.getMaxY2();
 }
 
 Gridifier.prototype.getRenderer = function() {
@@ -347,6 +355,7 @@ Gridifier.HorizontalGrid = {};
 Gridifier.VerticalGrid = {};
 Gridifier.Operations = {};
 Gridifier.TransformerOperations = {};
+Gridifier.SizesTransformer = {};
 
 Gridifier.GRID_TYPES = {VERTICAL_GRID: "verticalGrid", HORIZONTAL_GRID: "horizontalGrid"};
 
@@ -365,7 +374,12 @@ Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES = {
 
 Gridifier.SORT_DISPERSION_MODES = {DISABLED: "disabled", CUSTOM: "custom", CUSTOM_ALL_EMPTY_SPACE: "customAllEmptySpace"};
 
-Gridifier.GRID_ITEM_MARKING_STRATEGIES = {BY_CLASS: "class", BY_DATA_ATTR: "data"};
-Gridifier.GRID_ITEM_MARKING_DEFAULTS = {CLASS: "gridifier-item", DATA_ATTR: "data-gridifier-item"};
+Gridifier.GRID_ITEM_MARKING_STRATEGIES = {BY_CLASS: "class", BY_DATA_ATTR: "data", BY_QUERY: "query"};
+Gridifier.GRID_ITEM_MARKING_DEFAULTS = {CLASS: "gridifier-item", DATA_ATTR: "data-gridifier-item", QUERY: "div > div"};
 
 Gridifier.OPERATIONS = {PREPEND: 0, REVERSED_PREPEND: 1, APPEND: 2, REVERSED_APPEND: 3, MIRRORED_PREPEND: 4};
+Gridifier.DEFAULT_TOGGLE_ANIMATION_MS_DURATION = 500;
+Gridifier.DEFAULT_COORDS_CHANGE_ANIMATION_MS_DURATION = 500;
+
+Gridifier.DEFAULT_ROTATE_PERSPECTIVE = "200px";
+Gridifier.DEFAULT_ROTATE_BACKFACE = true;

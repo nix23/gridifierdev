@@ -63,6 +63,7 @@ Gridifier.Operations.Append.prototype.execute = function(items) {
     items = this._collector.sortCollection(items);
     
     for(var i = 0; i < items.length; i++) {
+        this._collector.attachToGrid(items[i]);
         this._guid.markNextAppendedItem(items[i]);
         this._append(items[i]);
     }

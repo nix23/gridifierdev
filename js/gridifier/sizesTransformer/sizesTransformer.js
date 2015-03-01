@@ -1,14 +1,14 @@
-Gridifier.SizesTransformer = function(gridifier,
-                                      settings,
-                                      connectors,
-                                      connections,
-                                      connectionsSorter,
-                                      guid,
-                                      appender,
-                                      reversedAppender,
-                                      normalizer,
-                                      operation,
-                                      sizesResolverManager) {
+Gridifier.SizesTransformer.Core = function(gridifier,
+                                           settings,
+                                           connectors,
+                                           connections,
+                                           connectionsSorter,
+                                           guid,
+                                           appender,
+                                           reversedAppender,
+                                           normalizer,
+                                           operation,
+                                           sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
@@ -125,15 +125,15 @@ Gridifier.SizesTransformer = function(gridifier,
 
 Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT = "restrictConnectionCollect";
 
-Gridifier.SizesTransformer.prototype.isTransformerQueueEmpty = function() {
+Gridifier.SizesTransformer.Core.prototype.isTransformerQueueEmpty = function() {
     return this._itemsReappender.isReappendQueueEmpty();
 }
 
-Gridifier.SizesTransformer.prototype.getQueuedConnectionsPerTransform = function() {
+Gridifier.SizesTransformer.Core.prototype.getQueuedConnectionsPerTransform = function() {
     return this._itemsReappender.getQueuedConnectionsPerTransform();
 }
 
-Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transformationData) {
+Gridifier.SizesTransformer.Core.prototype.transformConnectionSizes = function(transformationData) {
     transformationData = this._transformedConnectionsSorter.sortTransformedConnections(
         transformationData
     );
@@ -185,7 +185,7 @@ Gridifier.SizesTransformer.prototype.transformConnectionSizes = function(transfo
     setTimeout(function() { applyTransform.call(me); }, 0);
 }
 
-Gridifier.SizesTransformer.prototype.stopRetransformAllConnectionsQueue = function() {
+Gridifier.SizesTransformer.Core.prototype.stopRetransformAllConnectionsQueue = function() {
     var connections = this._connections.get();
 
     if(!this._itemsReappender.isReappendQueueEmpty()) {
@@ -207,7 +207,7 @@ Gridifier.SizesTransformer.prototype.stopRetransformAllConnectionsQueue = functi
     }
 }
 
-Gridifier.SizesTransformer.prototype.retransformAllConnections = function() {
+Gridifier.SizesTransformer.Core.prototype.retransformAllConnections = function() {
     this.stopRetransformAllConnectionsQueue();
     var connections = this._connections.get();
     
@@ -284,7 +284,7 @@ Gridifier.SizesTransformer.prototype.retransformAllConnections = function() {
 }
 
 // Sync is required, because scheduled connection to transform may has changed % sizes after resizes.
-Gridifier.SizesTransformer.prototype._syncAllScheduledToTransformItemSizes = function(connections) {
+Gridifier.SizesTransformer.Core.prototype._syncAllScheduledToTransformItemSizes = function(connections) {
     var transformationData = [];
     for(var i = 0; i < connections.length; i++) {
         if(this._transformedItemMarker.isTransformedItem(connections[i].item)) {
@@ -314,7 +314,7 @@ Gridifier.SizesTransformer.prototype._syncAllScheduledToTransformItemSizes = fun
 // (Used in insertBefore, insertAfter methods. In that methods we should launch reappend
 //  queue immediatly, because in CSD mode we can't insertBefore or after next item BEFORE
 //  current items positions are recalculated.(Order depends on position)
-Gridifier.SizesTransformer.prototype.retransformFrom = function(firstConnectionToRetransform) {
+Gridifier.SizesTransformer.Core.prototype.retransformFrom = function(firstConnectionToRetransform) {
     var connectionsToReappend = [];
     if(!this._itemsReappender.isReappendQueueEmpty()) {
         var currentQueueState = this._itemsReappender.stopReappendingQueuedItems();

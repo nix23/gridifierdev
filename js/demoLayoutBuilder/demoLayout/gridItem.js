@@ -69,7 +69,7 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
                                                                            isContentBoxBoxSizing,
                                                                            itemBgClass) {
     this._gridifier.markAsGridItem(this._$gridItem);
-
+    
     if(typeof window.borderType == "undefined")
         window.borderType = 1;
     else

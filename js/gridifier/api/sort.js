@@ -55,6 +55,6 @@ Gridifier.Api.Sort.prototype.getSortFunction = function() {
 
 Gridifier.Api.Sort.prototype._addDefaultSort = function() {
     this._sortFunctions["default"] = function(firstItem, secondItem) {
-        return -1;
+        return 0;
     };
 }

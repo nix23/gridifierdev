@@ -56,17 +56,35 @@ Gridifier.Api.CoordsChanger.prototype.getCoordsChangerFunction = function() {
 }
 
 Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
-    this._coordsChangerFunctions["default"] = function(item, newLeft, newTop) { 
+    this._coordsChangerFunctions["default"] = function(item, 
+                                                       newLeft, 
+                                                       newTop,
+                                                       animationMsDuration,
+                                                       eventEmitter,
+                                                       emitTransformEvent,
+                                                       newWidth,
+                                                       newHeight) { 
         //Dom.css3.transitionProperty(item, "left 0ms ease, top 0ms ease"); If !ie8(isSupporting)
         Dom.css.set(item, {
             left: newLeft,
             top: newTop
         });
+
+        if(emitTransformEvent) {
+            eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
+        }
     };
 }
 
 Gridifier.Api.CoordsChanger.prototype._addSimultaneousCSS3TransitionCoordsChanger = function() {
-    this._coordsChangerFunctions.simultaneousCSS3Transition = function(item, newLeft, newTop) {
+    this._coordsChangerFunctions.simultaneousCSS3Transition = function(item, 
+                                                                       newLeft, 
+                                                                       newTop,
+                                                                       animationMsDuration,
+                                                                       eventEmitter,
+                                                                       emitTransformEvent,
+                                                                       newWidth,
+                                                                       newHeight) {
         // @todo -> if !supporting transitions -> default
 
         var newLeft = parseFloat(newLeft);
@@ -88,15 +106,20 @@ Gridifier.Api.CoordsChanger.prototype._addSimultaneousCSS3TransitionCoordsChange
             var translateY = (currentTop - newTop) * -1;
         else
             var translateY = 0;
-
-        // @todo -> correctly parse params
-        // @todo -> set transitions only in this func-on, or separate transition setter???
         
-        Dom.css3.transitionProperty(item, Prefixer.getForCSS('transform', item) + " 500ms ease");
-        //, width 600ms ease, height 600ms ease");
-        // @todo -> Is it required?
+        Dom.css3.transitionProperty(
+            item, 
+            Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+        );
+        
         Dom.css3.perspective(item, "1000");
         Dom.css3.backfaceVisibility(item, "hidden");
         Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px,0px");
+
+        if(emitTransformEvent) {
+            setTimeout(function() {
+                eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
+            }, animationMsDuration + 20);
+        }
     };
 }

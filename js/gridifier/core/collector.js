@@ -49,33 +49,54 @@ Gridifier.Collector.prototype._createCollectorFunction = function() {
     }
     else if(this._settings.isByDataAttrGridItemMarkingStrategy()) {
         this._collectorFunction = function(grid) {
-            return Dom.get.byQuery(grid, "[" + gridItemMarkingValue + "]");
+            return Dom.get.byQuery(
+                grid, 
+                "[" + Gridifier.GRID_ITEM_MARKING_DEFAULTS.DATA_ATTR + "=" + gridItemMarkingValue + "]"
+            );
+        }
+    }
+    else if(this._settings.isByQueryGridItemMarkingStrategy()) {
+        this._collectorFunction = function(grid) {
+            return Dom.get.byQuery(grid, gridItemMarkingValue);
         }
     }
 }
 
-// @todo -> Add by query marking(For recursive grids(> , > . , > #, > el[], etc...))
 Gridifier.Collector.prototype._createMarkingFunction = function() {
     var gridItemMarkingValue = this._settings.getGridItemMarkingType();
 
     if(this._settings.isByClassGridItemMarkingStrategy()) {
         this._markingFunction = function(item) {
-            Dom.css.addClass(item, gridItemMarkingValue);
+            if(!Dom.css.hasClass(item, gridItemMarkingValue))
+                Dom.css.addClass(item, gridItemMarkingValue);
         }
     }
     else if(this._settings.isByDataAttrGridItemMarkingStrategy()) {
         this._markingFunction = function(item) {
-            item.setAttribute(gridItemMarkingValue, "");
+            item.setAttribute(
+                Gridifier.GRID_ITEM_MARKING_DEFAULTS.DATA_ATTR, 
+                gridItemMarkingValue
+            );
+        }
+    }
+    else if(this._settings.isByQueryGridItemMarkingStrategy()) {
+        this._markingFunction = function(item) {
+            ;
         }
     }
 }
 
 Gridifier.Collector.prototype.attachToGrid = function(items) {
+    if(!Dom.isArray(items))
+        var items = [items];
+    
     for(var i = 0; i < items.length; i++) {
         Dom.css.set(items[i], {
-            visibility: "hidden",
             position: "absolute"
         });
+
+        if(!this._settings.shouldDisableItemHideOnGridAttach())
+            Dom.css.set(items[i], {"visibility": "hidden"});
     }
     for(var i = 0; i < items.length; i++)
         this._markingFunction(items[i]);

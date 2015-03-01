@@ -63,40 +63,47 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
         item.style.visibility = "hidden";
     }
 
-    var duration = this._settings.getAnimationMsDuration();
+    var animationMsDuration = this._settings.getToggleAnimationMsDuration();
     Dom.css3.transitionProperty(
         frontFrame, 
-        Prefixer.getForCSS('transform', frontFrame) + " " + duration + "ms ease"
+        Prefixer.getForCSS('transform', frontFrame) + " " + animationMsDuration + "ms ease"
     );
     Dom.css3.transitionProperty(
         backFrame, 
-        Prefixer.getForCSS('transform', backFrame) + " " + duration + "ms ease"
+        Prefixer.getForCSS('transform', backFrame) + " " + animationMsDuration + "ms ease"
     );
 
+    var me = this;
     setTimeout(function() {
-        Dom.css3.transformProperty(backFrame, rotateProp, "0deg");
         Dom.css3.transformProperty(frontFrame, rotateProp, "180deg");
+        Dom.css3.transformProperty(backFrame, rotateProp, "0deg");
     }, 20);
 
     setTimeout(function() {
         scene.parentNode.removeChild(scene);
-        if(isShowing)
+        if(isShowing) {
             item.style.visibility = "visible";
-        // @todo -> Send event after completion
-    }, this._settings.getAnimationMsDuration() + 1);
+            me._eventEmitter.emitShowEvent(item);
+        }
+        else if(isHiding) {
+            item.style.visibility = "hidden";
+            grid.removeChild(item);
+            me._eventEmitter.emitHideEvent(item);
+        }
+    }, animationMsDuration + 20);
 }
 
 Gridifier.Api.Rotate.prototype._createScene = function(item, grid) {
     var scene = document.createElement("div");
     Dom.css.set(scene, {
-        width: this.sizesResolverManager.outerWidth(item, true) + "px",
-        height: this.sizesResolverManager.outerHeight(item, true) + "px",
+        width: this._sizesResolverManager.outerWidth(item, true) + "px",
+        height: this._sizesResolverManager.outerHeight(item, true) + "px",
         position: "absolute",
         // @todo -> Pass here original left and top values????
-        top: this.sizesResolverManager.positionTop(item) + "px",
-        left: this.sizesResolverManager.positionLeft(item) + "px"
+        top: this._sizesResolverManager.positionTop(item) + "px",
+        left: this._sizesResolverManager.positionLeft(item) + "px"
     });
-    Dom.css3.perspective(scene, "200px"); 
+    Dom.css3.perspective(scene, this._settings.getRotatePerspective()); 
     grid.appendChild(scene);
 
     return scene;
@@ -108,7 +115,7 @@ Gridifier.Api.Rotate.prototype._createFrames = function(scene) {
         width: "100%", height: "100%", position: "absolute"
     });
     Dom.css3.transformStyle(frames, "preserve-3d");
-    Dom.css3.perspective(frames, "200px");
+    Dom.css3.perspective(frames, this._settings.getRotatePerspective());
 
     scene.appendChild(frames);
     return frames;
@@ -120,8 +127,8 @@ Gridifier.Api.Rotate.prototype._createItemClone = function(item) {
         left: "0px",
         top: "0px",
         visibility: "visible",
-        width: this.sizesResolverManager.outerWidth(item, true) + "px",
-        height: this.sizesResolverManager.outerHeight(item, true) + "px"
+        width: this._sizesResolverManager.outerWidth(item, true) + "px",
+        height: this._sizesResolverManager.outerHeight(item, true) + "px"
     });
 
     return itemClone;
@@ -134,7 +141,9 @@ Gridifier.Api.Rotate.prototype._addFrameCss = function(frame) {
         width: "100%", 
         height: "100%"
     });
-    Dom.css3.backfaceVisibility(frame, "hidden");
+
+    if(!this._settings.getRotateBackface())
+        Dom.css3.backfaceVisibility(frame, "hidden");
 }
 
 Gridifier.Api.Rotate.prototype._createFrontFrame = function(frames, rotateProp) {

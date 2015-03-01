@@ -10,9 +10,6 @@ Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
 
     this._gridType = null;
 
-    // @todo -> Fix this
-    this._animationDuration = 900;
-
     this._prependType = null;
     this._appendType = null;
 
@@ -38,6 +35,13 @@ Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
 
     this._shouldEnableDragifierOnInit = false;
     this._dragifierItemSelector = null;
+
+    this._shouldDisableItemHideOnGridAttach = false;
+    this._toggleAnimationMsDuration = null;
+    this._coordsChangeAnimationMsDuration = null;
+
+    this._rotatePerspective = null;
+    this._rotateBackface = null;
 
     this._css = {
     };
@@ -82,6 +86,12 @@ Gridifier.Settings.prototype._parse = function() {
     this._sortDispersionMode = this._coreSettingsParser.parseSortDispersionMode();
     this._sortDispersionValue = this._coreSettingsParser.parseSortDispersionValue();
 
+    this._shouldDisableItemHideOnGridAttach = this._coreSettingsParser.parseDisableItemHideOnGridAttachValue();
+    this._toggleAnimationMsDuration = this._coreSettingsParser.parseToggleAnimationMsDuration();
+    this._coordsChangeAnimationMsDuration = this._coreSettingsParser.parseCoordsChangeAnimationMsDuration();
+    this._rotatePerspective = this._coreSettingsParser.parseRotatePerspective();
+    this._rotateBackface = this._coreSettingsParser.parseRotateBackface();
+
     this._apiSettingsParser.parseToggleOptions(this._toggleApi);
     this._apiSettingsParser.parseSortOptions(this._sortApi);
     this._apiSettingsParser.parseFilterOptions(this._filterApi);
@@ -97,8 +107,24 @@ Gridifier.Settings.prototype._parse = function() {
     this._dragifierItemSelector = dragifierData.dragifierItemSelector;
 }
 
-Gridifier.Settings.prototype.getAnimationMsDuration = function() {
-    return this._animationDuration;
+Gridifier.Settings.prototype.getEventEmitter = function() {
+    return this._eventEmitter;
+}
+
+Gridifier.Settings.prototype.getToggleAnimationMsDuration = function() {
+    return this._toggleAnimationMsDuration;
+}
+
+Gridifier.Settings.prototype.getCoordsChangeAnimationMsDuration = function() {
+    return this._coordsChangeAnimationMsDuration;
+}
+
+Gridifier.Settings.prototype.getRotatePerspective = function() {
+    return this._rotatePerspective;
+}
+
+Gridifier.Settings.prototype.getRotateBackface = function() {
+    return this._rotateBackface;
 }
 
 Gridifier.Settings.prototype.isVerticalGrid = function() {
@@ -177,6 +203,10 @@ Gridifier.Settings.prototype.getSortDispersionValue = function() {
     return this._sortDispersionValue;
 }
 
+Gridifier.Settings.prototype.shouldDisableItemHideOnGridAttach = function() {
+    return this._shouldDisableItemHideOnGridAttach;
+}
+
 Gridifier.Settings.prototype.setToggle = function(toggleFunctionName) {
     this._toggleApi.setToggleFunction(toggleFunctionName);
 }
@@ -223,6 +253,10 @@ Gridifier.Settings.prototype.isByClassGridItemMarkingStrategy = function() {
 
 Gridifier.Settings.prototype.isByDataAttrGridItemMarkingStrategy = function() {
     return this._gridItemMarkingStrategyType == Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_DATA_ATTR;
+}
+
+Gridifier.Settings.prototype.isByQueryGridItemMarkingStrategy = function() {
+    return this._gridItemMarkingStrategyType == Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_QUERY;
 }
 
 Gridifier.Settings.prototype.getGridItemMarkingType = function() {

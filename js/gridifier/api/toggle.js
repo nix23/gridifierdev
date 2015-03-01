@@ -29,6 +29,7 @@ Gridifier.Api.Toggle = function(settings, eventEmitter, sizesResolverManager) {
         me._addScale();
         me._addFade();
         me._addVisibility();
+        me._addVoid();
     };
 
     this._bindEvents = function() {
@@ -69,24 +70,27 @@ Gridifier.Api.Toggle.prototype._addRotateX = function() {
     var me = this;
 
     this._toggleFunctions.rotateX = {
-        "show": function(item, grid) {
+        "show": function(item, grid, animationMsDuration, eventEmitter) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
-                // @todo -> Send event
+                eventEmitter.emitShowEvent(item);
                 return;
             }
 
             me._rotateApi.show(item, grid);
         },
 
-        "hide": function(item, grid) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+            itemClone.style.visibility = "visible";
+            item.style.visibility = "hidden";
+
             if(!Dom.isBrowserSupportingTransitions()) {
-                item.style.visibility = "hidden";
-                // @todo -> Send event
+                itemClone.style.visibility = "hidden";
+                eventEmitter.emitHideEvent(item);
                 return;
             }
 
-            me._rotateApi.hide(item, grid);
+            me._rotateApi.hide(itemClone, grid);
         }
     };
 }
@@ -95,24 +99,27 @@ Gridifier.Api.Toggle.prototype._addRotateY = function() {
     var me = this;
 
     this._toggleFunctions.rotateY = {
-        "show": function(item, grid) {
+        "show": function(item, grid, animationMsDuration, eventEmitter) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
-                // @todo -> Send event
+                eventEmitter.emitShowEvent(item);
                 return;
             }
 
             me._rotateApi.show(item, grid, true);
         },
 
-        "hide": function(item, grid) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+            itemClone.style.visibility = "visible";
+            item.style.visibility = "hidden";
+
             if(!Dom.isBrowserSupportingTransitions()) {
-                item.style.visibility = "hidden";
-                // @todo -> Send event
+                itemClone.style.visibility = "hidden";
+                eventEmitter.emitHideEvent(item);
                 return;
             }
 
-            me._rotateApi.hide(item, grid, true);
+            me._rotateApi.hide(itemClone, grid, true);
         }
     };
 }
@@ -121,57 +128,53 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
     var me = this;
 
     this._toggleFunctions.scale = {
-        "show": function(item, grid) {
+        "show": function(item, grid, animationMsDuration, eventEmitter) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
-                // @todo -> Send event
+                eventEmitter.emitShowEvent(item);
                 return;
             }
             
-            // @todo -> Adjust timeout, and move to separate const
-            // @todo -> Change other transition params to transform
-            // @todo -> Apply prefixer to all settings
-            //Dom.css3.transitionProperty(item, Prefixer.getForCSS('transform', item) +" 1ms ease");
-            //Dom.css3.transitionProperty(item, "none");
             Dom.css3.transition(item, "none");
-            
-            // @todo -> Make multiple transform. Replace in all other settings
-            //          (Rewrite all transitions and transforms in such manners)
             Dom.css3.transformProperty(item, "scale", 0);
+            
             item.style.visibility = "visible"; // Ie11 blinking fix(:))
             setTimeout(function() {
-                // @todo -> Use correct vendor.(Refactor SizesTransformer)
                 item.style.visibility = "visible";
-                // @todo -> Add duration
-                Dom.css3.transition(item, Prefixer.getForCSS('transform', item) + " 900ms ease");
+                Dom.css3.transition(
+                    item, 
+                    Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+                );
                 Dom.css3.transformProperty(item, "scale", 1);
+
                 setTimeout(function() {
-                    //Dom.css3.transitionProperty(item, "none");
-                    me._eventEmitter.emitShowEvent(item); // @pass event emitter to call
-                }, 1020);
+                    eventEmitter.emitShowEvent(item);
+                }, animationMsDuration + 20);
             }, 20); 
         },
 
-        "hide": function(item, itemClone, grid) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
             itemClone.style.visibility = "visible";
             item.style.visibility = "hidden";
 
             if(!Dom.isBrowserSupportingTransitions()) {
                 itemClone.style.visibility = "hidden";
-                // @todo -> Send event
+                eventEmitter.emitHideEvent(item);
                 return;
             }
 
-            Dom.css3.transition(itemClone, Prefixer.getForCSS('transform', itemClone) + " 900ms ease");
-            //Dom.css3.transition(item, "transform 1000ms ease");
+            Dom.css3.transition(
+                itemClone, 
+                Prefixer.getForCSS('transform', itemClone) + " " + animationMsDuration + "ms ease"
+            );
+
             Dom.css3.transform(itemClone, "scale(0)");
-            //Dom.css3.transformProperty(item, "scale", 0);
             setTimeout(function() {
                 itemClone.style.visibility = "hidden";
                 grid.removeChild(itemClone);
-                // @todo -> Emit event
-            },820); // setTimeout should be smaller(Flickering bug in Webkit)
-            // Send event through global Gridifier.Event Object
+                eventEmitter.emitHideEvent(item);
+            // setTimeout should be smaller than animation duration(Flickering bug in Webkit)
+            }, animationMsDuration - 100); 
         }
     };
 }
@@ -180,48 +183,84 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
     var me = this;
 
     this._toggleFunctions.fade = {
-        "show": function(item) {
+        "show": function(item, grid, animationMsDuration, eventEmitter) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
-                // @todo -> Send event
+                eventEmitter.emitShowEvent(item);
                 return;
             }
 
-            Dom.css3.transition(item, "All 0s ease");
+            Dom.css3.transition(item, "none");
             Dom.css3.opacity(item, "0");
+
             setTimeout(function() {
                 item.style.visibility = "visible";
-                Dom.css3.transition(item, "All 1000ms ease");
+                Dom.css3.transition(
+                    item, 
+                    Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms ease"
+                );
                 Dom.css3.opacity(item, 1);
+
+                setTimeout(function() {
+                    eventEmitter.emitShowEvent(item);
+                }, animationMsDuration + 20);
             }, 20);
         },
 
-        "hide": function(item) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+            itemClone.style.visibility = "visible";
+            item.style.visibility = "hidden";
+
             if(!Dom.isBrowserSupportingTransitions()) {
-                item.style.visibility = "hidden";
-                // @todo -> Send event
+                itemClone.style.visibility = "hidden";
+                eventEmitter.emitHideEvent(item);
                 return;
             }
 
-            Dom.css3.transition(item, "All 1000ms ease");
-            Dom.css3.opacity(item, "0");
+            Dom.css3.transition(
+                itemClone, 
+                Prefixer.getForCSS('opacity', itemClone) + " " + animationMsDuration + "ms ease"
+            );
+
+            Dom.css3.opacity(itemClone, "0");
             setTimeout(function() {
-                item.style.visibility = "hidden";
-                Dom.css3.transition(item, "All 0ms ease");
-                Dom.css3.opacity(item, 1);
-            }, 20);
+                itemClone.style.visibility = "hidden";
+                grid.removeChild(itemClone);
+                eventEmitter.emitHideEvent(item);
+            }, animationMsDuration + 20);
         }
     };
 }
 
 Gridifier.Api.Toggle.prototype._addVisibility = function() {
+    var me = this;
+
     this._toggleFunctions.visibility = {
-        "show": function(item) {
+        "show": function(item, grid, animationMsDuration, eventEmitter) {
             item.style.visibility = "visible";
+            eventEmitter.emitShowEvent(item);
+        },
+
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+            itemClone.style.visibility = "hidden";
+            item.style.visibility = "hidden";
+
+            grid.removeChild(itemClone);
+            eventEmitter.emitHideEvent(item);
+        }
+    };
+}
+
+Gridifier.Api.Toggle.prototype._addVoid = function() {
+    var me = this;
+
+    this._toggleFunctions.void = {
+        "show": function(item) {
+            me._eventEmitter.emitShowEvent(item); // @pass event emitter to call
         },
 
         "hide": function(item) {
-            item.style.visibility = "hidden";
+            ; // @todo -> send event here
         }
     };
 }

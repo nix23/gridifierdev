@@ -208,7 +208,10 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         // me._gridifierDynamicSettings._itemSizes[2].width = "25%";
         // me._gridifierDynamicSettings._itemSizes[2].height = "200px";
 
-
+        me._gridifierSettings.toggleAnimationMsDuration = 1000;
+        //me._gridifierSettings.coordsChangeAnimationMsDuration = 3000;
+        //me._gridifierSettings.rotateBackface = false;
+        //me._gridifierSettings.rotatePerspective = "3000px";
 
         me._gridifierDynamicSettings._batchSize = 50;
         for(var i = 0; i < 50; i++) {
@@ -510,6 +513,18 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifier.onShow(function(item) {
             var itemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
             item.innerHTML = itemGUID;
+        });
+
+        me._gridifier.onHide(function(item) {
+            // var itemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
+            // console.log("item = ", item);
+            // console.log("Item with GUID = " + itemGUID + " was hiden!");
+        });
+
+        me._gridifier.onTransform(function(item, newWidth, newHeight, newLeft, newTop) {
+            // console.log("Item transformed ! newwidth = " + newWidth + " newheight = " + newHeight);
+            // console.log(" newleft = " + newLeft + ", newTop = " + newTop);
+            // console.log('item = ', item);
         });
     }
 

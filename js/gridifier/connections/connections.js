@@ -40,6 +40,36 @@ Gridifier.Connections = function(gridifier,
     return this;
 }
 
+Gridifier.Connections.prototype.getMaxX2 = function() {
+    var connections = this._connections.get();
+
+    if(connections.length == 0)
+        return 0;
+    
+    var maxX2 = 0;
+    for(var i = 0; i < connections.length; i++) {
+        if(connections[i].x2 > maxX2)
+            maxX2 = connections[i].x2;
+    }
+
+    return maxX2;
+}
+
+Gridifier.Connections.prototype.getMaxY2 = function() {
+    var connections = this._connections.get();
+
+    if(connections.length == 0)
+        return 0;
+
+    var maxY2 = 0;
+    for(var i = 0; i < connections.length; i++) {
+        if(connections[i].y2 > maxY2)
+            maxY2 = connections[i].y2;
+    }
+
+    return maxY2;
+}
+
 Gridifier.Connections.prototype.setSizesTransformerInstance = function(sizesTransformer) {
     this._sizesTransformer = sizesTransformer;
 }

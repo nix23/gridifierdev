@@ -141,6 +141,14 @@ Gridifier.HorizontalGrid.Connections.prototype.restoreOnCustomSortDispersionMode
     this.restore(connections);
 }
 
+Gridifier.HorizontalGrid.Connections.prototype.getMaxX2 = function() {
+    return this._connectionsCore.getMaxX2();
+}
+
+Gridifier.HorizontalGrid.Connections.prototype.getMaxY2 = function() {
+    return this._connectionsCore.getMaxY2();
+}
+
 Gridifier.HorizontalGrid.Connections.prototype.findConnectionByItem = function(item) {
     return this._connectionsCore.findConnectionByItem(item);
 }

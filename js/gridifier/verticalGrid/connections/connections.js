@@ -141,6 +141,14 @@ Gridifier.VerticalGrid.Connections.prototype.restoreOnCustomSortDispersionMode =
     this.restore(connections);
 }
 
+Gridifier.VerticalGrid.Connections.prototype.getMaxX2 = function() {
+    return this._connectionsCore.getMaxX2();
+}
+
+Gridifier.VerticalGrid.Connections.prototype.getMaxY2 = function() {
+    return this._connectionsCore.getMaxY2();
+}
+
 Gridifier.VerticalGrid.Connections.prototype.findConnectionByItem = function(item) {
     return this._connectionsCore.findConnectionByItem(item);
 }

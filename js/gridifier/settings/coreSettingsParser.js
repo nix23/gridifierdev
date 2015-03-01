@@ -182,9 +182,45 @@ Gridifier.CoreSettingsParser.prototype.parseSortDispersionValue = function() {
     return sortDispersionValue;
 }
 
+Gridifier.CoreSettingsParser.prototype.parseDisableItemHideOnGridAttachValue = function() {
+    if(!this._settings.hasOwnProperty("disableItemHideOnGridAttach"))
+        return false;
+
+    return true;
+}
+
+Gridifier.CoreSettingsParser.prototype.parseToggleAnimationMsDuration = function() {
+    if(!this._settings.hasOwnProperty("toggleAnimationMsDuration"))
+        return Gridifier.DEFAULT_TOGGLE_ANIMATION_MS_DURATION;
+
+    return this._settings.toggleAnimationMsDuration;
+}
+
+Gridifier.CoreSettingsParser.prototype.parseCoordsChangeAnimationMsDuration = function() {
+    if(!this._settings.hasOwnProperty("coordsChangeAnimationMsDuration"))
+        return Gridifier.DEFAULT_COORDS_CHANGE_ANIMATION_MS_DURATION;
+
+    return this._settings.coordsChangeAnimationMsDuration;
+}
+
+Gridifier.CoreSettingsParser.prototype.parseRotatePerspective = function() {
+    if(!this._settings.hasOwnProperty("rotatePerspective"))
+        return Gridifier.DEFAULT_ROTATE_PERSPECTIVE;
+
+    return this._settings.rotatePerspective;
+}
+
+Gridifier.CoreSettingsParser.prototype.parseRotateBackface = function() {
+    if(!this._settings.hasOwnProperty("rotateBackface"))
+        return Gridifier.DEFAULT_ROTATE_BACKFACE;
+
+    return this._settings.rotateBackface;
+}
+
 Gridifier.CoreSettingsParser.prototype.parseGridItemMarkingStrategy = function() {
     if(!this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_CLASS) 
-        && !this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_DATA_ATTR)) {
+        && !this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_DATA_ATTR)
+        && !this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_QUERY)) {
         return {
             gridItemMarkingStrategyType: Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_DATA_ATTR,
             gridItemMarkingValue: Gridifier.GRID_ITEM_MARKING_DEFAULTS.DATA_ATTR
@@ -201,6 +237,12 @@ Gridifier.CoreSettingsParser.prototype.parseGridItemMarkingStrategy = function()
         return {
             gridItemMarkingStrategyType: Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_DATA_ATTR,
             gridItemMarkingValue: this._settings[Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_DATA_ATTR]
+        };
+    }
+    else if(this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_QUERY)) {
+        return {
+            gridItemMarkingStrategyType: Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_QUERY,
+            gridItemMarkingValue: this._settings[Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_QUERY]
         };
     }
 }

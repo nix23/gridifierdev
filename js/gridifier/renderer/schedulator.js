@@ -139,11 +139,16 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 left: left,
                 top: top
             });
-
+            
             var toggleFunction = this._settings.getToggle();
+            var eventEmitter = this._settings.getEventEmitter();
+            var animationMsDuration = this._settings.getToggleAnimationMsDuration();
+
             toggleFunction.show(
                 connectionToProcess.item,
-                this._gridifier.getGrid()
+                this._gridifier.getGrid(),
+                animationMsDuration,
+                eventEmitter
             );
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
@@ -154,30 +159,58 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             });
 
             var toggleFunction = this._settings.getToggle();
+            var eventEmitter = this._settings.getEventEmitter();
+            var animationMsDuration = this._settings.getToggleAnimationMsDuration();
+
             toggleFunction.hide(
                 connectionToProcess.item,
                 connectionToProcess.disconnectedItemClone,
-                this._gridifier.getGrid()
+                this._gridifier.getGrid(),
+                animationMsDuration,
+                eventEmitter
             );
         }
-        else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER) {
+        else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER ||
+                processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED) {
             var rendererCoordsChangerFunction = this._settings.getCoordsChanger();
-            rendererCoordsChangerFunction(connectionToProcess.item, left, top);
+            var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
+            var eventEmitter = this._settings.getEventEmitter();
+
+            rendererCoordsChangerFunction(
+                connectionToProcess.item, 
+                left, 
+                top,
+                animationMsDuration,
+                eventEmitter,
+                false
+            );
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_TRANSFORMED) {
             var targetWidth = this._scheduledConnectionsToProcessData[i].targetWidth;
             var targetHeight = this._scheduledConnectionsToProcessData[i].targetHeight;
 
             var rendererSizesChangerFunction = this._settings.getSizesChanger();
-            rendererSizesChangerFunction(connectionToProcess.item, targetWidth, targetHeight);
+
+            rendererSizesChangerFunction(
+                connectionToProcess.item, 
+                targetWidth, 
+                targetHeight
+            );
 
             var rendererCoordsChangerFunction = this._settings.getCoordsChanger();
-            rendererCoordsChangerFunction(connectionToProcess.item, left, top);
-        }
-        // @todo -> Merge with second cond?
-        else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED) {
-            var rendererCoordsChangerFunction = this._settings.getCoordsChanger();
-            rendererCoordsChangerFunction(connectionToProcess.item, left, top);
+            var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
+            var eventEmitter = this._settings.getEventEmitter();
+
+            rendererCoordsChangerFunction(
+                connectionToProcess.item, 
+                left, 
+                top,
+                animationMsDuration,
+                eventEmitter,
+                true,
+                targetWidth,
+                targetHeight
+            );
         }
     }
 
