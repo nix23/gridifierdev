@@ -17,7 +17,9 @@ Gridifier.Api.CoordsChanger = function(settings, eventEmitter) {
         me._coordsChangerFunctions = {};
 
         me._addDefaultCoordsChanger();
-        me._addSimultaneousCSS3TransitionCoordsChanger();
+        me._addCSS3TranslateCoordsChanger();
+        me._addCSS3Translate3DCoordsChanger();
+
     };
 
     this._bindEvents = function() {
@@ -76,15 +78,61 @@ Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
     };
 }
 
-Gridifier.Api.CoordsChanger.prototype._addSimultaneousCSS3TransitionCoordsChanger = function() {
-    this._coordsChangerFunctions.simultaneousCSS3Transition = function(item, 
-                                                                       newLeft, 
-                                                                       newTop,
-                                                                       animationMsDuration,
-                                                                       eventEmitter,
-                                                                       emitTransformEvent,
-                                                                       newWidth,
-                                                                       newHeight) {
+Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function() {
+    this._coordsChangerFunctions.CSS3Translate = function(item, 
+                                                          newLeft, 
+                                                          newTop,
+                                                          animationMsDuration,
+                                                          eventEmitter,
+                                                          emitTransformEvent,
+                                                          newWidth,
+                                                          newHeight) {
+        // @todo -> if !supporting transitions -> default
+
+        var newLeft = parseFloat(newLeft);
+        var newTop = parseFloat(newTop);
+
+        var currentLeft = parseFloat(item.style.left);
+        var currentTop = parseFloat(item.style.top);
+
+        if(newLeft > currentLeft)
+            var translateX = newLeft - currentLeft;
+        else if(newLeft < currentLeft)
+            var translateX = (currentLeft - newLeft) * -1;
+        else 
+            var translateX = 0;
+
+        if(newTop > currentTop)
+            var translateY = newTop - currentTop;
+        else if(newTop < currentTop)
+            var translateY = (currentTop - newTop) * -1;
+        else
+            var translateY = 0;
+        
+        Dom.css3.transitionProperty(
+            item, 
+            Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+        );
+        
+        Dom.css3.transformProperty(item, "translate", translateX + "px," + translateY + "px");
+
+        if(emitTransformEvent) {
+            setTimeout(function() {
+                eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
+            }, animationMsDuration + 20);
+        }
+    };
+}
+
+Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = function() {
+    this._coordsChangerFunctions.CSS3Translate3D = function(item, 
+                                                            newLeft, 
+                                                            newTop,
+                                                            animationMsDuration,
+                                                            eventEmitter,
+                                                            emitTransformEvent,
+                                                            newWidth,
+                                                            newHeight) {
         // @todo -> if !supporting transitions -> default
 
         var newLeft = parseFloat(newLeft);

@@ -46,7 +46,14 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
             me._settings
         );
         me._dragifierCore = new Gridifier.Dragifier.Core(
-            me._gridifier, me._appender, me._reversedAppender, me._connectors, me._settings, me._dragifierRenderer, me._sizesResolverManager
+            me._gridifier, 
+            me._appender, 
+            me._reversedAppender,
+            me._connectors, 
+            me._connections,
+            me._settings, 
+            me._dragifierRenderer, 
+            me._sizesResolverManager
         );
         me._discretizer = new Gridifier.Discretizer(
             me._gridifier, me._connections, me._settings, me._sizesResolverManager
@@ -78,10 +85,10 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.bindDraggableItem 
     this._initDraggableItem(item);
     this._initDraggableItemConnection();
 
+    this._dragifierCore.determineGridOffsets();
     this._dragifierCore.determineInitialCursorOffsetsFromDraggableItemCenter(
         this._draggableItem, cursorX, cursorY
     );
-    this._dragifierCore.determineGridOffsets();
 
     this._draggableItemClone = this._dragifierCore.createDraggableItemClone(this._draggableItem);
     this._draggableItemPointer = this._dragifierCore.createDraggableItemPointer(this._draggableItem);

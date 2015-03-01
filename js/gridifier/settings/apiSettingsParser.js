@@ -131,7 +131,7 @@ Gridifier.ApiSettingsParser.prototype.parseFilterOptions = function(filterApi) {
 
 Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coordsChangerApi) {
     if(!this._settings.hasOwnProperty("coordsChanger")) {
-        coordsChangerApi.setCoordsChangerFunction("simultaneousCSS3Transition");
+        coordsChangerApi.setCoordsChangerFunction("CSS3Translate3D");
         return;
     }
 
@@ -154,7 +154,7 @@ Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coord
             coordsChangerApi.addCoordsChangerFunction(coordsChangerFunctionName, coordsChangerFunction);
         }
         
-        coordsChangerApi.setCoordsChangerFunction("simultaneousCSS3Transition");
+        coordsChangerApi.setCoordsChangerFunction("CSS3Translate3D");
         return;
     }
     else {

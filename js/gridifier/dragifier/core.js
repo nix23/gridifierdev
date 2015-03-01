@@ -2,6 +2,7 @@ Gridifier.Dragifier.Core = function(gridifier,
                                     appender,
                                     reversedAppender,
                                     connectors,
+                                    connections,
                                     settings,
                                     dragifierRenderer,
                                     sizesResolverManager) {
@@ -11,6 +12,7 @@ Gridifier.Dragifier.Core = function(gridifier,
     this._appender = null;
     this._reversedAppender = null;
     this._connectors = null;
+    this._connections = null;
     this._settings = null;
     this._dragifierRenderer = null;
     this._sizesResolverManager = null;
@@ -29,6 +31,7 @@ Gridifier.Dragifier.Core = function(gridifier,
         me._appender = appender;
         me._reversedAppender = reversedAppender;
         me._connectors = connectors;
+        me._connections = connections;
         me._settings = settings;
         me._dragifierRenderer = dragifierRenderer;
         me._sizesResolverManager = sizesResolverManager;
@@ -51,11 +54,52 @@ Gridifier.Dragifier.Core = function(gridifier,
     return this;
 }
 
+Gridifier.Dragifier.Core.prototype.determineGridOffsets = function() {
+    this._gridOffsetLeft = this._sizesResolverManager.offsetLeft(this._gridifier.getGrid());
+    this._gridOffsetTop = this._sizesResolverManager.offsetTop(this._gridifier.getGrid());
+}
+
+Gridifier.Dragifier.Core.prototype._getDraggableItemOffsetLeft = function(draggableItem, substractMargins) {
+    // @old return this._sizesResolverManager.offsetLeft(draggableItem, substractMargins);
+    var substractMargins = substractMargins || false;
+    var draggableItemConnection = this._connections.findConnectionByItem(draggableItem);
+
+    if(substractMargins) {
+        var elemWidth = this._sizesResolverManager.outerWidth(draggableItem);
+        var elemWidthWithMargins = this._sizesResolverManager.outerWidth(draggableItem, true);
+        var marginWidth = elemWidthWithMargins - elemWidth;
+        var halfOfMarginWidth = marginWidth / 2;
+        
+        return this._gridOffsetLeft + draggableItemConnection.x1 - halfOfMarginWidth;
+    }
+    else {
+        return this._gridOffsetLeft + draggableItemConnection.x1;
+    }
+}
+
+Gridifier.Dragifier.Core.prototype._getDraggableItemOffsetTop = function(draggableItem, substractMargins) {
+    // @old return this._sizesResolverManager.offsetTop(draggableItem, substractMargins);
+    var substractMargins = substractMargins || false;
+    var draggableItemConnection = this._connections.findConnectionByItem(draggableItem);
+
+    if(substractMargins) {
+        var elemHeight = this._sizesResolverManager.outerHeight(draggableItem);
+        var elemHeightWithMargins = this._sizesResolverManager.outerHeight(draggableItem, true);
+        var marginHeight = elemHeightWithMargins - elemHeight;
+        var halfOfMarginHeight = marginHeight / 2;
+
+        return this._gridOffsetTop + draggableItemConnection.y1 - halfOfMarginHeight;
+    }
+    else {
+        return this._gridOffsetTop + draggableItemConnection.y1;
+    }
+}
+
 Gridifier.Dragifier.Core.prototype.determineInitialCursorOffsetsFromDraggableItemCenter = function(draggableItem,
                                                                                                    cursorX, 
                                                                                                    cursorY) {
-    var draggableItemOffsetLeft = this._sizesResolverManager.offsetLeft(draggableItem);
-    var draggableItemOffsetTop = this._sizesResolverManager.offsetTop(draggableItem);
+    var draggableItemOffsetLeft = this._getDraggableItemOffsetLeft(draggableItem);
+    var draggableItemOffsetTop = this._getDraggableItemOffsetTop(draggableItem);
 
     var draggableItemWidth = this._sizesResolverManager.outerWidth(draggableItem, true);
     var draggableItemHeight = this._sizesResolverManager.outerHeight(draggableItem, true);
@@ -67,17 +111,14 @@ Gridifier.Dragifier.Core.prototype.determineInitialCursorOffsetsFromDraggableIte
     this._cursorOffsetYFromDraggableItemCenter = draggableItemCenterY - cursorY;
 }
 
-Gridifier.Dragifier.Core.prototype.determineGridOffsets = function() {
-    this._gridOffsetLeft = this._sizesResolverManager.offsetLeft(this._gridifier.getGrid());
-    this._gridOffsetTop = this._sizesResolverManager.offsetTop(this._gridifier.getGrid());
-}
-
 Gridifier.Dragifier.Core.prototype.createDraggableItemClone = function(draggableItem) {
     var draggableItemClone = draggableItem.cloneNode(true);
 
     // @todo -> Replace this, tmp solution
     draggableItemClone.style.setProperty("background", "rgb(235,235,235)", "important");
-    Dom.css3.transition(draggableItemClone, "All 0ms ease");
+    //Dom.css3.transition(draggableItemClone, "All 0ms ease");
+    Dom.css3.transform(draggableItemClone, "");
+    Dom.css3.transition(draggableItemClone, "none");
     draggableItemClone.style.zIndex = 10; // @endtodo
 
     var cloneWidth = this._sizesResolverManager.outerWidth(draggableItem);
@@ -88,8 +129,8 @@ Gridifier.Dragifier.Core.prototype.createDraggableItemClone = function(draggable
 
     document.body.appendChild(draggableItemClone);
 
-    var draggableItemOffsetLeft = this._sizesResolverManager.offsetLeft(draggableItem);
-    var draggableItemOffsetTop = this._sizesResolverManager.offsetTop(draggableItem);
+    var draggableItemOffsetLeft = this._getDraggableItemOffsetLeft(draggableItem);
+    var draggableItemOffsetTop = this._getDraggableItemOffsetTop(draggableItem);
 
     draggableItemClone.style.left = draggableItemOffsetLeft +"px";
     draggableItemClone.style.top = draggableItemOffsetTop + "px";
@@ -104,8 +145,8 @@ Gridifier.Dragifier.Core.prototype.createDraggableItemClone = function(draggable
 }
 
 Gridifier.Dragifier.Core.prototype.createDraggableItemPointer = function(draggableItem) {
-    var draggableItemOffsetLeft = this._sizesResolverManager.offsetLeft(draggableItem, true);
-    var draggableItemOffsetTop = this._sizesResolverManager.offsetTop(draggableItem, true);
+    var draggableItemOffsetLeft = this._getDraggableItemOffsetLeft(draggableItem, true);
+    var draggableItemOffsetTop = this._getDraggableItemOffsetTop(draggableItem, true);
 
     // @todo -> Add mixed options
     var draggableItemPointer = document.createElement("div");

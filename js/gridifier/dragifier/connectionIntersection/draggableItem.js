@@ -49,7 +49,14 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
             me._settings
         );
         me._dragifierCore = new Gridifier.Dragifier.Core(
-            me._gridifier, me._appender, me._reversedAppender, me._connectors, me._settings, me._dragifierRenderer, me._sizesResolverManager
+            me._gridifier, 
+            me._appender, 
+            me._reversedAppender, 
+            me._connectors, 
+            me._connections,
+            me._settings, 
+            me._dragifierRenderer, 
+            me._sizesResolverManager
         );
 
         me._bindEvents();
@@ -74,10 +81,10 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.bindDraggableI
                                                                                                cursorY) {
     this._initDraggableItem(item);
 
+    this._dragifierCore.determineGridOffsets();
     this._dragifierCore.determineInitialCursorOffsetsFromDraggableItemCenter(
         this._draggableItem, cursorX, cursorY
     );
-    this._dragifierCore.determineGridOffsets();
 
     this._draggableItemClone = this._dragifierCore.createDraggableItemClone(this._draggableItem);
     this._hideDraggableItem();
