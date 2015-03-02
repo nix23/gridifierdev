@@ -1526,6 +1526,7 @@ Gridifier.DEFAULT_COORDS_CHANGE_ANIMATION_MS_DURATION = 500;
 
 Gridifier.DEFAULT_ROTATE_PERSPECTIVE = "200px";
 Gridifier.DEFAULT_ROTATE_BACKFACE = true;
+Gridifier.GRID_TRANSFORM_TYPES = {EXPAND: "expand", FIT: "fit"};
 
 Gridifier.Api.CoordsChanger = function(settings, eventEmitter) {
     var me = this;
@@ -6955,48 +6956,61 @@ Gridifier.GridSizesUpdater.prototype.scheduleGridSizesUpdate = function() {
 
     var me = this;
     this._gridSizesUpdateTimeout = setTimeout(function() {
-        // @todo -> Refactor here to two methods -> updateVerticalGridWidth / updateHorizontalGridHeight(naoboroot)
-        me._updateGridSizes.call(me);
+        if(me._settings.isVerticalGrid()) {
+            me._updateVerticalGridSizes.call(me);
+        }
+        else if(me._settings.isHorizontalGrid()) {
+            me._updateHorizontalGridSizes.call(me);
+        }
     }, Gridifier.GridSizesUpdater.GRID_SIZES_UPDATE_TIMEOUT);
 }
 
-// @todo After SizesTransforms maybe should decrease grid height,
-// Make custom updates(User decides update or no... Maybe will be used for fixed animations!!!)
-// if elements become smaller?
-Gridifier.GridSizesUpdater.prototype._updateGridSizes = function() {
+Gridifier.GridSizesUpdater.prototype._updateVerticalGridSizes = function() {
     var connections = this._connections.get();
     if(connections.length == 0)
         return;
 
-    if(this._settings.isVerticalGrid()) {
-        var gridHeight = connections[0].y2;
-        for(var i = 1; i < connections.length; i++) {
-            if(connections[i].y2 > gridHeight)
-                gridHeight = connections[i].y2;
-        }
+    var gridHeight = connections[0].y2;
+    for(var i = 1; i < connections.length; i++) {
+        if(connections[i].y2 > gridHeight)
+            gridHeight = connections[i].y2;
+    }
 
+    if(this._settings.isExpandGridTransformType()) {
         if(this._grid.getGridY2() < gridHeight)
-            Dom.css.set(this._grid.getGrid(), {"height": gridHeight + "px"});
-        // @todo -> Fire event here
-        // @todo -> Remove event from append/prepend methods
-        // @todo after each operation update grid width/height(Also when width height is decreasing)
-        // @todo also update demo layout builder heading height label
-        this._eventEmitter.emitGridSizesChangeEvent();
+            Dom.css.set(this._grid.getGrid(), {"height": (gridHeight + 1) + "px"});
     }
-    else if(this._settings.isHorizontalGrid()) {
-        var gridWidth = connections[0].x2;
-        for(var i = 1; i < connections.length; i++) {
-            if(connections[i].x2 > gridWidth)
-                gridWidth = connections[i].x2;
-        }
+    else if(this._settings.isFitGridTransformType()) {
+        Dom.css.set(this._grid.getGrid(), {"height": (gridHeight + 1) + "px"});
+    }
+    
+    this._eventEmitter.emitGridSizesChangeEvent(
+        this._grid.getGrid(), this._grid.getGridX2() + 1, gridHeight + 1
+    );
+}
 
-        if(this._grid.getGridX2() < gridWidth)
-            Dom.css.set(this._grid.getGrid(), {"width": gridWidth + "px"});
-        // @todo -> Fire event here
-        // @todo after each operation update grid width/height(Also when width height is decreasing)
-        // @todo also update demo layout builder heading height label
-        this._eventEmitter.emitGridSizesChangeEvent();
+Gridifier.GridSizesUpdater.prototype._updateHorizontalGridSizes = function() {
+    var connections = this._connections.get();
+    if(connections.length == 0)
+        return;
+
+    var gridWidth = connections[0].x2;
+    for(var i = 1; i < connections.length; i++) {
+        if(connections[i].x2 > gridWidth)
+            gridWidth = connections[i].x2;
     }
+
+    if(this._settings.isExpandGridTransformType()) {
+        if(this._grid.getGridX2() < gridWidth)
+            Dom.css.set(this._grid.getGrid(), {"width": (gridWidth + 1) + "px"});
+    }
+    else if(this._settings.isFitGridTransformType()) {
+        Dom.css.set(this._grid.getGrid(), {"width": (gridWidth + 1) + "px"});
+    }
+    
+    this._eventEmitter.emitGridSizesChangeEvent(
+        this._grid.getGrid(), gridWidth + 1, this._grid.getGridY2() + 1
+    );
 }
 
 Gridifier.HorizontalGrid.Appender = function(gridifier, 
@@ -10797,6 +10811,16 @@ Gridifier.CoreSettingsParser.prototype.parseRotateBackface = function() {
     return this._settings.rotateBackface;
 }
 
+Gridifier.CoreSettingsParser.prototype.parseGridTransformType = function() {
+    if(!this._settings.hasOwnProperty("gridTransformType"))
+        return Gridifier.GRID_TRANSFORM_TYPES.FIT;
+
+    if(this._settings.gridTransformType == Gridifier.GRID_TRANSFORM_TYPES.EXPAND)
+        return Gridifier.GRID_TRANSFORM_TYPES.EXPAND;
+    else
+        return Gridifier.GRID_TRANSFORM_TYPES.FIT;
+}
+
 Gridifier.CoreSettingsParser.prototype.parseGridItemMarkingStrategy = function() {
     if(!this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_CLASS) 
         && !this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_DATA_ATTR)
@@ -10908,6 +10932,8 @@ Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
     this._rotatePerspective = null;
     this._rotateBackface = null;
 
+    this._gridTransformType = null;
+
     this._css = {
     };
 
@@ -10956,6 +10982,7 @@ Gridifier.Settings.prototype._parse = function() {
     this._coordsChangeAnimationMsDuration = this._coreSettingsParser.parseCoordsChangeAnimationMsDuration();
     this._rotatePerspective = this._coreSettingsParser.parseRotatePerspective();
     this._rotateBackface = this._coreSettingsParser.parseRotateBackface();
+    this._gridTransformType = this._coreSettingsParser.parseGridTransformType();
 
     this._apiSettingsParser.parseToggleOptions(this._toggleApi);
     this._apiSettingsParser.parseSortOptions(this._sortApi);
@@ -10990,6 +11017,14 @@ Gridifier.Settings.prototype.getRotatePerspective = function() {
 
 Gridifier.Settings.prototype.getRotateBackface = function() {
     return this._rotateBackface;
+}
+
+Gridifier.Settings.prototype.isExpandGridTransformType = function() {
+    return this._gridTransformType == Gridifier.GRID_TRANSFORM_TYPES.EXPAND;
+}
+
+Gridifier.Settings.prototype.isFitGridTransformType = function() {
+    return this._gridTransformType == Gridifier.GRID_TRANSFORM_TYPES.FIT;
 }
 
 Gridifier.Settings.prototype.isVerticalGrid = function() {

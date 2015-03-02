@@ -354,6 +354,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         // me._gridifier._settings.setRendererCoordsChanger('default');
         // me._gridifier._settings.setRendererSizesChanger('default');
         //me._gridifier.setCoordsChanger("CSS3Translate");
+        me._gridifier.setCoordsChanger("CSS3Position");
 
        // for(var i = 0; i < 10000; i++) {
        //      var div = document.createElement("div");
