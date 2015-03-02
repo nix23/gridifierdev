@@ -227,6 +227,13 @@ Gridifier.CoreSettingsParser.prototype.parseGridTransformType = function() {
         return Gridifier.GRID_TRANSFORM_TYPES.FIT;
 }
 
+Gridifier.CoreSettingsParser.prototype.parseGridTransformTimeout = function() {
+    if(!this._settings.hasOwnProperty("gridTransformTimeout"))
+        return Gridifier.DEFAULT_GRID_TRANSFORM_TIMEOUT;
+
+    return this._settings.gridTransformTimeout;
+}
+
 Gridifier.CoreSettingsParser.prototype.parseGridItemMarkingStrategy = function() {
     if(!this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_CLASS) 
         && !this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_DATA_ATTR)

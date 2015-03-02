@@ -35,14 +35,12 @@ Gridifier.GridSizesUpdater = function(grid,
     return this;
 }
 
-Gridifier.GridSizesUpdater.GRID_SIZES_UPDATE_TIMEOUT = 100;
-
 Gridifier.GridSizesUpdater.prototype.scheduleGridSizesUpdate = function() {
     if(this._gridSizesUpdateTimeout != null) {
         clearTimeout(this._gridSizesUpdateTimeout);
         this._gridSizesUpdateTimeout = null;
     }
-
+    
     var me = this;
     this._gridSizesUpdateTimeout = setTimeout(function() {
         if(me._settings.isVerticalGrid()) {
@@ -51,7 +49,7 @@ Gridifier.GridSizesUpdater.prototype.scheduleGridSizesUpdate = function() {
         else if(me._settings.isHorizontalGrid()) {
             me._updateHorizontalGridSizes.call(me);
         }
-    }, Gridifier.GridSizesUpdater.GRID_SIZES_UPDATE_TIMEOUT);
+    }, this._settings.getGridTransformTimeout());
 }
 
 Gridifier.GridSizesUpdater.prototype._updateVerticalGridSizes = function() {
