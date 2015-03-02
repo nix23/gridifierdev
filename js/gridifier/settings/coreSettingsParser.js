@@ -217,6 +217,16 @@ Gridifier.CoreSettingsParser.prototype.parseRotateBackface = function() {
     return this._settings.rotateBackface;
 }
 
+Gridifier.CoreSettingsParser.prototype.parseGridTransformType = function() {
+    if(!this._settings.hasOwnProperty("gridTransformType"))
+        return Gridifier.GRID_TRANSFORM_TYPES.FIT;
+
+    if(this._settings.gridTransformType == Gridifier.GRID_TRANSFORM_TYPES.EXPAND)
+        return Gridifier.GRID_TRANSFORM_TYPES.EXPAND;
+    else
+        return Gridifier.GRID_TRANSFORM_TYPES.FIT;
+}
+
 Gridifier.CoreSettingsParser.prototype.parseGridItemMarkingStrategy = function() {
     if(!this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_CLASS) 
         && !this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_DATA_ATTR)

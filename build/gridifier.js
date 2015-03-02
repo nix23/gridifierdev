@@ -1546,7 +1546,9 @@ Gridifier.Api.CoordsChanger = function(settings, eventEmitter) {
         me._coordsChangerFunctions = {};
 
         me._addDefaultCoordsChanger();
-        me._addSimultaneousCSS3TransitionCoordsChanger();
+        me._addCSS3TranslateCoordsChanger();
+        me._addCSS3Translate3DCoordsChanger();
+
     };
 
     this._bindEvents = function() {
@@ -1605,15 +1607,61 @@ Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
     };
 }
 
-Gridifier.Api.CoordsChanger.prototype._addSimultaneousCSS3TransitionCoordsChanger = function() {
-    this._coordsChangerFunctions.simultaneousCSS3Transition = function(item, 
-                                                                       newLeft, 
-                                                                       newTop,
-                                                                       animationMsDuration,
-                                                                       eventEmitter,
-                                                                       emitTransformEvent,
-                                                                       newWidth,
-                                                                       newHeight) {
+Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function() {
+    this._coordsChangerFunctions.CSS3Translate = function(item, 
+                                                          newLeft, 
+                                                          newTop,
+                                                          animationMsDuration,
+                                                          eventEmitter,
+                                                          emitTransformEvent,
+                                                          newWidth,
+                                                          newHeight) {
+        // @todo -> if !supporting transitions -> default
+
+        var newLeft = parseFloat(newLeft);
+        var newTop = parseFloat(newTop);
+
+        var currentLeft = parseFloat(item.style.left);
+        var currentTop = parseFloat(item.style.top);
+
+        if(newLeft > currentLeft)
+            var translateX = newLeft - currentLeft;
+        else if(newLeft < currentLeft)
+            var translateX = (currentLeft - newLeft) * -1;
+        else 
+            var translateX = 0;
+
+        if(newTop > currentTop)
+            var translateY = newTop - currentTop;
+        else if(newTop < currentTop)
+            var translateY = (currentTop - newTop) * -1;
+        else
+            var translateY = 0;
+        
+        Dom.css3.transitionProperty(
+            item, 
+            Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+        );
+        
+        Dom.css3.transformProperty(item, "translate", translateX + "px," + translateY + "px");
+
+        if(emitTransformEvent) {
+            setTimeout(function() {
+                eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
+            }, animationMsDuration + 20);
+        }
+    };
+}
+
+Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = function() {
+    this._coordsChangerFunctions.CSS3Translate3D = function(item, 
+                                                            newLeft, 
+                                                            newTop,
+                                                            animationMsDuration,
+                                                            eventEmitter,
+                                                            emitTransformEvent,
+                                                            newWidth,
+                                                            newHeight) {
         // @todo -> if !supporting transitions -> default
 
         var newLeft = parseFloat(newLeft);
@@ -5254,6 +5302,7 @@ Gridifier.Dragifier.Core = function(gridifier,
                                     appender,
                                     reversedAppender,
                                     connectors,
+                                    connections,
                                     settings,
                                     dragifierRenderer,
                                     sizesResolverManager) {
@@ -5263,6 +5312,7 @@ Gridifier.Dragifier.Core = function(gridifier,
     this._appender = null;
     this._reversedAppender = null;
     this._connectors = null;
+    this._connections = null;
     this._settings = null;
     this._dragifierRenderer = null;
     this._sizesResolverManager = null;
@@ -5281,6 +5331,7 @@ Gridifier.Dragifier.Core = function(gridifier,
         me._appender = appender;
         me._reversedAppender = reversedAppender;
         me._connectors = connectors;
+        me._connections = connections;
         me._settings = settings;
         me._dragifierRenderer = dragifierRenderer;
         me._sizesResolverManager = sizesResolverManager;
@@ -5303,11 +5354,52 @@ Gridifier.Dragifier.Core = function(gridifier,
     return this;
 }
 
+Gridifier.Dragifier.Core.prototype.determineGridOffsets = function() {
+    this._gridOffsetLeft = this._sizesResolverManager.offsetLeft(this._gridifier.getGrid());
+    this._gridOffsetTop = this._sizesResolverManager.offsetTop(this._gridifier.getGrid());
+}
+
+Gridifier.Dragifier.Core.prototype._getDraggableItemOffsetLeft = function(draggableItem, substractMargins) {
+    // @old return this._sizesResolverManager.offsetLeft(draggableItem, substractMargins);
+    var substractMargins = substractMargins || false;
+    var draggableItemConnection = this._connections.findConnectionByItem(draggableItem);
+
+    if(substractMargins) {
+        var elemWidth = this._sizesResolverManager.outerWidth(draggableItem);
+        var elemWidthWithMargins = this._sizesResolverManager.outerWidth(draggableItem, true);
+        var marginWidth = elemWidthWithMargins - elemWidth;
+        var halfOfMarginWidth = marginWidth / 2;
+        
+        return this._gridOffsetLeft + draggableItemConnection.x1 - halfOfMarginWidth;
+    }
+    else {
+        return this._gridOffsetLeft + draggableItemConnection.x1;
+    }
+}
+
+Gridifier.Dragifier.Core.prototype._getDraggableItemOffsetTop = function(draggableItem, substractMargins) {
+    // @old return this._sizesResolverManager.offsetTop(draggableItem, substractMargins);
+    var substractMargins = substractMargins || false;
+    var draggableItemConnection = this._connections.findConnectionByItem(draggableItem);
+
+    if(substractMargins) {
+        var elemHeight = this._sizesResolverManager.outerHeight(draggableItem);
+        var elemHeightWithMargins = this._sizesResolverManager.outerHeight(draggableItem, true);
+        var marginHeight = elemHeightWithMargins - elemHeight;
+        var halfOfMarginHeight = marginHeight / 2;
+
+        return this._gridOffsetTop + draggableItemConnection.y1 - halfOfMarginHeight;
+    }
+    else {
+        return this._gridOffsetTop + draggableItemConnection.y1;
+    }
+}
+
 Gridifier.Dragifier.Core.prototype.determineInitialCursorOffsetsFromDraggableItemCenter = function(draggableItem,
                                                                                                    cursorX, 
                                                                                                    cursorY) {
-    var draggableItemOffsetLeft = this._sizesResolverManager.offsetLeft(draggableItem);
-    var draggableItemOffsetTop = this._sizesResolverManager.offsetTop(draggableItem);
+    var draggableItemOffsetLeft = this._getDraggableItemOffsetLeft(draggableItem);
+    var draggableItemOffsetTop = this._getDraggableItemOffsetTop(draggableItem);
 
     var draggableItemWidth = this._sizesResolverManager.outerWidth(draggableItem, true);
     var draggableItemHeight = this._sizesResolverManager.outerHeight(draggableItem, true);
@@ -5319,17 +5411,14 @@ Gridifier.Dragifier.Core.prototype.determineInitialCursorOffsetsFromDraggableIte
     this._cursorOffsetYFromDraggableItemCenter = draggableItemCenterY - cursorY;
 }
 
-Gridifier.Dragifier.Core.prototype.determineGridOffsets = function() {
-    this._gridOffsetLeft = this._sizesResolverManager.offsetLeft(this._gridifier.getGrid());
-    this._gridOffsetTop = this._sizesResolverManager.offsetTop(this._gridifier.getGrid());
-}
-
 Gridifier.Dragifier.Core.prototype.createDraggableItemClone = function(draggableItem) {
     var draggableItemClone = draggableItem.cloneNode(true);
 
     // @todo -> Replace this, tmp solution
     draggableItemClone.style.setProperty("background", "rgb(235,235,235)", "important");
-    Dom.css3.transition(draggableItemClone, "All 0ms ease");
+    //Dom.css3.transition(draggableItemClone, "All 0ms ease");
+    Dom.css3.transform(draggableItemClone, "");
+    Dom.css3.transition(draggableItemClone, "none");
     draggableItemClone.style.zIndex = 10; // @endtodo
 
     var cloneWidth = this._sizesResolverManager.outerWidth(draggableItem);
@@ -5340,8 +5429,8 @@ Gridifier.Dragifier.Core.prototype.createDraggableItemClone = function(draggable
 
     document.body.appendChild(draggableItemClone);
 
-    var draggableItemOffsetLeft = this._sizesResolverManager.offsetLeft(draggableItem);
-    var draggableItemOffsetTop = this._sizesResolverManager.offsetTop(draggableItem);
+    var draggableItemOffsetLeft = this._getDraggableItemOffsetLeft(draggableItem);
+    var draggableItemOffsetTop = this._getDraggableItemOffsetTop(draggableItem);
 
     draggableItemClone.style.left = draggableItemOffsetLeft +"px";
     draggableItemClone.style.top = draggableItemOffsetTop + "px";
@@ -5356,8 +5445,8 @@ Gridifier.Dragifier.Core.prototype.createDraggableItemClone = function(draggable
 }
 
 Gridifier.Dragifier.Core.prototype.createDraggableItemPointer = function(draggableItem) {
-    var draggableItemOffsetLeft = this._sizesResolverManager.offsetLeft(draggableItem, true);
-    var draggableItemOffsetTop = this._sizesResolverManager.offsetTop(draggableItem, true);
+    var draggableItemOffsetLeft = this._getDraggableItemOffsetLeft(draggableItem, true);
+    var draggableItemOffsetTop = this._getDraggableItemOffsetTop(draggableItem, true);
 
     // @todo -> Add mixed options
     var draggableItemPointer = document.createElement("div");
@@ -5540,7 +5629,14 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
             me._settings
         );
         me._dragifierCore = new Gridifier.Dragifier.Core(
-            me._gridifier, me._appender, me._reversedAppender, me._connectors, me._settings, me._dragifierRenderer, me._sizesResolverManager
+            me._gridifier, 
+            me._appender, 
+            me._reversedAppender, 
+            me._connectors, 
+            me._connections,
+            me._settings, 
+            me._dragifierRenderer, 
+            me._sizesResolverManager
         );
 
         me._bindEvents();
@@ -5565,10 +5661,10 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.bindDraggableI
                                                                                                cursorY) {
     this._initDraggableItem(item);
 
+    this._dragifierCore.determineGridOffsets();
     this._dragifierCore.determineInitialCursorOffsetsFromDraggableItemCenter(
         this._draggableItem, cursorX, cursorY
     );
-    this._dragifierCore.determineGridOffsets();
 
     this._draggableItemClone = this._dragifierCore.createDraggableItemClone(this._draggableItem);
     this._hideDraggableItem();
@@ -5835,7 +5931,14 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
             me._settings
         );
         me._dragifierCore = new Gridifier.Dragifier.Core(
-            me._gridifier, me._appender, me._reversedAppender, me._connectors, me._settings, me._dragifierRenderer, me._sizesResolverManager
+            me._gridifier, 
+            me._appender, 
+            me._reversedAppender,
+            me._connectors, 
+            me._connections,
+            me._settings, 
+            me._dragifierRenderer, 
+            me._sizesResolverManager
         );
         me._discretizer = new Gridifier.Discretizer(
             me._gridifier, me._connections, me._settings, me._sizesResolverManager
@@ -5867,10 +5970,10 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.bindDraggableItem 
     this._initDraggableItem(item);
     this._initDraggableItemConnection();
 
+    this._dragifierCore.determineGridOffsets();
     this._dragifierCore.determineInitialCursorOffsetsFromDraggableItemCenter(
         this._draggableItem, cursorX, cursorY
     );
-    this._dragifierCore.determineGridOffsets();
 
     this._draggableItemClone = this._dragifierCore.createDraggableItemClone(this._draggableItem);
     this._draggableItemPointer = this._dragifierCore.createDraggableItemPointer(this._draggableItem);
@@ -10405,7 +10508,7 @@ Gridifier.ApiSettingsParser.prototype.parseFilterOptions = function(filterApi) {
 
 Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coordsChangerApi) {
     if(!this._settings.hasOwnProperty("coordsChanger")) {
-        coordsChangerApi.setCoordsChangerFunction("simultaneousCSS3Transition");
+        coordsChangerApi.setCoordsChangerFunction("CSS3Translate3D");
         return;
     }
 
@@ -10428,7 +10531,7 @@ Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coord
             coordsChangerApi.addCoordsChangerFunction(coordsChangerFunctionName, coordsChangerFunction);
         }
         
-        coordsChangerApi.setCoordsChangerFunction("simultaneousCSS3Transition");
+        coordsChangerApi.setCoordsChangerFunction("CSS3Translate3D");
         return;
     }
     else {

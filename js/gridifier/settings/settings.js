@@ -43,6 +43,8 @@ Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
     this._rotatePerspective = null;
     this._rotateBackface = null;
 
+    this._gridTransformType = null;
+
     this._css = {
     };
 
@@ -91,6 +93,7 @@ Gridifier.Settings.prototype._parse = function() {
     this._coordsChangeAnimationMsDuration = this._coreSettingsParser.parseCoordsChangeAnimationMsDuration();
     this._rotatePerspective = this._coreSettingsParser.parseRotatePerspective();
     this._rotateBackface = this._coreSettingsParser.parseRotateBackface();
+    this._gridTransformType = this._coreSettingsParser.parseGridTransformType();
 
     this._apiSettingsParser.parseToggleOptions(this._toggleApi);
     this._apiSettingsParser.parseSortOptions(this._sortApi);
@@ -125,6 +128,14 @@ Gridifier.Settings.prototype.getRotatePerspective = function() {
 
 Gridifier.Settings.prototype.getRotateBackface = function() {
     return this._rotateBackface;
+}
+
+Gridifier.Settings.prototype.isExpandGridTransformType = function() {
+    return this._gridTransformType == Gridifier.GRID_TRANSFORM_TYPES.EXPAND;
+}
+
+Gridifier.Settings.prototype.isFitGridTransformType = function() {
+    return this._gridTransformType == Gridifier.GRID_TRANSFORM_TYPES.FIT;
 }
 
 Gridifier.Settings.prototype.isVerticalGrid = function() {

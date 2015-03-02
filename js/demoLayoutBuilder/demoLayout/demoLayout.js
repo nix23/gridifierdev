@@ -54,6 +54,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridType = gridType;
         me._gridifierSettings = gridifierSettings;
         
+        me._gridifierSettings.gridTransformType = "expand";
+
         me._gridifierSettings.prependType = "mirroredPrepend";
         //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
