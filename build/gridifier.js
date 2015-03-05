@@ -1526,7 +1526,9 @@ Gridifier.DEFAULT_COORDS_CHANGE_ANIMATION_MS_DURATION = 500;
 
 Gridifier.DEFAULT_ROTATE_PERSPECTIVE = "200px";
 Gridifier.DEFAULT_ROTATE_BACKFACE = true;
+
 Gridifier.GRID_TRANSFORM_TYPES = {EXPAND: "expand", FIT: "fit"};
+Gridifier.DEFAULT_GRID_TRANSFORM_TIMEOUT = 100;
 
 Gridifier.Api.CoordsChanger = function(settings, eventEmitter) {
     var me = this;
@@ -1547,6 +1549,7 @@ Gridifier.Api.CoordsChanger = function(settings, eventEmitter) {
         me._coordsChangerFunctions = {};
 
         me._addDefaultCoordsChanger();
+        me._addCSS3PositionCoordsChanger();
         me._addCSS3TranslateCoordsChanger();
         me._addCSS3Translate3DCoordsChanger();
 
@@ -1606,6 +1609,37 @@ Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
             eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
         }
     };
+}
+
+Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function() {
+    this._coordsChangerFunctions.CSS3Position = function(item,
+                                                         newLeft,
+                                                         newTop,
+                                                         animationMsDuration,
+                                                         eventEmitter,
+                                                         emitTransformEvent,
+                                                         newWidth,
+                                                         newHeight) {
+        Dom.css3.transitionProperty(
+            item, 
+            Prefixer.getForCSS('left', item) + " " + animationMsDuration + "ms ease"
+        );
+        Dom.css3.transitionProperty(
+            item,
+            Prefixer.getForCSS('top', item) + " " + animationMsDuration + "ms ease"
+        );
+
+        Dom.css.set(item, {
+            left: parseFloat(newLeft) + "px",
+            top: parseFloat(newTop) + "px"
+        });
+
+        if(emitTransformEvent) {
+            setTimeout(function() {
+                eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
+            }, animationMsDuration + 20);
+        }
+    }
 }
 
 Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function() {
@@ -2014,6 +2048,282 @@ Gridifier.Api.SizesChanger.prototype._addSimultaneousCSS3TransitionSizesChanger 
     };
 }
 
+Gridifier.Api.Slide = function(settings, eventEmitter, sizesResolverManager) {
+    var me = this;
+
+    this._settings = null;
+    this._eventEmitter = null;
+    this._sizesResolverManager = null;
+
+    this._css = {
+    };
+
+    this._construct = function() {
+        me._settings = settings;
+        me._eventEmitter = eventEmitter;
+        me._sizesResolverManager = sizesResolverManager;
+    };
+
+    this._bindEvents = function() {
+    };
+
+    this._unbindEvents = function() {
+    };
+
+    this.destruct = function() {
+        me._unbindEvents();
+    };
+
+    this._construct();
+    return this;
+}
+
+Gridifier.Api.Slide.prototype._executeSlideShow = function(item, 
+                                                           grid, 
+                                                           animationMsDuration, 
+                                                           eventEmitter,
+                                                           coordsChanger,
+                                                           startLeft,
+                                                           startTop) {
+    var targetLeft = item.style.left;
+    var targetTop = item.style.top;
+
+    var itemClone = item.cloneNode(true);
+    grid.appendChild(itemClone);
+
+    setTimeout(function() {
+        Dom.css3.transition(itemClone, "none");
+        coordsChanger(
+            itemClone,
+            startLeft,
+            startTop,
+            0,
+            eventEmitter,
+            false
+        );
+
+        setTimeout(function() {
+            Dom.css3.transition(
+                itemClone, 
+                Prefixer.getForCSS('transform', itemClone) + " " + animationMsDuration + "ms ease"
+            );
+            itemClone.style.visibility = "visible";
+            coordsChanger(
+                itemClone, 
+                targetLeft, 
+                targetTop,
+                animationMsDuration,
+                eventEmitter,
+                false
+            );
+
+            setTimeout(function() {
+                itemClone.style.visibility = "hidden";
+                item.style.visibility = "visible";
+                grid.removeChild(itemClone);
+
+                eventEmitter.emitShowEvent(item);
+            }, animationMsDuration + 20);
+        }, 100); // A little delay before setting translate3d second time
+    }, 100);
+}
+
+Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
+                                                           itemClone,
+                                                           grid,
+                                                           animationMsDuration,
+                                                           eventEmitter,
+                                                           coordsChanger,
+                                                           targetLeft,
+                                                           targetTop) {
+    Dom.css3.transition(
+        itemClone, 
+        Prefixer.getForCSS('transform', itemClone) + " " + animationMsDuration + "ms ease"
+    );
+    coordsChanger(
+        itemClone, 
+        targetLeft, 
+        targetTop,
+        animationMsDuration,
+        eventEmitter,
+        false
+    );
+
+    setTimeout(function() {
+        itemClone.style.visibility = "hidden";
+        grid.removeChild(itemClone);
+        eventEmitter.emitHideEvent(item);
+    }, animationMsDuration + 20);
+}
+
+Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, alignBottom, reverseDirection) {
+    var me = this;
+
+    var alignTop = alignTop || false;
+    var alignBottom = alignBottom || false;
+
+    var isLeftSideToggler = !reverseDirection;
+    var isRightSideToggler = reverseDirection;
+
+    var getLeftPos = function(item, grid) {
+        if(isLeftSideToggler)
+            return me._sizesResolverManager.outerWidth(item,true) * -1;
+        else if(isRightSideToggler)
+            return me._sizesResolverManager.outerWidth(grid) + me._sizesResolverManager.outerWidth(item, true);
+    }
+
+    return {
+        "show": function(item, 
+                         grid, 
+                         animationMsDuration, 
+                         eventEmitter, 
+                         sizesResolverManager,
+                         coordsChanger) {
+            if(!Dom.isBrowserSupportingTransitions()) {
+                item.style.visibility = "visible";
+                eventEmitter.emitShowEvent(item);
+                return;
+            }
+
+            if(alignTop)
+                var top = 0;
+            else if(alignBottom)
+                var top = sizesResolverManager.outerHeight(grid) + sizesResolverManager.outerHeight(item, true);
+            else
+                var top = item.style.top;
+
+            me._executeSlideShow(
+                item, 
+                grid, 
+                animationMsDuration, 
+                eventEmitter,
+                coordsChanger,
+                getLeftPos(item, grid),
+                top
+            );
+        },
+
+        "hide": function(item, 
+                         itemClone, 
+                         grid, 
+                         animationMsDuration, 
+                         eventEmitter, 
+                         sizesResolverManager,
+                         coordsChanger) {
+            itemClone.style.visibility = "visible";
+            item.style.visibility = "hidden";
+
+            if(!Dom.isBrowserSupportingTransitions()) {
+                itemClone.style.visibility = "hidden";
+                eventEmitter.emitHideEvent(item);
+                return;
+            }
+
+            if(alignTop)
+                var top = 0;
+            else if(alignBottom)
+                var top = sizesResolverManager.outerHeight(grid) + sizesResolverManager.outerHeight(item, true);
+            else
+                var top = item.style.top;
+
+            me._executeSlideHide(
+                item,
+                itemClone,
+                grid,
+                animationMsDuration,
+                eventEmitter,
+                coordsChanger,
+                getLeftPos(item, grid),
+                top
+            );
+        }
+    };
+}
+
+Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, alignRight, reverseDirection) {
+    var me = this;
+
+    var alignLeft = alignLeft || false;
+    var alignRight = alignRight || false;
+
+    var isTopSideToggler = !reverseDirection;
+    var isBottomSideToggler = reverseDirection;
+
+    var getTopPos = function(item, grid) {
+        if(isTopSideToggler)
+            return me._sizesResolverManager.outerHeight(item,true) * -1;
+        else if(isBottomSideToggler)
+            return me._sizesResolverManager.outerHeight(grid) + me._sizesResolverManager.outerHeight(item, true);
+    }
+
+    return {
+        "show": function(item, 
+                         grid, 
+                         animationMsDuration, 
+                         eventEmitter, 
+                         sizesResolverManager,
+                         coordsChanger) {
+            if(!Dom.isBrowserSupportingTransitions()) {
+                item.style.visibility = "visible";
+                eventEmitter.emitShowEvent(item);
+                return;
+            }
+
+            if(alignLeft)
+                var left = 0;
+            else if(alignRight)
+                var left = sizesResolverManager.outerWidth(grid) + sizesResolverManager.outerWidth(item, true);
+            else
+                var left = item.style.left;
+
+            me._executeSlideShow(
+                item, 
+                grid, 
+                animationMsDuration, 
+                eventEmitter,
+                coordsChanger,
+                left,
+                getTopPos(item, grid)
+            );
+        },
+
+        "hide": function(item, 
+                         itemClone, 
+                         grid, 
+                         animationMsDuration, 
+                         eventEmitter, 
+                         sizesResolverManager,
+                         coordsChanger) {
+            itemClone.style.visibility = "visible";
+            item.style.visibility = "hidden";
+
+            if(!Dom.isBrowserSupportingTransitions()) {
+                itemClone.style.visibility = "hidden";
+                eventEmitter.emitHideEvent(item);
+                return;
+            }
+
+            if(alignLeft)
+                var left = 0;
+            else if(alignRight)
+                var left = sizesResolverManager.outerWidth(grid) + sizesResolverManager.outerWidth(item, true);
+            else
+                var left = item.style.left;
+
+            me._executeSlideHide(
+                item,
+                itemClone,
+                grid,
+                animationMsDuration,
+                eventEmitter,
+                coordsChanger,
+                left,
+                getTopPos(item, grid)
+            );
+        }
+    };
+}
+
 Gridifier.Api.Sort = function(settings, eventEmitter) {
     var me = this;
 
@@ -2071,7 +2381,10 @@ Gridifier.Api.Sort.prototype.getSortFunction = function() {
 
 Gridifier.Api.Sort.prototype._addDefaultSort = function() {
     this._sortFunctions["default"] = function(firstItem, secondItem) {
-        return 0;
+        var firstItemSortNumber = firstItem.getAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR);
+        var secondItemSortNumber = secondItem.getAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR);
+
+        return parseInt(firstItemSortNumber, 10) - parseInt(secondItemSortNumber, 10);
     };
 }
 
@@ -2082,6 +2395,7 @@ Gridifier.Api.Toggle = function(settings, eventEmitter, sizesResolverManager) {
     this._eventEmitter = null;
     this._sizesResolverManager = null;
 
+    this._slideApi = null;
     this._rotateApi = null;
 
     this._toggleFunction = null;
@@ -2095,12 +2409,16 @@ Gridifier.Api.Toggle = function(settings, eventEmitter, sizesResolverManager) {
         me._eventEmitter = eventEmitter;
         me._sizesResolverManager = sizesResolverManager;
 
+        me._slideApi = new Gridifier.Api.Slide(
+            me._settings, me._eventEmitter, me._sizesResolverManager
+        );
         me._rotateApi = new Gridifier.Api.Rotate(
             me._settings, me._eventEmitter, me._sizesResolverManager
         );
 
         me._toggleFunctions = {};
 
+        me._addSlides();
         me._addRotateX();
         me._addRotateY();
         me._addScale();
@@ -2143,11 +2461,31 @@ Gridifier.Api.Toggle.prototype.getToggleFunction = function() {
     return this._toggleFunction;
 }
 
+Gridifier.Api.Toggle.prototype._addSlides = function() {
+    var me = this;
+
+    this._toggleFunctions.slideLeft = this._slideApi.createHorizontalSlideToggler(false, false, false);
+    this._toggleFunctions.slideLeftTop = this._slideApi.createHorizontalSlideToggler(true, false, false);
+    this._toggleFunctions.slideLeftBottom = this._slideApi.createHorizontalSlideToggler(false, true, false);
+
+    this._toggleFunctions.slideRight = this._slideApi.createHorizontalSlideToggler(false, false, true);
+    this._toggleFunctions.slideRightTop = this._slideApi.createHorizontalSlideToggler(true, false, true);
+    this._toggleFunctions.slideRightBottom = this._slideApi.createHorizontalSlideToggler(false, true, true);
+
+    this._toggleFunctions.slideTop = this._slideApi.createVerticalSlideToggler(false, false, false);
+    this._toggleFunctions.slideTopLeft = this._slideApi.createVerticalSlideToggler(true, false, false);
+    this._toggleFunctions.slideTopRight = this._slideApi.createVerticalSlideToggler(false, true, false);
+
+    this._toggleFunctions.slideBottom = this._slideApi.createVerticalSlideToggler(false, false, true);
+    this._toggleFunctions.slideBottomLeft = this._slideApi.createVerticalSlideToggler(true, false, true);
+    this._toggleFunctions.slideBottomRight = this._slideApi.createVerticalSlideToggler(false, true, true);
+}
+
 Gridifier.Api.Toggle.prototype._addRotateX = function() {
     var me = this;
 
     this._toggleFunctions.rotateX = {
-        "show": function(item, grid, animationMsDuration, eventEmitter) {
+        "show": function(item, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
@@ -2157,7 +2495,7 @@ Gridifier.Api.Toggle.prototype._addRotateX = function() {
             me._rotateApi.show(item, grid);
         },
 
-        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             itemClone.style.visibility = "visible";
             item.style.visibility = "hidden";
 
@@ -2176,7 +2514,7 @@ Gridifier.Api.Toggle.prototype._addRotateY = function() {
     var me = this;
 
     this._toggleFunctions.rotateY = {
-        "show": function(item, grid, animationMsDuration, eventEmitter) {
+        "show": function(item, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
@@ -2186,7 +2524,7 @@ Gridifier.Api.Toggle.prototype._addRotateY = function() {
             me._rotateApi.show(item, grid, true);
         },
 
-        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             itemClone.style.visibility = "visible";
             item.style.visibility = "hidden";
 
@@ -2205,7 +2543,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
     var me = this;
 
     this._toggleFunctions.scale = {
-        "show": function(item, grid, animationMsDuration, eventEmitter) {
+        "show": function(item, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
@@ -2230,7 +2568,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
             }, 20); 
         },
 
-        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             itemClone.style.visibility = "visible";
             item.style.visibility = "hidden";
 
@@ -2260,7 +2598,7 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
     var me = this;
 
     this._toggleFunctions.fade = {
-        "show": function(item, grid, animationMsDuration, eventEmitter) {
+        "show": function(item, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
@@ -2284,7 +2622,7 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
             }, 20);
         },
 
-        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             itemClone.style.visibility = "visible";
             item.style.visibility = "hidden";
 
@@ -2313,12 +2651,12 @@ Gridifier.Api.Toggle.prototype._addVisibility = function() {
     var me = this;
 
     this._toggleFunctions.visibility = {
-        "show": function(item, grid, animationMsDuration, eventEmitter) {
+        "show": function(item, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             item.style.visibility = "visible";
             eventEmitter.emitShowEvent(item);
         },
 
-        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             itemClone.style.visibility = "hidden";
             item.style.visibility = "hidden";
 
@@ -2337,7 +2675,7 @@ Gridifier.Api.Toggle.prototype._addVoid = function() {
         },
 
         "hide": function(item) {
-            ; // @todo -> send event here
+            me._eventEmitter.emitHideEvent(item); // @pass event emitter to call
         }
     };
 }
@@ -3464,6 +3802,8 @@ Gridifier.Collector = function(settings, grid, sizesResolverManager) {
     return this;
 }
 
+Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR = "data-gridifier-item-sorting-index";
+
 Gridifier.Collector.prototype._createCollectorFunction = function() {
     var gridItemMarkingValue = this._settings.getGridItemMarkingType();
 
@@ -3679,7 +4019,16 @@ Gridifier.Collector.prototype.filterCollection = function(items) {
 }
 
 Gridifier.Collector.prototype.sortCollection = function(items) {
+    for(var i = 0; i < items.length; i++) {
+        items[i].setAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR, i);
+    }
+
     items.sort(this._settings.getSort());
+
+    for(var i = 0; i < items.length; i++) {
+        items[i].removeAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR);
+    }
+
     return items;
     // @todo -> check if reverse of the itams is required
     // if(this.gridifier.isAppending())
@@ -6946,14 +7295,12 @@ Gridifier.GridSizesUpdater = function(grid,
     return this;
 }
 
-Gridifier.GridSizesUpdater.GRID_SIZES_UPDATE_TIMEOUT = 100;
-
 Gridifier.GridSizesUpdater.prototype.scheduleGridSizesUpdate = function() {
     if(this._gridSizesUpdateTimeout != null) {
         clearTimeout(this._gridSizesUpdateTimeout);
         this._gridSizesUpdateTimeout = null;
     }
-
+    
     var me = this;
     this._gridSizesUpdateTimeout = setTimeout(function() {
         if(me._settings.isVerticalGrid()) {
@@ -6962,7 +7309,7 @@ Gridifier.GridSizesUpdater.prototype.scheduleGridSizesUpdate = function() {
         else if(me._settings.isHorizontalGrid()) {
             me._updateHorizontalGridSizes.call(me);
         }
-    }, Gridifier.GridSizesUpdater.GRID_SIZES_UPDATE_TIMEOUT);
+    }, this._settings.getGridTransformTimeout());
 }
 
 Gridifier.GridSizesUpdater.prototype._updateVerticalGridSizes = function() {
@@ -10312,12 +10659,16 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var toggleFunction = this._settings.getToggle();
             var eventEmitter = this._settings.getEventEmitter();
             var animationMsDuration = this._settings.getToggleAnimationMsDuration();
+            var sizesResolverManager = this._settings.getSizesResolverManager();
+            var coordsChanger = this._settings.getCoordsChanger();
 
             toggleFunction.show(
                 connectionToProcess.item,
                 this._gridifier.getGrid(),
                 animationMsDuration,
-                eventEmitter
+                eventEmitter,
+                sizesResolverManager,
+                coordsChanger
             );
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
@@ -10330,13 +10681,17 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var toggleFunction = this._settings.getToggle();
             var eventEmitter = this._settings.getEventEmitter();
             var animationMsDuration = this._settings.getToggleAnimationMsDuration();
+            var sizesResolverManager = this._settings.getSizesResolverManager();
+            var coordsChanger = this._settings.getCoordsChanger();
 
             toggleFunction.hide(
                 connectionToProcess.item,
                 connectionToProcess.disconnectedItemClone,
                 this._gridifier.getGrid(),
                 animationMsDuration,
-                eventEmitter
+                eventEmitter,
+                sizesResolverManager,
+                coordsChanger
             );
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER ||
@@ -10821,6 +11176,13 @@ Gridifier.CoreSettingsParser.prototype.parseGridTransformType = function() {
         return Gridifier.GRID_TRANSFORM_TYPES.FIT;
 }
 
+Gridifier.CoreSettingsParser.prototype.parseGridTransformTimeout = function() {
+    if(!this._settings.hasOwnProperty("gridTransformTimeout"))
+        return Gridifier.DEFAULT_GRID_TRANSFORM_TIMEOUT;
+
+    return this._settings.gridTransformTimeout;
+}
+
 Gridifier.CoreSettingsParser.prototype.parseGridItemMarkingStrategy = function() {
     if(!this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_CLASS) 
         && !this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_DATA_ATTR)
@@ -10933,6 +11295,7 @@ Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
     this._rotateBackface = null;
 
     this._gridTransformType = null;
+    this._gridTransformTimeout = null;
 
     this._css = {
     };
@@ -10983,6 +11346,7 @@ Gridifier.Settings.prototype._parse = function() {
     this._rotatePerspective = this._coreSettingsParser.parseRotatePerspective();
     this._rotateBackface = this._coreSettingsParser.parseRotateBackface();
     this._gridTransformType = this._coreSettingsParser.parseGridTransformType();
+    this._gridTransformTimeout = this._coreSettingsParser.parseGridTransformTimeout();
 
     this._apiSettingsParser.parseToggleOptions(this._toggleApi);
     this._apiSettingsParser.parseSortOptions(this._sortApi);
@@ -11001,6 +11365,10 @@ Gridifier.Settings.prototype._parse = function() {
 
 Gridifier.Settings.prototype.getEventEmitter = function() {
     return this._eventEmitter;
+}
+
+Gridifier.Settings.prototype.getSizesResolverManager = function() {
+    return this._sizesResolverManager;
 }
 
 Gridifier.Settings.prototype.getToggleAnimationMsDuration = function() {
@@ -11025,6 +11393,10 @@ Gridifier.Settings.prototype.isExpandGridTransformType = function() {
 
 Gridifier.Settings.prototype.isFitGridTransformType = function() {
     return this._gridTransformType == Gridifier.GRID_TRANSFORM_TYPES.FIT;
+}
+
+Gridifier.Settings.prototype.getGridTransformTimeout = function() {
+    return this._gridTransformTimeout;
 }
 
 Gridifier.Settings.prototype.isVerticalGrid = function() {
@@ -12962,6 +13334,7 @@ Gridifier.VerticalGrid.Connections.prototype.getAllConnectionsBelowY = function(
 }
 
 Gridifier.VerticalGrid.Connections.prototype.getAllConnectionsAboveY = function(y) {
+    // @todo -> Place CSD here too :)
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
         if(this._connections[i].y2 < y)

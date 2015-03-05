@@ -39,6 +39,8 @@ Gridifier.Collector = function(settings, grid, sizesResolverManager) {
     return this;
 }
 
+Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR = "data-gridifier-item-sorting-index";
+
 Gridifier.Collector.prototype._createCollectorFunction = function() {
     var gridItemMarkingValue = this._settings.getGridItemMarkingType();
 
@@ -254,7 +256,16 @@ Gridifier.Collector.prototype.filterCollection = function(items) {
 }
 
 Gridifier.Collector.prototype.sortCollection = function(items) {
+    for(var i = 0; i < items.length; i++) {
+        items[i].setAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR, i);
+    }
+
     items.sort(this._settings.getSort());
+
+    for(var i = 0; i < items.length; i++) {
+        items[i].removeAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR);
+    }
+
     return items;
     // @todo -> check if reverse of the itams is required
     // if(this.gridifier.isAppending())

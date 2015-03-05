@@ -143,12 +143,16 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var toggleFunction = this._settings.getToggle();
             var eventEmitter = this._settings.getEventEmitter();
             var animationMsDuration = this._settings.getToggleAnimationMsDuration();
+            var sizesResolverManager = this._settings.getSizesResolverManager();
+            var coordsChanger = this._settings.getCoordsChanger();
 
             toggleFunction.show(
                 connectionToProcess.item,
                 this._gridifier.getGrid(),
                 animationMsDuration,
-                eventEmitter
+                eventEmitter,
+                sizesResolverManager,
+                coordsChanger
             );
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
@@ -161,13 +165,17 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var toggleFunction = this._settings.getToggle();
             var eventEmitter = this._settings.getEventEmitter();
             var animationMsDuration = this._settings.getToggleAnimationMsDuration();
+            var sizesResolverManager = this._settings.getSizesResolverManager();
+            var coordsChanger = this._settings.getCoordsChanger();
 
             toggleFunction.hide(
                 connectionToProcess.item,
                 connectionToProcess.disconnectedItemClone,
                 this._gridifier.getGrid(),
                 animationMsDuration,
-                eventEmitter
+                eventEmitter,
+                sizesResolverManager,
+                coordsChanger
             );
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER ||

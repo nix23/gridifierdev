@@ -5,6 +5,7 @@ Gridifier.Api.Toggle = function(settings, eventEmitter, sizesResolverManager) {
     this._eventEmitter = null;
     this._sizesResolverManager = null;
 
+    this._slideApi = null;
     this._rotateApi = null;
 
     this._toggleFunction = null;
@@ -18,12 +19,16 @@ Gridifier.Api.Toggle = function(settings, eventEmitter, sizesResolverManager) {
         me._eventEmitter = eventEmitter;
         me._sizesResolverManager = sizesResolverManager;
 
+        me._slideApi = new Gridifier.Api.Slide(
+            me._settings, me._eventEmitter, me._sizesResolverManager
+        );
         me._rotateApi = new Gridifier.Api.Rotate(
             me._settings, me._eventEmitter, me._sizesResolverManager
         );
 
         me._toggleFunctions = {};
 
+        me._addSlides();
         me._addRotateX();
         me._addRotateY();
         me._addScale();
@@ -66,11 +71,31 @@ Gridifier.Api.Toggle.prototype.getToggleFunction = function() {
     return this._toggleFunction;
 }
 
+Gridifier.Api.Toggle.prototype._addSlides = function() {
+    var me = this;
+
+    this._toggleFunctions.slideLeft = this._slideApi.createHorizontalSlideToggler(false, false, false);
+    this._toggleFunctions.slideLeftTop = this._slideApi.createHorizontalSlideToggler(true, false, false);
+    this._toggleFunctions.slideLeftBottom = this._slideApi.createHorizontalSlideToggler(false, true, false);
+
+    this._toggleFunctions.slideRight = this._slideApi.createHorizontalSlideToggler(false, false, true);
+    this._toggleFunctions.slideRightTop = this._slideApi.createHorizontalSlideToggler(true, false, true);
+    this._toggleFunctions.slideRightBottom = this._slideApi.createHorizontalSlideToggler(false, true, true);
+
+    this._toggleFunctions.slideTop = this._slideApi.createVerticalSlideToggler(false, false, false);
+    this._toggleFunctions.slideTopLeft = this._slideApi.createVerticalSlideToggler(true, false, false);
+    this._toggleFunctions.slideTopRight = this._slideApi.createVerticalSlideToggler(false, true, false);
+
+    this._toggleFunctions.slideBottom = this._slideApi.createVerticalSlideToggler(false, false, true);
+    this._toggleFunctions.slideBottomLeft = this._slideApi.createVerticalSlideToggler(true, false, true);
+    this._toggleFunctions.slideBottomRight = this._slideApi.createVerticalSlideToggler(false, true, true);
+}
+
 Gridifier.Api.Toggle.prototype._addRotateX = function() {
     var me = this;
 
     this._toggleFunctions.rotateX = {
-        "show": function(item, grid, animationMsDuration, eventEmitter) {
+        "show": function(item, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
@@ -80,7 +105,7 @@ Gridifier.Api.Toggle.prototype._addRotateX = function() {
             me._rotateApi.show(item, grid);
         },
 
-        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             itemClone.style.visibility = "visible";
             item.style.visibility = "hidden";
 
@@ -99,7 +124,7 @@ Gridifier.Api.Toggle.prototype._addRotateY = function() {
     var me = this;
 
     this._toggleFunctions.rotateY = {
-        "show": function(item, grid, animationMsDuration, eventEmitter) {
+        "show": function(item, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
@@ -109,7 +134,7 @@ Gridifier.Api.Toggle.prototype._addRotateY = function() {
             me._rotateApi.show(item, grid, true);
         },
 
-        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             itemClone.style.visibility = "visible";
             item.style.visibility = "hidden";
 
@@ -128,7 +153,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
     var me = this;
 
     this._toggleFunctions.scale = {
-        "show": function(item, grid, animationMsDuration, eventEmitter) {
+        "show": function(item, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
@@ -153,7 +178,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
             }, 20); 
         },
 
-        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             itemClone.style.visibility = "visible";
             item.style.visibility = "hidden";
 
@@ -183,7 +208,7 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
     var me = this;
 
     this._toggleFunctions.fade = {
-        "show": function(item, grid, animationMsDuration, eventEmitter) {
+        "show": function(item, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
@@ -207,7 +232,7 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
             }, 20);
         },
 
-        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             itemClone.style.visibility = "visible";
             item.style.visibility = "hidden";
 
@@ -236,12 +261,12 @@ Gridifier.Api.Toggle.prototype._addVisibility = function() {
     var me = this;
 
     this._toggleFunctions.visibility = {
-        "show": function(item, grid, animationMsDuration, eventEmitter) {
+        "show": function(item, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             item.style.visibility = "visible";
             eventEmitter.emitShowEvent(item);
         },
 
-        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter) {
+        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
             itemClone.style.visibility = "hidden";
             item.style.visibility = "hidden";
 
@@ -260,7 +285,7 @@ Gridifier.Api.Toggle.prototype._addVoid = function() {
         },
 
         "hide": function(item) {
-            ; // @todo -> send event here
+            me._eventEmitter.emitHideEvent(item); // @pass event emitter to call
         }
     };
 }

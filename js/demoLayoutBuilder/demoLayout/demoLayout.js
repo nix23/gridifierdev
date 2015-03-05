@@ -348,7 +348,10 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
         window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
-        //me._gridifier.setCoordsChanger("default");
+        // setTimeout(function() {
+        // me._gridifier.toggleBy("slideBottomRight");
+        // }, 500);
+        //me._gridifier.setCoordsChanger("CSS3Position");
         //me._gridifier.setItemWidthPercentageAntialias(0.1);
         //me._gridifier.setItemHeightPercentageAntialias(0.1);
         // me._gridifier._settings.setRendererCoordsChanger('default');

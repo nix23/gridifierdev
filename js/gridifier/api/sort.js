@@ -55,6 +55,9 @@ Gridifier.Api.Sort.prototype.getSortFunction = function() {
 
 Gridifier.Api.Sort.prototype._addDefaultSort = function() {
     this._sortFunctions["default"] = function(firstItem, secondItem) {
-        return 0;
+        var firstItemSortNumber = firstItem.getAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR);
+        var secondItemSortNumber = secondItem.getAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR);
+
+        return parseInt(firstItemSortNumber, 10) - parseInt(secondItemSortNumber, 10);
     };
 }

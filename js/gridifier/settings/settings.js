@@ -116,6 +116,10 @@ Gridifier.Settings.prototype.getEventEmitter = function() {
     return this._eventEmitter;
 }
 
+Gridifier.Settings.prototype.getSizesResolverManager = function() {
+    return this._sizesResolverManager;
+}
+
 Gridifier.Settings.prototype.getToggleAnimationMsDuration = function() {
     return this._toggleAnimationMsDuration;
 }

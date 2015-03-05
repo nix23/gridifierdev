@@ -215,6 +215,7 @@ Gridifier.VerticalGrid.Connections.prototype.getAllConnectionsBelowY = function(
 }
 
 Gridifier.VerticalGrid.Connections.prototype.getAllConnectionsAboveY = function(y) {
+    // @todo -> Place CSD here too :)
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
         if(this._connections[i].y2 < y)
