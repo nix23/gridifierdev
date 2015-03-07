@@ -132,13 +132,13 @@ Gridifier.ApiSettingsParser.prototype.parseFilterOptions = function(filterApi) {
 Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coordsChangerApi) {
     if(!this._settings.hasOwnProperty("coordsChanger")) {
         coordsChangerApi.setCoordsChangerFunction("CSS3Translate3D");
+        coordsChangerApi.setCoordsChangerOnToggleFunction("CSS3Translate3D");
         return;
     }
 
     if(typeof this._settings.coordsChanger == "function") {
         coordsChangerApi.addCoordsChangerFunction("clientDefault", this._settings.coordsChanger);
         coordsChangerApi.setCoordsChangerFunction("clientDefault");
-        return;
     }
     else if(typeof this._settings.coordsChanger == "object") {
         for(var coordsChangerFunctionName in this._settings.coordsChanger) {
@@ -155,13 +155,19 @@ Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coord
         }
         
         coordsChangerApi.setCoordsChangerFunction("CSS3Translate3D");
-        return;
     }
     else {
         new Gridifier.Error(
             Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_COORDS_CHANGER_PARAM_VALUE,
             this._settings.coordsChanger
         );
+    }
+
+    if(this._settings.hasOwnProperty("coordsChangerOnToggle")) {
+        coordsChangerApi.setCoordsChangerOnToggleFunction(this._settings.coordsChangerOnToggle);
+    }
+    else {
+        coordsChangerApi.setCoordsChangerOnToggleFunction("CSS3Translate3D");
     }
 }
 

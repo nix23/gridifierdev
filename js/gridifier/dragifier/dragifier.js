@@ -1,6 +1,7 @@
 Gridifier.Dragifier = function(gridifier,
                                appender,
                                reversedAppender,
+                               collector,
                                connections,
                                connectors,
                                guid,
@@ -11,6 +12,7 @@ Gridifier.Dragifier = function(gridifier,
     this._gridifier = null;
     this._appender = null;
     this._reversedAppender = null;
+    this._collector = null;
     this._connections = null;
     this._connectors = null;
     this._guid = null;
@@ -27,6 +29,7 @@ Gridifier.Dragifier = function(gridifier,
         me._gridifier = gridifier;
         me._appender = appender;
         me._reversedAppender = reversedAppender;
+        me._collector = collector;
         me._connections = connections;
         me._connectors = connectors;
         me._guid = guid;
@@ -158,6 +161,7 @@ Gridifier.Dragifier.prototype._createDraggableItem = function() {
             this._gridifier, 
             this._appender,
             this._reversedAppender,
+            this._collector,
             this._connections, 
             this._connectors, 
             this._guid, 
@@ -170,6 +174,7 @@ Gridifier.Dragifier.prototype._createDraggableItem = function() {
             this._gridifier, 
             this._appender,
             this._reversedAppender,
+            this._collector,
             this._connections, 
             this._connectors, 
             this._guid, 

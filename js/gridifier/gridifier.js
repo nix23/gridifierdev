@@ -12,6 +12,8 @@ Gridifier = function(grid, settings) {
     this._filtrator = null;
     this._disconnector = null;
     this._sizesResolverManager = null;
+    this._lifecycleCallbacks = null;
+    this._itemClonesManager = null;
 
     this._connectors = null;
     this._connections = null;
@@ -37,11 +39,16 @@ Gridifier = function(grid, settings) {
         me._sizesResolverManager = new Gridifier.SizesResolverManager();
         me._grid = new Gridifier.Grid(grid, me._sizesResolverManager);
         me._eventEmitter = new Gridifier.EventEmitter(me);
-        me._settings = new Gridifier.Settings(settings, me._eventEmitter, me._sizesResolverManager);
+        me._settings = new Gridifier.Settings(settings, me, me._eventEmitter, me._sizesResolverManager);
         me._collector = new Gridifier.Collector(me._settings,  me.getGrid(), me._sizesResolverManager);
+
+        me._settings.setCollectorInstance(me._collector);
+
         me._guid = new Gridifier.GUID();
         me._normalizer = new Gridifier.Normalizer(me, me._sizesResolverManager);
         me._operation = new Gridifier.Operation();
+        me._lifecycleCallbacks = new Gridifier.LifecycleCallbacks(me._collector);
+        me._itemClonesManager = new Gridifier.ItemClonesManager(me._grid, me._collector);
 
         me._grid.setCollectorInstance(me._collector);
 
@@ -111,6 +118,7 @@ Gridifier = function(grid, settings) {
         me._sizesTransformer = new Gridifier.SizesTransformer.Core(
             me,
             me._settings,
+            me._collector,
             me._connectors,
             me._connections,
             me._connectionsSorter,
@@ -150,6 +158,7 @@ Gridifier = function(grid, settings) {
             me, 
             me._appender,
             me._reversedAppender,
+            me._collector,
             me._connections, 
             me._connectors, 
             me._guid, 
@@ -237,6 +246,7 @@ Gridifier.prototype.triggerResize = function() {
 
 // Write tests soon per everything :}
 // Method names -> gridify, watchify?
+// @todo -> User can write this method???? Why should it be inside lib?
 Gridifier.prototype.watch = function() {
     // @todo -> Watch per DOM appends-prepends through setTimeout,
     //  and process changes.
@@ -278,15 +288,27 @@ Gridifier.prototype.collect = function() {
 }
 
 Gridifier.prototype.disconnect = function(items) {
-    this._sizesTransformer.stopRetransformAllConnectionsQueue();
-    this._disconnector.disconnect(items);
-    this.retransformAllSizes();
+    this._lifecycleCallbacks.executePreDisconnectCallbacks(items);
+
+    var execute = function() {
+        this._sizesTransformer.stopRetransformAllConnectionsQueue();
+        this._disconnector.disconnect(items);
+        this.retransformAllSizes();
+    }
+
+    var me = this;
+    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
 
     return this;
 }
 
 Gridifier.prototype.setCoordsChanger = function(coordsChangerName) {
     this._settings.setCoordsChanger(coordsChangerName);
+    return this;
+}
+
+Gridifier.prototype.setCoordsChangerOnToggle = function(coordsChangerName) {
+    this._settings.setCoordsChangerOnToggle(coordsChangerName);
     return this;
 }
 
@@ -310,26 +332,57 @@ Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
         return this;
     }
 
-    this._operationsQueue.schedulePrependOperation(items, batchSize, batchTimeout);
+    this._lifecycleCallbacks.executePreInsertCallbacks(items);
+    var execute = function() {
+        this._operationsQueue.schedulePrependOperation(items, batchSize, batchTimeout);
+    }
+
+    var me = this;
+    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+
     return this;
 }
 
 Gridifier.prototype.append = function(items, batchSize, batchTimeout) {
-    this._operationsQueue.scheduleAppendOperation(items, batchSize, batchTimeout);
+    this._lifecycleCallbacks.executePreInsertCallbacks(items);
+
+    var execute = function() {
+        this._operationsQueue.scheduleAppendOperation(items, batchSize, batchTimeout);
+    }
+
+    var me = this;
+    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+
     return this;
 }
 
 Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchTimeout) {
-    this._operationsQueue.scheduleInsertBeforeOperation(
-        items, beforeItem, batchSize, batchTimeout
-    );
+    this._lifecycleCallbacks.executePreInsertCallbacks(items);
+
+    var execute = function() {
+        this._operationsQueue.scheduleInsertBeforeOperation(
+            items, beforeItem, batchSize, batchTimeout
+        );
+    }
+
+    var me = this;
+    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+
     return this;
 }
 
 Gridifier.prototype.insertAfter = function(items, afterItem, batchSize, batchTimeout) {
-    this._operationsQueue.scheduleInsertAfterOperation(
-        items, afterItem, batchSize, batchTimeout
-    );
+    this._lifecycleCallbacks.executePreInsertCallbacks(items);
+
+    var execute = function() {
+        this._operationsQueue.scheduleInsertAfterOperation(
+            items, afterItem, batchSize, batchTimeout
+        );
+    }
+
+    var me = this;
+    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+
     return this;
 }
 
@@ -348,6 +401,33 @@ Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
     this._transformOperation.execute(maybeItem, newWidth, newHeight);
 }
 
+Gridifier.prototype.addPreInsertLifecycleCallback = function(callback) {
+    this._lifecycleCallbacks.addPreInsertCallback(callback);
+}
+
+Gridifier.prototype.addPreDisconnectLifecycleCallback = function(callback) {
+    this._lifecycleCallbacks.addPreDisconnectCallback(callback);
+}
+
+Gridifier.prototype.setItemClonesManagerLifecycleCallbacks = function() {
+    var me = this;
+    this.addPreInsertLifecycleCallback(function(items) {
+        for(var i = 0; i < items.length; i++) {
+            me._itemClonesManager.createClone(items[i]);
+        }
+    });
+
+    this.addPreDisconnectLifecycleCallback(function(items) {
+        for(var i = 0; i < items.length; i++) {
+            me._itemClonesManager.destroyClone(items[i]);
+        }
+    });
+}
+
+Gridifier.prototype.getItemClonesManager = function() {
+    return this._itemClonesManager;
+}
+
 // @todo -> Add to items numbers besides GUIDS, and rebuild them on item deletes(Also use in sorting per drag?)
 
 Gridifier.Api = {};
@@ -356,6 +436,8 @@ Gridifier.VerticalGrid = {};
 Gridifier.Operations = {};
 Gridifier.TransformerOperations = {};
 Gridifier.SizesTransformer = {};
+
+Gridifier.REFLOW_OPTIMIZATION_TIMEOUT = 0;
 
 Gridifier.GRID_TYPES = {VERTICAL_GRID: "verticalGrid", HORIZONTAL_GRID: "horizontalGrid"};
 

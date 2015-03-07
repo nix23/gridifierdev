@@ -1,6 +1,7 @@
 Gridifier.Dragifier.Core = function(gridifier,
                                     appender,
                                     reversedAppender,
+                                    collector,
                                     connectors,
                                     connections,
                                     settings,
@@ -11,6 +12,7 @@ Gridifier.Dragifier.Core = function(gridifier,
     this._gridifier = null;
     this._appender = null;
     this._reversedAppender = null;
+    this._collector = null;
     this._connectors = null;
     this._connections = null;
     this._settings = null;
@@ -30,6 +32,7 @@ Gridifier.Dragifier.Core = function(gridifier,
         me._gridifier = gridifier;
         me._appender = appender;
         me._reversedAppender = reversedAppender;
+        me._collector = collector;
         me._connectors = connectors;
         me._connections = connections;
         me._settings = settings;
@@ -113,6 +116,7 @@ Gridifier.Dragifier.Core.prototype.determineInitialCursorOffsetsFromDraggableIte
 
 Gridifier.Dragifier.Core.prototype.createDraggableItemClone = function(draggableItem) {
     var draggableItemClone = draggableItem.cloneNode(true);
+    this._collector.markItemAsRestrictedToCollect(draggableItemClone);
 
     // @todo -> Replace this, tmp solution
     draggableItemClone.style.setProperty("background", "rgb(235,235,235)", "important");

@@ -1,7 +1,9 @@
-Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
+Gridifier.Settings = function(settings, gridifier, eventEmitter, sizesResolverManager) {
     var me = this;
 
     this._settings = null;
+    this._gridifier = null;
+    this._collector = null;
     this._eventEmitter = null;
     this._sizesResolverManager = null;
 
@@ -51,6 +53,7 @@ Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
 
     this._construct = function() {
         me._settings = settings;
+        me._gridifier = gridifier;
         me._eventEmitter = eventEmitter;
         me._sizesResolverManager = sizesResolverManager;
 
@@ -60,7 +63,7 @@ Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
         me._toggleApi = new Gridifier.Api.Toggle(me, me._eventEmitter, me._sizesResolverManager);
         me._sortApi = new Gridifier.Api.Sort(me, me._eventEmitter);
         me._filterApi = new Gridifier.Api.Filter(me, me._eventEmitter);
-        me._coordsChangerApi = new Gridifier.Api.CoordsChanger(me, me._eventEmitter);
+        me._coordsChangerApi = new Gridifier.Api.CoordsChanger(me, me._gridifier, me._eventEmitter);
         me._sizesChangerApi = new Gridifier.Api.SizesChanger(me, me._eventEmitter);
 
         me._parse();
@@ -78,6 +81,11 @@ Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
 
     this._construct();
     return this;
+}
+
+Gridifier.Settings.prototype.setCollectorInstance = function(collector) {
+    this._toggleApi.setCollectorInstance(collector);
+    this._collector = collector;
 }
 
 Gridifier.Settings.prototype._parse = function() {
@@ -110,6 +118,10 @@ Gridifier.Settings.prototype._parse = function() {
     var dragifierData = this._coreSettingsParser.parseDragifierSettings();
     this._shouldEnableDragifierOnInit = dragifierData.shouldEnableDragifierOnInit;
     this._dragifierItemSelector = dragifierData.dragifierItemSelector;
+}
+
+Gridifier.Settings.prototype.getCollector = function() {
+    return this._collector;
 }
 
 Gridifier.Settings.prototype.getEventEmitter = function() {
@@ -256,12 +268,20 @@ Gridifier.Settings.prototype.setCoordsChanger = function(coordsChangerFunctionNa
     this._coordsChangerApi.setCoordsChangerFunction(coordsChangerFunctionName);
 }
 
+Gridifier.Settings.prototype.setCoordsChangerOnToggle = function(coordsChangerFunctionName) {
+    this._coordsChangerApi.setCoordsChangerOnToggleFunction(coordsChangerFunctionName);
+}
+
 Gridifier.Settings.prototype.setSizesChanger = function(sizesChangerFunctionName) {
     this._sizesChangerApi.setSizesChangerFunction(sizesChangerFunctionName);
 }
 
 Gridifier.Settings.prototype.getCoordsChanger = function() {
     return this._coordsChangerApi.getCoordsChangerFunction();
+}
+
+Gridifier.Settings.prototype.getCoordsChangerOnToggle = function() {
+    return this._coordsChangerApi.getCoordsChangerOnToggleFunction();
 }
 
 Gridifier.Settings.prototype.getSizesChanger = function() {

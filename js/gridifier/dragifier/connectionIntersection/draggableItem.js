@@ -1,6 +1,7 @@
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
                                                                    appender,
                                                                    reversedAppender,
+                                                                   collector,
                                                                    connections,
                                                                    connectors,
                                                                    guid,
@@ -11,6 +12,7 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
     this._gridifier = null;
     this._appender = null;
     this._reversedAppender = null;
+    this._collector = null;
     this._connections = null;
     this._connectors = null;
     this._connectionsIntersector = null;
@@ -32,6 +34,7 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
         me._gridifier = gridifier;
         me._appender = appender;
         me._reversedAppender = reversedAppender;
+        me._collector = collector;
         me._connections = connections;
         me._connectors = connectors;
         me._guid = guid;
@@ -52,6 +55,7 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
             me._gridifier, 
             me._appender, 
             me._reversedAppender, 
+            me._collector,
             me._connectors, 
             me._connections,
             me._settings, 
@@ -128,6 +132,13 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._initDraggable
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._hideDraggableItem = function() {
     this._draggableItem.style.visibility = "hidden";
+
+    var itemClonesManager = this._gridifier.getItemClonesManager();
+    if(itemClonesManager.hasBindedClone(this._draggableItem)) {
+        var draggableItemRendererClone = itemClonesManager.getBindedClone(this._draggableItem);
+        draggableItemRendererClone.style.visibility = "hidden";
+    }
+
     // @todo -> Replace with real hidder
     Dom.css.addClass(document.body, "disableSelect");
 }
@@ -188,10 +199,14 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._swapItemGUIDS
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.unbindDraggableItem = function() {
     document.body.removeChild(this._draggableItemClone);
 
-    this._draggableItem.style.visibility = "visible";
+    this._showDraggableItem();
     this._draggableItem = null;
     this._draggableItem = null;
 
     // @todo -> Replace with real hidder
     Dom.css.removeClass(document.body, "disableSelect");
+}
+
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._showDraggableItem = function() {
+    this._draggableItem.style.visibility = "visible";
 }

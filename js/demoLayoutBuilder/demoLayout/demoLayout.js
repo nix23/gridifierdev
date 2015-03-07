@@ -59,7 +59,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierSettings.prependType = "mirroredPrepend";
         //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
-        //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
+        me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         //me._gridifierSettings.alignmentType = "center";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
         me._gridifierSettings.dragifier = true;
@@ -346,11 +346,14 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridDebugger = new DemoLayoutBuilder.DemoLayout.GridDebugger(me, me._grid.getGrid().get(0));
         Logger.setGrid(me._grid.getGrid().get(0));
         
+        //me._gridifierSettings.toggleAnimationMsDuration = 5000;
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
+        me._gridifier.setItemClonesManagerLifecycleCallbacks();
+        me._gridifier.setCoordsChanger("CSS3Translate3DClones");
         window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
-        // setTimeout(function() {
-        // me._gridifier.toggleBy("slideBottomRight");
-        // }, 500);
+        setTimeout(function() {
+            me._gridifier.toggleBy("slideLeft");
+        }, 500);
         //me._gridifier.setCoordsChanger("CSS3Position");
         //me._gridifier.setItemWidthPercentageAntialias(0.1);
         //me._gridifier.setItemHeightPercentageAntialias(0.1);
@@ -480,7 +483,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             me._gridifier.triggerResize();
             $(me).trigger(DemoLayoutBuilder.DemoLayout.EVENT_DEMO_LAYOUT_SIZES_CHANGE);
         });
-
+        
         // @todo -> Replace this.(Tmp for testing)
         me._$view.on("click", ".gridItem", function() { ///console.log("toggle");
             //me._gridifier.disconnect($(this));

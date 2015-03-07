@@ -97,6 +97,7 @@ Gridifier.Disconnector.prototype._addDisconnectedItemClones = function(connectio
     for(var i = 0; i < connectionsToDisconnect.length; i++) {
         var disconnectedItemClone = connectionsToDisconnect[i].item.cloneNode(true);
         disconnectedItemClone.style.visibility = "hidden";
+        this._collector.markItemAsRestrictedToCollect(disconnectedItemClone);
         
         Dom.css3.transition(disconnectedItemClone, "none");
         Dom.css3.transform(disconnectedItemClone, "");

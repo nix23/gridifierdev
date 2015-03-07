@@ -1,6 +1,7 @@
 Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
                                                                appender,
                                                                reversedAppender,
+                                                               collector,
                                                                connections,
                                                                connectors,
                                                                guid,
@@ -11,6 +12,7 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
     this._gridifier = null;
     this._appender = null;
     this._reversedAppender = null;
+    this._collector = null;
     this._connections = null;
     this._connectors = null;
     this._guid = null;
@@ -35,6 +37,7 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
         me._gridifier = gridifier;
         me._appender = appender;
         me._reversedAppender = reversedAppender;
+        me._collector = collector;
         me._connections = connections;
         me._connectors = connectors;
         me._guid = guid;
@@ -49,6 +52,7 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
             me._gridifier, 
             me._appender, 
             me._reversedAppender,
+            me._collector,
             me._connectors, 
             me._connections,
             me._settings, 
@@ -146,6 +150,13 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._initDraggableItem
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._hideDraggableItem = function() {
     this._draggableItem.style.visibility = "hidden";
+
+    var itemClonesManager = this._gridifier.getItemClonesManager();
+    if(itemClonesManager.hasBindedClone(this._draggableItem)) {
+        var draggableItemRendererClone = itemClonesManager.getBindedClone(this._draggableItem);
+        draggableItemRendererClone.style.visibility = "hidden";
+    }
+
     // @todo -> Replace with real hidder
     Dom.css.addClass(document.body, "disableSelect");
 }
@@ -229,10 +240,14 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.unbindDraggableIte
     this._gridifier.getGrid().removeChild(this._draggableItemPointer);
     this._draggableItemConnection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = false;
 
-    this._draggableItem.style.visibility = "visible";
+    this._showDraggableItem();
     this._draggableItem = null;
     this._discretizer.deleteDemonstrator();
 
     // @todo -> Replace with real hidder
     Dom.css.removeClass(document.body, "disableSelect");
+}
+
+Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._showDraggableItem = function() {
+    this._draggableItem.style.visibility = "visible";
 }

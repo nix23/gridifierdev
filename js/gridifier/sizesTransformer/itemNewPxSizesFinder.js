@@ -1,9 +1,11 @@
 Gridifier.SizesTransformer.ItemNewPxSizesFinder = function(gridifier,
+                                                           collector,
                                                            connections,
                                                            sizesResolverManager) {
     var me = this;
 
     me._gridifier = null;
+    me._collector = null;
     me._connections = null;
     me._sizesResolverManager = null;
 
@@ -12,6 +14,7 @@ Gridifier.SizesTransformer.ItemNewPxSizesFinder = function(gridifier,
 
     this._construct = function() {
         me._gridifier = gridifier;
+        me._collector = collector;
         me._connections = connections;
         me._sizesResolverManager = sizesResolverManager;
     };
@@ -48,6 +51,7 @@ Gridifier.SizesTransformer.ItemNewPxSizesFinder.prototype._calculateNewPxSizesPe
                                                                                                            widthToTransform,
                                                                                                            heightToTransform) {
     var transformedItemClone = transformedItem.cloneNode();
+    this._collector.markItemAsRestrictedToCollect(transformedItemClone);
     this._sizesResolverManager.unmarkAsCached(transformedItemClone);
 
     Dom.css.set(transformedItemClone, {

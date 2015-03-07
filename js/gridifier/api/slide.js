@@ -28,18 +28,22 @@ Gridifier.Api.Slide = function(settings, eventEmitter, sizesResolverManager) {
     return this;
 }
 
+Gridifier.Api.Slide.SHOW_ITEM_TIMEOUT = 100;
+
 Gridifier.Api.Slide.prototype._executeSlideShow = function(item, 
                                                            grid, 
                                                            animationMsDuration, 
                                                            eventEmitter,
                                                            coordsChanger,
+                                                           collector,
                                                            startLeft,
                                                            startTop) {
-    var targetLeft = item.style.left;
+    var targetLeft = item.style.left; 
     var targetTop = item.style.top;
 
     var itemClone = item.cloneNode(true);
-    grid.appendChild(itemClone);
+    grid.appendChild(itemClone); 
+    collector.markItemAsRestrictedToCollect(itemClone);
 
     setTimeout(function() {
         Dom.css3.transition(itemClone, "none");
@@ -74,8 +78,8 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
 
                 eventEmitter.emitShowEvent(item);
             }, animationMsDuration + 20);
-        }, 100); // A little delay before setting translate3d second time
-    }, 100);
+        }, Gridifier.Api.Slide.SHOW_ITEM_TIMEOUT); // A little delay before setting translate3d second time
+    }, Gridifier.Api.Slide.SHOW_ITEM_TIMEOUT);
 }
 
 Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
@@ -84,6 +88,7 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
                                                            animationMsDuration,
                                                            eventEmitter,
                                                            coordsChanger,
+                                                           collector,
                                                            targetLeft,
                                                            targetTop) {
     Dom.css3.transition(
@@ -98,8 +103,21 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
         eventEmitter,
         false
     );
+    
+    // Fix for concurrent clone animations on filters. Clone can be
+    // kept visible(their events wont be copyied), but all original
+    // items must be invisible.
+    // So, if some items will show after delay, while other items are hiding,
+    // we should hide them again.(Because they are disconnected from grid, and if 
+    // user will click on any of them, error will appear)
+    for(var i = 0; i < Dom.toInt(animationMsDuration); i += 50) {
+        setTimeout(function() {
+            item.style.visibility = "hidden";
+        }, i);
+    }
 
     setTimeout(function() {
+        item.style.visibility = "hidden";
         itemClone.style.visibility = "hidden";
         grid.removeChild(itemClone);
         eventEmitter.emitHideEvent(item);
@@ -128,7 +146,8 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                          animationMsDuration, 
                          eventEmitter, 
                          sizesResolverManager,
-                         coordsChanger) {
+                         coordsChanger,
+                         collector) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
@@ -148,6 +167,7 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 animationMsDuration, 
                 eventEmitter,
                 coordsChanger,
+                collector,
                 getLeftPos(item, grid),
                 top
             );
@@ -159,9 +179,10 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                          animationMsDuration, 
                          eventEmitter, 
                          sizesResolverManager,
-                         coordsChanger) {
+                         coordsChanger,
+                         collector) {
             itemClone.style.visibility = "visible";
-            item.style.visibility = "hidden";
+            item.style.visibility = "hidden"; 
 
             if(!Dom.isBrowserSupportingTransitions()) {
                 itemClone.style.visibility = "hidden";
@@ -183,6 +204,7 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 animationMsDuration,
                 eventEmitter,
                 coordsChanger,
+                collector,
                 getLeftPos(item, grid),
                 top
             );

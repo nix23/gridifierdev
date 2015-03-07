@@ -144,7 +144,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var eventEmitter = this._settings.getEventEmitter();
             var animationMsDuration = this._settings.getToggleAnimationMsDuration();
             var sizesResolverManager = this._settings.getSizesResolverManager();
-            var coordsChanger = this._settings.getCoordsChanger();
+            var coordsChanger = this._settings.getCoordsChangerOnToggle();
+            var collector = this._settings.getCollector();
 
             toggleFunction.show(
                 connectionToProcess.item,
@@ -152,7 +153,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 animationMsDuration,
                 eventEmitter,
                 sizesResolverManager,
-                coordsChanger
+                coordsChanger,
+                collector
             );
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
@@ -166,7 +168,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var eventEmitter = this._settings.getEventEmitter();
             var animationMsDuration = this._settings.getToggleAnimationMsDuration();
             var sizesResolverManager = this._settings.getSizesResolverManager();
-            var coordsChanger = this._settings.getCoordsChanger();
+            var coordsChanger = this._settings.getCoordsChangerOnToggle();
+            var collector = this._settings.getCollector();
 
             toggleFunction.hide(
                 connectionToProcess.item,
@@ -175,7 +178,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 animationMsDuration,
                 eventEmitter,
                 sizesResolverManager,
-                coordsChanger
+                coordsChanger,
+                collector
             );
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER ||

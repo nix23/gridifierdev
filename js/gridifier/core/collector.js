@@ -40,26 +40,31 @@ Gridifier.Collector = function(settings, grid, sizesResolverManager) {
 }
 
 Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR = "data-gridifier-item-sorting-index";
+Gridifier.Collector.RESTRICT_ITEM_COLLECT_DATA_ATTR = "data-gridifier-item-restrict-collect";
 
 Gridifier.Collector.prototype._createCollectorFunction = function() {
     var gridItemMarkingValue = this._settings.getGridItemMarkingType();
 
+    var me = this;
     if(this._settings.isByClassGridItemMarkingStrategy()) {
         this._collectorFunction = function(grid) {
-            return Dom.get.byQuery(grid, "." + gridItemMarkingValue);
+            var items = Dom.get.byQuery(grid, "." + gridItemMarkingValue);
+            return me.filterNotRestrictedToCollectItems(items);
         }
     }
     else if(this._settings.isByDataAttrGridItemMarkingStrategy()) {
         this._collectorFunction = function(grid) {
-            return Dom.get.byQuery(
+            var items = Dom.get.byQuery(
                 grid, 
                 "[" + Gridifier.GRID_ITEM_MARKING_DEFAULTS.DATA_ATTR + "=" + gridItemMarkingValue + "]"
             );
+            return me.filterNotRestrictedToCollectItems(items);
         }
     }
     else if(this._settings.isByQueryGridItemMarkingStrategy()) {
         this._collectorFunction = function(grid) {
-            return Dom.get.byQuery(grid, gridItemMarkingValue);
+            var items = Dom.get.byQuery(grid, gridItemMarkingValue);
+            return me.filterNotRestrictedToCollectItems(items);
         }
     }
 }
@@ -270,4 +275,20 @@ Gridifier.Collector.prototype.sortCollection = function(items) {
     // @todo -> check if reverse of the itams is required
     // if(this.gridifier.isAppending())
     //      return items.reverse()
+}
+
+Gridifier.Collector.prototype.filterNotRestrictedToCollectItems = function(items) {
+    var filteredItems = [];
+    for(var i = 0; i < items.length; i++) {
+        if(Dom.hasAttribute(items[i], Gridifier.Collector.RESTRICT_ITEM_COLLECT_DATA_ATTR))
+            continue;
+
+        filteredItems.push(items[i]);
+    }
+
+    return filteredItems;
+}
+
+Gridifier.Collector.prototype.markItemAsRestrictedToCollect = function(item) {
+    item.setAttribute(Gridifier.Collector.RESTRICT_ITEM_COLLECT_DATA_ATTR, "restricted");
 }

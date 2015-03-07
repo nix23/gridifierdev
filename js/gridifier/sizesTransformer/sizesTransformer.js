@@ -1,5 +1,6 @@
 Gridifier.SizesTransformer.Core = function(gridifier,
                                            settings,
+                                           collector,
                                            connectors,
                                            connections,
                                            connectionsSorter,
@@ -13,6 +14,7 @@ Gridifier.SizesTransformer.Core = function(gridifier,
 
     this._gridifier = null;
     this._settings = null;
+    this._collector = null;
     this._connectors = null;
     this._connections = null;
     this._connectionsSorter = null;
@@ -40,6 +42,7 @@ Gridifier.SizesTransformer.Core = function(gridifier,
     this._construct = function() {
         me._gridifier = gridifier;
         me._settings = settings;
+        me._collector = collector;
         me._connectors = connectors;
         me._connections = connections;
         me._connectionsSorter = connectionsSorter;
@@ -67,7 +70,7 @@ Gridifier.SizesTransformer.Core = function(gridifier,
             me._connectionsSorter
         );
         me._itemNewPxSizesFinder = new Gridifier.SizesTransformer.ItemNewPxSizesFinder(
-            me._gridifier, me._connections, me._sizesResolverManager
+            me._gridifier, me._collector, me._connections, me._sizesResolverManager
         );
         me._transformedItemMarker = new Gridifier.SizesTransformer.TransformedItemMarker();
         me._itemsToReappendFinder = new Gridifier.SizesTransformer.ItemsToReappendFinder(

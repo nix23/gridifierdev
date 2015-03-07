@@ -51,6 +51,10 @@ Gridifier.Api.Toggle = function(settings, eventEmitter, sizesResolverManager) {
     return this;
 }
 
+Gridifier.Api.Toggle.prototype.setCollectorInstance = function(collector) {
+    this._rotateApi.setCollectorInstance(collector);
+}
+
 Gridifier.Api.Toggle.prototype.setToggleFunction = function(toggleFunctionName) {
     if(!this._toggleFunctions.hasOwnProperty(toggleFunctionName)) {
         new Gridifier.Error(

@@ -4,6 +4,7 @@ Gridifier.Api.Rotate = function(settings, eventEmitter, sizesResolverManager) {
     this._settings = null;
     this._eventEmitter = null;
     this._sizesResolverManager = null;
+    this._collector = null;
 
     this._css = {
     };
@@ -26,6 +27,10 @@ Gridifier.Api.Rotate = function(settings, eventEmitter, sizesResolverManager) {
 
     this._construct();
     return this;
+}
+
+Gridifier.Api.Rotate.prototype.setCollectorInstance = function(collector) {
+    this._collector = collector;
 }
 
 Gridifier.Api.Rotate.prototype.show = function(item, grid, inverseRotateAxis) {
@@ -123,6 +128,7 @@ Gridifier.Api.Rotate.prototype._createFrames = function(scene) {
 
 Gridifier.Api.Rotate.prototype._createItemClone = function(item) {
     var itemClone = item.cloneNode(true);
+    this._collector.markItemAsRestrictedToCollect(itemClone);
     Dom.css.set(itemClone, {
         left: "0px",
         top: "0px",
