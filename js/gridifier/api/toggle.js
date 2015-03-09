@@ -168,7 +168,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
             Dom.css3.transformProperty(item, "scale", 0);
             
             item.style.visibility = "visible"; // Ie11 blinking fix(:))
-            setTimeout(function() {
+            setTimeout(function() { 
                 item.style.visibility = "visible";
                 Dom.css3.transition(
                     item, 
@@ -201,9 +201,12 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
             setTimeout(function() {
                 itemClone.style.visibility = "hidden";
                 grid.removeChild(itemClone);
-                eventEmitter.emitHideEvent(item);
             // setTimeout should be smaller than animation duration(Flickering bug in Webkit)
             }, animationMsDuration - 100); 
+
+            setTimeout(function() {
+                eventEmitter.emitHideEvent(item);
+            }, animationMsDuration + 20);
         }
     };
 }

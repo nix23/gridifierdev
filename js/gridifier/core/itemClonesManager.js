@@ -39,14 +39,29 @@ Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR = "data-gridifier-c
 Gridifier.ItemClonesManager.prototype.createClone = function(item) {
    var itemClone = item.cloneNode(true);
    itemClone.setAttribute(Gridifier.ItemClonesManager.ITEM_CLONE_MARKING_DATA_ATTR, "item-clone");
+   itemClone.style.visibility = "hidden";
+   
    this._collector.markItemAsRestrictedToCollect(itemClone);
    this._grid.getGrid().appendChild(itemClone);
+
+   if(item.style.zIndex.length == 0) {
+      itemClone.style.zIndex = 1;
+      item.style.zIndex = 2;
+   }
+   else {
+      var currentItemZIndex = item.style.zIndex;
+      itemClone.style.zIndex = currentItemZIndex - 1;
+   }
 
    this._nextBindingId++;
    item.setAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR, this._nextBindingId);
    itemClone.setAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR, this._nextBindingId);
 
    this._itemClones.push(itemClone);
+}
+
+Gridifier.ItemClonesManager.prototype.isItemClone = function(maybeItemClone) {
+   return Dom.hasAttribute(maybeItemClone, Gridifier.ItemClonesManager.ITEM_CLONE_MARKING_DATA_ATTR);
 }
 
 Gridifier.ItemClonesManager.prototype.hasBindedClone = function(item) {

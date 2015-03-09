@@ -227,11 +227,29 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
     var me = this;
     var itemShownDataAttr = "data-gridifier-item-shown";
 
-    this._gridifier.onShow(function(item) {
-       item.setAttribute(itemShownDataAttr, "yes");
+    this._gridifier.onShow(function(item) { 
+        var itemClonesManager = me._gridifier.getItemClonesManager();
+        if(!itemClonesManager.hasBindedClone(item))
+            return;
+        if(itemClonesManager.isItemClone(item)) {
+            item.style.visibility = "hidden";
+            return;
+        }
+
+        item.style.visibility = "visible";
+        item.setAttribute(itemShownDataAttr, "yes");
     });
 
     this._gridifier.onHide(function(item) {
+       var itemClonesManager = me._gridifier.getItemClonesManager();
+       if(!itemClonesManager.hasBindedClone(item))
+           return;
+       if(itemClonesManager.isItemClone(item)) {
+           item.style.visibility = "hidden";
+           return;
+       }
+       
+       item.style.visibility = "hidden";
        item.removeAttribute(itemShownDataAttr);
     });
 
@@ -247,10 +265,6 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
                                                                   newHeight) {
         // @todo -> if !supporting transitions -> default
         
-        if(!Dom.hasAttribute(item, itemShownDataAttr)) {
-            return;
-        }
-
         var itemClonesManager = me._gridifier.getItemClonesManager();
         var itemClone = itemClonesManager.getBindedClone(item);
 
@@ -258,12 +272,11 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
 
         if(typeof clonesHideTimeouts[guid] == "undefined") {
             clonesHideTimeouts[guid] = null;
-            itemClone.style.position = item.style.position;
-            itemClone.style.left = item.style.left;
-            itemClone.style.top = item.style.top;
         }
 
-        itemClone.style.visibility = "visible";
+        if(Dom.hasAttribute(item, itemShownDataAttr)) {
+            itemClone.style.visibility = "visible";
+        }
         item.style.visibility = "hidden";
 
         if(emitTransformEvent) {
@@ -271,6 +284,10 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
                 width: newWidth,
                 height: newHeight
             });
+
+            setTimeout(function() {
+                eventEmitter.emitTransformEvent(itemClone, newWidth, newHeight, newLeft, newTop);
+            }, animationMsDuration + 20);
         }
         
         me._coordsChangerFunctions.CSS3Translate3D(
@@ -293,8 +310,10 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
             var hideCloneTimeout = animationMsDuration;
 
         clonesHideTimeouts[guid] = setTimeout(function() {
-            item.style.visibility = "visible";
-            itemClone.style.visibility = "hidden";
+            if(Dom.hasAttribute(item, itemShownDataAttr)) {
+                item.style.visibility = "visible";
+                itemClone.style.visibility = "hidden";
+            }
         }, hideCloneTimeout);
     };
 }

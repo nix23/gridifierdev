@@ -153,7 +153,7 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 eventEmitter.emitShowEvent(item);
                 return;
             }
-
+            
             if(alignTop)
                 var top = 0;
             else if(alignBottom)

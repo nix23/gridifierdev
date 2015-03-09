@@ -156,6 +156,26 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 coordsChanger,
                 collector
             );
+
+            if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
+                var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
+                
+                Dom.css.set(itemClone, {
+                    position: "absolute",
+                    left: left,
+                    top: top
+                });
+
+                toggleFunction.show(
+                    itemClone,
+                    this._gridifier.getGrid(),
+                    animationMsDuration,
+                    eventEmitter,
+                    sizesResolverManager,
+                    coordsChanger,
+                    collector
+                );
+            }
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
             Dom.css.set(connectionToProcess.disconnectedItemClone, {
@@ -181,6 +201,14 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 coordsChanger,
                 collector
             );
+
+            if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
+                var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
+                Dom.css.set(itemClone, {visibility: "hidden"}); 
+                setTimeout(function() {
+                    eventEmitter.emitHideEvent(itemClone);
+                }, animationMsDuration + 20);
+            }
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER ||
                 processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED) {

@@ -428,6 +428,17 @@ Gridifier.prototype.getItemClonesManager = function() {
     return this._itemClonesManager;
 }
 
+Gridifier.prototype.hasItemBindedClone = function(item) {
+    return this._itemClonesManager.hasBindedClone(item);
+}
+
+Gridifier.prototype.getItemClone = function(item) {
+    if(!this._itemClonesManager.hasBindedClone(item))
+        new Error("Gridifier error: item has no binded clone.(Wrong item?). Item = ", item);
+
+    return this._itemClonesManager.getBindedClone(item);
+}
+
 // @todo -> Add to items numbers besides GUIDS, and rebuild them on item deletes(Also use in sorting per drag?)
 
 Gridifier.Api = {};
