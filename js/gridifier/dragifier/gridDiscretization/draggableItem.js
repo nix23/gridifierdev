@@ -150,6 +150,7 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._initDraggableItem
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._hideDraggableItem = function() {
     this._draggableItem.style.visibility = "hidden";
+    this._draggableItem.setAttribute(Gridifier.Dragifier.IS_DRAGGABLE_ITEM_DATA_ATTR, "yes");
 
     var itemClonesManager = this._gridifier.getItemClonesManager();
     if(itemClonesManager.hasBindedClone(this._draggableItem)) {
@@ -250,4 +251,5 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.unbindDraggableIte
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._showDraggableItem = function() {
     this._draggableItem.style.visibility = "visible";
+    this._draggableItem.removeAttribute(Gridifier.Dragifier.IS_DRAGGABLE_ITEM_DATA_ATTR);
 }

@@ -154,6 +154,8 @@ Gridifier.Dragifier = function(gridifier,
     return this;
 }
 
+Gridifier.Dragifier.IS_DRAGGABLE_ITEM_DATA_ATTR = "data-gridifier-is-draggable-item";
+
 Gridifier.Dragifier.prototype._createDraggableItem = function() {
     // @todo -> Add customSD mode
     if(this._settings.isDisabledSortDispersion()) {

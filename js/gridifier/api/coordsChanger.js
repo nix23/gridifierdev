@@ -264,6 +264,10 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
                                                                   newWidth,
                                                                   newHeight) {
         // @todo -> if !supporting transitions -> default
+        if(item.hasAttribute(Gridifier.Dragifier.IS_DRAGGABLE_ITEM_DATA_ATTR))
+            var isDraggableItem = true;
+        else
+            var isDraggableItem = false;
         
         var itemClonesManager = me._gridifier.getItemClonesManager();
         var itemClone = itemClonesManager.getBindedClone(item);
@@ -274,7 +278,7 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
             clonesHideTimeouts[guid] = null;
         }
 
-        if(Dom.hasAttribute(item, itemShownDataAttr)) {
+        if(Dom.hasAttribute(item, itemShownDataAttr) && !isDraggableItem) {
             itemClone.style.visibility = "visible";
         }
         item.style.visibility = "hidden";
@@ -310,7 +314,7 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
             var hideCloneTimeout = animationMsDuration;
 
         clonesHideTimeouts[guid] = setTimeout(function() {
-            if(Dom.hasAttribute(item, itemShownDataAttr)) {
+            if(Dom.hasAttribute(item, itemShownDataAttr) && !isDraggableItem) {
                 item.style.visibility = "visible";
                 itemClone.style.visibility = "hidden";
             }
