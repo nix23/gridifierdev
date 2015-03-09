@@ -1155,6 +1155,8 @@ Gridifier = function(grid, settings) {
     this._filtrator = null;
     this._disconnector = null;
     this._sizesResolverManager = null;
+    this._lifecycleCallbacks = null;
+    this._itemClonesManager = null;
 
     this._connectors = null;
     this._connections = null;
@@ -1180,11 +1182,16 @@ Gridifier = function(grid, settings) {
         me._sizesResolverManager = new Gridifier.SizesResolverManager();
         me._grid = new Gridifier.Grid(grid, me._sizesResolverManager);
         me._eventEmitter = new Gridifier.EventEmitter(me);
-        me._settings = new Gridifier.Settings(settings, me._eventEmitter, me._sizesResolverManager);
+        me._settings = new Gridifier.Settings(settings, me, me._eventEmitter, me._sizesResolverManager);
         me._collector = new Gridifier.Collector(me._settings,  me.getGrid(), me._sizesResolverManager);
+
+        me._settings.setCollectorInstance(me._collector);
+
         me._guid = new Gridifier.GUID();
         me._normalizer = new Gridifier.Normalizer(me, me._sizesResolverManager);
         me._operation = new Gridifier.Operation();
+        me._lifecycleCallbacks = new Gridifier.LifecycleCallbacks(me._collector);
+        me._itemClonesManager = new Gridifier.ItemClonesManager(me._grid, me._collector);
 
         me._grid.setCollectorInstance(me._collector);
 
@@ -1254,6 +1261,7 @@ Gridifier = function(grid, settings) {
         me._sizesTransformer = new Gridifier.SizesTransformer.Core(
             me,
             me._settings,
+            me._collector,
             me._connectors,
             me._connections,
             me._connectionsSorter,
@@ -1293,6 +1301,7 @@ Gridifier = function(grid, settings) {
             me, 
             me._appender,
             me._reversedAppender,
+            me._collector,
             me._connections, 
             me._connectors, 
             me._guid, 
@@ -1380,6 +1389,7 @@ Gridifier.prototype.triggerResize = function() {
 
 // Write tests soon per everything :}
 // Method names -> gridify, watchify?
+// @todo -> User can write this method???? Why should it be inside lib?
 Gridifier.prototype.watch = function() {
     // @todo -> Watch per DOM appends-prepends through setTimeout,
     //  and process changes.
@@ -1421,15 +1431,27 @@ Gridifier.prototype.collect = function() {
 }
 
 Gridifier.prototype.disconnect = function(items) {
-    this._sizesTransformer.stopRetransformAllConnectionsQueue();
-    this._disconnector.disconnect(items);
-    this.retransformAllSizes();
+    this._lifecycleCallbacks.executePreDisconnectCallbacks(items);
+
+    var execute = function() {
+        this._sizesTransformer.stopRetransformAllConnectionsQueue();
+        this._disconnector.disconnect(items);
+        this.retransformAllSizes();
+    }
+
+    var me = this;
+    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
 
     return this;
 }
 
 Gridifier.prototype.setCoordsChanger = function(coordsChangerName) {
     this._settings.setCoordsChanger(coordsChangerName);
+    return this;
+}
+
+Gridifier.prototype.setCoordsChangerOnToggle = function(coordsChangerName) {
+    this._settings.setCoordsChangerOnToggle(coordsChangerName);
     return this;
 }
 
@@ -1453,26 +1475,57 @@ Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
         return this;
     }
 
-    this._operationsQueue.schedulePrependOperation(items, batchSize, batchTimeout);
+    this._lifecycleCallbacks.executePreInsertCallbacks(items);
+    var execute = function() {
+        this._operationsQueue.schedulePrependOperation(items, batchSize, batchTimeout);
+    }
+
+    var me = this;
+    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+
     return this;
 }
 
 Gridifier.prototype.append = function(items, batchSize, batchTimeout) {
-    this._operationsQueue.scheduleAppendOperation(items, batchSize, batchTimeout);
+    this._lifecycleCallbacks.executePreInsertCallbacks(items);
+
+    var execute = function() {
+        this._operationsQueue.scheduleAppendOperation(items, batchSize, batchTimeout);
+    }
+
+    var me = this;
+    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+
     return this;
 }
 
 Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchTimeout) {
-    this._operationsQueue.scheduleInsertBeforeOperation(
-        items, beforeItem, batchSize, batchTimeout
-    );
+    this._lifecycleCallbacks.executePreInsertCallbacks(items);
+
+    var execute = function() {
+        this._operationsQueue.scheduleInsertBeforeOperation(
+            items, beforeItem, batchSize, batchTimeout
+        );
+    }
+
+    var me = this;
+    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+
     return this;
 }
 
 Gridifier.prototype.insertAfter = function(items, afterItem, batchSize, batchTimeout) {
-    this._operationsQueue.scheduleInsertAfterOperation(
-        items, afterItem, batchSize, batchTimeout
-    );
+    this._lifecycleCallbacks.executePreInsertCallbacks(items);
+
+    var execute = function() {
+        this._operationsQueue.scheduleInsertAfterOperation(
+            items, afterItem, batchSize, batchTimeout
+        );
+    }
+
+    var me = this;
+    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+
     return this;
 }
 
@@ -1491,6 +1544,33 @@ Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
     this._transformOperation.execute(maybeItem, newWidth, newHeight);
 }
 
+Gridifier.prototype.addPreInsertLifecycleCallback = function(callback) {
+    this._lifecycleCallbacks.addPreInsertCallback(callback);
+}
+
+Gridifier.prototype.addPreDisconnectLifecycleCallback = function(callback) {
+    this._lifecycleCallbacks.addPreDisconnectCallback(callback);
+}
+
+Gridifier.prototype.setItemClonesManagerLifecycleCallbacks = function() {
+    var me = this;
+    this.addPreInsertLifecycleCallback(function(items) {
+        for(var i = 0; i < items.length; i++) {
+            me._itemClonesManager.createClone(items[i]);
+        }
+    });
+
+    this.addPreDisconnectLifecycleCallback(function(items) {
+        for(var i = 0; i < items.length; i++) {
+            me._itemClonesManager.destroyClone(items[i]);
+        }
+    });
+}
+
+Gridifier.prototype.getItemClonesManager = function() {
+    return this._itemClonesManager;
+}
+
 // @todo -> Add to items numbers besides GUIDS, and rebuild them on item deletes(Also use in sorting per drag?)
 
 Gridifier.Api = {};
@@ -1499,6 +1579,8 @@ Gridifier.VerticalGrid = {};
 Gridifier.Operations = {};
 Gridifier.TransformerOperations = {};
 Gridifier.SizesTransformer = {};
+
+Gridifier.REFLOW_OPTIMIZATION_TIMEOUT = 0;
 
 Gridifier.GRID_TYPES = {VERTICAL_GRID: "verticalGrid", HORIZONTAL_GRID: "horizontalGrid"};
 
@@ -1530,20 +1612,23 @@ Gridifier.DEFAULT_ROTATE_BACKFACE = true;
 Gridifier.GRID_TRANSFORM_TYPES = {EXPAND: "expand", FIT: "fit"};
 Gridifier.DEFAULT_GRID_TRANSFORM_TIMEOUT = 100;
 
-Gridifier.Api.CoordsChanger = function(settings, eventEmitter) {
+Gridifier.Api.CoordsChanger = function(settings, gridifier, eventEmitter) {
     var me = this;
 
     this._settings = null;
+    this._gridifier = null;
     this._eventEmitter = null;
 
     this._coordsChangerFunction = null;
+    this._coordsChangerOnToggleFunction = null;
     this._coordsChangerFunctions = {};
 
     this._css = {
     };
 
-    this._construct = function() {
+    this._construct = function() { 
         me._settings = settings;
+        me._gridifier = gridifier;
         me._eventEmitter = eventEmitter;
 
         me._coordsChangerFunctions = {};
@@ -1552,7 +1637,7 @@ Gridifier.Api.CoordsChanger = function(settings, eventEmitter) {
         me._addCSS3PositionCoordsChanger();
         me._addCSS3TranslateCoordsChanger();
         me._addCSS3Translate3DCoordsChanger();
-
+        me._addCSS3Translate3DClonesCoordsChanger();
     };
 
     this._bindEvents = function() {
@@ -1588,6 +1673,22 @@ Gridifier.Api.CoordsChanger.prototype.addCoordsChangerFunction = function(coords
 
 Gridifier.Api.CoordsChanger.prototype.getCoordsChangerFunction = function() {
     return this._coordsChangerFunction;
+}
+
+Gridifier.Api.CoordsChanger.prototype.setCoordsChangerOnToggleFunction = function(coordsChangerFunctionName) {
+    if(!this._coordsChangerFunctions.hasOwnProperty(coordsChangerFunctionName)) {
+        new Gridifier.Error(
+            Gridifier.Error.ERROR_TYPES.SETTINGS.SET_COORDS_CHANGER_INVALID_PARAM,
+            coordsChangerFunctionName
+        );
+        return;
+    }
+
+    this._coordsChangerOnToggleFunction = this._coordsChangerFunctions[coordsChangerFunctionName];
+}
+
+Gridifier.Api.CoordsChanger.prototype.getCoordsChangerOnToggleFunction = function() {
+    return this._coordsChangerOnToggleFunction;
 }
 
 Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
@@ -1736,6 +1837,79 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
     };
 }
 
+Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = function() {
+    var me = this;
+    var itemShownDataAttr = "data-gridifier-item-shown";
+
+    this._gridifier.onShow(function(item) {
+       item.setAttribute(itemShownDataAttr, "yes");
+    });
+
+    this._gridifier.onHide(function(item) {
+       item.removeAttribute(itemShownDataAttr);
+    });
+
+    this._coordsChangerFunctions.CSS3Translate3DClones = function(item,
+                                                                  newLeft,
+                                                                  newTop,
+                                                                  animationMsDuration,
+                                                                  eventEmitter,
+                                                                  emitTransformEvent,
+                                                                  newWidth,
+                                                                  newHeight) {
+        // @todo -> if !supporting transitions -> default
+        
+        if(!Dom.hasAttribute(item, itemShownDataAttr)) {
+            return;
+        }
+
+        var itemClonesManager = me._gridifier.getItemClonesManager();
+        var itemClone = itemClonesManager.getBindedClone(item);
+
+        var guid = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
+
+        if(typeof(this._clonesHideTimeouts) == "undefined") {
+            this._clonesHideTimeouts = [];
+        }
+
+        if(typeof this._clonesHideTimeouts[guid] == "undefined") {
+            this._clonesHideTimeouts[guid] = null;
+            itemClone.style.position = item.style.position;
+            itemClone.style.left = item.style.left;
+            itemClone.style.top = item.style.top;
+        }
+
+        itemClone.style.visibility = "visible";
+        item.style.visibility = "hidden";
+
+        if(emitTransformEvent) {
+            Dom.css.set(itemClone, {
+                width: newWidth,
+                height: newHeight
+            });
+        }
+        
+        me._coordsChangerFunctions.CSS3Translate3D(
+            itemClone, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+        );
+
+        if(this._clonesHideTimeouts[guid] != null) {
+           clearTimeout(this._clonesHideTimeouts[guid]);
+           this._clonesHideTimeouts[guid] = null;
+        }
+
+        this._clonesHideTimeouts[guid] = setTimeout(function() {
+            Dom.css.set(item, {
+                left: newLeft,
+                top: newTop
+            });
+            
+            item.style.visibility = "visible";
+            itemClone.style.visibility = "hidden";
+        }, animationMsDuration + 20);
+    };
+}
+
 Gridifier.Api.Filter = function(settings, eventEmitter) {
     var me = this;
 
@@ -1803,6 +1977,7 @@ Gridifier.Api.Rotate = function(settings, eventEmitter, sizesResolverManager) {
     this._settings = null;
     this._eventEmitter = null;
     this._sizesResolverManager = null;
+    this._collector = null;
 
     this._css = {
     };
@@ -1825,6 +2000,10 @@ Gridifier.Api.Rotate = function(settings, eventEmitter, sizesResolverManager) {
 
     this._construct();
     return this;
+}
+
+Gridifier.Api.Rotate.prototype.setCollectorInstance = function(collector) {
+    this._collector = collector;
 }
 
 Gridifier.Api.Rotate.prototype.show = function(item, grid, inverseRotateAxis) {
@@ -1922,6 +2101,7 @@ Gridifier.Api.Rotate.prototype._createFrames = function(scene) {
 
 Gridifier.Api.Rotate.prototype._createItemClone = function(item) {
     var itemClone = item.cloneNode(true);
+    this._collector.markItemAsRestrictedToCollect(itemClone);
     Dom.css.set(itemClone, {
         left: "0px",
         top: "0px",
@@ -2078,18 +2258,22 @@ Gridifier.Api.Slide = function(settings, eventEmitter, sizesResolverManager) {
     return this;
 }
 
+Gridifier.Api.Slide.SHOW_ITEM_TIMEOUT = 100;
+
 Gridifier.Api.Slide.prototype._executeSlideShow = function(item, 
                                                            grid, 
                                                            animationMsDuration, 
                                                            eventEmitter,
                                                            coordsChanger,
+                                                           collector,
                                                            startLeft,
                                                            startTop) {
-    var targetLeft = item.style.left;
+    var targetLeft = item.style.left; 
     var targetTop = item.style.top;
 
     var itemClone = item.cloneNode(true);
-    grid.appendChild(itemClone);
+    grid.appendChild(itemClone); 
+    collector.markItemAsRestrictedToCollect(itemClone);
 
     setTimeout(function() {
         Dom.css3.transition(itemClone, "none");
@@ -2124,8 +2308,8 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
 
                 eventEmitter.emitShowEvent(item);
             }, animationMsDuration + 20);
-        }, 100); // A little delay before setting translate3d second time
-    }, 100);
+        }, Gridifier.Api.Slide.SHOW_ITEM_TIMEOUT); // A little delay before setting translate3d second time
+    }, Gridifier.Api.Slide.SHOW_ITEM_TIMEOUT);
 }
 
 Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
@@ -2134,6 +2318,7 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
                                                            animationMsDuration,
                                                            eventEmitter,
                                                            coordsChanger,
+                                                           collector,
                                                            targetLeft,
                                                            targetTop) {
     Dom.css3.transition(
@@ -2148,8 +2333,21 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
         eventEmitter,
         false
     );
+    
+    // Fix for concurrent clone animations on filters. Clone can be
+    // kept visible(their events wont be copyied), but all original
+    // items must be invisible.
+    // So, if some items will show after delay, while other items are hiding,
+    // we should hide them again.(Because they are disconnected from grid, and if 
+    // user will click on any of them, error will appear)
+    for(var i = 0; i < Dom.toInt(animationMsDuration); i += 50) {
+        setTimeout(function() {
+            item.style.visibility = "hidden";
+        }, i);
+    }
 
     setTimeout(function() {
+        item.style.visibility = "hidden";
         itemClone.style.visibility = "hidden";
         grid.removeChild(itemClone);
         eventEmitter.emitHideEvent(item);
@@ -2178,7 +2376,8 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                          animationMsDuration, 
                          eventEmitter, 
                          sizesResolverManager,
-                         coordsChanger) {
+                         coordsChanger,
+                         collector) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
@@ -2198,6 +2397,7 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 animationMsDuration, 
                 eventEmitter,
                 coordsChanger,
+                collector,
                 getLeftPos(item, grid),
                 top
             );
@@ -2209,9 +2409,10 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                          animationMsDuration, 
                          eventEmitter, 
                          sizesResolverManager,
-                         coordsChanger) {
+                         coordsChanger,
+                         collector) {
             itemClone.style.visibility = "visible";
-            item.style.visibility = "hidden";
+            item.style.visibility = "hidden"; 
 
             if(!Dom.isBrowserSupportingTransitions()) {
                 itemClone.style.visibility = "hidden";
@@ -2233,6 +2434,7 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 animationMsDuration,
                 eventEmitter,
                 coordsChanger,
+                collector,
                 getLeftPos(item, grid),
                 top
             );
@@ -2439,6 +2641,10 @@ Gridifier.Api.Toggle = function(settings, eventEmitter, sizesResolverManager) {
 
     this._construct();
     return this;
+}
+
+Gridifier.Api.Toggle.prototype.setCollectorInstance = function(collector) {
+    this._rotateApi.setCollectorInstance(collector);
 }
 
 Gridifier.Api.Toggle.prototype.setToggleFunction = function(toggleFunctionName) {
@@ -3803,26 +4009,31 @@ Gridifier.Collector = function(settings, grid, sizesResolverManager) {
 }
 
 Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR = "data-gridifier-item-sorting-index";
+Gridifier.Collector.RESTRICT_ITEM_COLLECT_DATA_ATTR = "data-gridifier-item-restrict-collect";
 
 Gridifier.Collector.prototype._createCollectorFunction = function() {
     var gridItemMarkingValue = this._settings.getGridItemMarkingType();
 
+    var me = this;
     if(this._settings.isByClassGridItemMarkingStrategy()) {
         this._collectorFunction = function(grid) {
-            return Dom.get.byQuery(grid, "." + gridItemMarkingValue);
+            var items = Dom.get.byQuery(grid, "." + gridItemMarkingValue);
+            return me.filterNotRestrictedToCollectItems(items);
         }
     }
     else if(this._settings.isByDataAttrGridItemMarkingStrategy()) {
         this._collectorFunction = function(grid) {
-            return Dom.get.byQuery(
+            var items = Dom.get.byQuery(
                 grid, 
                 "[" + Gridifier.GRID_ITEM_MARKING_DEFAULTS.DATA_ATTR + "=" + gridItemMarkingValue + "]"
             );
+            return me.filterNotRestrictedToCollectItems(items);
         }
     }
     else if(this._settings.isByQueryGridItemMarkingStrategy()) {
         this._collectorFunction = function(grid) {
-            return Dom.get.byQuery(grid, gridItemMarkingValue);
+            var items = Dom.get.byQuery(grid, gridItemMarkingValue);
+            return me.filterNotRestrictedToCollectItems(items);
         }
     }
 }
@@ -4035,6 +4246,22 @@ Gridifier.Collector.prototype.sortCollection = function(items) {
     //      return items.reverse()
 }
 
+Gridifier.Collector.prototype.filterNotRestrictedToCollectItems = function(items) {
+    var filteredItems = [];
+    for(var i = 0; i < items.length; i++) {
+        if(Dom.hasAttribute(items[i], Gridifier.Collector.RESTRICT_ITEM_COLLECT_DATA_ATTR))
+            continue;
+
+        filteredItems.push(items[i]);
+    }
+
+    return filteredItems;
+}
+
+Gridifier.Collector.prototype.markItemAsRestrictedToCollect = function(item) {
+    item.setAttribute(Gridifier.Collector.RESTRICT_ITEM_COLLECT_DATA_ATTR, "restricted");
+}
+
 Gridifier.ConnectedItemMarker = function() {
     var me = this;
 
@@ -4177,6 +4404,7 @@ Gridifier.Disconnector.prototype._addDisconnectedItemClones = function(connectio
     for(var i = 0; i < connectionsToDisconnect.length; i++) {
         var disconnectedItemClone = connectionsToDisconnect[i].item.cloneNode(true);
         disconnectedItemClone.style.visibility = "hidden";
+        this._collector.markItemAsRestrictedToCollect(disconnectedItemClone);
         
         Dom.css3.transition(disconnectedItemClone, "none");
         Dom.css3.transform(disconnectedItemClone, "");
@@ -4459,6 +4687,152 @@ Gridifier.GUID.prototype.markNextPrependedItem = function(item) {
     item.setAttribute(Gridifier.GUID.GUID_DATA_ATTR, this._minItemGUID);
 
     return this._minItemGUID;
+}
+
+Gridifier.ItemClonesManager = function(grid, collector) {
+   var me = this;
+
+   this._grid = null;
+   this._collector = null;
+
+   this._itemClones = [];
+   this._nextBindingId = 0;
+
+   this._css = {
+   };
+
+   this._construct = function() {
+      me._grid = grid;
+      me._collector = collector;
+
+      me._itemClones = [];
+
+      me._bindEvents();
+   };
+
+   this._bindEvents = function() {
+   };
+
+   this._unbindEvents = function() {
+   };
+
+   this.destruct = function() {
+      me._unbindEvents();
+   };
+
+   this._construct();
+   return this;
+}
+
+Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR = "gridifier-clones-manager-binding";
+
+Gridifier.ItemClonesManager.prototype.createClone = function(item) {
+   var itemClone = item.cloneNode(true);
+   this._collector.markItemAsRestrictedToCollect(item);
+   this._grid.getGrid().appendChild(itemClone);
+
+   this._nextBindingId++;
+   item.setAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR, this._nextBindingId);
+   itemClone.setAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR, this._nextBindingId);
+
+   this._itemClones.push(itemClone);
+}
+
+Gridifier.ItemClonesManager.prototype.hasBindedClone = function(item) {
+   return Dom.hasAttribute(item, Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR);
+}
+
+Gridifier.ItemClonesManager.prototype.getBindedClone = function(item) {
+   var bindedClone = null;
+
+   for(var i = 0; i < this._itemClones.length; i++) {
+      if(this._itemClones[i].getAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR)
+         == item.getAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR)) {
+         bindedClone = this._itemClones[i];
+      }
+   }
+
+   if(bindedClone == null)
+      throw new Error("Gridifier error: binded clone not found(on bind). ", item);
+
+   return bindedClone;
+}
+
+Gridifier.ItemClonesManager.prototype.destroyClone = function(item) {
+   var bindedClone = null;
+
+   for(var i = 0; i < this._itemClones.length; i++) {
+      if(this._itemClones[i].getAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR)
+         == item.getAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR)) {
+         bindedClone = this._itemClones[i];
+         this._itemClones.splice(i, 1);
+         break;
+      }
+   }
+
+   if(bindedClone == null) 
+      throw new Error("Gridifier error: binded clone not found(on destroy). ", item);
+   
+   this._grid.getGrid().removeChild(bindedClone);
+   item.removeAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR);
+}
+
+Gridifier.LifecycleCallbacks = function(collector) {
+   var me = this;
+
+   this._collector = null;
+
+   this._preInsertCallbacks = [];
+   this._preDisconnectCallbacks = [];
+
+   this._css = {
+   };
+
+   this._construct = function() {
+      me._collector = collector;
+
+      me._insertCallbacks = [];
+      me._disconnectCallbacks = [];
+
+      this._bindEvents();
+   };
+
+   this._bindEvents = function() {
+   };
+
+   this._unbindEvents = function() {
+   };
+
+   this.destruct = function() {
+      me._unbindEvents();
+   };
+
+   this._construct();
+   return this;
+}
+
+Gridifier.LifecycleCallbacks.prototype.addPreInsertCallback = function(callback) {
+   this._preInsertCallbacks.push(callback);
+}
+
+Gridifier.LifecycleCallbacks.prototype.addPreDisconnectCallback = function(callback) {
+   this._preDisconnectCallbacks.push(callback);
+}
+
+Gridifier.LifecycleCallbacks.prototype.executePreInsertCallbacks = function(items) {
+   var items = this._collector.toDOMCollection(items);
+   
+   for(var i = 0; i < this._preInsertCallbacks.length; i++) {
+      this._preInsertCallbacks[i](items);
+   }
+}
+
+Gridifier.LifecycleCallbacks.prototype.executePreDisconnectCallbacks = function(items) {
+   var items = this._collector.toDOMCollection(items);
+   
+   for(var i = 0; i < this._preDisconnectCallbacks.length; i++) {
+      this._preDisconnectCallbacks[i](items);
+   }
 }
 
 Gridifier.Normalizer = function(gridifier, sizesResolverManager) {
@@ -5422,6 +5796,7 @@ Gridifier.Discretizer.Demonstrator.prototype._createCells = function(cells) {
 Gridifier.Dragifier = function(gridifier,
                                appender,
                                reversedAppender,
+                               collector,
                                connections,
                                connectors,
                                guid,
@@ -5432,6 +5807,7 @@ Gridifier.Dragifier = function(gridifier,
     this._gridifier = null;
     this._appender = null;
     this._reversedAppender = null;
+    this._collector = null;
     this._connections = null;
     this._connectors = null;
     this._guid = null;
@@ -5448,6 +5824,7 @@ Gridifier.Dragifier = function(gridifier,
         me._gridifier = gridifier;
         me._appender = appender;
         me._reversedAppender = reversedAppender;
+        me._collector = collector;
         me._connections = connections;
         me._connectors = connectors;
         me._guid = guid;
@@ -5579,6 +5956,7 @@ Gridifier.Dragifier.prototype._createDraggableItem = function() {
             this._gridifier, 
             this._appender,
             this._reversedAppender,
+            this._collector,
             this._connections, 
             this._connectors, 
             this._guid, 
@@ -5591,6 +5969,7 @@ Gridifier.Dragifier.prototype._createDraggableItem = function() {
             this._gridifier, 
             this._appender,
             this._reversedAppender,
+            this._collector,
             this._connections, 
             this._connectors, 
             this._guid, 
@@ -5651,6 +6030,7 @@ Gridifier.Dragifier.prototype._findDraggableItemByIdentifier = function(identifi
 Gridifier.Dragifier.Core = function(gridifier,
                                     appender,
                                     reversedAppender,
+                                    collector,
                                     connectors,
                                     connections,
                                     settings,
@@ -5661,6 +6041,7 @@ Gridifier.Dragifier.Core = function(gridifier,
     this._gridifier = null;
     this._appender = null;
     this._reversedAppender = null;
+    this._collector = null;
     this._connectors = null;
     this._connections = null;
     this._settings = null;
@@ -5680,6 +6061,7 @@ Gridifier.Dragifier.Core = function(gridifier,
         me._gridifier = gridifier;
         me._appender = appender;
         me._reversedAppender = reversedAppender;
+        me._collector = collector;
         me._connectors = connectors;
         me._connections = connections;
         me._settings = settings;
@@ -5763,6 +6145,7 @@ Gridifier.Dragifier.Core.prototype.determineInitialCursorOffsetsFromDraggableIte
 
 Gridifier.Dragifier.Core.prototype.createDraggableItemClone = function(draggableItem) {
     var draggableItemClone = draggableItem.cloneNode(true);
+    this._collector.markItemAsRestrictedToCollect(draggableItemClone);
 
     // @todo -> Replace this, tmp solution
     draggableItemClone.style.setProperty("background", "rgb(235,235,235)", "important");
@@ -5931,6 +6314,7 @@ Gridifier.Dragifier.Renderer.prototype.render = function(item, newLeft, newTop) 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
                                                                    appender,
                                                                    reversedAppender,
+                                                                   collector,
                                                                    connections,
                                                                    connectors,
                                                                    guid,
@@ -5941,6 +6325,7 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
     this._gridifier = null;
     this._appender = null;
     this._reversedAppender = null;
+    this._collector = null;
     this._connections = null;
     this._connectors = null;
     this._connectionsIntersector = null;
@@ -5962,6 +6347,7 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
         me._gridifier = gridifier;
         me._appender = appender;
         me._reversedAppender = reversedAppender;
+        me._collector = collector;
         me._connections = connections;
         me._connectors = connectors;
         me._guid = guid;
@@ -5982,6 +6368,7 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
             me._gridifier, 
             me._appender, 
             me._reversedAppender, 
+            me._collector,
             me._connectors, 
             me._connections,
             me._settings, 
@@ -6058,6 +6445,13 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._initDraggable
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._hideDraggableItem = function() {
     this._draggableItem.style.visibility = "hidden";
+
+    var itemClonesManager = this._gridifier.getItemClonesManager();
+    if(itemClonesManager.hasBindedClone(this._draggableItem)) {
+        var draggableItemRendererClone = itemClonesManager.getBindedClone(this._draggableItem);
+        draggableItemRendererClone.style.visibility = "hidden";
+    }
+
     // @todo -> Replace with real hidder
     Dom.css.addClass(document.body, "disableSelect");
 }
@@ -6118,12 +6512,16 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._swapItemGUIDS
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.unbindDraggableItem = function() {
     document.body.removeChild(this._draggableItemClone);
 
-    this._draggableItem.style.visibility = "visible";
+    this._showDraggableItem();
     this._draggableItem = null;
     this._draggableItem = null;
 
     // @todo -> Replace with real hidder
     Dom.css.removeClass(document.body, "disableSelect");
+}
+
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._showDraggableItem = function() {
+    this._draggableItem.style.visibility = "visible";
 }
 
 Gridifier.Dragifier.Cells = function(discretizer) {
@@ -6236,6 +6634,7 @@ Gridifier.Dragifier.Cells.prototype.normalizeCellsWithMaybeIntersectionOverflows
 Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
                                                                appender,
                                                                reversedAppender,
+                                                               collector,
                                                                connections,
                                                                connectors,
                                                                guid,
@@ -6246,6 +6645,7 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
     this._gridifier = null;
     this._appender = null;
     this._reversedAppender = null;
+    this._collector = null;
     this._connections = null;
     this._connectors = null;
     this._guid = null;
@@ -6270,6 +6670,7 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
         me._gridifier = gridifier;
         me._appender = appender;
         me._reversedAppender = reversedAppender;
+        me._collector = collector;
         me._connections = connections;
         me._connectors = connectors;
         me._guid = guid;
@@ -6284,6 +6685,7 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
             me._gridifier, 
             me._appender, 
             me._reversedAppender,
+            me._collector,
             me._connectors, 
             me._connections,
             me._settings, 
@@ -6381,6 +6783,13 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._initDraggableItem
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._hideDraggableItem = function() {
     this._draggableItem.style.visibility = "hidden";
+
+    var itemClonesManager = this._gridifier.getItemClonesManager();
+    if(itemClonesManager.hasBindedClone(this._draggableItem)) {
+        var draggableItemRendererClone = itemClonesManager.getBindedClone(this._draggableItem);
+        draggableItemRendererClone.style.visibility = "hidden";
+    }
+
     // @todo -> Replace with real hidder
     Dom.css.addClass(document.body, "disableSelect");
 }
@@ -6464,12 +6873,16 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.unbindDraggableIte
     this._gridifier.getGrid().removeChild(this._draggableItemPointer);
     this._draggableItemConnection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = false;
 
-    this._draggableItem.style.visibility = "visible";
+    this._showDraggableItem();
     this._draggableItem = null;
     this._discretizer.deleteDemonstrator();
 
     // @todo -> Replace with real hidder
     Dom.css.removeClass(document.body, "disableSelect");
+}
+
+Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._showDraggableItem = function() {
+    this._draggableItem.style.visibility = "visible";
 }
 
 Gridifier.ApiSettingsErrors = function(error, errorType) {
@@ -10660,7 +11073,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var eventEmitter = this._settings.getEventEmitter();
             var animationMsDuration = this._settings.getToggleAnimationMsDuration();
             var sizesResolverManager = this._settings.getSizesResolverManager();
-            var coordsChanger = this._settings.getCoordsChanger();
+            var coordsChanger = this._settings.getCoordsChangerOnToggle();
+            var collector = this._settings.getCollector();
 
             toggleFunction.show(
                 connectionToProcess.item,
@@ -10668,7 +11082,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 animationMsDuration,
                 eventEmitter,
                 sizesResolverManager,
-                coordsChanger
+                coordsChanger,
+                collector
             );
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
@@ -10682,7 +11097,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var eventEmitter = this._settings.getEventEmitter();
             var animationMsDuration = this._settings.getToggleAnimationMsDuration();
             var sizesResolverManager = this._settings.getSizesResolverManager();
-            var coordsChanger = this._settings.getCoordsChanger();
+            var coordsChanger = this._settings.getCoordsChangerOnToggle();
+            var collector = this._settings.getCollector();
 
             toggleFunction.hide(
                 connectionToProcess.item,
@@ -10691,7 +11107,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 animationMsDuration,
                 eventEmitter,
                 sizesResolverManager,
-                coordsChanger
+                coordsChanger,
+                collector
             );
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER ||
@@ -10878,13 +11295,13 @@ Gridifier.ApiSettingsParser.prototype.parseFilterOptions = function(filterApi) {
 Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coordsChangerApi) {
     if(!this._settings.hasOwnProperty("coordsChanger")) {
         coordsChangerApi.setCoordsChangerFunction("CSS3Translate3D");
+        coordsChangerApi.setCoordsChangerOnToggleFunction("CSS3Translate3D");
         return;
     }
 
     if(typeof this._settings.coordsChanger == "function") {
         coordsChangerApi.addCoordsChangerFunction("clientDefault", this._settings.coordsChanger);
         coordsChangerApi.setCoordsChangerFunction("clientDefault");
-        return;
     }
     else if(typeof this._settings.coordsChanger == "object") {
         for(var coordsChangerFunctionName in this._settings.coordsChanger) {
@@ -10901,13 +11318,19 @@ Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coord
         }
         
         coordsChangerApi.setCoordsChangerFunction("CSS3Translate3D");
-        return;
     }
     else {
         new Gridifier.Error(
             Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_COORDS_CHANGER_PARAM_VALUE,
             this._settings.coordsChanger
         );
+    }
+
+    if(this._settings.hasOwnProperty("coordsChangerOnToggle")) {
+        coordsChangerApi.setCoordsChangerOnToggleFunction(this._settings.coordsChangerOnToggle);
+    }
+    else {
+        coordsChangerApi.setCoordsChangerOnToggleFunction("CSS3Translate3D");
     }
 }
 
@@ -11249,10 +11672,12 @@ Gridifier.CoreSettingsParser.prototype.parseDragifierSettings = function() {
     };
 }
 
-Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
+Gridifier.Settings = function(settings, gridifier, eventEmitter, sizesResolverManager) {
     var me = this;
 
     this._settings = null;
+    this._gridifier = null;
+    this._collector = null;
     this._eventEmitter = null;
     this._sizesResolverManager = null;
 
@@ -11302,6 +11727,7 @@ Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
 
     this._construct = function() {
         me._settings = settings;
+        me._gridifier = gridifier;
         me._eventEmitter = eventEmitter;
         me._sizesResolverManager = sizesResolverManager;
 
@@ -11311,7 +11737,7 @@ Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
         me._toggleApi = new Gridifier.Api.Toggle(me, me._eventEmitter, me._sizesResolverManager);
         me._sortApi = new Gridifier.Api.Sort(me, me._eventEmitter);
         me._filterApi = new Gridifier.Api.Filter(me, me._eventEmitter);
-        me._coordsChangerApi = new Gridifier.Api.CoordsChanger(me, me._eventEmitter);
+        me._coordsChangerApi = new Gridifier.Api.CoordsChanger(me, me._gridifier, me._eventEmitter);
         me._sizesChangerApi = new Gridifier.Api.SizesChanger(me, me._eventEmitter);
 
         me._parse();
@@ -11329,6 +11755,11 @@ Gridifier.Settings = function(settings, eventEmitter, sizesResolverManager) {
 
     this._construct();
     return this;
+}
+
+Gridifier.Settings.prototype.setCollectorInstance = function(collector) {
+    this._toggleApi.setCollectorInstance(collector);
+    this._collector = collector;
 }
 
 Gridifier.Settings.prototype._parse = function() {
@@ -11361,6 +11792,10 @@ Gridifier.Settings.prototype._parse = function() {
     var dragifierData = this._coreSettingsParser.parseDragifierSettings();
     this._shouldEnableDragifierOnInit = dragifierData.shouldEnableDragifierOnInit;
     this._dragifierItemSelector = dragifierData.dragifierItemSelector;
+}
+
+Gridifier.Settings.prototype.getCollector = function() {
+    return this._collector;
 }
 
 Gridifier.Settings.prototype.getEventEmitter = function() {
@@ -11507,12 +11942,20 @@ Gridifier.Settings.prototype.setCoordsChanger = function(coordsChangerFunctionNa
     this._coordsChangerApi.setCoordsChangerFunction(coordsChangerFunctionName);
 }
 
+Gridifier.Settings.prototype.setCoordsChangerOnToggle = function(coordsChangerFunctionName) {
+    this._coordsChangerApi.setCoordsChangerOnToggleFunction(coordsChangerFunctionName);
+}
+
 Gridifier.Settings.prototype.setSizesChanger = function(sizesChangerFunctionName) {
     this._sizesChangerApi.setSizesChangerFunction(sizesChangerFunctionName);
 }
 
 Gridifier.Settings.prototype.getCoordsChanger = function() {
     return this._coordsChangerApi.getCoordsChangerFunction();
+}
+
+Gridifier.Settings.prototype.getCoordsChangerOnToggle = function() {
+    return this._coordsChangerApi.getCoordsChangerOnToggleFunction();
 }
 
 Gridifier.Settings.prototype.getSizesChanger = function() {
@@ -11622,11 +12065,13 @@ Gridifier.SizesTransformer.EmptySpaceNormalizer.prototype._applyNoIntersectionsS
 }
 
 Gridifier.SizesTransformer.ItemNewPxSizesFinder = function(gridifier,
+                                                           collector,
                                                            connections,
                                                            sizesResolverManager) {
     var me = this;
 
     me._gridifier = null;
+    me._collector = null;
     me._connections = null;
     me._sizesResolverManager = null;
 
@@ -11635,6 +12080,7 @@ Gridifier.SizesTransformer.ItemNewPxSizesFinder = function(gridifier,
 
     this._construct = function() {
         me._gridifier = gridifier;
+        me._collector = collector;
         me._connections = connections;
         me._sizesResolverManager = sizesResolverManager;
     };
@@ -11671,6 +12117,7 @@ Gridifier.SizesTransformer.ItemNewPxSizesFinder.prototype._calculateNewPxSizesPe
                                                                                                            widthToTransform,
                                                                                                            heightToTransform) {
     var transformedItemClone = transformedItem.cloneNode();
+    this._collector.markItemAsRestrictedToCollect(transformedItemClone);
     this._sizesResolverManager.unmarkAsCached(transformedItemClone);
 
     Dom.css.set(transformedItemClone, {
@@ -12115,6 +12562,7 @@ Gridifier.SizesTransformer.ItemsToReappendFinder.prototype.findAllOnSizesTransfo
 
 Gridifier.SizesTransformer.Core = function(gridifier,
                                            settings,
+                                           collector,
                                            connectors,
                                            connections,
                                            connectionsSorter,
@@ -12128,6 +12576,7 @@ Gridifier.SizesTransformer.Core = function(gridifier,
 
     this._gridifier = null;
     this._settings = null;
+    this._collector = null;
     this._connectors = null;
     this._connections = null;
     this._connectionsSorter = null;
@@ -12155,6 +12604,7 @@ Gridifier.SizesTransformer.Core = function(gridifier,
     this._construct = function() {
         me._gridifier = gridifier;
         me._settings = settings;
+        me._collector = collector;
         me._connectors = connectors;
         me._connections = connections;
         me._connectionsSorter = connectionsSorter;
@@ -12182,7 +12632,7 @@ Gridifier.SizesTransformer.Core = function(gridifier,
             me._connectionsSorter
         );
         me._itemNewPxSizesFinder = new Gridifier.SizesTransformer.ItemNewPxSizesFinder(
-            me._gridifier, me._connections, me._sizesResolverManager
+            me._gridifier, me._collector, me._connections, me._sizesResolverManager
         );
         me._transformedItemMarker = new Gridifier.SizesTransformer.TransformedItemMarker();
         me._itemsToReappendFinder = new Gridifier.SizesTransformer.ItemsToReappendFinder(

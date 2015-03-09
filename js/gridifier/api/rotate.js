@@ -84,6 +84,16 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
         Dom.css3.transformProperty(backFrame, rotateProp, "0deg");
     }, 20);
 
+    // A little helper to reduce blink effect after animation finish
+    if(animationMsDuration > 400) {
+       setTimeout(function () {
+          if (isShowing)
+             item.style.visibility = "visible";
+          else if (isHiding)
+             item.style.visibility = "hidden";
+       }, animationMsDuration - 150);
+    }
+
     setTimeout(function() {
         scene.parentNode.removeChild(scene);
         if(isShowing) {

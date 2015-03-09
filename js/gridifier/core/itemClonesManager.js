@@ -33,11 +33,13 @@ Gridifier.ItemClonesManager = function(grid, collector) {
    return this;
 }
 
-Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR = "gridifier-clones-manager-binding";
+Gridifier.ItemClonesManager.ITEM_CLONE_MARKING_DATA_ATTR = "data-gridifier-clones-manager-item-clone";
+Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR = "data-gridifier-clones-manager-binding";
 
 Gridifier.ItemClonesManager.prototype.createClone = function(item) {
    var itemClone = item.cloneNode(true);
-   this._collector.markItemAsRestrictedToCollect(item);
+   itemClone.setAttribute(Gridifier.ItemClonesManager.ITEM_CLONE_MARKING_DATA_ATTR, "item-clone");
+   this._collector.markItemAsRestrictedToCollect(itemClone);
    this._grid.getGrid().appendChild(itemClone);
 
    this._nextBindingId++;
@@ -62,7 +64,7 @@ Gridifier.ItemClonesManager.prototype.getBindedClone = function(item) {
    }
 
    if(bindedClone == null)
-      throw new Error("Gridifier error: binded clone not found(on bind). ", item);
+      throw new Error("Gridifier error: binded clone not found(on bind). (Did you forgot to call setItemClonesManagerLifecycleCallbacks()?", item);
 
    return bindedClone;
 }

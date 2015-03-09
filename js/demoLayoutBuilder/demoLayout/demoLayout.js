@@ -346,13 +346,13 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridDebugger = new DemoLayoutBuilder.DemoLayout.GridDebugger(me, me._grid.getGrid().get(0));
         Logger.setGrid(me._grid.getGrid().get(0));
         
-        //me._gridifierSettings.toggleAnimationMsDuration = 5000;
+        me._gridifierSettings.toggleAnimationMsDuration = 2500;
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
         me._gridifier.setItemClonesManagerLifecycleCallbacks();
         me._gridifier.setCoordsChanger("CSS3Translate3DClones");
         window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
         setTimeout(function() {
-            me._gridifier.toggleBy("slideLeft");
+            //me._gridifier.toggleBy("slideLeft");
         }, 500);
         //me._gridifier.setCoordsChanger("CSS3Position");
         //me._gridifier.setItemWidthPercentageAntialias(0.1);

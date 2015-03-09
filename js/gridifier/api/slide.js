@@ -234,7 +234,8 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
                          animationMsDuration, 
                          eventEmitter, 
                          sizesResolverManager,
-                         coordsChanger) {
+                         coordsChanger,
+                         collector) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
@@ -254,6 +255,7 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
                 animationMsDuration, 
                 eventEmitter,
                 coordsChanger,
+                collector,
                 left,
                 getTopPos(item, grid)
             );
@@ -265,7 +267,8 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
                          animationMsDuration, 
                          eventEmitter, 
                          sizesResolverManager,
-                         coordsChanger) {
+                         coordsChanger,
+                         collector) {
             itemClone.style.visibility = "visible";
             item.style.visibility = "hidden";
 
@@ -289,6 +292,7 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
                 animationMsDuration,
                 eventEmitter,
                 coordsChanger,
+                collector,
                 left,
                 getTopPos(item, grid)
             );

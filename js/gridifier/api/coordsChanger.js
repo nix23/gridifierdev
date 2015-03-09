@@ -235,6 +235,8 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
        item.removeAttribute(itemShownDataAttr);
     });
 
+    var clonesHideTimeouts = [];
+
     this._coordsChangerFunctions.CSS3Translate3DClones = function(item,
                                                                   newLeft,
                                                                   newTop,
@@ -254,12 +256,8 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
 
         var guid = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
 
-        if(typeof(this._clonesHideTimeouts) == "undefined") {
-            this._clonesHideTimeouts = [];
-        }
-
-        if(typeof this._clonesHideTimeouts[guid] == "undefined") {
-            this._clonesHideTimeouts[guid] = null;
+        if(typeof clonesHideTimeouts[guid] == "undefined") {
+            clonesHideTimeouts[guid] = null;
             itemClone.style.position = item.style.position;
             itemClone.style.left = item.style.left;
             itemClone.style.top = item.style.top;
@@ -279,19 +277,24 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
             itemClone, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
         );
 
-        if(this._clonesHideTimeouts[guid] != null) {
-           clearTimeout(this._clonesHideTimeouts[guid]);
-           this._clonesHideTimeouts[guid] = null;
+        if(clonesHideTimeouts[guid] != null) {
+           clearTimeout(clonesHideTimeouts[guid]);
+           clonesHideTimeouts[guid] = null;
         }
 
-        this._clonesHideTimeouts[guid] = setTimeout(function() {
-            Dom.css.set(item, {
-                left: newLeft,
-                top: newTop
-            });
-            
+        Dom.css.set(item, {
+           left: newLeft,
+           top: newTop
+        });
+
+        if(Dom.toInt(animationMsDuration) > 20)
+            var hideCloneTimeout = animationMsDuration - 20;
+        else
+            var hideCloneTimeout = animationMsDuration;
+
+        clonesHideTimeouts[guid] = setTimeout(function() {
             item.style.visibility = "visible";
             itemClone.style.visibility = "hidden";
-        }, animationMsDuration + 20);
+        }, hideCloneTimeout);
     };
 }
