@@ -604,7 +604,8 @@ DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
         // })($gridItem, gridItem);
     }
 
-    this._gridifier.append(itemsToAppend);
+    //this._gridifier.append(itemsToAppend);
+    this._gridifier.silentAppend(itemsToAppend);
     // @todo -> append and prepend by one or by batch????
 }
 

@@ -185,6 +185,11 @@ Gridifier.Collector.prototype.collect = function() {
     return items;
 }
 
+Gridifier.Collector.prototype.collectByQuery = function(query) {
+   var items = Dom.get.byQuery(this._grid, query);
+   return this.filterNotRestrictedToCollectItems(items);
+}
+
 Gridifier.Collector.prototype.collectAllConnectedItems = function() {
     var items = this._collectorFunction(this._grid);
 

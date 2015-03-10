@@ -139,6 +139,19 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 left: left,
                 top: top
             });
+
+            if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
+               var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
+
+               Dom.css.set(itemClone, {
+                  position: "absolute",
+                  left: left,
+                  top: top
+               });
+            }
+
+            if(Dom.hasAttribute(connectionToProcess.item, Gridifier.Renderer.SILENT_RENDER_DATA_ATTR))
+               continue;
             
             var toggleFunction = this._settings.getToggle();
             var eventEmitter = this._settings.getEventEmitter();
@@ -159,12 +172,6 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
 
             if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
                 var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
-                
-                Dom.css.set(itemClone, {
-                    position: "absolute",
-                    left: left,
-                    top: top
-                });
 
                 toggleFunction.show(
                     itemClone,

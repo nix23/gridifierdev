@@ -356,6 +356,32 @@ Gridifier.prototype.append = function(items, batchSize, batchTimeout) {
     return this;
 }
 
+Gridifier.prototype.silentAppend = function(items, batchSize, batchTimeout) {
+   this._renderer.scheduleForSilentRender(
+      this._collector.toDOMCollection(items)
+   );
+   this.append(items, batchSize, batchTimeout);
+}
+
+Gridifier.prototype.silentRender = function() {
+   var scheduledForSilentRenderItems = this._collector.collectByQuery(
+      "[" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
+   );
+
+   var scheduledForSilentRenderConnections = [];
+   for(var i = 0; i < scheduledForSilentRenderItems.length; i++) {
+      scheduledForSilentRenderConnections.push(
+         this._connections.findConnectionByItem(scheduledForSilentRenderItems[i])
+      );
+   }
+
+   this._renderer.unscheduleForSilentRender(
+      scheduledForSilentRenderItems,
+      scheduledForSilentRenderConnections
+   );
+   this._renderer.showConnections(scheduledForSilentRenderConnections);
+}
+
 Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchTimeout) {
     this._lifecycleCallbacks.executePreInsertCallbacks(items);
 
