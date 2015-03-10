@@ -351,9 +351,10 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
         me._gridifier.setItemClonesManagerLifecycleCallbacks();
         me._gridifier.setCoordsChanger("CSS3Translate3DClones");
+        //me._gridifier.setSizesChanger("defaultPaddingBottom");
         window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
         setTimeout(function() {
-            me._gridifier.toggleBy("slideLeft");
+            //me._gridifier.toggleBy("slideLeft");
         }, 500);
         //me._gridifier.setCoordsChanger("CSS3Position");
         //me._gridifier.setItemWidthPercentageAntialias(0.1);
@@ -489,17 +490,19 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._$view.on("click", ".gridItem", function() { ///console.log("toggle");
             //me._gridifier.disconnect($(this));
             //me._gridifier.transformSizes($(this), "*2", "*2");
-           //me._gridifier.toggleSizes($(this), "*2", "*2");
-            // if($(this).hasClass("transformedItem")) {
-            //     $(this).removeClass("transformedItem");
-            //     me._gridifier.transformSizes($(this), "25%", "200px");
-               //me._gridifier.transformSizes($(this), "200px", "200px");
-            // }
-            // else {
-                // $(this).addClass("transformedItem");
-                // me._gridifier.transformSizes($(this), "50%", "400px");
-                //me._gridifier.transformSizes($(this), "400px", "400px");
-            //}
+           //me._gridifier.toggleSizesWithPaddingBottom($(this), "*2", "*2");
+           // me._gridifier.toggleSizes($(this), "*2", "*2");
+            return;
+            if($(this).hasClass("transformedItem")) {
+                $(this).removeClass("transformedItem");
+                //me._gridifier.transformSizesWithPaddingBottom($(this), "/2", "/2");
+               me._gridifier.transformSizes($(this), "/2", "/2");
+            }
+            else {
+                $(this).addClass("transformedItem");
+                //me._gridifier.transformSizesWithPaddingBottom($(this), "*2", "*2");
+                me._gridifier.transformSizes($(this), "*2", "*2");
+            }
         });
 
         // @todo -> Replace this.(tmp for testing)

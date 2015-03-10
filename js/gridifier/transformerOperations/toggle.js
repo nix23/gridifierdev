@@ -48,10 +48,15 @@ Gridifier.TransformerOperations.Toggle = function(collector,
 
 // @todo -> Apply check that item is < than grid
 // @todo -> Update grid sizes after toggle and transform
-Gridifier.TransformerOperations.Toggle.prototype.execute = function(maybeItem, newWidth, newHeight) {
+Gridifier.TransformerOperations.Toggle.prototype.execute = function(maybeItem, 
+                                                                    newWidth, 
+                                                                    newHeight,
+                                                                    usePaddingBottomInsteadHeight) {
     var itemsToTransform = this._optionsParser.parseItemsToTransform(maybeItem);
     var sizesToTransform = this._optionsParser.parseSizesToTransform(maybeItem, newWidth, newHeight);
-    var transformationData = this._parseTransformationData(itemsToTransform, sizesToTransform);
+    var transformationData = this._parseTransformationData(
+        itemsToTransform, sizesToTransform, usePaddingBottomInsteadHeight
+    );
 
     /* @system-log-start */
     Logger.startLoggingOperation(
@@ -66,7 +71,8 @@ Gridifier.TransformerOperations.Toggle.prototype.execute = function(maybeItem, n
 }
 
 Gridifier.TransformerOperations.Toggle.prototype._parseTransformationData = function(itemsToTransform,
-                                                                                     sizesToTransform) {
+                                                                                     sizesToTransform,
+                                                                                     usePaddingBottomInsteadHeight) {
     var itemNewRawSizesFinder = new Gridifier.SizesTransformer.ItemNewRawSizesFinder(this._sizesResolverManager);
     var transformationData = [];
     /* @system-log-start */
@@ -84,9 +90,9 @@ Gridifier.TransformerOperations.Toggle.prototype._parseTransformationData = func
             itemNewRawSizesFinder.unmarkConnectionPerToggle(connectionToTransform);
         }
         else {
-            itemNewRawSizesFinder.markConnectionPerToggle(connectionToTransform);
+            itemNewRawSizesFinder.markConnectionPerToggle(connectionToTransform, usePaddingBottomInsteadHeight);
             targetSizesToTransform = itemNewRawSizesFinder.initConnectionTransform(
-                connectionToTransform, sizesToTransform[i][0], sizesToTransform[i][1]
+                connectionToTransform, sizesToTransform[i][0], sizesToTransform[i][1], usePaddingBottomInsteadHeight
             );
         }
         /* @system-log-start */
@@ -100,7 +106,8 @@ Gridifier.TransformerOperations.Toggle.prototype._parseTransformationData = func
         transformationData.push({
             connectionToTransform: connectionToTransform,
             widthToTransform: targetSizesToTransform.targetWidth,
-            heightToTransform: targetSizesToTransform.targetHeight
+            heightToTransform: targetSizesToTransform.targetHeight,
+            usePaddingBottomInsteadHeight: usePaddingBottomInsteadHeight
         });
     }
 

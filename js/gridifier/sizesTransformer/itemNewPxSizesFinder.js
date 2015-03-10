@@ -38,7 +38,8 @@ Gridifier.SizesTransformer.ItemNewPxSizesFinder.prototype.calculateNewPxSizesPer
         var pxSizes = this._calculateNewPxSizesPerConnectionItem(
             transformationData[i].connectionToTransform.item,
             transformationData[i].widthToTransform,
-            transformationData[i].heightToTransform
+            transformationData[i].heightToTransform,
+            transformationData[i].usePaddingBottomInsteadHeight
         );
         transformationData[i].pxWidthToTransform = pxSizes.width;
         transformationData[i].pxHeightToTransform = pxSizes.height;
@@ -49,7 +50,8 @@ Gridifier.SizesTransformer.ItemNewPxSizesFinder.prototype.calculateNewPxSizesPer
 
 Gridifier.SizesTransformer.ItemNewPxSizesFinder.prototype._calculateNewPxSizesPerConnectionItem = function(transformedItem,
                                                                                                            widthToTransform,
-                                                                                                           heightToTransform) {
+                                                                                                           heightToTransform,
+                                                                                                           usePaddingBottomInsteadHeight) {
     var transformedItemClone = transformedItem.cloneNode();
     this._collector.markItemAsRestrictedToCollect(transformedItemClone);
     this._sizesResolverManager.unmarkAsCached(transformedItemClone);
@@ -60,8 +62,11 @@ Gridifier.SizesTransformer.ItemNewPxSizesFinder.prototype._calculateNewPxSizesPe
         left: "-90000px",
         visibility: "hidden",
         width: widthToTransform,
-        height: heightToTransform
+        height: (usePaddingBottomInsteadHeight) ? 0 : heightToTransform
     });
+
+    if(usePaddingBottomInsteadHeight)
+        transformedItemClone.style.paddingBottom = heightToTransform;
 
     this._gridifier.getGrid().appendChild(transformedItemClone);
     var pxSizes = {

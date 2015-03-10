@@ -227,7 +227,17 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._adjustDraggableIt
     this._draggableItemConnection.y2 = draggableItemNewCoords.y2;
 
     var rendererCoordsChanger = this._settings.getCoordsChanger();
-    rendererCoordsChanger(this._draggableItem, draggableItemNewCoords.x1, draggableItemNewCoords.y1);
+    var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
+    var eventEmitter = this._settings.getEventEmitter();
+
+    rendererCoordsChanger(
+        this._draggableItem, 
+        draggableItemNewCoords.x1 + "px", 
+        draggableItemNewCoords.y1 + "px",
+        animationMsDuration,
+        eventEmitter,
+        false
+    );
 
     this._dragifierRenderer.render(
         this._draggableItemPointer,

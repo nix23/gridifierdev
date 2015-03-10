@@ -17,6 +17,7 @@ Gridifier.Api.SizesChanger = function(settings, eventEmitter) {
         me._sizesChangerFunctions = {};
 
         me._addDefaultSizesChanger();
+        me._addDefaultPaddingBottomSizesChanger();
         me._addSimultaneousCSS3TransitionSizesChanger();
     };
 
@@ -61,6 +62,16 @@ Gridifier.Api.SizesChanger.prototype._addDefaultSizesChanger = function() {
         Dom.css.set(item, {
             width: newWidth,
             height: newHeight
+        });
+    };
+}
+
+Gridifier.Api.SizesChanger.prototype._addDefaultPaddingBottomSizesChanger = function() {
+    this._sizesChangerFunctions["defaultPaddingBottom"] = function(item, newWidth, newPaddingBottom) {
+        Dom.css3.transitionProperty(item, "width 0ms ease, padding-bottom 0ms ease");
+        Dom.css.set(item, {
+            width: newWidth,
+            paddingBottom: newPaddingBottom
         });
     };
 }

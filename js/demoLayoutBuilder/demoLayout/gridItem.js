@@ -90,6 +90,8 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
     this._$gridItem.css({
         width: itemSizes.width,
         height: itemSizes.height,
+        //height: 0,
+        //paddingBottom: "15%",
         //height: "30%",
 
         // width: "33.43%",

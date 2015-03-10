@@ -393,12 +393,22 @@ Gridifier.prototype.retransformAllSizes = function() {
 
 Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {
     this._normalizer.updateItemAntialiasValues();
-    this._toggleOperation.execute(maybeItem, newWidth, newHeight);
+    this._toggleOperation.execute(maybeItem, newWidth, newHeight, false);
 }
 
 Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
     this._normalizer.updateItemAntialiasValues();
-    this._transformOperation.execute(maybeItem, newWidth, newHeight);
+    this._transformOperation.execute(maybeItem, newWidth, newHeight, false);
+}
+
+Gridifier.prototype.toggleSizesWithPaddingBottom = function(maybeItem, newWidth, newPaddingBottom) {
+    this._normalizer.updateItemAntialiasValues();
+    this._toggleOperation.execute(maybeItem, newWidth, newPaddingBottom, true);
+}
+
+Gridifier.prototype.transformSizesWithPaddingBottom = function(maybeItem, newWidth, newPaddingBottom) {
+    this._normalizer.updateItemAntialiasValues();
+    this._transformOperation.execute(maybeItem, newWidth, newPaddingBottom, true);
 }
 
 Gridifier.prototype.addPreInsertLifecycleCallback = function(callback) {

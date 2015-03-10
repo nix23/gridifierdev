@@ -281,19 +281,23 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
         if(Dom.hasAttribute(item, itemShownDataAttr) && !isDraggableItem) {
             itemClone.style.visibility = "visible";
         }
+
         item.style.visibility = "hidden";
 
         if(emitTransformEvent) {
-            Dom.css.set(itemClone, {
-                width: newWidth,
-                height: newHeight
-            });
+            var sizesChanger = me._settings.getSizesChanger();
+            sizesChanger(itemClone, newWidth, newHeight);
 
             setTimeout(function() {
                 eventEmitter.emitTransformEvent(itemClone, newWidth, newHeight, newLeft, newTop);
             }, animationMsDuration + 20);
         }
         
+        Dom.css.set(item, {
+            left: newLeft,
+            top: newTop
+        });
+
         me._coordsChangerFunctions.CSS3Translate3D(
             itemClone, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
         );
@@ -303,18 +307,13 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
            clonesHideTimeouts[guid] = null;
         }
 
-        Dom.css.set(item, {
-           left: newLeft,
-           top: newTop
-        });
-
         if(Dom.toInt(animationMsDuration) > 20)
             var hideCloneTimeout = animationMsDuration - 20;
         else
             var hideCloneTimeout = animationMsDuration;
 
         clonesHideTimeouts[guid] = setTimeout(function() {
-            if(Dom.hasAttribute(item, itemShownDataAttr) && !isDraggableItem) {
+            if(Dom.hasAttribute(item, itemShownDataAttr) && !isDraggableItem) { 
                 item.style.visibility = "visible";
                 itemClone.style.visibility = "hidden";
             }

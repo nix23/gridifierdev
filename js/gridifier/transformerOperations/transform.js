@@ -48,10 +48,15 @@ Gridifier.TransformerOperations.Transform = function(collector,
 
 // @todo -> Apply check that item is < than grid
 // @todo -> Update grid sizes after toggle and transform
-Gridifier.TransformerOperations.Transform.prototype.execute = function(maybeItem, newWidth, newHeight) {
+Gridifier.TransformerOperations.Transform.prototype.execute = function(maybeItem, 
+                                                                       newWidth, 
+                                                                       newHeight, 
+                                                                       usePaddingBottomInsteadHeight) {
     var itemsToTransform = this._optionsParser.parseItemsToTransform(maybeItem);
     var sizesToTransform = this._optionsParser.parseSizesToTransform(maybeItem, newWidth, newHeight);
-    var transformationData = this._parseTransformationData(itemsToTransform, sizesToTransform);
+    var transformationData = this._parseTransformationData(
+        itemsToTransform, sizesToTransform, usePaddingBottomInsteadHeight
+    );
 
     /* @system-log-start */
     Logger.startLoggingOperation(
@@ -66,7 +71,8 @@ Gridifier.TransformerOperations.Transform.prototype.execute = function(maybeItem
 }
 
 Gridifier.TransformerOperations.Transform.prototype._parseTransformationData = function(itemsToTransform,
-                                                                                        sizesToTransform) {
+                                                                                        sizesToTransform,
+                                                                                        usePaddingBottomInsteadHeight) {
     var itemNewRawSizesFinder = new Gridifier.SizesTransformer.ItemNewRawSizesFinder(this._sizesResolverManager);
     var transformationData = [];
     /* @system-log-start */
@@ -78,9 +84,8 @@ Gridifier.TransformerOperations.Transform.prototype._parseTransformationData = f
         var targetSizesToTransform = null;
 
         targetSizesToTransform = itemNewRawSizesFinder.initConnectionTransform(
-            connectionToTransform, sizesToTransform[i][0], sizesToTransform[i][1]
+            connectionToTransform, sizesToTransform[i][0], sizesToTransform[i][1], usePaddingBottomInsteadHeight
         );
-        
         /* @system-log-start */
         this._loggerLegend += "Item GUID: " + this._guid.getItemGUID(connectionToTransform.item);
         this._loggerLegend += " new width: " + sizesToTransform[i][0] + " new height: " + sizesToTransform[i][1];
@@ -92,7 +97,8 @@ Gridifier.TransformerOperations.Transform.prototype._parseTransformationData = f
         transformationData.push({
             connectionToTransform: connectionToTransform,
             widthToTransform: targetSizesToTransform.targetWidth,
-            heightToTransform: targetSizesToTransform.targetHeight
+            heightToTransform: targetSizesToTransform.targetHeight,
+            usePaddingBottomInsteadHeight: usePaddingBottomInsteadHeight
         });
     }
 

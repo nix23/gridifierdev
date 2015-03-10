@@ -31,10 +31,11 @@ Gridifier.SizesTransformer.ItemNewRawSizesFinder.EMPTY_DATA_ATTR_VALUE = "gridif
 
 Gridifier.SizesTransformer.ItemNewRawSizesFinder.prototype.initConnectionTransform = function(connection, 
                                                                                               newWidth, 
-                                                                                              newHeight) {
+                                                                                              newHeight,
+                                                                                              usePaddingBottomInsteadHeight) {
     var targetSizes = {};
 
-    var targetSizeTypes = {width: 0, height: 1};
+    var targetSizeTypes = {width: 0, height: 1, paddingBottom: 2};
     var me = this;
 
     var getTargetSize = function(newSize, targetSizeType) {
@@ -76,7 +77,10 @@ Gridifier.SizesTransformer.ItemNewRawSizesFinder.prototype.initConnectionTransfo
     }
 
     targetSizes.targetWidth = getTargetSize(newWidth, targetSizeTypes.width);
-    targetSizes.targetHeight = getTargetSize(newHeight, targetSizeTypes.height);
+    if(!usePaddingBottomInsteadHeight)
+        targetSizes.targetHeight = getTargetSize(newHeight, targetSizeTypes.height);
+    else
+        targetSizes.targetHeight = getTargetSize(newHeight, targetSizeTypes.paddingBottom);
 
     return targetSizes;
 }
@@ -95,6 +99,12 @@ Gridifier.SizesTransformer.ItemNewRawSizesFinder.prototype._getItemRawSize = fun
             return SizesResolver.getPercentageCSSValue("height", item, itemComputedCSS);
         else
             return this._sizesResolverManager.outerHeight(item) + "px";
+    }
+    else if(sizeType == sizeTypes.paddingBottom) {
+        if(SizesResolver.hasPercentageCSSValue("paddingBottom", item, itemComputedCSS))
+            return SizesResolver.getPercentageCSSValue("paddingBottom", item, itemComputedCSS);
+        else 
+            return itemComputedCSS.paddingBottom;
     }
 }
 
@@ -117,16 +127,20 @@ Gridifier.SizesTransformer.ItemNewRawSizesFinder.prototype.getConnectionSizesPer
     return originalSizes;
 }
 
-Gridifier.SizesTransformer.ItemNewRawSizesFinder.prototype.markConnectionPerToggle = function(connection) {
+Gridifier.SizesTransformer.ItemNewRawSizesFinder.prototype.markConnectionPerToggle = function(connection,
+                                                                                              usePaddingBottomInsteadHeight) {
     var itemNewRawSizesFinder = Gridifier.SizesTransformer.ItemNewRawSizesFinder;
     connection.item.setAttribute(
         itemNewRawSizesFinder.TOGGLE_SIZES_TOGGLED_ITEM_SIZES_DATA_ATTR,
         itemNewRawSizesFinder.EMPTY_DATA_ATTR_VALUE
     );
 
-    var targetSizeTypes = {width: 0, height: 1};
+    var targetSizeTypes = {width: 0, height: 1, paddingBottom: 2};
     var originalItemWidth = this._getItemRawSize(connection.item, targetSizeTypes.width, targetSizeTypes);
-    var originalItemHeight = this._getItemRawSize(connection.item, targetSizeTypes.height, targetSizeTypes);
+    if(!usePaddingBottomInsteadHeight)
+        var originalItemHeight = this._getItemRawSize(connection.item, targetSizeTypes.height, targetSizeTypes);
+    else
+        var originalItemHeight = this._getItemRawSize(connection.item, targetSizeTypes.paddingBottom, targetSizeTypes);
 
     connection.item.setAttribute(
         itemNewRawSizesFinder.TOGGLE_SIZES_ORIGINAL_WIDTH_DATA_ATTR,
