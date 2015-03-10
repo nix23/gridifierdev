@@ -346,8 +346,10 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridDebugger = new DemoLayoutBuilder.DemoLayout.GridDebugger(me, me._grid.getGrid().get(0));
         Logger.setGrid(me._grid.getGrid().get(0));
         
-        me._gridifierSettings.toggleAnimationMsDuration = 500;
-        me._gridifierSettings.coordsChangeAnimationMsDuration = 500;
+        //me._gridifierSettings.toggleAnimationMsDuration = 500;
+        //me._gridifierSettings.coordsChangeAnimationMsDuration = 500;
+        me._gridifierSettings.toggleAnimationMsDuration = 3000;
+        me._gridifierSettings.coordsChangeAnimationMsDuration = 3000;
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
         me._gridifier.setItemClonesManagerLifecycleCallbacks();
         me._gridifier.setCoordsChanger("CSS3Translate3DClones");
@@ -604,8 +606,8 @@ DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
         // })($gridItem, gridItem);
     }
 
-    //this._gridifier.append(itemsToAppend);
-    this._gridifier.silentAppend(itemsToAppend);
+    this._gridifier.append(itemsToAppend);
+    //this._gridifier.silentAppend(itemsToAppend);
     // @todo -> append and prepend by one or by batch????
 }
 
