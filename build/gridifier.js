@@ -1450,11 +1450,6 @@ Gridifier.prototype.setCoordsChanger = function(coordsChangerName) {
     return this;
 }
 
-Gridifier.prototype.setCoordsChangerOnToggle = function(coordsChangerName) {
-    this._settings.setCoordsChangerOnToggle(coordsChangerName);
-    return this;
-}
-
 Gridifier.prototype.setSizesChanger = function(sizesChangerName) {
     this._settings.setSizesChanger(sizesChangerName);
     return this;
@@ -1532,22 +1527,27 @@ Gridifier.prototype.silentAppend = function(items, batchSize, batchTimeout) {
 }
 
 Gridifier.prototype.silentRender = function() {
-   var scheduledForSilentRenderItems = this._collector.collectByQuery(
-      "[" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
-   );
+   var executeSilentRender = function() {
+       var scheduledForSilentRenderItems = this._collector.collectByQuery(
+           "[" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
+       );
 
-   var scheduledForSilentRenderConnections = [];
-   for(var i = 0; i < scheduledForSilentRenderItems.length; i++) {
-      scheduledForSilentRenderConnections.push(
-         this._connections.findConnectionByItem(scheduledForSilentRenderItems[i])
-      );
+       var scheduledForSilentRenderConnections = [];
+       for (var i = 0; i < scheduledForSilentRenderItems.length; i++) {
+           scheduledForSilentRenderConnections.push(
+               this._connections.findConnectionByItem(scheduledForSilentRenderItems[i])
+           );
+       }
+
+       this._renderer.unscheduleForSilentRender(
+           scheduledForSilentRenderItems,
+           scheduledForSilentRenderConnections
+       );
+       this._renderer.showConnections(scheduledForSilentRenderConnections);
    }
 
-   this._renderer.unscheduleForSilentRender(
-      scheduledForSilentRenderItems,
-      scheduledForSilentRenderConnections
-   );
-   this._renderer.showConnections(scheduledForSilentRenderConnections);
+   var me = this;
+   setTimeout(function() { executeSilentRender.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 20);
 }
 
 Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchTimeout) {
@@ -1692,7 +1692,6 @@ Gridifier.Api.CoordsChanger = function(settings, gridifier, eventEmitter) {
     this._eventEmitter = null;
 
     this._coordsChangerFunction = null;
-    this._coordsChangerOnToggleFunction = null;
     this._coordsChangerFunctions = {};
 
     this._css = {
@@ -1745,22 +1744,6 @@ Gridifier.Api.CoordsChanger.prototype.addCoordsChangerFunction = function(coords
 
 Gridifier.Api.CoordsChanger.prototype.getCoordsChangerFunction = function() {
     return this._coordsChangerFunction;
-}
-
-Gridifier.Api.CoordsChanger.prototype.setCoordsChangerOnToggleFunction = function(coordsChangerFunctionName) {
-    if(!this._coordsChangerFunctions.hasOwnProperty(coordsChangerFunctionName)) {
-        new Gridifier.Error(
-            Gridifier.Error.ERROR_TYPES.SETTINGS.SET_COORDS_CHANGER_INVALID_PARAM,
-            coordsChangerFunctionName
-        );
-        return;
-    }
-
-    this._coordsChangerOnToggleFunction = this._coordsChangerFunctions[coordsChangerFunctionName];
-}
-
-Gridifier.Api.CoordsChanger.prototype.getCoordsChangerOnToggleFunction = function() {
-    return this._coordsChangerOnToggleFunction;
 }
 
 Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
@@ -1878,36 +1861,38 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
         var currentLeft = parseFloat(item.style.left);
         var currentTop = parseFloat(item.style.top);
 
-        if(newLeft > currentLeft)
+        if (newLeft > currentLeft)
             var translateX = newLeft - currentLeft;
-        else if(newLeft < currentLeft)
+        else if (newLeft < currentLeft)
             var translateX = (currentLeft - newLeft) * -1;
-        else 
+        else
             var translateX = 0;
 
-        if(newTop > currentTop)
+        if (newTop > currentTop)
             var translateY = newTop - currentTop;
-        else if(newTop < currentTop)
+        else if (newTop < currentTop)
             var translateY = (currentTop - newTop) * -1;
         else
             var translateY = 0;
-        
+
         Dom.css3.transitionProperty(
             item,
             Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
         );
-        
+
         Dom.css3.perspective(item, "1000");
         Dom.css3.backfaceVisibility(item, "hidden");
         Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px,0px");
 
-        if(emitTransformEvent) {
-            setTimeout(function() {
+        if (emitTransformEvent) {
+            setTimeout(function () {
                 eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
             }, animationMsDuration + 20);
         }
     };
 }
+
+Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR = "gridifier-clones-coords-changer-restrict-show";
 
 Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = function() {
     var me = this;
@@ -1922,15 +1907,14 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
     });
 
     this._gridifier.onHide(function(item) {
-       var itemClonesManager = me._gridifier.getItemClonesManager();
-       if(!itemClonesManager.hasBindedClone(item))
-           return;
+        var itemClonesManager = me._gridifier.getItemClonesManager();
+        if(!itemClonesManager.hasBindedClone(item))
+            return;
 
-       item.removeAttribute(itemShownDataAttr);
+        item.removeAttribute(itemShownDataAttr);
     });
 
     var clonesHideTimeouts = [];
-    var itemShowTimeouts = [];
 
     this._coordsChangerFunctions.CSS3Translate3DClones = function(item,
                                                                   newLeft,
@@ -1954,22 +1938,13 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
         if(typeof clonesHideTimeouts[guid] == "undefined") {
             clonesHideTimeouts[guid] = null;
         }
-        if(typeof itemShowTimeouts[guid] == "undefined") {
-            itemShowTimeouts[guid] = null;
-        }
 
-        if(Dom.hasAttribute(item, itemShownDataAttr) && !isDraggableItem) {
+        var cc = Gridifier.Api.CoordsChanger;
+        if(!isDraggableItem && !Dom.hasAttribute(itemClone, cc.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR))
             itemClone.style.visibility = "visible";
-        }
 
         if(Dom.hasAttribute(item, itemShownDataAttr))
             item.style.visibility = "hidden";
-        else {
-            Dom.css.set(itemClone, {
-                left: newLeft,
-                top: newTop
-            });
-        }
 
         if(emitTransformEvent) {
             var sizesChanger = me._settings.getSizesChanger();
@@ -2099,17 +2074,17 @@ Gridifier.Api.Rotate.prototype.setCollectorInstance = function(collector) {
     this._collector = collector;
 }
 
-Gridifier.Api.Rotate.prototype.show = function(item, grid, inverseRotateAxis) {
+Gridifier.Api.Rotate.prototype.show = function(item, grid, inverseRotateAxis, timeouter) {
     var rotateProp = (inverseRotateAxis) ? "rotateY" : "rotateX";
-    this._rotate(item, grid, rotateProp, false);
+    this._rotate(item, grid, rotateProp, false, timeouter);
 }
 
-Gridifier.Api.Rotate.prototype.hide = function(item, grid, inverseRotateAxis) {
+Gridifier.Api.Rotate.prototype.hide = function(item, grid, inverseRotateAxis, timeouter) {
     var rotateProp = (inverseRotateAxis) ? "rotateY" : "rotateX";
-    this._rotate(item, grid, rotateProp, true);
+    this._rotate(item, grid, rotateProp, true, timeouter);
 }
 
-Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle) {
+Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle, timeouter) {
     if(!inverseToggle) {
         var isShowing = true;
         var isHiding = false;
@@ -2123,11 +2098,14 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
     var frames = this._createFrames(scene);
     var itemClone = this._createItemClone(item);
 
+    item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
+    item.setAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR, "yes");
     var frontFrame = this._createFrontFrame(frames, rotateProp);
     var backFrame = this._createBackFrame(frames, rotateProp);
 
     if(isShowing) {
         backFrame.appendChild(itemClone);
+        item.style.visibility = "hidden";
     }
     else if(isHiding) {
         frontFrame.appendChild(itemClone);
@@ -2145,33 +2123,39 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
     );
 
     var me = this;
-    setTimeout(function() {
+    var initRotateTimeout = setTimeout(function() {
         Dom.css3.transformProperty(frontFrame, rotateProp, "180deg");
         Dom.css3.transformProperty(backFrame, rotateProp, "0deg");
     }, 20);
+    //timeouter.add(item, initRotateTimeout);
 
     // A little helper to reduce blink effect after animation finish
     if(animationMsDuration > 400) {
-       setTimeout(function () {
+       var prehideItemTimeout = setTimeout(function () {
+          item.removeAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR);
+
           if (isShowing)
              item.style.visibility = "visible";
           else if (isHiding)
              item.style.visibility = "hidden";
-       }, animationMsDuration - 150);
+       }, animationMsDuration - 50);
+       //timeouter.add(item, prehideItemTimeout);
     }
 
-    setTimeout(function() {
+    var completeRotateTimeout = setTimeout(function() {
         scene.parentNode.removeChild(scene);
+        item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
+
         if(isShowing) {
             item.style.visibility = "visible";
             me._eventEmitter.emitShowEvent(item);
         }
         else if(isHiding) {
             item.style.visibility = "hidden";
-            grid.removeChild(item);
             me._eventEmitter.emitHideEvent(item);
         }
     }, animationMsDuration + 20);
+    //timeouter.add(item, completeRotateTimeout);
 }
 
 Gridifier.Api.Rotate.prototype._createScene = function(item, grid) {
@@ -2342,10 +2326,11 @@ Gridifier.Api.SizesChanger.prototype._addSimultaneousCSS3TransitionSizesChanger 
     };
 }
 
-Gridifier.Api.Slide = function(settings, eventEmitter, sizesResolverManager) {
+Gridifier.Api.Slide = function(settings, gridifier, eventEmitter, sizesResolverManager) {
     var me = this;
 
     this._settings = null;
+    this._gridifier = null;
     this._eventEmitter = null;
     this._sizesResolverManager = null;
 
@@ -2354,6 +2339,7 @@ Gridifier.Api.Slide = function(settings, eventEmitter, sizesResolverManager) {
 
     this._construct = function() {
         me._settings = settings;
+        me._gridifier = gridifier;
         me._eventEmitter = eventEmitter;
         me._sizesResolverManager = sizesResolverManager;
     };
@@ -2372,8 +2358,6 @@ Gridifier.Api.Slide = function(settings, eventEmitter, sizesResolverManager) {
     return this;
 }
 
-Gridifier.Api.Slide.SHOW_ITEM_TIMEOUT = 100;
-
 Gridifier.Api.Slide.prototype._executeSlideShow = function(item, 
                                                            grid, 
                                                            animationMsDuration,
@@ -2382,12 +2366,14 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
                                                            coordsChanger,
                                                            collector,
                                                            startLeft,
-                                                           startTop) {
-    var targetLeft = item.style.left; 
-    var targetTop = item.style.top;
+                                                           startTop,
+                                                           connectionLeft,
+                                                           connectionTop) {
+    var me = this;
+    var targetLeft = connectionLeft;
+    var targetTop = connectionTop;
 
-    if(!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
-        Dom.css3.transition(item, "none");
+    if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
         coordsChanger(
             item,
             startLeft,
@@ -2396,84 +2382,62 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
             eventEmitter,
             false
         );
+
         item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
     }
 
-    Dom.css3.transition(itemClone, "none");
-    coordsChanger(
-        itemClone,
-        startLeft,
-        startTop,
-        0,
-        eventEmitter,
-        false
-    );
+    // Setting translated position after 0ms call requires a little delay
+    // per browsers repaint
+    var slideOutTimeout = setTimeout(function() {
+        if(!me._gridifier.hasItemBindedClone(item))
+            item.style.visibility = "visible";
 
-    setTimeout(function() {
-        Dom.css3.transition(
-            itemClone,
-            Prefixer.getForCSS('transform', itemClone) + " " + animationMsDuration + "ms ease"
-        );
-        itemClone.style.visibility = "visible";
         coordsChanger(
-            itemClone,
+            item,
             targetLeft,
             targetTop,
             animationMsDuration,
             eventEmitter,
             false
         );
+    }, 0);
+    timeouter.add(item, slideOutTimeout);
 
-        setTimeout(function() {
-            itemClone.style.visibility = "hidden";
-            item.style.visibility = "visible";
-            grid.removeChild(itemClone);
-
-            eventEmitter.emitShowEvent(item);
-        }, animationMsDuration + 20);
-    }, Gridifier.Api.Slide.SHOW_ITEM_TIMEOUT); // A little delay before setting translate3d second time
+    var completeSlideOutTimeout = setTimeout(function() {
+        item.style.visibility = "visible";
+        item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
+        eventEmitter.emitShowEvent(item);
+    }, animationMsDuration + 20);
+    timeouter.add(item, completeSlideOutTimeout);
 }
 
 Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
-                                                           itemClone,
                                                            grid,
                                                            animationMsDuration,
+                                                           timeouter,
                                                            eventEmitter,
                                                            coordsChanger,
                                                            collector,
                                                            targetLeft,
-                                                           targetTop) {
-    Dom.css3.transition(
-        itemClone, 
-        Prefixer.getForCSS('transform', itemClone) + " " + animationMsDuration + "ms ease"
-    );
+                                                           targetTop,
+                                                           connectionLeft,
+                                                           connectionTop) {
+    item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
     coordsChanger(
-        itemClone, 
-        targetLeft, 
+        item,
+        targetLeft,
         targetTop,
         animationMsDuration,
         eventEmitter,
         false
     );
-    
-    // Fix for concurrent clone animations on filters. Clone can be
-    // kept visible(their events wont be copyied), but all original
-    // items must be invisible.
-    // So, if some items will show after delay, while other items are hiding,
-    // we should hide them again.(Because they are disconnected from grid, and if 
-    // user will click on any of them, error will appear)
-    for(var i = 0; i < Dom.toInt(animationMsDuration); i += 50) {
-        setTimeout(function() {
-            item.style.visibility = "hidden";
-        }, i);
-    }
 
-    setTimeout(function() {
+    var slideInTimeout = setTimeout(function() {
         item.style.visibility = "hidden";
-        itemClone.style.visibility = "hidden";
-        grid.removeChild(itemClone);
+        item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
         eventEmitter.emitHideEvent(item);
     }, animationMsDuration + 20);
+    timeouter.add(item, slideInTimeout);
 }
 
 Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, alignBottom, reverseDirection) {
@@ -2487,7 +2451,7 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
 
     var getLeftPos = function(item, grid) {
         if(isLeftSideToggler)
-            return me._sizesResolverManager.outerWidth(item,true) * -1;
+            return me._sizesResolverManager.outerWidth(item, true) * -1;
         else if(isRightSideToggler)
             return me._sizesResolverManager.outerWidth(grid) + me._sizesResolverManager.outerWidth(item, true);
     }
@@ -2500,7 +2464,9 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                          eventEmitter, 
                          sizesResolverManager,
                          coordsChanger,
-                         collector) {
+                         collector,
+                         connectionLeft,
+                         connectionTop) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
@@ -2524,23 +2490,25 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 coordsChanger,
                 collector,
                 getLeftPos(item, grid),
-                top
+                top,
+                connectionLeft,
+                connectionTop
             );
         },
 
-        "hide": function(item, 
-                         itemClone, 
+        "hide": function(item,
                          grid, 
-                         animationMsDuration, 
+                         animationMsDuration,
+                         timeouter,
                          eventEmitter, 
                          sizesResolverManager,
                          coordsChanger,
-                         collector) {
-            itemClone.style.visibility = "visible";
-            item.style.visibility = "hidden"; 
-
+                         collector,
+                         connectionLeft,
+                         connectionTop) {
+            timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
-                itemClone.style.visibility = "hidden";
+                item.style.visibility = "hidden";
                 eventEmitter.emitHideEvent(item);
                 return;
             }
@@ -2554,14 +2522,16 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
 
             me._executeSlideHide(
                 item,
-                itemClone,
                 grid,
                 animationMsDuration,
+                timeouter,
                 eventEmitter,
                 coordsChanger,
                 collector,
                 getLeftPos(item, grid),
-                top
+                top,
+                connectionLeft,
+                connectionTop
             );
         }
     };
@@ -2586,11 +2556,15 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
     return {
         "show": function(item, 
                          grid, 
-                         animationMsDuration, 
+                         animationMsDuration,
+                         timeouter,
                          eventEmitter, 
                          sizesResolverManager,
                          coordsChanger,
-                         collector) {
+                         collector,
+                         connectionLeft,
+                         connectionTop) {
+            timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
@@ -2607,28 +2581,31 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
             me._executeSlideShow(
                 item, 
                 grid, 
-                animationMsDuration, 
+                animationMsDuration,
+                timeouter,
                 eventEmitter,
                 coordsChanger,
                 collector,
                 left,
-                getTopPos(item, grid)
+                getTopPos(item, grid),
+                connectionLeft,
+                connectionTop
             );
         },
 
-        "hide": function(item, 
-                         itemClone, 
+        "hide": function(item,
                          grid, 
-                         animationMsDuration, 
+                         animationMsDuration,
+                         timeouter,
                          eventEmitter, 
                          sizesResolverManager,
                          coordsChanger,
-                         collector) {
-            itemClone.style.visibility = "visible";
-            item.style.visibility = "hidden";
-
+                         collector,
+                         connectionLeft,
+                         connectionTop) {
+            timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
-                itemClone.style.visibility = "hidden";
+                item.style.visibility = "hidden";
                 eventEmitter.emitHideEvent(item);
                 return;
             }
@@ -2642,14 +2619,16 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
 
             me._executeSlideHide(
                 item,
-                itemClone,
                 grid,
                 animationMsDuration,
+                timeouter,
                 eventEmitter,
                 coordsChanger,
                 collector,
                 left,
-                getTopPos(item, grid)
+                getTopPos(item, grid),
+                connectionLeft,
+                connectionTop
             );
         }
     };
@@ -2719,10 +2698,11 @@ Gridifier.Api.Sort.prototype._addDefaultSort = function() {
     };
 }
 
-Gridifier.Api.Toggle = function(settings, eventEmitter, sizesResolverManager) {
+Gridifier.Api.Toggle = function(settings, gridifier, eventEmitter, sizesResolverManager) {
     var me = this;
 
     this._settings = null;
+    this._gridifier = null;
     this._eventEmitter = null;
     this._sizesResolverManager = null;
 
@@ -2737,11 +2717,12 @@ Gridifier.Api.Toggle = function(settings, eventEmitter, sizesResolverManager) {
 
     this._construct = function() {
         me._settings = settings;
+        me._gridifier = gridifier;
         me._eventEmitter = eventEmitter;
         me._sizesResolverManager = sizesResolverManager;
 
         me._slideApi = new Gridifier.Api.Slide(
-            me._settings, me._eventEmitter, me._sizesResolverManager
+            me._settings, me._gridifier, me._eventEmitter, me._sizesResolverManager
         );
         me._rotateApi = new Gridifier.Api.Rotate(
             me._settings, me._eventEmitter, me._sizesResolverManager
@@ -2822,27 +2803,42 @@ Gridifier.Api.Toggle.prototype._addRotateX = function() {
     var me = this;
 
     this._toggleFunctions.rotateX = {
-        "show": function(item, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
+        "show": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
+            timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
                 return;
             }
 
-            me._rotateApi.show(item, grid);
+            if(me._gridifier.hasItemBindedClone(item)) {
+                var itemClone = me._gridifier.getItemClone(item);
+                timeouter.flush(itemClone);
+                me._rotateApi.show(item, grid, false, timeouter);
+                me._rotateApi.show(itemClone, grid, false, timeouter);
+            }
+            else {
+                me._rotateApi.show(item, grid, false, timeouter);
+            }
         },
 
-        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
-            itemClone.style.visibility = "visible";
-            item.style.visibility = "hidden";
-
+        "hide": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
+            timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
-                itemClone.style.visibility = "hidden";
+                item.style.visibility = "hidden";
                 eventEmitter.emitHideEvent(item);
                 return;
             }
 
-            me._rotateApi.hide(itemClone, grid);
+            if(me._gridifier.hasItemBindedClone(item)) {
+                var itemClone = me._gridifier.getItemClone(item);
+                timeouter.flush(itemClone);
+                me._rotateApi.hide(item, grid, false, timeouter);
+                me._rotateApi.hide(itemClone, grid, false, timeouter);
+            }
+            else {
+                me._rotateApi.hide(item, grid, false, timeouter);
+            }
         }
     };
 }
@@ -2851,27 +2847,42 @@ Gridifier.Api.Toggle.prototype._addRotateY = function() {
     var me = this;
 
     this._toggleFunctions.rotateY = {
-        "show": function(item, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
+        "show": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
+            timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
                 eventEmitter.emitShowEvent(item);
                 return;
             }
 
-            me._rotateApi.show(item, grid, true);
+            if(me._gridifier.hasItemBindedClone(item)) {
+                var itemClone = me._gridifier.getItemClone(item);
+                timeouter.flush(itemClone);
+                me._rotateApi.show(item, grid, true, timeouter);
+                me._rotateApi.show(itemClone, grid, true, timeouter);
+            }
+            else {
+                me._rotateApi.show(item, grid, true, timeouter);
+            }
         },
 
-        "hide": function(item, itemClone, grid, animationMsDuration, eventEmitter, sizesResolverManager) {
-            itemClone.style.visibility = "visible";
-            item.style.visibility = "hidden";
-
+        "hide": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
+            timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
-                itemClone.style.visibility = "hidden";
+                item.style.visibility = "hidden";
                 eventEmitter.emitHideEvent(item);
                 return;
             }
 
-            me._rotateApi.hide(itemClone, grid, true);
+            if(me._gridifier.hasItemBindedClone(item)) {
+                var itemClone = me._gridifier.getItemClone(item);
+                timeouter.flush(itemClone);
+                me._rotateApi.hide(item, grid, true, timeouter);
+                me._rotateApi.hide(itemClone, grid, true, timeouter);
+            }
+            else {
+                me._rotateApi.hide(item, grid, true, timeouter);
+            }
         }
     };
 }
@@ -2888,28 +2899,41 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 return;
             }
 
-            if(!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
-                Dom.css3.transition(item, "none");
-                Dom.css3.transformProperty(item, "scale", 0);
-                item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
-            }
-            
-            item.style.visibility = "visible"; // Ie11 blinking fix(:))
-            var initScaleTimeout = setTimeout(function() {
-                item.style.visibility = "visible";
-                Dom.css3.transition(
-                    item,
-                    Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
-                );
-                Dom.css3.transformProperty(item, "scale", 1);
-            }, 20);
-            timeouter.add(item, initScaleTimeout);
+            var executeScaleShow = function(item) {
+                if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
+                    Dom.css3.transition(item, "none");
+                    Dom.css3.transformProperty(item, "scale", 0);
+                    item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
+                }
 
-            var completeScaleTimeout = setTimeout(function() {
-                item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
-                eventEmitter.emitShowEvent(item);
-            }, animationMsDuration + 40);
-            timeouter.add(item, completeScaleTimeout);
+                item.style.visibility = "visible"; // Ie11 blinking fix(:))
+                var initScaleTimeout = setTimeout(function () {
+                    item.style.visibility = "visible";
+                    Dom.css3.transition(
+                        item,
+                        Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+                    );
+                    Dom.css3.transformProperty(item, "scale", 1);
+                }, 20);
+                timeouter.add(item, initScaleTimeout);
+
+                var completeScaleTimeout = setTimeout(function () {
+                    item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
+                    eventEmitter.emitShowEvent(item);
+                }, animationMsDuration + 40);
+                timeouter.add(item, completeScaleTimeout);
+            }
+
+            // @todo -> Do scale only on clone?(Event won't be sended on clone)
+            if(me._gridifier.hasItemBindedClone(item)) {
+                var itemClone = me._gridifier.getItemClone(item);
+                timeouter.flush(itemClone);
+                executeScaleShow(item);
+                executeScaleShow(itemClone);
+            }
+            else {
+                executeScaleShow(item);
+            }
         },
 
         "hide": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
@@ -2920,36 +2944,49 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 return;
             }
 
-            Dom.css3.transition(
-                item,
-                Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
-            );
+            var executeScaleHide = function(item) {
+                Dom.css3.transition(
+                    item,
+                    Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+                );
 
-            item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
-            Dom.css3.transformProperty(item, "scale", 0);
+                item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
+                Dom.css3.transformProperty(item, "scale", 0);
 
-            if(animationMsDuration > 200)
-                var hideItemTimeout = animationMsDuration - 100;
-            else
-                var hideItemTimeout = animationMsDuration - 50;
+                if (animationMsDuration > 200)
+                    var hideItemTimeout = animationMsDuration - 100;
+                else
+                    var hideItemTimeout = animationMsDuration - 50;
 
-            if(hideItemTimeout < 0)
-                hideItemTimeout = 0;
+                if (hideItemTimeout < 0)
+                    hideItemTimeout = 0;
 
-            var prehideItemTimeout = setTimeout(function() {
-                item.style.visibility = "hidden";
-                // setTimeout should be smaller than animation duration(Flickering bug in Webkit)
-            }, hideItemTimeout);
-            timeouter.add(item, prehideItemTimeout);
+                var prehideItemTimeout = setTimeout(function () {
+                    item.style.visibility = "hidden";
+                    // setTimeout should be smaller than animation duration(Flickering bug in Webkit)
+                }, hideItemTimeout);
+                timeouter.add(item, prehideItemTimeout);
 
-            var completeScaleTimeout = setTimeout(function() {
-                Dom.css3.transition(item, "none");
-                Dom.css3.transformProperty(item, "scale", 1);
+                var completeScaleTimeout = setTimeout(function () {
+                    item.style.visibility = "hidden";
+                    Dom.css3.transition(item, "none");
+                    Dom.css3.transformProperty(item, "scale", 1);
 
-                item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
-                eventEmitter.emitHideEvent(item);
-            }, animationMsDuration + 20);
-            timeouter.add(item, completeScaleTimeout);
+                    item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
+                    eventEmitter.emitHideEvent(item);
+                }, animationMsDuration + 20);
+                timeouter.add(item, completeScaleTimeout);
+            }
+
+            if(me._gridifier.hasItemBindedClone(item)) {
+                var itemClone = me._gridifier.getItemClone(item);
+                timeouter.flush(item);
+                executeScaleHide(item);
+                executeScaleHide(itemClone);
+            }
+            else {
+                executeScaleHide(item);
+            }
         }
     };
 }
@@ -2966,27 +3003,39 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
                 return;
             }
 
-            if(!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
-                Dom.css3.transition(item, "none");
-                Dom.css3.opacity(item, "0");
-                item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
+            var executeFadeShow = function(item) {
+                if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
+                    Dom.css3.transition(item, "none");
+                    Dom.css3.opacity(item, "0");
+                    item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
+                }
+
+                var initFadeTimeout = setTimeout(function () {
+                    item.style.visibility = "visible";
+                    Dom.css3.transition(
+                        item,
+                        Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms ease"
+                    );
+                    Dom.css3.opacity(item, 1);
+                }, 20);
+                timeouter.add(item, initFadeTimeout);
+
+                var completeFadeTimeout = setTimeout(function () {
+                    item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
+                    eventEmitter.emitShowEvent(item);
+                }, animationMsDuration + 40);
+                timeouter.add(item, completeFadeTimeout);
             }
 
-            var initFadeTimeout = setTimeout(function() {
-                item.style.visibility = "visible";
-                Dom.css3.transition(
-                    item, 
-                    Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms ease"
-                );
-                Dom.css3.opacity(item, 1);
-            }, 20);
-            timeouter.add(item, initFadeTimeout);
-
-            var completeFadeTimeout = setTimeout(function() {
-                item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
-                eventEmitter.emitShowEvent(item);
-            }, animationMsDuration + 40);
-            timeouter.add(item, completeFadeTimeout);
+            if(me._gridifier.hasItemBindedClone(item)) {
+                var itemClone = me._gridifier.getItemClone(item);
+                timeouter.flush(itemClone);
+                executeFadeShow(item);
+                executeFadeShow(itemClone);
+            }
+            else {
+                executeFadeShow(item);
+            }
         },
 
         "hide": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
@@ -2997,24 +3046,36 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
                 return;
             }
 
-            Dom.css3.transition(
-                item,
-                Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms ease"
-            );
+            var executeFadeHide = function(item) {
+                Dom.css3.transition(
+                    item,
+                    Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms ease"
+                );
 
-            item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
-            Dom.css3.opacity(item, "0");
+                item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
+                Dom.css3.opacity(item, "0");
 
-            var executeFadeOutTimeout = setTimeout(function() {
-                item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
-                item.style.visibility = "hidden";
+                var executeFadeOutTimeout = setTimeout(function () {
+                    item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
+                    item.style.visibility = "hidden";
 
-                Dom.css3.transition(item, "none");
-                Dom.css3.opacity(item, "1");
+                    Dom.css3.transition(item, "none");
+                    Dom.css3.opacity(item, "1");
 
-                eventEmitter.emitHideEvent(item);
-            }, animationMsDuration + 20);
-            timeouter.add(item, executeFadeOutTimeout);
+                    eventEmitter.emitHideEvent(item);
+                }, animationMsDuration + 20);
+                timeouter.add(item, executeFadeOutTimeout);
+            }
+
+            if(me._gridifier.hasItemBindedClone(item)) {
+                var itemClone = me._gridifier.getItemClone(item);
+                timeouter.flush(item);
+                executeFadeHide(item);
+                executeFadeHide(itemClone);
+            }
+            else {
+                executeFadeHide(item);
+            }
         }
     };
 }
@@ -3120,7 +3181,7 @@ Gridifier.Api.ToggleTimeouter.prototype.flush = function(item) {
         window.killNumber = 0;
     window.killNumber++;
 
-    if(this._toggleTimeouts.hasOwnProperty(itemGUID)) { console.log("Killing scheduled timeouts = " + window.killNumber);
+    if(this._toggleTimeouts.hasOwnProperty(itemGUID)) {
         for(var i = 0; i < this._toggleTimeouts[itemGUID].length; i++) {
             clearTimeout(this._toggleTimeouts[itemGUID][i]);
         }
@@ -8195,7 +8256,7 @@ Gridifier.HorizontalGrid.Appender.prototype.append = function(item) {
             }
         }
 
-        this._renderer.renderConnections(colConnections);
+        this._renderer.renderConnectionsAfterDelay(colConnections);
         this._renderer.showConnections(connection);
     }
 }
@@ -9809,7 +9870,7 @@ Gridifier.HorizontalGrid.Prepender.prototype.prepend = function(item) {
             }
         }
 
-        this._renderer.renderConnections(colConnections);
+        this._renderer.renderConnectionsAfterDelay(colConnections);
         this._renderer.showConnections(connection);
     }
 }
@@ -10031,7 +10092,7 @@ Gridifier.HorizontalGrid.ReversedAppender.prototype.reversedAppend = function(it
             }
         }
 
-        this._renderer.renderConnections(colConnections);
+        this._renderer.renderConnectionsAfterDelay(colConnections);
         this._renderer.showConnections(connection);
     }
 }
@@ -10263,7 +10324,7 @@ Gridifier.HorizontalGrid.ReversedPrepender.prototype.reversedPrepend = function(
             }
         }
 
-        this._renderer.renderConnections(colConnections);
+        this._renderer.renderConnectionsAfterDelay(colConnections);
         this._renderer.showConnections(connection);
     }
 }
@@ -11079,11 +11140,11 @@ Gridifier.Renderer = function(gridifier, connections, settings, normalizer) {
 
         me._transformedItemMarker = new Gridifier.SizesTransformer.TransformedItemMarker();
 
-        me._rendererSchedulator = new Gridifier.Renderer.Schedulator(
-            me._gridifier, me._settings, me
-        );
         me._rendererConnections = new Gridifier.Renderer.Connections(
             me._settings
+        );
+        me._rendererSchedulator = new Gridifier.Renderer.Schedulator(
+            me._gridifier, me._settings, me._connections, me, me._rendererConnections
         );
     };
 
@@ -11188,6 +11249,19 @@ Gridifier.Renderer.prototype.renderConnections = function(connections, exceptCon
     }
 }
 
+// Delay in row/col updates in noIntersectionsMode is required, because without it refreshes
+// will be called right after show method, and will be placed in the end of animation.
+// (Example: slide show method -> calling 0ms offset translate at start, than this refresh
+// will be called before slideOutTimeout without a delay.(Will move items instantly)
+Gridifier.Renderer.prototype.renderConnectionsAfterDelay = function(connections, delay) {
+    var delay = delay || 0;
+
+    for(var i = 0; i < connections.length; i++) {
+        this._rendererSchedulator.reinit();
+        this._rendererSchedulator.scheduleDelayedRender(connections[i], null, null, delay);
+    }
+}
+
 Gridifier.Renderer.prototype.scheduleForSilentRender = function(items) {
    for(var i = 0; i < items.length; i++) {
       items[i].setAttribute(
@@ -11285,12 +11359,14 @@ Gridifier.Renderer.Connections.prototype.getCssTopPropertyValuePerConnection = f
     return top;
 }
 
-Gridifier.Renderer.Schedulator = function(gridifier, settings, renderer) {
+Gridifier.Renderer.Schedulator = function(gridifier, settings, connections, renderer, rendererConnections) {
     var me = this;
 
     this._gridifier = null;
     this._settings = null;
+    this._connections = null;
     this._renderer = null;
+    this._rendererConnections = null;
 
     // Array[
     //     [0] => {connection: connection, processingType: processingType, left: left, top: top, 
@@ -11309,7 +11385,9 @@ Gridifier.Renderer.Schedulator = function(gridifier, settings, renderer) {
     this._construct = function() {
         me._gridifier = gridifier;
         me._settings = settings;
+        me._connections = connections;
         me._renderer = renderer;
+        me._rendererConnections = rendererConnections;
     };
 
     this._bindEvents = function() {
@@ -11328,8 +11406,9 @@ Gridifier.Renderer.Schedulator = function(gridifier, settings, renderer) {
 
 Gridifier.Renderer.Schedulator.PROCESS_SCHEDULED_CONNECTIONS_TIMEOUT = 20;
 Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES = {
-    SHOW: 0, HIDE: 1, RENDER: 2, RENDER_TRANSFORMED: 3, RENDER_DEPENDED: 4
+    SHOW: 0, HIDE: 1, RENDER: 2, RENDER_TRANSFORMED: 3, RENDER_DEPENDED: 4, DELAYED_RENDER: 5
 };
+Gridifier.Renderer.Schedulator.DISABLE_PRETOGGLE_COORDS_CHANGER_CALL_DATA_ATTR = "data-gridifier-renderer-disable-pretoggle-cc-call";
 
 Gridifier.Renderer.Schedulator.prototype.reinit = function() {
     if(this._scheduledConnectionsToProcessData == null) {
@@ -11369,6 +11448,16 @@ Gridifier.Renderer.Schedulator.prototype.scheduleRender = function(connection, l
         top: top
     });
     this._schedule();
+}
+
+Gridifier.Renderer.Schedulator.prototype.scheduleDelayedRender = function(connection, left, top, delay) {
+    this._scheduledConnectionsToProcessData.push({
+        connection: connection,
+        processingType: Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.DELAYED_RENDER,
+        left: left,
+        top: top,
+        delay: delay
+    });
 }
 
 Gridifier.Renderer.Schedulator.prototype.scheduleRenderTransformed = function(connection, 
@@ -11411,6 +11500,7 @@ Gridifier.Renderer.Schedulator.prototype._schedule = function() {
 // me._gridifier.getGridX2() will be called(because of setTimeout async), and Gridifier will recursively recalculate
 // all DOM nodes up through DOM-Tree, until reaching root node.
 Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function() {
+    var me = this;
     var schedulator = Gridifier.Renderer.Schedulator;
 
     for(var i = 0; i < this._scheduledConnectionsToProcessData.length; i++) {
@@ -11445,61 +11535,36 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var eventEmitter = this._settings.getEventEmitter();
             var animationMsDuration = this._settings.getToggleAnimationMsDuration();
             var sizesResolverManager = this._settings.getSizesResolverManager();
-            var coordsChanger = this._settings.getCoordsChangerOnToggle();
+            var coordsChanger = this._settings.getCoordsChanger();
             var collector = this._settings.getCollector();
+
+            var showItem = function(item) {
+                toggleFunction.show(
+                    connectionToProcess.item,
+                    me._gridifier.getGrid(),
+                    animationMsDuration,
+                    toggleTimeouter,
+                    eventEmitter,
+                    sizesResolverManager,
+                    coordsChanger,
+                    collector,
+                    left,
+                    top
+                );
+            };
 
             // We should call coords changer with fake(0ms) time to set traslate property
             // on toggled item, before toggle animation will start. Adding new translate rule
             // to the transform property dynamically won't work. (
             //      item.style.wT = "scale(0)";
             //      item.style.wT = "scale(1) translate3d(0px,0px,0px)"; -> Won't work.
-            // I don't think that we should also do this in hide.(Will have all required rules set at that moment)
-            var rendererCoordsChangerFunction = this._settings.getCoordsChanger();
-            var coordsChangeFakeAnimationMsDuration = 0;
-
-            rendererCoordsChangerFunction(
-                connectionToProcess.item,
-                left,
-                top,
-                coordsChangeFakeAnimationMsDuration,
-                eventEmitter,
-                false
-            );
-
-            toggleFunction.show(
-                connectionToProcess.item,
-                this._gridifier.getGrid(),
-                animationMsDuration,
-                toggleTimeouter,
-                eventEmitter,
-                sizesResolverManager,
-                coordsChanger,
-                collector
-            );
-
+            coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter);
             if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
                 var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
-
-                rendererCoordsChangerFunction(
-                    itemClone,
-                    left,
-                    top,
-                    coordsChangeFakeAnimationMsDuration,
-                    eventEmitter,
-                    false
-                );
-
-                toggleFunction.show(
-                    itemClone,
-                    this._gridifier.getGrid(),
-                    animationMsDuration,
-                    toggleTimeouter,
-                    eventEmitter,
-                    sizesResolverManager,
-                    coordsChanger,
-                    collector
-                );
+                coordsChanger(itemClone, left, top, animationMsDuration, eventEmitter);
             }
+
+            showItem(connectionToProcess.item);
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
             var toggleFunction = this._settings.getToggle();
@@ -11507,51 +11572,62 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var eventEmitter = this._settings.getEventEmitter();
             var animationMsDuration = this._settings.getToggleAnimationMsDuration();
             var sizesResolverManager = this._settings.getSizesResolverManager();
-            var coordsChanger = this._settings.getCoordsChangerOnToggle();
+            var coordsChanger = this._settings.getCoordsChanger();
             var collector = this._settings.getCollector();
 
-            toggleFunction.hide(
-                connectionToProcess.item,
-                this._gridifier.getGrid(),
-                animationMsDuration,
-                toggleTimeouter,
-                eventEmitter,
-                sizesResolverManager,
-                coordsChanger,
-                collector
-            );
-
-            if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
-                var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
-
-                // We should update this value on hide, because with translates, last set
-                // translate will be still applyied when we will call next show on filtering.
-                // In ClonesRenderer we will update Dom left and top values at last coordsChanger()
-                // call, and because of that this call will set up translates to 0,0,(0) values.
-                // (Otherwise clones will move from translated positions at last step on next filter show)
-                var rendererCoordsChangerFunction = this._settings.getCoordsChanger();
-                var coordsChangeFakeAnimationMsDuration = 0;
-
-                rendererCoordsChangerFunction(
-                    itemClone,
-                    left,
-                    top,
-                    coordsChangeFakeAnimationMsDuration,
-                    eventEmitter,
-                    false
-                );
-
+            var hideItem = function(item) {
                 toggleFunction.hide(
-                    itemClone,
-                    this._gridifier.getGrid(),
+                    item,
+                    me._gridifier.getGrid(),
                     animationMsDuration,
                     toggleTimeouter,
                     eventEmitter,
                     sizesResolverManager,
                     coordsChanger,
-                    collector
+                    collector,
+                    left,
+                    top
                 );
+            };
+
+            // We should update this value on hide, because with translates, last set
+            // translate will be still applyied when we will call next show on filtering.
+            // In ClonesRenderer we will update Dom left and top values at last coordsChanger()
+            // call, and because of that this call will set up translates to 0,0,(0) values.
+            // (Otherwise clones will move from translated positions at last step on next filter show)
+            // (We should not do this on original item.(Can stop hiding animation, like on rotate)
+            if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
+                var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
+                coordsChanger(itemClone, left, top, animationMsDuration, eventEmitter);
             }
+
+            hideItem(connectionToProcess.item);
+        }
+        else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.DELAYED_RENDER) {
+            var delay = this._scheduledConnectionsToProcessData[i].delay;
+            var coordsChanger = this._settings.getCoordsChanger();
+            // @todo -> Or toggleAnimationMsDuration(Per sync???)
+            var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
+            var eventEmitter = this._settings.getEventEmitter();
+
+            var me = this;
+            (function(item, animationMsDuration, eventEmitter, delay) {
+                setTimeout(function() {
+                    // Because of using this delayed timeout we should find item connection again.
+                    // There could be a bunch of resizes since this delayedRender schedule, so this item connection can point to the
+                    // old version of the connection.
+                    var connectionToProcess = me._connections.findConnectionByItem(item);
+
+                    coordsChanger(
+                        item,
+                        me._rendererConnections.getCssLeftPropertyValuePerConnection(connectionToProcess),
+                        me._rendererConnections.getCssTopPropertyValuePerConnection(connectionToProcess),
+                        animationMsDuration,
+                        eventEmitter,
+                        false
+                    );
+                }, delay);
+            })(connectionToProcess.item, animationMsDuration, eventEmitter, delay);
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER ||
                 processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED) {
@@ -11560,8 +11636,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var eventEmitter = this._settings.getEventEmitter();
 
             rendererCoordsChangerFunction(
-                connectionToProcess.item, 
-                left, 
+                connectionToProcess.item,
+                left,
                 top,
                 animationMsDuration,
                 eventEmitter,
@@ -11737,7 +11813,6 @@ Gridifier.ApiSettingsParser.prototype.parseFilterOptions = function(filterApi) {
 Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coordsChangerApi) {
     if(!this._settings.hasOwnProperty("coordsChanger")) {
         coordsChangerApi.setCoordsChangerFunction("CSS3Translate3D");
-        coordsChangerApi.setCoordsChangerOnToggleFunction("CSS3Translate3D");
         return;
     }
 
@@ -11766,13 +11841,6 @@ Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coord
             Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_COORDS_CHANGER_PARAM_VALUE,
             this._settings.coordsChanger
         );
-    }
-
-    if(this._settings.hasOwnProperty("coordsChangerOnToggle")) {
-        coordsChangerApi.setCoordsChangerOnToggleFunction(this._settings.coordsChangerOnToggle);
-    }
-    else {
-        coordsChangerApi.setCoordsChangerOnToggleFunction("CSS3Translate3D");
     }
 }
 
@@ -12179,7 +12247,7 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
         me._coreSettingsParser = new Gridifier.CoreSettingsParser(me, me._settings);
         me._apiSettingsParser = new Gridifier.ApiSettingsParser(me, me._settings);
 
-        me._toggleApi = new Gridifier.Api.Toggle(me, me._eventEmitter, me._sizesResolverManager);
+        me._toggleApi = new Gridifier.Api.Toggle(me, me._gridifier,  me._eventEmitter, me._sizesResolverManager);
         me._toggleTimeouterApi = new Gridifier.Api.ToggleTimeouter();
         me._sortApi = new Gridifier.Api.Sort(me, me._eventEmitter);
         me._filterApi = new Gridifier.Api.Filter(me, me._eventEmitter);
@@ -12392,20 +12460,12 @@ Gridifier.Settings.prototype.setCoordsChanger = function(coordsChangerFunctionNa
     this._coordsChangerApi.setCoordsChangerFunction(coordsChangerFunctionName);
 }
 
-Gridifier.Settings.prototype.setCoordsChangerOnToggle = function(coordsChangerFunctionName) {
-    this._coordsChangerApi.setCoordsChangerOnToggleFunction(coordsChangerFunctionName);
-}
-
 Gridifier.Settings.prototype.setSizesChanger = function(sizesChangerFunctionName) {
     this._sizesChangerApi.setSizesChangerFunction(sizesChangerFunctionName);
 }
 
 Gridifier.Settings.prototype.getCoordsChanger = function() {
     return this._coordsChangerApi.getCoordsChangerFunction();
-}
-
-Gridifier.Settings.prototype.getCoordsChangerOnToggle = function() {
-    return this._coordsChangerApi.getCoordsChangerOnToggleFunction();
 }
 
 Gridifier.Settings.prototype.getSizesChanger = function() {
@@ -13909,7 +13969,7 @@ Gridifier.VerticalGrid.Appender.prototype.append = function(item) {
             }
         }
 
-        this._renderer.renderConnections(rowConnections);
+        this._renderer.renderConnectionsAfterDelay(rowConnections);
         this._renderer.showConnections(connection);
     }
 }
@@ -14933,7 +14993,7 @@ Gridifier.VerticalGrid.ConnectionsVerticalIntersector.prototype.isIntersectingMo
 
     var connections = this._connections.get();
     var intersectedConnectionItemIndexes = [];
-    
+
     var isIntersectingVerticallyAnyFromAlreadyIntersectedItems = function(connection) {
         if(intersectedConnectionItemIndexes.length == 0)
             return false;
@@ -15007,7 +15067,7 @@ Gridifier.VerticalGrid.ConnectionsVerticalIntersector.prototype.getAllVertically
         var isAbove = (itemCoords.y1 < maybeIntersectableConnection.y1 && itemCoords.y2 < maybeIntersectableConnection.y1);
         var isBelow = (itemCoords.y1 > maybeIntersectableConnection.y2 && itemCoords.y2 > maybeIntersectableConnection.y2);
 
-        if(!isAbove && !isBelow) 
+        if(!isAbove && !isBelow)
             verticallyIntersectedConnections.push(maybeIntersectableConnection);
     }
 
@@ -15018,7 +15078,7 @@ Gridifier.VerticalGrid.ConnectionsVerticalIntersector.prototype.expandVertically
     var mostTallConnection = this.getMostTallFromAllVerticallyIntersectedConnections(newConnection);
     if(mostTallConnection == null)
         return;
-    
+
     var rowConnectionsToExpand = this.getAllVerticallyIntersectedConnections(newConnection);
     this._lastRowVerticallyExpandedConnections = rowConnectionsToExpand;
 
@@ -15048,7 +15108,8 @@ Gridifier.VerticalGrid.ConnectionsVerticalIntersector.prototype.expandVertically
             var itemHeight = targetSizes.targetHeight - 1;
 
             //var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
-            // @todo fix (y2 - y1 + 1) 
+            // @todo fix (y2 - y1 + 1)
+            //rowConnectionsToExpand[i].verticalOffset = Math.abs(y2 - y1) - itemHeight;
             rowConnectionsToExpand[i].verticalOffset = Math.abs(y2 - y1) - itemHeight;
         }
     }
@@ -15698,7 +15759,7 @@ Gridifier.VerticalGrid.Prepender.prototype.prepend = function(item) {
             }
         }
 
-        this._renderer.renderConnections(rowConnections);
+        this._renderer.renderConnectionsAfterDelay(rowConnections);
         this._renderer.showConnections(connection);
     }
 }
@@ -15920,7 +15981,7 @@ Gridifier.VerticalGrid.ReversedAppender.prototype.reversedAppend = function(item
             }
         }
 
-        this._renderer.renderConnections(rowConnections);
+        this._renderer.renderConnectionsAfterDelay(rowConnections);
         this._renderer.showConnections(connection);
     }
 }
@@ -16152,7 +16213,7 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype.reversedPrepend = function(it
             }
         }
 
-        this._renderer.renderConnections(rowConnections);
+        this._renderer.renderConnectionsAfterDelay(rowConnections);
         this._renderer.showConnections(connection);
     }
 }

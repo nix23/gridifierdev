@@ -384,22 +384,27 @@ Gridifier.prototype.silentAppend = function(items, batchSize, batchTimeout) {
 }
 
 Gridifier.prototype.silentRender = function() {
-   var scheduledForSilentRenderItems = this._collector.collectByQuery(
-      "[" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
-   );
+   var executeSilentRender = function() {
+       var scheduledForSilentRenderItems = this._collector.collectByQuery(
+           "[" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
+       );
 
-   var scheduledForSilentRenderConnections = [];
-   for(var i = 0; i < scheduledForSilentRenderItems.length; i++) {
-      scheduledForSilentRenderConnections.push(
-         this._connections.findConnectionByItem(scheduledForSilentRenderItems[i])
-      );
+       var scheduledForSilentRenderConnections = [];
+       for (var i = 0; i < scheduledForSilentRenderItems.length; i++) {
+           scheduledForSilentRenderConnections.push(
+               this._connections.findConnectionByItem(scheduledForSilentRenderItems[i])
+           );
+       }
+
+       this._renderer.unscheduleForSilentRender(
+           scheduledForSilentRenderItems,
+           scheduledForSilentRenderConnections
+       );
+       this._renderer.showConnections(scheduledForSilentRenderConnections);
    }
 
-   this._renderer.unscheduleForSilentRender(
-      scheduledForSilentRenderItems,
-      scheduledForSilentRenderConnections
-   );
-   this._renderer.showConnections(scheduledForSilentRenderConnections);
+   var me = this;
+   setTimeout(function() { executeSilentRender.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 20);
 }
 
 Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchTimeout) {

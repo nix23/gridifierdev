@@ -158,11 +158,11 @@ Gridifier.Api.Toggle.prototype._addRotateY = function() {
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
-                me._rotateApi.show(item, grid, false, timeouter);
-                me._rotateApi.show(itemClone, grid, false, timeouter);
+                me._rotateApi.show(item, grid, true, timeouter);
+                me._rotateApi.show(itemClone, grid, true, timeouter);
             }
             else {
-                me._rotateApi.show(item, grid, false, timeouter);
+                me._rotateApi.show(item, grid, true, timeouter);
             }
         },
 
@@ -177,11 +177,11 @@ Gridifier.Api.Toggle.prototype._addRotateY = function() {
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
-                me._rotateApi.hide(item, grid, false, timeouter);
-                me._rotateApi.hide(itemClone, grid, false, timeouter);
+                me._rotateApi.hide(item, grid, true, timeouter);
+                me._rotateApi.hide(itemClone, grid, true, timeouter);
             }
             else {
-                me._rotateApi.hide(item, grid, false, timeouter);
+                me._rotateApi.hide(item, grid, true, timeouter);
             }
         }
     };
@@ -268,6 +268,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 timeouter.add(item, prehideItemTimeout);
 
                 var completeScaleTimeout = setTimeout(function () {
+                    item.style.visibility = "hidden";
                     Dom.css3.transition(item, "none");
                     Dom.css3.transformProperty(item, "scale", 1);
 

@@ -348,8 +348,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         //me._gridifierSettings.toggleAnimationMsDuration = 500;
         //me._gridifierSettings.coordsChangeAnimationMsDuration = 500;
-        me._gridifierSettings.toggleAnimationMsDuration = 1200;
-        me._gridifierSettings.coordsChangeAnimationMsDuration = 1200;
+        me._gridifierSettings.toggleAnimationMsDuration = 500;
+        me._gridifierSettings.coordsChangeAnimationMsDuration = 500;
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
 
         me._gridifier.setItemClonesManagerLifecycleCallbacks();
@@ -357,8 +357,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifier.setSizesChanger("defaultPaddingBottom");
         window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
         setTimeout(function() {
-           //me._gridifier.toggleBy("fade");
-           me._gridifier.toggleBy("rotateY");
+            //me._gridifier.toggleBy("fade");
+            //me._gridifier.toggleBy("rotateY");
             //me._gridifier.toggleBy("slideLeft");
         }, 500);
         //me._gridifier.setCoordsChanger("CSS3Position");

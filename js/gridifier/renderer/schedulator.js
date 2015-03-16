@@ -197,8 +197,12 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             // to the transform property dynamically won't work. (
             //      item.style.wT = "scale(0)";
             //      item.style.wT = "scale(1) translate3d(0px,0px,0px)"; -> Won't work.
-            // I don't think that we should also do this in hide.(Will have all required rules set at that moment)
             coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter);
+            if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
+                var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
+                coordsChanger(itemClone, left, top, animationMsDuration, eventEmitter);
+            }
+
             showItem(connectionToProcess.item);
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
@@ -230,7 +234,12 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             // In ClonesRenderer we will update Dom left and top values at last coordsChanger()
             // call, and because of that this call will set up translates to 0,0,(0) values.
             // (Otherwise clones will move from translated positions at last step on next filter show)
-            coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter);
+            // (We should not do this on original item.(Can stop hiding animation, like on rotate)
+            if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
+                var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
+                coordsChanger(itemClone, left, top, animationMsDuration, eventEmitter);
+            }
+
             hideItem(connectionToProcess.item);
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.DELAYED_RENDER) {
