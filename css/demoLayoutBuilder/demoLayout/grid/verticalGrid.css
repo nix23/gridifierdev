@@ -5,6 +5,7 @@
     background: rgb(235,235,235);
     border-top: 1px rgb(210,210,210) solid;
     border-bottom: 1px rgb(210,210,210) solid;
+    overflow: hidden;
 }
 
 #demoLayout .gridView .grid .gridBg {

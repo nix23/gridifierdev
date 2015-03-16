@@ -137,7 +137,7 @@ Gridifier.HorizontalGrid.Prepender.prototype.prepend = function(item) {
             }
         }
 
-        this._renderer.renderConnections(colConnections);
+        this._renderer.renderConnectionsAfterDelay(colConnections);
         this._renderer.showConnections(connection);
     }
 }

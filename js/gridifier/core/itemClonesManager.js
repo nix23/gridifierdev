@@ -45,12 +45,19 @@ Gridifier.ItemClonesManager.prototype.createClone = function(item) {
    this._grid.getGrid().appendChild(itemClone);
 
    if(item.style.zIndex.length == 0) {
-      itemClone.style.zIndex = 1;
-      item.style.zIndex = 2;
+      itemClone.style.zIndex = 0;
+      item.style.zIndex = 1;
    }
    else {
       var currentItemZIndex = item.style.zIndex;
-      itemClone.style.zIndex = currentItemZIndex - 1;
+
+      if(currentItemZIndex == 0) {
+          itemClone.style.zIndex = 0;
+          item.style.zIndex = 1;
+      }
+      else {
+          itemClone.style.zIndex = 0;
+      }
    }
 
    this._nextBindingId++;

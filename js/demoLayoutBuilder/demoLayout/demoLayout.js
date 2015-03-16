@@ -60,7 +60,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
-        //me._gridifierSettings.alignmentType = "center";
+        me._gridifierSettings.alignmentType = "center";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
         me._gridifierSettings.dragifier = true;
 
@@ -348,14 +348,17 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         //me._gridifierSettings.toggleAnimationMsDuration = 500;
         //me._gridifierSettings.coordsChangeAnimationMsDuration = 500;
-        me._gridifierSettings.toggleAnimationMsDuration = 3000;
-        me._gridifierSettings.coordsChangeAnimationMsDuration = 3000;
+        me._gridifierSettings.toggleAnimationMsDuration = 1200;
+        me._gridifierSettings.coordsChangeAnimationMsDuration = 1200;
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
+
         me._gridifier.setItemClonesManagerLifecycleCallbacks();
         me._gridifier.setCoordsChanger("CSS3Translate3DClones");
         //me._gridifier.setSizesChanger("defaultPaddingBottom");
         window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
         setTimeout(function() {
+           //me._gridifier.toggleBy("fade");
+           me._gridifier.toggleBy("rotateY");
             //me._gridifier.toggleBy("slideLeft");
         }, 500);
         //me._gridifier.setCoordsChanger("CSS3Position");
@@ -607,6 +610,7 @@ DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
     }
 
     this._gridifier.append(itemsToAppend);
+    //this._gridifier.append(itemsToAppend, 1, 100);
     //this._gridifier.silentAppend(itemsToAppend);
     // @todo -> append and prepend by one or by batch????
 }

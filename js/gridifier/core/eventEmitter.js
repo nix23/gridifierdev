@@ -7,6 +7,7 @@ Gridifier.EventEmitter = function(gridifier) {
     me._hideCallbacks = [];
     me._gridSizesChangeCallbacks = [];
     me._transformCallbacks = [];
+    me._connectionCreateCallbacks = [];
 
     this._css = {
     };
@@ -36,6 +37,7 @@ Gridifier.EventEmitter.prototype._bindEmitterToGridifier = function() {
     this._gridifier.onHide = function(callbackFn) { me.onHide.call(me, callbackFn); };
     this._gridifier.onGridSizesChange = function(callbackFn) { me.onGridSizesChange.call(me, callbackFn); };
     this._gridifier.onTransform = function(callbackFn) { me.onTransform.call(me, callbackFn); };
+    this._gridifier.onConnectionCreate = function(callbackFn) { me.onConnectionCreate.call(me, callbackFn); };
 }
 
 Gridifier.EventEmitter.prototype.onShow = function(callbackFn) {
@@ -52,6 +54,10 @@ Gridifier.EventEmitter.prototype.onTransform = function(callbackFn) {
 
 Gridifier.EventEmitter.prototype.onGridSizesChange = function(callbackFn) {
     this._gridSizesChangeCallbacks.push(callbackFn);
+}
+
+Gridifier.EventEmitter.prototype.onConnectionCreate = function(callbackFn) {
+    this._connectionCreateCallbacks.push(callbackFn);
 }
 
 // @todo -> Add off events
@@ -80,5 +86,11 @@ Gridifier.EventEmitter.prototype.emitGridSizesChangeEvent = function() {
 Gridifier.EventEmitter.prototype.emitTransformEvent = function(item, newWidth, newHeight, newLeft, newTop) {
     for(var i = 0; i < this._transformCallbacks.length; i++) {
         this._transformCallbacks[i](item, newWidth, newHeight, newLeft, newTop);
+    }
+}
+
+Gridifier.EventEmitter.prototype.emitConnectionCreateEvent = function(connections) {
+    for(var i = 0; i < this._connectionCreateCallbacks.length; i++) {
+        this._connectionCreateCallbacks[i](connections);
     }
 }

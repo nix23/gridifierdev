@@ -114,7 +114,7 @@ Gridifier.HorizontalGrid.ReversedAppender.prototype.reversedAppend = function(it
             }
         }
 
-        this._renderer.renderConnections(colConnections);
+        this._renderer.renderConnectionsAfterDelay(colConnections);
         this._renderer.showConnections(connection);
     }
 }

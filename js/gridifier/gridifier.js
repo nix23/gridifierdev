@@ -39,12 +39,12 @@ Gridifier = function(grid, settings) {
         me._sizesResolverManager = new Gridifier.SizesResolverManager();
         me._grid = new Gridifier.Grid(grid, me._sizesResolverManager);
         me._eventEmitter = new Gridifier.EventEmitter(me);
-        me._settings = new Gridifier.Settings(settings, me, me._eventEmitter, me._sizesResolverManager);
+        me._guid = new Gridifier.GUID();
+        me._settings = new Gridifier.Settings(settings, me, me._guid, me._eventEmitter, me._sizesResolverManager);
         me._collector = new Gridifier.Collector(me._settings,  me.getGrid(), me._sizesResolverManager);
 
         me._settings.setCollectorInstance(me._collector);
 
-        me._guid = new Gridifier.GUID();
         me._normalizer = new Gridifier.Normalizer(me, me._sizesResolverManager);
         me._operation = new Gridifier.Operation();
         me._lifecycleCallbacks = new Gridifier.LifecycleCallbacks(me._collector);
@@ -54,7 +54,7 @@ Gridifier = function(grid, settings) {
 
         if(me._settings.isVerticalGrid()) {
             me._connections = new Gridifier.VerticalGrid.Connections(
-                me, me._guid, me._settings, me._sizesResolverManager
+                me, me._guid, me._settings, me._sizesResolverManager, me._eventEmitter
             );
             me._connectionsSorter = new Gridifier.VerticalGrid.ConnectionsSorter(
                 me._connections, me._settings, me._guid
@@ -62,7 +62,7 @@ Gridifier = function(grid, settings) {
         }
         else if(me._settings.isHorizontalGrid()) {
             me._connections = new Gridifier.HorizontalGrid.Connections(
-                me, me._guid, me._settings, me._sizesResolverManager
+                me, me._guid, me._settings, me._sizesResolverManager, me._eventEmitter
             );
             me._connectionsSorter = new Gridifier.HorizontalGrid.ConnectionsSorter(
                 me._connections, me._settings, me._guid
@@ -307,22 +307,42 @@ Gridifier.prototype.setCoordsChanger = function(coordsChangerName) {
     return this;
 }
 
-Gridifier.prototype.setCoordsChangerOnToggle = function(coordsChangerName) {
-    this._settings.setCoordsChangerOnToggle(coordsChangerName);
-    return this;
-}
-
 Gridifier.prototype.setSizesChanger = function(sizesChangerName) {
     this._settings.setSizesChanger(sizesChangerName);
     return this;
 }
 
 Gridifier.prototype.setItemWidthPercentageAntialias = function(itemWidthPtAntialias) {
+    this._normalizer.bindZIndexesUpdates();
     this._normalizer.setItemWidthAntialiasPercentageValue(itemWidthPtAntialias);
+
+    return this;
 }
 
 Gridifier.prototype.setItemHeightPercentageAntialias = function(itemHeightPtAntialias) {
+    this._normalizer.bindZIndexesUpdates();
     this._normalizer.setItemHeightAntialiasPercentageValue(itemHeightPtAntialias);
+
+    return this;
+}
+
+Gridifier.prototype.setItemWidthPxAntialias = function(itemWidthPxAntialias) {
+    this._normalizer.bindZIndexesUpdates();
+    this._normalizer.setItemWidthAntialiasPxValue(itemWidthPxAntialias);
+
+    return this;
+}
+
+Gridifier.prototype.setItemHeightPxAntialias = function(itemHeightPxAntialias) {
+    this._normalizer.bindZIndexesUpdates();
+    this._normalizer.setItemHeightAntialiasPxValue(itemHeightPxAntialias);
+
+    return this;
+}
+
+Gridifier.prototype.disableZIndexesUpdates = function() {
+    this._normalizer.disableZIndexesUpdates();
+    return this;
 }
 
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {

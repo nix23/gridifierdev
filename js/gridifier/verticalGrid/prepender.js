@@ -137,7 +137,7 @@ Gridifier.VerticalGrid.Prepender.prototype.prepend = function(item) {
             }
         }
 
-        this._renderer.renderConnections(rowConnections);
+        this._renderer.renderConnectionsAfterDelay(rowConnections);
         this._renderer.showConnections(connection);
     }
 }

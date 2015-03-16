@@ -1,8 +1,9 @@
-Gridifier.Settings = function(settings, gridifier, eventEmitter, sizesResolverManager) {
+Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesResolverManager) {
     var me = this;
 
     this._settings = null;
     this._gridifier = null;
+    this._guid = null;
     this._collector = null;
     this._eventEmitter = null;
     this._sizesResolverManager = null;
@@ -27,6 +28,7 @@ Gridifier.Settings = function(settings, gridifier, eventEmitter, sizesResolverMa
     //               that they would call for example scale in ie10/ie9 etc....
     //              User should have control over direction of rotate and perspective size.
     this._toggleApi = null;
+    this._toggleTimeouterApi = null;
     this._sortApi = null;
     this._filterApi = null;
     this._coordsChangerApi = null;
@@ -54,13 +56,15 @@ Gridifier.Settings = function(settings, gridifier, eventEmitter, sizesResolverMa
     this._construct = function() {
         me._settings = settings;
         me._gridifier = gridifier;
+        me._guid = guid;
         me._eventEmitter = eventEmitter;
         me._sizesResolverManager = sizesResolverManager;
 
         me._coreSettingsParser = new Gridifier.CoreSettingsParser(me, me._settings);
         me._apiSettingsParser = new Gridifier.ApiSettingsParser(me, me._settings);
 
-        me._toggleApi = new Gridifier.Api.Toggle(me, me._eventEmitter, me._sizesResolverManager);
+        me._toggleApi = new Gridifier.Api.Toggle(me, me._gridifier,  me._eventEmitter, me._sizesResolverManager);
+        me._toggleTimeouterApi = new Gridifier.Api.ToggleTimeouter();
         me._sortApi = new Gridifier.Api.Sort(me, me._eventEmitter);
         me._filterApi = new Gridifier.Api.Filter(me, me._eventEmitter);
         me._coordsChangerApi = new Gridifier.Api.CoordsChanger(me, me._gridifier, me._eventEmitter);
@@ -158,6 +162,10 @@ Gridifier.Settings.prototype.isFitGridTransformType = function() {
 
 Gridifier.Settings.prototype.getGridTransformTimeout = function() {
     return this._gridTransformTimeout;
+}
+
+Gridifier.Settings.prototype.getToggleTimeouter = function() {
+    return this._toggleTimeouterApi;
 }
 
 Gridifier.Settings.prototype.isVerticalGrid = function() {
@@ -268,20 +276,12 @@ Gridifier.Settings.prototype.setCoordsChanger = function(coordsChangerFunctionNa
     this._coordsChangerApi.setCoordsChangerFunction(coordsChangerFunctionName);
 }
 
-Gridifier.Settings.prototype.setCoordsChangerOnToggle = function(coordsChangerFunctionName) {
-    this._coordsChangerApi.setCoordsChangerOnToggleFunction(coordsChangerFunctionName);
-}
-
 Gridifier.Settings.prototype.setSizesChanger = function(sizesChangerFunctionName) {
     this._sizesChangerApi.setSizesChangerFunction(sizesChangerFunctionName);
 }
 
 Gridifier.Settings.prototype.getCoordsChanger = function() {
     return this._coordsChangerApi.getCoordsChangerFunction();
-}
-
-Gridifier.Settings.prototype.getCoordsChangerOnToggle = function() {
-    return this._coordsChangerApi.getCoordsChangerOnToggleFunction();
 }
 
 Gridifier.Settings.prototype.getSizesChanger = function() {

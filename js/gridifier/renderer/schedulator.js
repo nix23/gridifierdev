@@ -1,9 +1,11 @@
-Gridifier.Renderer.Schedulator = function(gridifier, settings, renderer) {
+Gridifier.Renderer.Schedulator = function(gridifier, settings, connections, renderer, rendererConnections) {
     var me = this;
 
     this._gridifier = null;
     this._settings = null;
+    this._connections = null;
     this._renderer = null;
+    this._rendererConnections = null;
 
     // Array[
     //     [0] => {connection: connection, processingType: processingType, left: left, top: top, 
@@ -22,7 +24,9 @@ Gridifier.Renderer.Schedulator = function(gridifier, settings, renderer) {
     this._construct = function() {
         me._gridifier = gridifier;
         me._settings = settings;
+        me._connections = connections;
         me._renderer = renderer;
+        me._rendererConnections = rendererConnections;
     };
 
     this._bindEvents = function() {
@@ -41,8 +45,9 @@ Gridifier.Renderer.Schedulator = function(gridifier, settings, renderer) {
 
 Gridifier.Renderer.Schedulator.PROCESS_SCHEDULED_CONNECTIONS_TIMEOUT = 20;
 Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES = {
-    SHOW: 0, HIDE: 1, RENDER: 2, RENDER_TRANSFORMED: 3, RENDER_DEPENDED: 4
+    SHOW: 0, HIDE: 1, RENDER: 2, RENDER_TRANSFORMED: 3, RENDER_DEPENDED: 4, DELAYED_RENDER: 5
 };
+Gridifier.Renderer.Schedulator.DISABLE_PRETOGGLE_COORDS_CHANGER_CALL_DATA_ATTR = "data-gridifier-renderer-disable-pretoggle-cc-call";
 
 Gridifier.Renderer.Schedulator.prototype.reinit = function() {
     if(this._scheduledConnectionsToProcessData == null) {
@@ -82,6 +87,16 @@ Gridifier.Renderer.Schedulator.prototype.scheduleRender = function(connection, l
         top: top
     });
     this._schedule();
+}
+
+Gridifier.Renderer.Schedulator.prototype.scheduleDelayedRender = function(connection, left, top, delay) {
+    this._scheduledConnectionsToProcessData.push({
+        connection: connection,
+        processingType: Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.DELAYED_RENDER,
+        left: left,
+        top: top,
+        delay: delay
+    });
 }
 
 Gridifier.Renderer.Schedulator.prototype.scheduleRenderTransformed = function(connection, 
@@ -124,6 +139,7 @@ Gridifier.Renderer.Schedulator.prototype._schedule = function() {
 // me._gridifier.getGridX2() will be called(because of setTimeout async), and Gridifier will recursively recalculate
 // all DOM nodes up through DOM-Tree, until reaching root node.
 Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function() {
+    var me = this;
     var schedulator = Gridifier.Renderer.Schedulator;
 
     for(var i = 0; i < this._scheduledConnectionsToProcessData.length; i++) {
@@ -154,68 +170,94 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                continue;
             
             var toggleFunction = this._settings.getToggle();
+            var toggleTimeouter = this._settings.getToggleTimeouter();
             var eventEmitter = this._settings.getEventEmitter();
             var animationMsDuration = this._settings.getToggleAnimationMsDuration();
             var sizesResolverManager = this._settings.getSizesResolverManager();
-            var coordsChanger = this._settings.getCoordsChangerOnToggle();
+            var coordsChanger = this._settings.getCoordsChanger();
             var collector = this._settings.getCollector();
 
-            toggleFunction.show(
-                connectionToProcess.item,
-                this._gridifier.getGrid(),
-                animationMsDuration,
-                eventEmitter,
-                sizesResolverManager,
-                coordsChanger,
-                collector
-            );
-
-            if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
-                var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
-
+            var showItem = function(item) {
                 toggleFunction.show(
-                    itemClone,
-                    this._gridifier.getGrid(),
+                    connectionToProcess.item,
+                    me._gridifier.getGrid(),
                     animationMsDuration,
+                    toggleTimeouter,
                     eventEmitter,
                     sizesResolverManager,
                     coordsChanger,
-                    collector
+                    collector,
+                    left,
+                    top
                 );
-            }
+            };
+
+            // We should call coords changer with fake(0ms) time to set traslate property
+            // on toggled item, before toggle animation will start. Adding new translate rule
+            // to the transform property dynamically won't work. (
+            //      item.style.wT = "scale(0)";
+            //      item.style.wT = "scale(1) translate3d(0px,0px,0px)"; -> Won't work.
+            // I don't think that we should also do this in hide.(Will have all required rules set at that moment)
+            coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter);
+            showItem(connectionToProcess.item);
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
-            Dom.css.set(connectionToProcess.disconnectedItemClone, {
-                position: "absolute",
-                left: left,
-                top: top
-            });
-
             var toggleFunction = this._settings.getToggle();
+            var toggleTimeouter = this._settings.getToggleTimeouter();
             var eventEmitter = this._settings.getEventEmitter();
             var animationMsDuration = this._settings.getToggleAnimationMsDuration();
             var sizesResolverManager = this._settings.getSizesResolverManager();
-            var coordsChanger = this._settings.getCoordsChangerOnToggle();
+            var coordsChanger = this._settings.getCoordsChanger();
             var collector = this._settings.getCollector();
 
-            toggleFunction.hide(
-                connectionToProcess.item,
-                connectionToProcess.disconnectedItemClone,
-                this._gridifier.getGrid(),
-                animationMsDuration,
-                eventEmitter,
-                sizesResolverManager,
-                coordsChanger,
-                collector
-            );
+            var hideItem = function(item) {
+                toggleFunction.hide(
+                    item,
+                    me._gridifier.getGrid(),
+                    animationMsDuration,
+                    toggleTimeouter,
+                    eventEmitter,
+                    sizesResolverManager,
+                    coordsChanger,
+                    collector,
+                    left,
+                    top
+                );
+            };
 
-            if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
-                var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
-                Dom.css.set(itemClone, {visibility: "hidden"}); 
+            // We should update this value on hide, because with translates, last set
+            // translate will be still applyied when we will call next show on filtering.
+            // In ClonesRenderer we will update Dom left and top values at last coordsChanger()
+            // call, and because of that this call will set up translates to 0,0,(0) values.
+            // (Otherwise clones will move from translated positions at last step on next filter show)
+            coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter);
+            hideItem(connectionToProcess.item);
+        }
+        else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.DELAYED_RENDER) {
+            var delay = this._scheduledConnectionsToProcessData[i].delay;
+            var coordsChanger = this._settings.getCoordsChanger();
+            // @todo -> Or toggleAnimationMsDuration(Per sync???)
+            var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
+            var eventEmitter = this._settings.getEventEmitter();
+
+            var me = this;
+            (function(item, animationMsDuration, eventEmitter, delay) {
                 setTimeout(function() {
-                    eventEmitter.emitHideEvent(itemClone);
-                }, animationMsDuration + 20);
-            }
+                    // Because of using this delayed timeout we should find item connection again.
+                    // There could be a bunch of resizes since this delayedRender schedule, so this item connection can point to the
+                    // old version of the connection.
+                    var connectionToProcess = me._connections.findConnectionByItem(item);
+
+                    coordsChanger(
+                        item,
+                        me._rendererConnections.getCssLeftPropertyValuePerConnection(connectionToProcess),
+                        me._rendererConnections.getCssTopPropertyValuePerConnection(connectionToProcess),
+                        animationMsDuration,
+                        eventEmitter,
+                        false
+                    );
+                }, delay);
+            })(connectionToProcess.item, animationMsDuration, eventEmitter, delay);
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER ||
                 processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED) {
@@ -224,8 +266,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var eventEmitter = this._settings.getEventEmitter();
 
             rendererCoordsChangerFunction(
-                connectionToProcess.item, 
-                left, 
+                connectionToProcess.item,
+                left,
                 top,
                 animationMsDuration,
                 eventEmitter,

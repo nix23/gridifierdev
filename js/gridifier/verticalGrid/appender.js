@@ -124,7 +124,7 @@ Gridifier.VerticalGrid.Appender.prototype.append = function(item) {
             }
         }
 
-        this._renderer.renderConnections(rowConnections);
+        this._renderer.renderConnectionsAfterDelay(rowConnections);
         this._renderer.showConnections(connection);
     }
 }

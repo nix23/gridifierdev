@@ -11,7 +11,12 @@ Gridifier.Normalizer = function(gridifier, sizesResolverManager) {
     this._roundingNormalizationValue = 1;
 
     this._itemWidthAntialiasPercentageValue = 0;
+    this._itemWidthAntialiasPxValue = 0;
     this._itemHeightAntialiasPercentageValue = 0;
+    this._itemHeightAntialiasPxValue = 0;
+
+    this._areZIndexesUpdatesEnabled = true;
+    this._areZIndexesUpdatesBinded = false;
 
     this._css = {
     };
@@ -22,6 +27,10 @@ Gridifier.Normalizer = function(gridifier, sizesResolverManager) {
 
         me.setItemWidthAntialiasPercentageValue(me._itemWidthAntialiasPercentageValue);
         me.setItemHeightAntialiasPercentageValue(me._itemHeightAntialiasPercentageValue);
+        me.setItemWidthAntialiasPxValue(me._itemWidthAntialiasPxValue);
+        me.setItemHeightAntialiasPxValue(me._itemHeightAntialiasPxValue);
+
+        me._bindEvents();
     };
 
     this._bindEvents = function() {
@@ -51,32 +60,73 @@ Gridifier.Normalizer.prototype.setItemWidthAntialiasPercentageValue = function(n
     this.updateItemWidthAntialiasPxValue();
 }
 
+Gridifier.Normalizer.prototype.setItemWidthAntialiasPxValue = function(newItemWidthPxValue) {
+    this._itemWidthAntialiasPxValue = newItemWidthPxValue;
+    this.updateItemWidthAntialiasPxValue();
+}
+
 Gridifier.Normalizer.prototype.setItemHeightAntialiasPercentageValue = function(newItemHeightPtValue) {
     this._itemHeightAntialiasPercentageValue = newItemHeightPtValue;
     this.updateItemHeightAntialiasPxValue();
 }
 
+Gridifier.Normalizer.prototype.setItemHeightAntialiasPxValue = function(newItemHeightPxValue) {
+    this._itemHeightAntialiasPxValue = newItemHeightPxValue;
+    this.updateItemHeightAntialiasPxValue();
+}
+
 Gridifier.Normalizer.prototype.updateItemWidthAntialiasPxValue = function() {
-    if(this._itemWidthAntialiasPercentageValue == 0) {
+    if(this._itemWidthAntialiasPercentageValue == 0 && this._itemWidthAntialiasPxValue == 0) {
         this._sizesResolverManager.setOuterWidthAntialiasValue(0);
         return;
     }
 
-    var newItemWidthAntialiasPxValue = (this._gridifier.getGridX2() + 1) * (this._itemWidthAntialiasPercentageValue / 100);
+    if(this._itemWidthAntialiasPercentageValue != 0)
+        var newItemWidthAntialiasPxValue = (this._gridifier.getGridX2() + 1) * (this._itemWidthAntialiasPercentageValue / 100);
+    else
+        var newItemWidthAntialiasPxValue = this._itemWidthAntialiasPxValue;
+
     this._sizesResolverManager.setOuterWidthAntialiasValue(newItemWidthAntialiasPxValue);
 }
 
 Gridifier.Normalizer.prototype.updateItemHeightAntialiasPxValue = function() {
-    if(this._itemHeightAntialiasPercentageValue == 0) {
+    if(this._itemHeightAntialiasPercentageValue == 0 && this._itemHeightAntialiasPxValue == 0) {
         this._sizesResolverManager.setOuterHeightAntialiasValue(0);
         return;
     }
 
-    var newItemHeightAntialiasPxValue = (this._gridifier.getGridY2() + 1) * (this._itemHeightAntialiasPercentageValue / 100);
+    if(this._itemHeightAntialiasPercentageValue != 0)
+        var newItemHeightAntialiasPxValue = (this._gridifier.getGridY2() + 1) * (this._itemHeightAntialiasPercentageValue / 100);
+    else
+        var newItemHeightAntialiasPxValue = this._itemHeightAntialiasPxValue;
+
     this._sizesResolverManager.setOuterHeightAntialiasValue(newItemHeightAntialiasPxValue);
 }
 
 Gridifier.Normalizer.prototype.updateItemAntialiasValues = function() {
     this.updateItemWidthAntialiasPxValue();
     this.updateItemHeightAntialiasPxValue();
+}
+
+Gridifier.Normalizer.prototype.disableZIndexesUpdates = function() {
+    this._areZIndexesUpdatesEnabled = false;
+}
+
+Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
+    if(!this._areZIndexesUpdatesEnabled || this._areZIndexesUpdatesBinded)
+        return;
+
+    this._gridifier.onConnectionCreate(function(connectionsObj) {
+        var connections = connectionsObj.get();
+        var connectionsSorter = connectionsObj.getConnectionsSorter();
+
+        var sortedConnections = connectionsSorter.sortConnectionsPerReappend(connections);
+        var nextItemZIndex = 1;
+        for(var i = 0; i < sortedConnections.length; i++) {
+            sortedConnections[i].item.style.zIndex = nextItemZIndex;
+            nextItemZIndex++;
+        }
+    });
+
+    this._areZIndexesUpdatesBinded = true;
 }

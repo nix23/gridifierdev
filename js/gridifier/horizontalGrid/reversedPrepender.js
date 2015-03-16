@@ -137,7 +137,7 @@ Gridifier.HorizontalGrid.ReversedPrepender.prototype.reversedPrepend = function(
             }
         }
 
-        this._renderer.renderConnections(colConnections);
+        this._renderer.renderConnectionsAfterDelay(colConnections);
         this._renderer.showConnections(connection);
     }
 }

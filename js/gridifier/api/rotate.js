@@ -33,17 +33,17 @@ Gridifier.Api.Rotate.prototype.setCollectorInstance = function(collector) {
     this._collector = collector;
 }
 
-Gridifier.Api.Rotate.prototype.show = function(item, grid, inverseRotateAxis) {
+Gridifier.Api.Rotate.prototype.show = function(item, grid, inverseRotateAxis, timeouter) {
     var rotateProp = (inverseRotateAxis) ? "rotateY" : "rotateX";
-    this._rotate(item, grid, rotateProp, false);
+    this._rotate(item, grid, rotateProp, false, timeouter);
 }
 
-Gridifier.Api.Rotate.prototype.hide = function(item, grid, inverseRotateAxis) {
+Gridifier.Api.Rotate.prototype.hide = function(item, grid, inverseRotateAxis, timeouter) {
     var rotateProp = (inverseRotateAxis) ? "rotateY" : "rotateX";
-    this._rotate(item, grid, rotateProp, true);
+    this._rotate(item, grid, rotateProp, true, timeouter);
 }
 
-Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle) {
+Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle, timeouter) {
     if(!inverseToggle) {
         var isShowing = true;
         var isHiding = false;
@@ -57,11 +57,14 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
     var frames = this._createFrames(scene);
     var itemClone = this._createItemClone(item);
 
+    item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
+    item.setAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR, "yes");
     var frontFrame = this._createFrontFrame(frames, rotateProp);
     var backFrame = this._createBackFrame(frames, rotateProp);
 
     if(isShowing) {
         backFrame.appendChild(itemClone);
+        item.style.visibility = "hidden";
     }
     else if(isHiding) {
         frontFrame.appendChild(itemClone);
@@ -79,33 +82,39 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
     );
 
     var me = this;
-    setTimeout(function() {
+    var initRotateTimeout = setTimeout(function() {
         Dom.css3.transformProperty(frontFrame, rotateProp, "180deg");
         Dom.css3.transformProperty(backFrame, rotateProp, "0deg");
     }, 20);
+    //timeouter.add(item, initRotateTimeout);
 
     // A little helper to reduce blink effect after animation finish
     if(animationMsDuration > 400) {
-       setTimeout(function () {
+       var prehideItemTimeout = setTimeout(function () {
+          item.removeAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR);
+
           if (isShowing)
              item.style.visibility = "visible";
           else if (isHiding)
              item.style.visibility = "hidden";
-       }, animationMsDuration - 150);
+       }, animationMsDuration - 50);
+       //timeouter.add(item, prehideItemTimeout);
     }
 
-    setTimeout(function() {
+    var completeRotateTimeout = setTimeout(function() {
         scene.parentNode.removeChild(scene);
+        item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
+
         if(isShowing) {
             item.style.visibility = "visible";
             me._eventEmitter.emitShowEvent(item);
         }
         else if(isHiding) {
             item.style.visibility = "hidden";
-            grid.removeChild(item);
             me._eventEmitter.emitHideEvent(item);
         }
     }, animationMsDuration + 20);
+    //timeouter.add(item, completeRotateTimeout);
 }
 
 Gridifier.Api.Rotate.prototype._createScene = function(item, grid) {

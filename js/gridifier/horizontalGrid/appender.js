@@ -112,7 +112,7 @@ Gridifier.HorizontalGrid.Appender.prototype.append = function(item) {
             }
         }
 
-        this._renderer.renderConnections(colConnections);
+        this._renderer.renderConnectionsAfterDelay(colConnections);
         this._renderer.showConnections(connection);
     }
 }

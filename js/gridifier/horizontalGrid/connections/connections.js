@@ -1,10 +1,11 @@
-Gridifier.HorizontalGrid.Connections = function(gridifier, guid, settings, sizesResolverManager) {
+Gridifier.HorizontalGrid.Connections = function(gridifier, guid, settings, sizesResolverManager, eventEmitter) {
     var me = this;
 
     this._gridifier = null;
     this._guid = null;
     this._settings = null;
     this._sizesResolverManager = null;
+    this._eventEmitter = null;
 
     this._itemCoordsExtractor = null;
     this._sizesTransformer = null;
@@ -23,6 +24,7 @@ Gridifier.HorizontalGrid.Connections = function(gridifier, guid, settings, sizes
         me._guid = guid;
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
+        me._eventEmitter = eventEmitter;
 
         me._ranges = new Gridifier.HorizontalGrid.ConnectionsRanges(me);
         me._ranges.init();
@@ -55,6 +57,10 @@ Gridifier.HorizontalGrid.Connections = function(gridifier, guid, settings, sizes
 
     this._construct();
     return this;
+}
+
+Gridifier.HorizontalGrid.Connections.prototype.getConnectionsSorter = function() {
+    return this._sorter;
 }
 
 Gridifier.HorizontalGrid.Connections.prototype.setSizesTransformerInstance = function(sizesTransformer) {
@@ -164,6 +170,7 @@ Gridifier.HorizontalGrid.Connections.prototype.remapAllItemGUIDSInSortedConnecti
 Gridifier.HorizontalGrid.Connections.prototype.add = function(item, itemConnectionCoords) {
     var connection = this._connectionsCore.createItemConnection(item, itemConnectionCoords);
     this._connections.push(connection);
+    this._eventEmitter.emitConnectionCreateEvent(this);
 
     return connection;
 }

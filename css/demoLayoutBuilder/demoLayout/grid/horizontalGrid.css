@@ -1,5 +1,6 @@
 #demoLayout .gridView {
     position: relative;
+    overflow: hidden;
 }
 
 #demoLayout .gridView .horizontalGrid {

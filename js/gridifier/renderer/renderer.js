@@ -22,11 +22,11 @@ Gridifier.Renderer = function(gridifier, connections, settings, normalizer) {
 
         me._transformedItemMarker = new Gridifier.SizesTransformer.TransformedItemMarker();
 
-        me._rendererSchedulator = new Gridifier.Renderer.Schedulator(
-            me._gridifier, me._settings, me
-        );
         me._rendererConnections = new Gridifier.Renderer.Connections(
             me._settings
+        );
+        me._rendererSchedulator = new Gridifier.Renderer.Schedulator(
+            me._gridifier, me._settings, me._connections, me, me._rendererConnections
         );
     };
 
@@ -128,6 +128,19 @@ Gridifier.Renderer.prototype.renderConnections = function(connections, exceptCon
 
         this._rendererSchedulator.reinit();
         this._rendererSchedulator.scheduleRender(connections[i], left, top);
+    }
+}
+
+// Delay in row/col updates in noIntersectionsMode is required, because without it refreshes
+// will be called right after show method, and will be placed in the end of animation.
+// (Example: slide show method -> calling 0ms offset translate at start, than this refresh
+// will be called before slideOutTimeout without a delay.(Will move items instantly)
+Gridifier.Renderer.prototype.renderConnectionsAfterDelay = function(connections, delay) {
+    var delay = delay || 0;
+
+    for(var i = 0; i < connections.length; i++) {
+        this._rendererSchedulator.reinit();
+        this._rendererSchedulator.scheduleDelayedRender(connections[i], null, null, delay);
     }
 }
 

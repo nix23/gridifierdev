@@ -6,7 +6,6 @@ Gridifier.Api.CoordsChanger = function(settings, gridifier, eventEmitter) {
     this._eventEmitter = null;
 
     this._coordsChangerFunction = null;
-    this._coordsChangerOnToggleFunction = null;
     this._coordsChangerFunctions = {};
 
     this._css = {
@@ -59,22 +58,6 @@ Gridifier.Api.CoordsChanger.prototype.addCoordsChangerFunction = function(coords
 
 Gridifier.Api.CoordsChanger.prototype.getCoordsChangerFunction = function() {
     return this._coordsChangerFunction;
-}
-
-Gridifier.Api.CoordsChanger.prototype.setCoordsChangerOnToggleFunction = function(coordsChangerFunctionName) {
-    if(!this._coordsChangerFunctions.hasOwnProperty(coordsChangerFunctionName)) {
-        new Gridifier.Error(
-            Gridifier.Error.ERROR_TYPES.SETTINGS.SET_COORDS_CHANGER_INVALID_PARAM,
-            coordsChangerFunctionName
-        );
-        return;
-    }
-
-    this._coordsChangerOnToggleFunction = this._coordsChangerFunctions[coordsChangerFunctionName];
-}
-
-Gridifier.Api.CoordsChanger.prototype.getCoordsChangerOnToggleFunction = function() {
-    return this._coordsChangerOnToggleFunction;
 }
 
 Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
@@ -192,65 +175,57 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
         var currentLeft = parseFloat(item.style.left);
         var currentTop = parseFloat(item.style.top);
 
-        if(newLeft > currentLeft)
+        if (newLeft > currentLeft)
             var translateX = newLeft - currentLeft;
-        else if(newLeft < currentLeft)
+        else if (newLeft < currentLeft)
             var translateX = (currentLeft - newLeft) * -1;
-        else 
+        else
             var translateX = 0;
 
-        if(newTop > currentTop)
+        if (newTop > currentTop)
             var translateY = newTop - currentTop;
-        else if(newTop < currentTop)
+        else if (newTop < currentTop)
             var translateY = (currentTop - newTop) * -1;
         else
             var translateY = 0;
-        
+
         Dom.css3.transitionProperty(
-            item, 
+            item,
             Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
         );
-        
+
         Dom.css3.perspective(item, "1000");
         Dom.css3.backfaceVisibility(item, "hidden");
         Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px,0px");
 
-        if(emitTransformEvent) {
-            setTimeout(function() {
+        if (emitTransformEvent) {
+            setTimeout(function () {
                 eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
             }, animationMsDuration + 20);
         }
     };
 }
 
+Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR = "gridifier-clones-coords-changer-restrict-show";
+
 Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = function() {
     var me = this;
     var itemShownDataAttr = "data-gridifier-item-shown";
 
-    this._gridifier.onShow(function(item) { 
+    this._gridifier.onShow(function(item) {
         var itemClonesManager = me._gridifier.getItemClonesManager();
         if(!itemClonesManager.hasBindedClone(item))
             return;
-        if(itemClonesManager.isItemClone(item)) {
-            item.style.visibility = "hidden";
-            return;
-        }
 
-        item.style.visibility = "visible";
         item.setAttribute(itemShownDataAttr, "yes");
     });
 
     this._gridifier.onHide(function(item) {
-       var itemClonesManager = me._gridifier.getItemClonesManager();
-       if(!itemClonesManager.hasBindedClone(item))
-           return;
-       if(itemClonesManager.isItemClone(item)) {
-           item.style.visibility = "hidden";
-           return;
-       }
-       
-       item.style.visibility = "hidden";
-       item.removeAttribute(itemShownDataAttr);
+        var itemClonesManager = me._gridifier.getItemClonesManager();
+        if(!itemClonesManager.hasBindedClone(item))
+            return;
+
+        item.removeAttribute(itemShownDataAttr);
     });
 
     var clonesHideTimeouts = [];
@@ -268,7 +243,7 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
             var isDraggableItem = true;
         else
             var isDraggableItem = false;
-        
+
         var itemClonesManager = me._gridifier.getItemClonesManager();
         var itemClone = itemClonesManager.getBindedClone(item);
 
@@ -278,11 +253,12 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
             clonesHideTimeouts[guid] = null;
         }
 
-        if(Dom.hasAttribute(item, itemShownDataAttr) && !isDraggableItem) {
+        var cc = Gridifier.Api.CoordsChanger;
+        if(!isDraggableItem && !Dom.hasAttribute(itemClone, cc.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR))
             itemClone.style.visibility = "visible";
-        }
 
-        item.style.visibility = "hidden";
+        if(Dom.hasAttribute(item, itemShownDataAttr))
+            item.style.visibility = "hidden";
 
         if(emitTransformEvent) {
             var sizesChanger = me._settings.getSizesChanger();
@@ -292,7 +268,7 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
                 eventEmitter.emitTransformEvent(itemClone, newWidth, newHeight, newLeft, newTop);
             }, animationMsDuration + 20);
         }
-        
+
         Dom.css.set(item, {
             left: newLeft,
             top: newTop
@@ -307,16 +283,11 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
            clonesHideTimeouts[guid] = null;
         }
 
-        if(Dom.toInt(animationMsDuration) > 20)
-            var hideCloneTimeout = animationMsDuration - 20;
-        else
-            var hideCloneTimeout = animationMsDuration;
-
         clonesHideTimeouts[guid] = setTimeout(function() {
-            if(Dom.hasAttribute(item, itemShownDataAttr) && !isDraggableItem) { 
+            if (Dom.hasAttribute(item, itemShownDataAttr) && !isDraggableItem) {
                 item.style.visibility = "visible";
                 itemClone.style.visibility = "hidden";
             }
-        }, hideCloneTimeout);
+        }, animationMsDuration);
     };
 }

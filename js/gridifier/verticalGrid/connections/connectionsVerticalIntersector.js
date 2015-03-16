@@ -42,7 +42,7 @@ Gridifier.VerticalGrid.ConnectionsVerticalIntersector.prototype.isIntersectingMo
 
     var connections = this._connections.get();
     var intersectedConnectionItemIndexes = [];
-    
+
     var isIntersectingVerticallyAnyFromAlreadyIntersectedItems = function(connection) {
         if(intersectedConnectionItemIndexes.length == 0)
             return false;
@@ -116,7 +116,7 @@ Gridifier.VerticalGrid.ConnectionsVerticalIntersector.prototype.getAllVertically
         var isAbove = (itemCoords.y1 < maybeIntersectableConnection.y1 && itemCoords.y2 < maybeIntersectableConnection.y1);
         var isBelow = (itemCoords.y1 > maybeIntersectableConnection.y2 && itemCoords.y2 > maybeIntersectableConnection.y2);
 
-        if(!isAbove && !isBelow) 
+        if(!isAbove && !isBelow)
             verticallyIntersectedConnections.push(maybeIntersectableConnection);
     }
 
@@ -127,7 +127,7 @@ Gridifier.VerticalGrid.ConnectionsVerticalIntersector.prototype.expandVertically
     var mostTallConnection = this.getMostTallFromAllVerticallyIntersectedConnections(newConnection);
     if(mostTallConnection == null)
         return;
-    
+
     var rowConnectionsToExpand = this.getAllVerticallyIntersectedConnections(newConnection);
     this._lastRowVerticallyExpandedConnections = rowConnectionsToExpand;
 
@@ -157,7 +157,8 @@ Gridifier.VerticalGrid.ConnectionsVerticalIntersector.prototype.expandVertically
             var itemHeight = targetSizes.targetHeight - 1;
 
             //var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
-            // @todo fix (y2 - y1 + 1) 
+            // @todo fix (y2 - y1 + 1)
+            //rowConnectionsToExpand[i].verticalOffset = Math.abs(y2 - y1) - itemHeight;
             rowConnectionsToExpand[i].verticalOffset = Math.abs(y2 - y1) - itemHeight;
         }
     }

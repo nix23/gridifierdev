@@ -62,8 +62,6 @@ Gridifier.Disconnector.prototype.disconnect = function(items) {
     
     for(var i = 0; i < connectionsToDisconnect.length; i++)
         this._connectedItemMarker.unmarkItemAsConnected(connectionsToDisconnect[i].item);
-
-    connectionsToDisconnect = this._addDisconnectedItemClones(connectionsToDisconnect);
     
     var renderer = this._gridifier.getRenderer();
     renderer.hideConnections(connectionsToDisconnect);
@@ -91,20 +89,4 @@ Gridifier.Disconnector.prototype._recreateConnectors = function() {
     else if(this._settings.isReversedAppend()) {
         this._reversedAppender.createInitialConnector();
     }
-}
-
-Gridifier.Disconnector.prototype._addDisconnectedItemClones = function(connectionsToDisconnect) {
-    for(var i = 0; i < connectionsToDisconnect.length; i++) {
-        var disconnectedItemClone = connectionsToDisconnect[i].item.cloneNode(true);
-        disconnectedItemClone.style.visibility = "hidden";
-        this._collector.markItemAsRestrictedToCollect(disconnectedItemClone);
-        
-        Dom.css3.transition(disconnectedItemClone, "none");
-        Dom.css3.transform(disconnectedItemClone, "");
-
-        connectionsToDisconnect[i].disconnectedItemClone = disconnectedItemClone;
-        this._gridifier.getGrid().appendChild(disconnectedItemClone);
-    }
-
-    return connectionsToDisconnect;
 }
