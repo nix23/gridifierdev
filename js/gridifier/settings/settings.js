@@ -144,6 +144,14 @@ Gridifier.Settings.prototype.getCoordsChangeAnimationMsDuration = function() {
     return this._coordsChangeAnimationMsDuration;
 }
 
+Gridifier.Settings.prototype.setToggleAnimationMsDuration = function(animationMsDuration) {
+    this._toggleAnimationMsDuration = animationMsDuration;
+}
+
+Gridifier.Settings.prototype.setCoordsChangeAnimationMsDuration = function(animationMsDuration) {
+    this._coordsChangeAnimationMsDuration = animationMsDuration;
+}
+
 Gridifier.Settings.prototype.getRotatePerspective = function() {
     return this._rotatePerspective;
 }

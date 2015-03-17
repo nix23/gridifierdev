@@ -44,8 +44,9 @@ Gridifier.Renderer = function(gridifier, connections, settings, normalizer) {
     return this;
 }
 
-Gridifier.Renderer.SILENT_RENDER_DATA_ATTR = "data-gridifier-scheduled-for-silent-render";
-Gridifier.Renderer.SILENT_RENDER_DATA_ATTR_VALUE = "silentRender";
+Gridifier.Renderer.prototype.getRendererConnections = function() {
+    return this._rendererConnections;
+}
 
 Gridifier.Renderer.prototype.showConnections = function(connections) {
     var me = this;
@@ -142,20 +143,4 @@ Gridifier.Renderer.prototype.renderConnectionsAfterDelay = function(connections,
         this._rendererSchedulator.reinit();
         this._rendererSchedulator.scheduleDelayedRender(connections[i], null, null, delay);
     }
-}
-
-Gridifier.Renderer.prototype.scheduleForSilentRender = function(items) {
-   for(var i = 0; i < items.length; i++) {
-      items[i].setAttribute(
-         Gridifier.Renderer.SILENT_RENDER_DATA_ATTR,
-         Gridifier.Renderer.SILENT_RENDER_DATA_ATTR_VALUE
-      );
-   }
-}
-
-Gridifier.Renderer.prototype.unscheduleForSilentRender = function(items, connections) {
-   for(var i = 0; i < items.length; i++) {
-      items[i].removeAttribute(Gridifier.Renderer.SILENT_RENDER_DATA_ATTR);
-      this._rendererConnections.unmarkConnectionItemAsRendered(connections[i]);
-   }
 }

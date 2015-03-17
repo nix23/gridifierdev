@@ -48,6 +48,7 @@ module.exports = function(grunt) {
           'js/gridifier/renderer/renderer.js',
           'js/gridifier/renderer/rendererConnections.js',
           'js/gridifier/renderer/schedulator.js',
+          'js/gridifier/renderer/silentRenderer.js',
 
           'js/gridifier/settings/**/*.js',
           'js/gridifier/sizesTransformer/**/*.js',

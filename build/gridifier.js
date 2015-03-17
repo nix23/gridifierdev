@@ -1162,6 +1162,7 @@ Gridifier = function(grid, settings) {
     this._connections = null;
     this._connectionsSorter = null;
     this._renderer = null;
+    this._silentRenderer = null;
     this._sizesTransformer = null;
     this._normalizer = null;
 
@@ -1294,6 +1295,15 @@ Gridifier = function(grid, settings) {
             me._reversedAppender,
             me._sizesTransformer,
             me._sizesResolverManager
+        );
+
+        me._silentRenderer = new Gridifier.SilentRenderer(
+            me,
+            me._collector,
+            me._connections,
+            me._operationsQueue,
+            me._renderer,
+            me._renderer.getRendererConnections()
         );
 
         // @todo -> Remove from local var
@@ -1488,6 +1498,14 @@ Gridifier.prototype.disableZIndexesUpdates = function() {
     return this;
 }
 
+Gridifier.prototype.setToggleAnimationMsDuration = function(animationMsDuration) {
+    this._settings.setToggleAnimationMsDuration(animationMsDuration);
+}
+
+Gridifier.prototype.setCoordsChangeAnimationMsDuration = function(animationMsDuration) {
+    this._settings.setCoordsChangeAnimationMsDuration(animationMsDuration);
+}
+
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     if(this._settings.isMirroredPrepend()) {
         // @todo -> should reverse collection
@@ -1520,34 +1538,17 @@ Gridifier.prototype.append = function(items, batchSize, batchTimeout) {
 }
 
 Gridifier.prototype.silentAppend = function(items, batchSize, batchTimeout) {
-   this._renderer.scheduleForSilentRender(
-      this._collector.toDOMCollection(items)
-   );
-   this.append(items, batchSize, batchTimeout);
+    this._silentRenderer.scheduleForSilentRender(
+       this._collector.toDOMCollection(items)
+    );
+    this.append(items, batchSize, batchTimeout);
+
+    return this;
 }
 
-Gridifier.prototype.silentRender = function() {
-   var executeSilentRender = function() {
-       var scheduledForSilentRenderItems = this._collector.collectByQuery(
-           "[" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
-       );
-
-       var scheduledForSilentRenderConnections = [];
-       for (var i = 0; i < scheduledForSilentRenderItems.length; i++) {
-           scheduledForSilentRenderConnections.push(
-               this._connections.findConnectionByItem(scheduledForSilentRenderItems[i])
-           );
-       }
-
-       this._renderer.unscheduleForSilentRender(
-           scheduledForSilentRenderItems,
-           scheduledForSilentRenderConnections
-       );
-       this._renderer.showConnections(scheduledForSilentRenderConnections);
-   }
-
-   var me = this;
-   setTimeout(function() { executeSilentRender.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 20);
+Gridifier.prototype.silentRender = function(batchSize, batchTimeout) {
+    this._silentRenderer.execute(batchSize, batchTimeout);
+    return this;
 }
 
 Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchTimeout) {
@@ -11001,7 +11002,10 @@ Gridifier.Operations.Queue.prototype.scheduleInsertAfterOperation = function(ite
 
 Gridifier.Operations.Queue.prototype._packItemsToBatches = function(items, batchSize) {
     var items = this._collector.toDOMCollection(items);
+    return this.splitItemsToBatches(items, batchSize);
+}
 
+Gridifier.Operations.Queue.prototype.splitItemsToBatches = function(items, batchSize) {
     var itemBatches = [];
     var itemsCountInCurrentBatch = 0;
     var itemsBatch = [];
@@ -11162,8 +11166,9 @@ Gridifier.Renderer = function(gridifier, connections, settings, normalizer) {
     return this;
 }
 
-Gridifier.Renderer.SILENT_RENDER_DATA_ATTR = "data-gridifier-scheduled-for-silent-render";
-Gridifier.Renderer.SILENT_RENDER_DATA_ATTR_VALUE = "silentRender";
+Gridifier.Renderer.prototype.getRendererConnections = function() {
+    return this._rendererConnections;
+}
 
 Gridifier.Renderer.prototype.showConnections = function(connections) {
     var me = this;
@@ -11260,22 +11265,6 @@ Gridifier.Renderer.prototype.renderConnectionsAfterDelay = function(connections,
         this._rendererSchedulator.reinit();
         this._rendererSchedulator.scheduleDelayedRender(connections[i], null, null, delay);
     }
-}
-
-Gridifier.Renderer.prototype.scheduleForSilentRender = function(items) {
-   for(var i = 0; i < items.length; i++) {
-      items[i].setAttribute(
-         Gridifier.Renderer.SILENT_RENDER_DATA_ATTR,
-         Gridifier.Renderer.SILENT_RENDER_DATA_ATTR_VALUE
-      );
-   }
-}
-
-Gridifier.Renderer.prototype.unscheduleForSilentRender = function(items, connections) {
-   for(var i = 0; i < items.length; i++) {
-      items[i].removeAttribute(Gridifier.Renderer.SILENT_RENDER_DATA_ATTR);
-      this._rendererConnections.unmarkConnectionItemAsRendered(connections[i]);
-   }
 }
 
 Gridifier.Renderer.Connections = function(settings) {
@@ -11527,7 +11516,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                });
             }
 
-            if(Dom.hasAttribute(connectionToProcess.item, Gridifier.Renderer.SILENT_RENDER_DATA_ATTR))
+            if(Dom.hasAttribute(connectionToProcess.item, Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR))
                continue;
             
             var toggleFunction = this._settings.getToggle();
@@ -11677,6 +11666,103 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
 
     this._scheduledConnectionsToProcessData = null;
     this._processScheduledConnectionsTimeout = null;
+}
+
+Gridifier.SilentRenderer = function(gridifier,
+                                    collector,
+                                    connections,
+                                    operationsQueue,
+                                    renderer,
+                                    rendererConnections) {
+    var me = this;
+
+    this._gridifier = null;
+    this._collector = null;
+    this._connections = null;
+    this._operationsQueue = null;
+    this._renderer = null;
+    this._rendererConnections = null;
+
+    this._css = {
+    };
+
+    this._construct = function() {
+        me._gridifier = gridifier;
+        me._collector = collector;
+        me._connections = connections;
+        me._operationsQueue = operationsQueue;
+        me._renderer = renderer;
+        me._rendererConnections = rendererConnections;
+    };
+
+    this._bindEvents = function() {
+    };
+
+    this._unbindEvents = function() {
+    };
+
+    this.destruct = function() {
+        me._unbindEvents();
+    };
+
+    this._construct();
+    return this;
+}
+
+Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR = "data-gridifier-scheduled-for-silent-render";
+Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR_VALUE = "silentRender";
+
+Gridifier.SilentRenderer.prototype.scheduleForSilentRender = function(items) {
+    for(var i = 0; i < items.length; i++) {
+        items[i].setAttribute(
+            Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR,
+            Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR_VALUE
+        );
+    }
+}
+
+Gridifier.SilentRenderer.prototype.unscheduleForSilentRender = function(items, connections) {
+    for(var i = 0; i < items.length; i++) {
+        items[i].removeAttribute(Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR);
+        this._rendererConnections.unmarkConnectionItemAsRendered(connections[i]);
+    }
+}
+
+Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
+    var executeSilentRender = function(scheduledItems, scheduledConnections) {
+        this.unscheduleForSilentRender(scheduledItems, scheduledConnections);
+        this._renderer.showConnections(scheduledConnections);
+    }
+
+    var me = this;
+    var scheduledItems = this._collector.collectByQuery(
+        "[" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
+    );
+    var scheduledConnections = [];
+    for (var i = 0; i < scheduledItems.length; i++)
+        scheduledConnections.push(this._connections.findConnectionByItem(scheduledItems[i]));
+
+    var connectionsSorter = this._connections.getConnectionsSorter();
+    scheduledConnections = connectionsSorter.sortConnectionsPerReappend(scheduledConnections);
+    scheduledItems = [];
+    for(var i = 0; i < scheduledConnections.length; i++)
+        scheduledItems.push(scheduledConnections[i].item);
+
+    if(typeof batchSize == "undefined") {
+        executeSilentRender.call(me, scheduledItems, scheduledConnections);
+        return;
+    }
+
+    if(typeof batchTimeout == "undefined" || batchTimeout < Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100)
+        var batchTimeout = Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100;
+
+    var itemBatches = this._operationsQueue.splitItemsToBatches(scheduledItems, batchSize);
+    var connectionBatches = this._operationsQueue.splitItemsToBatches(scheduledConnections, batchSize);
+    for(var i = 0; i < itemBatches.length; i++) {
+        (function(itemBatch, i, connectionBatch) {
+            setTimeout(function() { executeSilentRender.call(me, itemBatch, connectionBatch); }, batchTimeout * i);
+        })(itemBatches[i], i, connectionBatches[i]);
+    }
 }
 
 Gridifier.ApiSettingsParser = function(settingsCore, settings) {
@@ -12326,6 +12412,14 @@ Gridifier.Settings.prototype.getToggleAnimationMsDuration = function() {
 
 Gridifier.Settings.prototype.getCoordsChangeAnimationMsDuration = function() {
     return this._coordsChangeAnimationMsDuration;
+}
+
+Gridifier.Settings.prototype.setToggleAnimationMsDuration = function(animationMsDuration) {
+    this._toggleAnimationMsDuration = animationMsDuration;
+}
+
+Gridifier.Settings.prototype.setCoordsChangeAnimationMsDuration = function(animationMsDuration) {
+    this._coordsChangeAnimationMsDuration = animationMsDuration;
 }
 
 Gridifier.Settings.prototype.getRotatePerspective = function() {

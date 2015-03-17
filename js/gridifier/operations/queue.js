@@ -261,7 +261,10 @@ Gridifier.Operations.Queue.prototype.scheduleInsertAfterOperation = function(ite
 
 Gridifier.Operations.Queue.prototype._packItemsToBatches = function(items, batchSize) {
     var items = this._collector.toDOMCollection(items);
+    return this.splitItemsToBatches(items, batchSize);
+}
 
+Gridifier.Operations.Queue.prototype.splitItemsToBatches = function(items, batchSize) {
     var itemBatches = [];
     var itemsCountInCurrentBatch = 0;
     var itemsBatch = [];

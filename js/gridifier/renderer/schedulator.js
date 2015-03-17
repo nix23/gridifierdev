@@ -166,7 +166,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                });
             }
 
-            if(Dom.hasAttribute(connectionToProcess.item, Gridifier.Renderer.SILENT_RENDER_DATA_ATTR))
+            if(Dom.hasAttribute(connectionToProcess.item, Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR))
                continue;
             
             var toggleFunction = this._settings.getToggle();

@@ -19,6 +19,7 @@ Gridifier = function(grid, settings) {
     this._connections = null;
     this._connectionsSorter = null;
     this._renderer = null;
+    this._silentRenderer = null;
     this._sizesTransformer = null;
     this._normalizer = null;
 
@@ -151,6 +152,15 @@ Gridifier = function(grid, settings) {
             me._reversedAppender,
             me._sizesTransformer,
             me._sizesResolverManager
+        );
+
+        me._silentRenderer = new Gridifier.SilentRenderer(
+            me,
+            me._collector,
+            me._connections,
+            me._operationsQueue,
+            me._renderer,
+            me._renderer.getRendererConnections()
         );
 
         // @todo -> Remove from local var
@@ -345,6 +355,14 @@ Gridifier.prototype.disableZIndexesUpdates = function() {
     return this;
 }
 
+Gridifier.prototype.setToggleAnimationMsDuration = function(animationMsDuration) {
+    this._settings.setToggleAnimationMsDuration(animationMsDuration);
+}
+
+Gridifier.prototype.setCoordsChangeAnimationMsDuration = function(animationMsDuration) {
+    this._settings.setCoordsChangeAnimationMsDuration(animationMsDuration);
+}
+
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     if(this._settings.isMirroredPrepend()) {
         // @todo -> should reverse collection
@@ -377,34 +395,17 @@ Gridifier.prototype.append = function(items, batchSize, batchTimeout) {
 }
 
 Gridifier.prototype.silentAppend = function(items, batchSize, batchTimeout) {
-   this._renderer.scheduleForSilentRender(
-      this._collector.toDOMCollection(items)
-   );
-   this.append(items, batchSize, batchTimeout);
+    this._silentRenderer.scheduleForSilentRender(
+       this._collector.toDOMCollection(items)
+    );
+    this.append(items, batchSize, batchTimeout);
+
+    return this;
 }
 
-Gridifier.prototype.silentRender = function() {
-   var executeSilentRender = function() {
-       var scheduledForSilentRenderItems = this._collector.collectByQuery(
-           "[" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.Renderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
-       );
-
-       var scheduledForSilentRenderConnections = [];
-       for (var i = 0; i < scheduledForSilentRenderItems.length; i++) {
-           scheduledForSilentRenderConnections.push(
-               this._connections.findConnectionByItem(scheduledForSilentRenderItems[i])
-           );
-       }
-
-       this._renderer.unscheduleForSilentRender(
-           scheduledForSilentRenderItems,
-           scheduledForSilentRenderConnections
-       );
-       this._renderer.showConnections(scheduledForSilentRenderConnections);
-   }
-
-   var me = this;
-   setTimeout(function() { executeSilentRender.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 20);
+Gridifier.prototype.silentRender = function(batchSize, batchTimeout) {
+    this._silentRenderer.execute(batchSize, batchTimeout);
+    return this;
 }
 
 Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchTimeout) {
