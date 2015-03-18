@@ -358,7 +358,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
         setTimeout(function() {
             //me._gridifier.toggleBy("fade");
-            me._gridifier.toggleBy("rotateXY");
+            me._gridifier.toggleBy("rotateZ");
             //me._gridifier.toggleBy("slideLeft");
         }, 500);
         //me._gridifier.setCoordsChanger("CSS3Position");

@@ -30,6 +30,7 @@ Gridifier.Api.Rotate = function(settings, eventEmitter, sizesResolverManager) {
 }
 
 Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES = {X: 0, Y: 1, Z: 2, XY: 3, XZ: 4, YZ: 5, XYZ: 6};
+Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES = {X: 0, Y: 1, Z: 2};
 
 Gridifier.Api.Rotate.prototype.setCollectorInstance = function(collector) {
     this._collector = collector;
@@ -37,31 +38,52 @@ Gridifier.Api.Rotate.prototype.setCollectorInstance = function(collector) {
 
 Gridifier.Api.Rotate.prototype._getRotateMatrix = function(rotateMatrixType) {
     if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.X)
-        return "1, 0, 0";
+        return "1, 0, 0, ";
     else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Y)
-        return "0, 1, 0";
+        return "0, 1, 0, ";
     else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Z)
-        return "0, 0, 1";
+        return "0, 0, 1, ";
     else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XY)
-        return "1, 1, 0";
+        return "1, 1, 0, ";
     else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XZ)
-        return "1, 0, 1";
+        return "1, 0, 1, ";
     else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.YZ)
-        return "0, 1, 1";
+        return "0, 1, 1, ";
     else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XYZ)
-        return "1, 1, 1";
+        return "1, 1, 1, ";
 
     throw new Error("Gridifier error: wrong rotate matrix type = " + rotateMatrixType);
 }
 
-Gridifier.Api.Rotate.prototype.show = function(item, grid, rotateMatrixType, timeouter) {
+Gridifier.Api.Rotate.prototype._getRotateFunction = function(rotateFunctionType) {
+    if(rotateFunctionType == Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.X)
+        return "rotateX";
+    else if(rotateFunctionType == Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.Y)
+        return "rotateY";
+    else if(rotateFunctionType == Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.Z)
+        return "rotateZ";
+
+    throw new Error("Gridifier error: wrong rotate function type = " + rotateFunctionType);
+}
+
+Gridifier.Api.Rotate.prototype.show3d = function(item, grid, rotateMatrixType, timeouter) {
     var rotateProp = "rotate3d";
     this._rotate(item, grid, rotateProp, false, timeouter, this._getRotateMatrix(rotateMatrixType));
 }
 
-Gridifier.Api.Rotate.prototype.hide = function(item, grid, rotateMatrixType, timeouter) {
+Gridifier.Api.Rotate.prototype.hide3d = function(item, grid, rotateMatrixType, timeouter) {
     var rotateProp = "rotate3d";
     this._rotate(item, grid, rotateProp, true, timeouter, this._getRotateMatrix(rotateMatrixType));
+}
+
+Gridifier.Api.Rotate.prototype.show = function(item, grid, rotateFunctionType, timeouter) {
+    var rotateProp = this._getRotateFunction(rotateFunctionType);
+    this._rotate(item, grid, rotateProp, false, timeouter, "");
+}
+
+Gridifier.Api.Rotate.prototype.hide = function(item, grid, rotateFunctionType, timeouter) {
+    var rotateProp = this._getRotateFunction(rotateFunctionType);
+    this._rotate(item, grid, rotateProp, true, timeouter, "");
 }
 
 Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle, timeouter, rotateMatrix) {
@@ -104,8 +126,8 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
 
     var me = this;
     var initRotateTimeout = setTimeout(function() {
-        Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + ", 180deg");
-        Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + ", 0deg");
+        Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + "180deg");
+        Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + "0deg");
     }, 20);
     //timeouter.add(item, initRotateTimeout);
 
@@ -199,7 +221,7 @@ Gridifier.Api.Rotate.prototype._createFrontFrame = function(frames, rotateProp, 
 
     Dom.css.set(frontFrame, {zIndex: 2});
     Dom.css3.transitionProperty(frontFrame, Prefixer.getForCSS('transform', frontFrame) + " 0ms ease");
-    Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + ", 0deg");
+    Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + "0deg");
 
     return frontFrame;
 }
@@ -210,7 +232,7 @@ Gridifier.Api.Rotate.prototype._createBackFrame = function(frames, rotateProp, r
     frames.appendChild(backFrame);
 
     Dom.css3.transitionProperty(backFrame, Prefixer.getForCSS('transform', backFrame) + " 0ms ease");
-    Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + ", -180deg");
+    Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + "-180deg");
 
     return backFrame;
 }

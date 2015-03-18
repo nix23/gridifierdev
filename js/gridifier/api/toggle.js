@@ -98,7 +98,10 @@ Gridifier.Api.Toggle.prototype._addSlides = function() {
     this._toggleFunctions.slideBottomRight = this._slideApi.createVerticalSlideToggler(false, true, true);
 }
 
-Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName, rotateMatrixType) {
+Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
+                                                         showRotateApiFunction,
+                                                         hideRotateApiFunction,
+                                                         rotateMatrixType) {
     var me = this;
 
     this._toggleFunctions[rotatorName] = {
@@ -113,11 +116,11 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName, rotateMatr
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
-                me._rotateApi.show(item, grid, rotateMatrixType, timeouter);
-                me._rotateApi.show(itemClone, grid, rotateMatrixType, timeouter);
+                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter);
+                me._rotateApi[showRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter);
             }
             else {
-                me._rotateApi.show(item, grid, rotateMatrixType, timeouter);
+                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter);
             }
         },
 
@@ -132,24 +135,28 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName, rotateMatr
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
-                me._rotateApi.hide(item, grid, rotateMatrixType, timeouter);
-                me._rotateApi.hide(itemClone, grid, rotateMatrixType, timeouter);
+                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter);
+                me._rotateApi[hideRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter);
             }
             else {
-                me._rotateApi.hide(item, grid, rotateMatrixType, timeouter);
+                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter);
             }
         }
     };
 }
 
 Gridifier.Api.Toggle.prototype._addRotates = function() {
-    this._createRotator("rotateX", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.X);
-    this._createRotator("rotateY", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Y);
-    this._createRotator("rotateZ", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Z);
-    this._createRotator("rotateXY", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XY);
-    this._createRotator("rotateXZ", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XZ);
-    this._createRotator("rotateYZ", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.YZ);
-    this._createRotator("rotateXYZ", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XYZ);
+    this._createRotator("rotate3dX", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.X);
+    this._createRotator("rotate3dY", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Y);
+    this._createRotator("rotate3dZ", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Z);
+    this._createRotator("rotate3dXY", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XY);
+    this._createRotator("rotate3dXZ", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XZ);
+    this._createRotator("rotate3dYZ", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.YZ);
+    this._createRotator("rotate3dXYZ", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XYZ);
+
+    this._createRotator("rotateX", "show", "hide", Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.X);
+    this._createRotator("rotateY", "show", "hide", Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.Y);
+    this._createRotator("rotateZ", "show", "hide", Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.Z);
 }
 
 Gridifier.Api.Toggle.prototype._addScale = function() {
