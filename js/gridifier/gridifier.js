@@ -162,6 +162,7 @@ Gridifier = function(grid, settings) {
             me._renderer,
             me._renderer.getRendererConnections()
         );
+        me._renderer.setSilentRendererInstance(me._silentRenderer);
 
         // @todo -> Remove from local var
         var dragifier = new Gridifier.Dragifier(

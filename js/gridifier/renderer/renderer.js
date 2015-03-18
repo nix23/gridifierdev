@@ -48,6 +48,10 @@ Gridifier.Renderer.prototype.getRendererConnections = function() {
     return this._rendererConnections;
 }
 
+Gridifier.Renderer.prototype.setSilentRendererInstance = function(silentRenderer) {
+    this._rendererSchedulator.setSilentRendererInstance(silentRenderer);
+}
+
 Gridifier.Renderer.prototype.showConnections = function(connections) {
     var me = this;
 

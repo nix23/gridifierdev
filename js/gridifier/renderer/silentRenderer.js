@@ -58,6 +58,10 @@ Gridifier.SilentRenderer.prototype.unscheduleForSilentRender = function(items, c
     }
 }
 
+Gridifier.SilentRenderer.prototype.isScheduledForSilentRender = function(item) {
+    return Dom.hasAttribute(item, Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR);
+}
+
 Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
     var executeSilentRender = function(scheduledItems, scheduledConnections) {
         this.unscheduleForSilentRender(scheduledItems, scheduledConnections);

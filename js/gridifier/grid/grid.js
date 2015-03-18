@@ -45,7 +45,6 @@ Gridifier.Grid.prototype._extractGrid = function(grid) {
 
 Gridifier.Grid.prototype._adjustGridCss = function() {
     var gridComputedCSS = SizesResolver.getComputedCSS(this._grid);
-    
     if(gridComputedCSS.position != "relative" && gridComputedCSS.position != "absolute")
         Dom.css.set(this._grid, {"position": "relative"});
 }

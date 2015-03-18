@@ -29,21 +29,42 @@ Gridifier.Api.Rotate = function(settings, eventEmitter, sizesResolverManager) {
     return this;
 }
 
+Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES = {X: 0, Y: 1, Z: 2, XY: 3, XZ: 4, YZ: 5, XYZ: 6};
+
 Gridifier.Api.Rotate.prototype.setCollectorInstance = function(collector) {
     this._collector = collector;
 }
 
-Gridifier.Api.Rotate.prototype.show = function(item, grid, inverseRotateAxis, timeouter) {
-    var rotateProp = (inverseRotateAxis) ? "rotateY" : "rotateX";
-    this._rotate(item, grid, rotateProp, false, timeouter);
+Gridifier.Api.Rotate.prototype._getRotateMatrix = function(rotateMatrixType) {
+    if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.X)
+        return "1, 0, 0";
+    else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Y)
+        return "0, 1, 0";
+    else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Z)
+        return "0, 0, 1";
+    else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XY)
+        return "1, 1, 0";
+    else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XZ)
+        return "1, 0, 1";
+    else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.YZ)
+        return "0, 1, 1";
+    else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XYZ)
+        return "1, 1, 1";
+
+    throw new Error("Gridifier error: wrong rotate matrix type = " + rotateMatrixType);
 }
 
-Gridifier.Api.Rotate.prototype.hide = function(item, grid, inverseRotateAxis, timeouter) {
-    var rotateProp = (inverseRotateAxis) ? "rotateY" : "rotateX";
-    this._rotate(item, grid, rotateProp, true, timeouter);
+Gridifier.Api.Rotate.prototype.show = function(item, grid, rotateMatrixType, timeouter) {
+    var rotateProp = "rotate3d";
+    this._rotate(item, grid, rotateProp, false, timeouter, this._getRotateMatrix(rotateMatrixType));
 }
 
-Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle, timeouter) {
+Gridifier.Api.Rotate.prototype.hide = function(item, grid, rotateMatrixType, timeouter) {
+    var rotateProp = "rotate3d";
+    this._rotate(item, grid, rotateProp, true, timeouter, this._getRotateMatrix(rotateMatrixType));
+}
+
+Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle, timeouter, rotateMatrix) {
     if(!inverseToggle) {
         var isShowing = true;
         var isHiding = false;
@@ -59,8 +80,8 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
 
     item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
     item.setAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR, "yes");
-    var frontFrame = this._createFrontFrame(frames, rotateProp);
-    var backFrame = this._createBackFrame(frames, rotateProp);
+    var frontFrame = this._createFrontFrame(frames, rotateProp, rotateMatrix);
+    var backFrame = this._createBackFrame(frames, rotateProp, rotateMatrix);
 
     if(isShowing) {
         backFrame.appendChild(itemClone);
@@ -83,8 +104,8 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
 
     var me = this;
     var initRotateTimeout = setTimeout(function() {
-        Dom.css3.transformProperty(frontFrame, rotateProp, "180deg");
-        Dom.css3.transformProperty(backFrame, rotateProp, "0deg");
+        Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + ", 180deg");
+        Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + ", 0deg");
     }, 20);
     //timeouter.add(item, initRotateTimeout);
 
@@ -171,25 +192,25 @@ Gridifier.Api.Rotate.prototype._addFrameCss = function(frame) {
         Dom.css3.backfaceVisibility(frame, "hidden");
 }
 
-Gridifier.Api.Rotate.prototype._createFrontFrame = function(frames, rotateProp) {
+Gridifier.Api.Rotate.prototype._createFrontFrame = function(frames, rotateProp, rotateMatrix) {
     var frontFrame = document.createElement("div");
     this._addFrameCss(frontFrame);
     frames.appendChild(frontFrame);
 
     Dom.css.set(frontFrame, {zIndex: 2});
     Dom.css3.transitionProperty(frontFrame, Prefixer.getForCSS('transform', frontFrame) + " 0ms ease");
-    Dom.css3.transformProperty(frontFrame, rotateProp, "0deg");
+    Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + ", 0deg");
 
     return frontFrame;
 }
 
-Gridifier.Api.Rotate.prototype._createBackFrame = function(frames, rotateProp) {
+Gridifier.Api.Rotate.prototype._createBackFrame = function(frames, rotateProp, rotateMatrix) {
     var backFrame = document.createElement("div");
     this._addFrameCss(backFrame);
     frames.appendChild(backFrame);
 
     Dom.css3.transitionProperty(backFrame, Prefixer.getForCSS('transform', backFrame) + " 0ms ease");
-    Dom.css3.transformProperty(backFrame, rotateProp, "-180deg");
+    Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + ", -180deg");
 
     return backFrame;
 }

@@ -1305,6 +1305,7 @@ Gridifier = function(grid, settings) {
             me._renderer,
             me._renderer.getRendererConnections()
         );
+        me._renderer.setSilentRendererInstance(me._silentRenderer);
 
         // @todo -> Remove from local var
         var dragifier = new Gridifier.Dragifier(
@@ -2903,7 +2904,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
             var executeScaleShow = function(item) {
                 if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
                     Dom.css3.transition(item, "none");
-                    Dom.css3.transformProperty(item, "scale", 0);
+                    Dom.css3.transformProperty(item, "scale3d", "0,0,0");
                     item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
                 }
 
@@ -2914,7 +2915,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                         item,
                         Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
                     );
-                    Dom.css3.transformProperty(item, "scale", 1);
+                    Dom.css3.transformProperty(item, "scale3d", "1,1,1");
                 }, 20);
                 timeouter.add(item, initScaleTimeout);
 
@@ -2952,7 +2953,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 );
 
                 item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
-                Dom.css3.transformProperty(item, "scale", 0);
+                Dom.css3.transformProperty(item, "scale3d", "0,0,0");
 
                 if (animationMsDuration > 200)
                     var hideItemTimeout = animationMsDuration - 100;
@@ -2971,7 +2972,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 var completeScaleTimeout = setTimeout(function () {
                     item.style.visibility = "hidden";
                     Dom.css3.transition(item, "none");
-                    Dom.css3.transformProperty(item, "scale", 1);
+                    Dom.css3.transformProperty(item, "scale3d", "1,1,1");
 
                     item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
                     eventEmitter.emitHideEvent(item);
@@ -8034,7 +8035,6 @@ Gridifier.Grid.prototype._extractGrid = function(grid) {
 
 Gridifier.Grid.prototype._adjustGridCss = function() {
     var gridComputedCSS = SizesResolver.getComputedCSS(this._grid);
-    
     if(gridComputedCSS.position != "relative" && gridComputedCSS.position != "absolute")
         Dom.css.set(this._grid, {"position": "relative"});
 }
@@ -11170,6 +11170,10 @@ Gridifier.Renderer.prototype.getRendererConnections = function() {
     return this._rendererConnections;
 }
 
+Gridifier.Renderer.prototype.setSilentRendererInstance = function(silentRenderer) {
+    this._rendererSchedulator.setSilentRendererInstance(silentRenderer);
+}
+
 Gridifier.Renderer.prototype.showConnections = function(connections) {
     var me = this;
 
@@ -11356,6 +11360,7 @@ Gridifier.Renderer.Schedulator = function(gridifier, settings, connections, rend
     this._connections = null;
     this._renderer = null;
     this._rendererConnections = null;
+    this._silentRenderer = null;
 
     // Array[
     //     [0] => {connection: connection, processingType: processingType, left: left, top: top, 
@@ -11398,6 +11403,10 @@ Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES = {
     SHOW: 0, HIDE: 1, RENDER: 2, RENDER_TRANSFORMED: 3, RENDER_DEPENDED: 4, DELAYED_RENDER: 5
 };
 Gridifier.Renderer.Schedulator.DISABLE_PRETOGGLE_COORDS_CHANGER_CALL_DATA_ATTR = "data-gridifier-renderer-disable-pretoggle-cc-call";
+
+Gridifier.Renderer.Schedulator.prototype.setSilentRendererInstance = function(silentRenderer) {
+    this._silentRenderer = silentRenderer;
+}
 
 Gridifier.Renderer.Schedulator.prototype.reinit = function() {
     if(this._scheduledConnectionsToProcessData == null) {
@@ -11498,6 +11507,9 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
         var left = this._scheduledConnectionsToProcessData[i].left;
         var top = this._scheduledConnectionsToProcessData[i].top;
 
+        if(this._silentRenderer.isScheduledForSilentRender(connectionToProcess.item))
+            continue;
+
         if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.SHOW) {
             // @todo -> maybe add here start/stop caching transaction??? Or it is useless?
             Dom.css.set(connectionToProcess.item, {
@@ -11515,9 +11527,6 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                   top: top
                });
             }
-
-            if(Dom.hasAttribute(connectionToProcess.item, Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR))
-               continue;
             
             var toggleFunction = this._settings.getToggle();
             var toggleTimeouter = this._settings.getToggleTimeouter();
@@ -11726,6 +11735,10 @@ Gridifier.SilentRenderer.prototype.unscheduleForSilentRender = function(items, c
         items[i].removeAttribute(Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR);
         this._rendererConnections.unmarkConnectionItemAsRendered(connections[i]);
     }
+}
+
+Gridifier.SilentRenderer.prototype.isScheduledForSilentRender = function(item) {
+    return Dom.hasAttribute(item, Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR);
 }
 
 Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
