@@ -69,32 +69,39 @@ Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
     }
 
     var me = this;
-    var scheduledItems = this._collector.collectByQuery(
-        "[" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
-    );
-    var scheduledConnections = [];
-    for (var i = 0; i < scheduledItems.length; i++)
-        scheduledConnections.push(this._connections.findConnectionByItem(scheduledItems[i]));
 
-    var connectionsSorter = this._connections.getConnectionsSorter();
-    scheduledConnections = connectionsSorter.sortConnectionsPerReappend(scheduledConnections);
-    scheduledItems = [];
-    for(var i = 0; i < scheduledConnections.length; i++)
-        scheduledItems.push(scheduledConnections[i].item);
+    var scheduleSilentRendererExecution = function() {
+        var scheduledItems = this._collector.collectByQuery(
+            "[" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
+        );
+        var scheduledConnections = [];
+        for (var i = 0; i < scheduledItems.length; i++)
+            scheduledConnections.push(this._connections.findConnectionByItem(scheduledItems[i]));
 
-    if(typeof batchSize == "undefined") {
-        executeSilentRender.call(me, scheduledItems, scheduledConnections);
-        return;
+        var connectionsSorter = this._connections.getConnectionsSorter();
+        scheduledConnections = connectionsSorter.sortConnectionsPerReappend(scheduledConnections);
+        scheduledItems = [];
+        for (var i = 0; i < scheduledConnections.length; i++)
+            scheduledItems.push(scheduledConnections[i].item);
+
+        if (typeof batchSize == "undefined") {
+            executeSilentRender.call(me, scheduledItems, scheduledConnections);
+            return;
+        }
+
+        if (typeof batchTimeout == "undefined" || batchTimeout < Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100)
+            var batchTimeout = Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100;
+
+        var itemBatches = this._operationsQueue.splitItemsToBatches(scheduledItems, batchSize);
+        var connectionBatches = this._operationsQueue.splitItemsToBatches(scheduledConnections, batchSize);
+        for (var i = 0; i < itemBatches.length; i++) {
+            (function (itemBatch, i, connectionBatch) {
+                setTimeout(function () {
+                    executeSilentRender.call(me, itemBatch, connectionBatch);
+                }, batchTimeout * i);
+            })(itemBatches[i], i, connectionBatches[i]);
+        }
     }
 
-    if(typeof batchTimeout == "undefined" || batchTimeout < Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100)
-        var batchTimeout = Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100;
-
-    var itemBatches = this._operationsQueue.splitItemsToBatches(scheduledItems, batchSize);
-    var connectionBatches = this._operationsQueue.splitItemsToBatches(scheduledConnections, batchSize);
-    for(var i = 0; i < itemBatches.length; i++) {
-        (function(itemBatch, i, connectionBatch) {
-            setTimeout(function() { executeSilentRender.call(me, itemBatch, connectionBatch); }, batchTimeout * i);
-        })(itemBatches[i], i, connectionBatches[i]);
-    }
+    setTimeout(function() { scheduleSilentRendererExecution.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100);
 }

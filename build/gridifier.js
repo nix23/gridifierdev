@@ -2073,6 +2073,7 @@ Gridifier.Api.Rotate = function(settings, eventEmitter, sizesResolverManager) {
 }
 
 Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES = {X: 0, Y: 1, Z: 2, XY: 3, XZ: 4, YZ: 5, XYZ: 6};
+Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES = {X: 0, Y: 1, Z: 2};
 
 Gridifier.Api.Rotate.prototype.setCollectorInstance = function(collector) {
     this._collector = collector;
@@ -2080,31 +2081,52 @@ Gridifier.Api.Rotate.prototype.setCollectorInstance = function(collector) {
 
 Gridifier.Api.Rotate.prototype._getRotateMatrix = function(rotateMatrixType) {
     if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.X)
-        return "1, 0, 0";
+        return "1, 0, 0, ";
     else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Y)
-        return "0, 1, 0";
+        return "0, 1, 0, ";
     else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Z)
-        return "0, 0, 1";
+        return "0, 0, 1, ";
     else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XY)
-        return "1, 1, 0";
+        return "1, 1, 0, ";
     else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XZ)
-        return "1, 0, 1";
+        return "1, 0, 1, ";
     else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.YZ)
-        return "0, 1, 1";
+        return "0, 1, 1, ";
     else if(rotateMatrixType == Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XYZ)
-        return "1, 1, 1";
+        return "1, 1, 1, ";
 
     throw new Error("Gridifier error: wrong rotate matrix type = " + rotateMatrixType);
 }
 
-Gridifier.Api.Rotate.prototype.show = function(item, grid, rotateMatrixType, timeouter) {
+Gridifier.Api.Rotate.prototype._getRotateFunction = function(rotateFunctionType) {
+    if(rotateFunctionType == Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.X)
+        return "rotateX";
+    else if(rotateFunctionType == Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.Y)
+        return "rotateY";
+    else if(rotateFunctionType == Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.Z)
+        return "rotateZ";
+
+    throw new Error("Gridifier error: wrong rotate function type = " + rotateFunctionType);
+}
+
+Gridifier.Api.Rotate.prototype.show3d = function(item, grid, rotateMatrixType, timeouter) {
     var rotateProp = "rotate3d";
     this._rotate(item, grid, rotateProp, false, timeouter, this._getRotateMatrix(rotateMatrixType));
 }
 
-Gridifier.Api.Rotate.prototype.hide = function(item, grid, rotateMatrixType, timeouter) {
+Gridifier.Api.Rotate.prototype.hide3d = function(item, grid, rotateMatrixType, timeouter) {
     var rotateProp = "rotate3d";
     this._rotate(item, grid, rotateProp, true, timeouter, this._getRotateMatrix(rotateMatrixType));
+}
+
+Gridifier.Api.Rotate.prototype.show = function(item, grid, rotateFunctionType, timeouter) {
+    var rotateProp = this._getRotateFunction(rotateFunctionType);
+    this._rotate(item, grid, rotateProp, false, timeouter, "");
+}
+
+Gridifier.Api.Rotate.prototype.hide = function(item, grid, rotateFunctionType, timeouter) {
+    var rotateProp = this._getRotateFunction(rotateFunctionType);
+    this._rotate(item, grid, rotateProp, true, timeouter, "");
 }
 
 Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle, timeouter, rotateMatrix) {
@@ -2147,8 +2169,8 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
 
     var me = this;
     var initRotateTimeout = setTimeout(function() {
-        Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + ", 180deg");
-        Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + ", 0deg");
+        Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + "180deg");
+        Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + "0deg");
     }, 20);
     //timeouter.add(item, initRotateTimeout);
 
@@ -2242,7 +2264,7 @@ Gridifier.Api.Rotate.prototype._createFrontFrame = function(frames, rotateProp, 
 
     Dom.css.set(frontFrame, {zIndex: 2});
     Dom.css3.transitionProperty(frontFrame, Prefixer.getForCSS('transform', frontFrame) + " 0ms ease");
-    Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + ", 0deg");
+    Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + "0deg");
 
     return frontFrame;
 }
@@ -2253,7 +2275,7 @@ Gridifier.Api.Rotate.prototype._createBackFrame = function(frames, rotateProp, r
     frames.appendChild(backFrame);
 
     Dom.css3.transitionProperty(backFrame, Prefixer.getForCSS('transform', backFrame) + " 0ms ease");
-    Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + ", -180deg");
+    Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + "-180deg");
 
     return backFrame;
 }
@@ -2821,7 +2843,10 @@ Gridifier.Api.Toggle.prototype._addSlides = function() {
     this._toggleFunctions.slideBottomRight = this._slideApi.createVerticalSlideToggler(false, true, true);
 }
 
-Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName, rotateMatrixType) {
+Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
+                                                         showRotateApiFunction,
+                                                         hideRotateApiFunction,
+                                                         rotateMatrixType) {
     var me = this;
 
     this._toggleFunctions[rotatorName] = {
@@ -2836,11 +2861,11 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName, rotateMatr
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
-                me._rotateApi.show(item, grid, rotateMatrixType, timeouter);
-                me._rotateApi.show(itemClone, grid, rotateMatrixType, timeouter);
+                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter);
+                me._rotateApi[showRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter);
             }
             else {
-                me._rotateApi.show(item, grid, rotateMatrixType, timeouter);
+                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter);
             }
         },
 
@@ -2855,24 +2880,28 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName, rotateMatr
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
-                me._rotateApi.hide(item, grid, rotateMatrixType, timeouter);
-                me._rotateApi.hide(itemClone, grid, rotateMatrixType, timeouter);
+                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter);
+                me._rotateApi[hideRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter);
             }
             else {
-                me._rotateApi.hide(item, grid, rotateMatrixType, timeouter);
+                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter);
             }
         }
     };
 }
 
 Gridifier.Api.Toggle.prototype._addRotates = function() {
-    this._createRotator("rotateX", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.X);
-    this._createRotator("rotateY", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Y);
-    this._createRotator("rotateZ", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Z);
-    this._createRotator("rotateXY", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XY);
-    this._createRotator("rotateXZ", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XZ);
-    this._createRotator("rotateYZ", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.YZ);
-    this._createRotator("rotateXYZ", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XYZ);
+    this._createRotator("rotate3dX", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.X);
+    this._createRotator("rotate3dY", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Y);
+    this._createRotator("rotate3dZ", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Z);
+    this._createRotator("rotate3dXY", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XY);
+    this._createRotator("rotate3dXZ", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XZ);
+    this._createRotator("rotate3dYZ", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.YZ);
+    this._createRotator("rotate3dXYZ", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XYZ);
+
+    this._createRotator("rotateX", "show", "hide", Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.X);
+    this._createRotator("rotateY", "show", "hide", Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.Y);
+    this._createRotator("rotateZ", "show", "hide", Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.Z);
 }
 
 Gridifier.Api.Toggle.prototype._addScale = function() {
@@ -5268,6 +5297,8 @@ Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
     if(!this._areZIndexesUpdatesEnabled || this._areZIndexesUpdatesBinded)
         return;
 
+    var me = this;
+
     this._gridifier.onConnectionCreate(function(connectionsObj) {
         var connections = connectionsObj.get();
         var connectionsSorter = connectionsObj.getConnectionsSorter();
@@ -5276,6 +5307,12 @@ Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
         var nextItemZIndex = 1;
         for(var i = 0; i < sortedConnections.length; i++) {
             sortedConnections[i].item.style.zIndex = nextItemZIndex;
+
+            if(me._gridifier.hasItemBindedClone(sortedConnections[i].item)) {
+                var itemClone = me._gridifier.getItemClone(sortedConnections[i].item);
+                itemClone.style.zIndex = nextItemZIndex - 1;
+            }
+
             nextItemZIndex++;
         }
     });
@@ -11734,34 +11771,41 @@ Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
     }
 
     var me = this;
-    var scheduledItems = this._collector.collectByQuery(
-        "[" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
-    );
-    var scheduledConnections = [];
-    for (var i = 0; i < scheduledItems.length; i++)
-        scheduledConnections.push(this._connections.findConnectionByItem(scheduledItems[i]));
 
-    var connectionsSorter = this._connections.getConnectionsSorter();
-    scheduledConnections = connectionsSorter.sortConnectionsPerReappend(scheduledConnections);
-    scheduledItems = [];
-    for(var i = 0; i < scheduledConnections.length; i++)
-        scheduledItems.push(scheduledConnections[i].item);
+    var scheduleSilentRendererExecution = function() {
+        var scheduledItems = this._collector.collectByQuery(
+            "[" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
+        );
+        var scheduledConnections = [];
+        for (var i = 0; i < scheduledItems.length; i++)
+            scheduledConnections.push(this._connections.findConnectionByItem(scheduledItems[i]));
 
-    if(typeof batchSize == "undefined") {
-        executeSilentRender.call(me, scheduledItems, scheduledConnections);
-        return;
+        var connectionsSorter = this._connections.getConnectionsSorter();
+        scheduledConnections = connectionsSorter.sortConnectionsPerReappend(scheduledConnections);
+        scheduledItems = [];
+        for (var i = 0; i < scheduledConnections.length; i++)
+            scheduledItems.push(scheduledConnections[i].item);
+
+        if (typeof batchSize == "undefined") {
+            executeSilentRender.call(me, scheduledItems, scheduledConnections);
+            return;
+        }
+
+        if (typeof batchTimeout == "undefined" || batchTimeout < Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100)
+            var batchTimeout = Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100;
+
+        var itemBatches = this._operationsQueue.splitItemsToBatches(scheduledItems, batchSize);
+        var connectionBatches = this._operationsQueue.splitItemsToBatches(scheduledConnections, batchSize);
+        for (var i = 0; i < itemBatches.length; i++) {
+            (function (itemBatch, i, connectionBatch) {
+                setTimeout(function () {
+                    executeSilentRender.call(me, itemBatch, connectionBatch);
+                }, batchTimeout * i);
+            })(itemBatches[i], i, connectionBatches[i]);
+        }
     }
 
-    if(typeof batchTimeout == "undefined" || batchTimeout < Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100)
-        var batchTimeout = Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100;
-
-    var itemBatches = this._operationsQueue.splitItemsToBatches(scheduledItems, batchSize);
-    var connectionBatches = this._operationsQueue.splitItemsToBatches(scheduledConnections, batchSize);
-    for(var i = 0; i < itemBatches.length; i++) {
-        (function(itemBatch, i, connectionBatch) {
-            setTimeout(function() { executeSilentRender.call(me, itemBatch, connectionBatch); }, batchTimeout * i);
-        })(itemBatches[i], i, connectionBatches[i]);
-    }
+    setTimeout(function() { scheduleSilentRendererExecution.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100);
 }
 
 Gridifier.ApiSettingsParser = function(settingsCore, settings) {

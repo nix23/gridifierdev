@@ -116,6 +116,8 @@ Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
     if(!this._areZIndexesUpdatesEnabled || this._areZIndexesUpdatesBinded)
         return;
 
+    var me = this;
+
     this._gridifier.onConnectionCreate(function(connectionsObj) {
         var connections = connectionsObj.get();
         var connectionsSorter = connectionsObj.getConnectionsSorter();
@@ -124,6 +126,12 @@ Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
         var nextItemZIndex = 1;
         for(var i = 0; i < sortedConnections.length; i++) {
             sortedConnections[i].item.style.zIndex = nextItemZIndex;
+
+            if(me._gridifier.hasItemBindedClone(sortedConnections[i].item)) {
+                var itemClone = me._gridifier.getItemClone(sortedConnections[i].item);
+                itemClone.style.zIndex = nextItemZIndex - 1;
+            }
+
             nextItemZIndex++;
         }
     });
