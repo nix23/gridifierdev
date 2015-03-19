@@ -68,7 +68,14 @@ Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
                                                        eventEmitter,
                                                        emitTransformEvent,
                                                        newWidth,
-                                                       newHeight) { 
+                                                       newHeight,
+                                                       isItemInitializationCall) {
+        var isItemInitializationCall = isItemInitializationCall || false;
+        if(isItemInitializationCall) {
+            // Custom init logic per coordsChanger sync can be placed here
+            return;
+        }
+
         //Dom.css3.transitionProperty(item, "left 0ms ease, top 0ms ease"); If !ie8(isSupporting)
         Dom.css.set(item, {
             left: newLeft,
@@ -89,7 +96,16 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
                                                          eventEmitter,
                                                          emitTransformEvent,
                                                          newWidth,
-                                                         newHeight) {
+                                                         newHeight,
+                                                         isItemInitializationCall) {
+        // @todo -> If not supporting -> def
+
+        var isItemInitializationCall = isItemInitializationCall || false;
+        if(isItemInitializationCall) {
+            Dom.css3.transform(item, "scale3d(1,1,1)");
+            return;
+        }
+
         Dom.css3.transitionProperty(
             item, 
             Prefixer.getForCSS('left', item) + " " + animationMsDuration + "ms ease"
@@ -120,8 +136,15 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function(
                                                           eventEmitter,
                                                           emitTransformEvent,
                                                           newWidth,
-                                                          newHeight) {
+                                                          newHeight,
+                                                          isItemInitializationCall) {
         // @todo -> if !supporting transitions -> default
+
+        var isItemInitializationCall = isItemInitializationCall || false;
+        if(isItemInitializationCall) {
+            Dom.css3.transform(item, "scale3d(1,1,1) translate(0px,0px)");
+            return;
+        }
 
         var newLeft = parseFloat(newLeft);
         var newTop = parseFloat(newTop);
@@ -166,8 +189,15 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
                                                             eventEmitter,
                                                             emitTransformEvent,
                                                             newWidth,
-                                                            newHeight) {
+                                                            newHeight,
+                                                            isItemInitializationCall) {
         // @todo -> if !supporting transitions -> default
+
+        var isItemInitializationCall = isItemInitializationCall || false;
+        if(isItemInitializationCall) {
+            Dom.css3.transform(item, "scale3d(1,1,1) translate3d(0px,0px,0px)");
+            return;
+        }
 
         var newLeft = parseFloat(newLeft);
         var newTop = parseFloat(newTop);
@@ -237,8 +267,25 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
                                                                   eventEmitter,
                                                                   emitTransformEvent,
                                                                   newWidth,
-                                                                  newHeight) {
+                                                                  newHeight,
+                                                                  isItemInitializationCall) {
         // @todo -> if !supporting transitions -> default
+
+        // We should preinit item transform property with scale3d(1,1,1) rule.
+        // Otherwise animation will break on scale3d applying any later time.
+        //      item.style.wT = "translate3d(0px,0px,0px)";
+        //      item.style.wT = "translate3d(0px,0px,0px) scale3d(1,1,1) "; -> Won't work.
+        //      item.style.wT = "scale3d(1,1,1)";
+        //      item.style.wT = "scale3d(1,1,1) translate3d(0px,0px,0px)"; -> Will work, but will break without setting
+        //                                                                    second rule without timeout. So we should
+        //                                                                    set all required rules per coords changers
+        //                                                                    before calling toggle function for first time.
+        var isItemInitializationCall = isItemInitializationCall || false;
+        if(isItemInitializationCall) {
+            Dom.css3.transform(item, "scale3d(1,1,1) translate3d(0px,0px,0px)");
+            return;
+        }
+
         if(item.hasAttribute(Gridifier.Dragifier.IS_DRAGGABLE_ITEM_DATA_ATTR))
             var isDraggableItem = true;
         else

@@ -173,14 +173,19 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
 
             var executeScaleShow = function(item) {
                 if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
-                    Dom.css3.transition(item, "none");
                     Dom.css3.transformProperty(item, "scale3d", "0,0,0");
                     item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
                 }
 
-                item.style.visibility = "visible"; // Ie11 blinking fix(:))
+                var setItemPrescaleVisibility = function(item) {
+                    item.style.visibility = "visible"
+                }
+
+                // Ie11 blinking fix(:))
+                setItemPrescaleVisibility(item);
+
                 var initScaleTimeout = setTimeout(function () {
-                    item.style.visibility = "visible";
+                    setItemPrescaleVisibility(item);
                     Dom.css3.transition(
                         item,
                         Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
@@ -196,7 +201,6 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 timeouter.add(item, completeScaleTimeout);
             }
 
-            // @todo -> Do scale only on clone?(Event won't be sended on clone)
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);

@@ -197,15 +197,17 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 );
             };
 
-            // We should call coords changer with fake(0ms) time to set traslate property
-            // on toggled item, before toggle animation will start. Adding new translate rule
-            // to the transform property dynamically won't work. (
-            //      item.style.wT = "scale(0)";
-            //      item.style.wT = "scale(1) translate3d(0px,0px,0px)"; -> Won't work.
-            coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter);
+            // Due to the bags, caused by setting multiple transform properties sequentially,
+            // we should preinit item with all transform rules, which will be used in coords changers.
+            // Scale always should be first(otherwise animation will break), translates should be also
+            // setted up with SINGLE rule at start. Thus, they can be overriden later. Otherwise,
+            // animation will break.
             if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
                 var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
-                coordsChanger(itemClone, left, top, animationMsDuration, eventEmitter);
+                coordsChanger(itemClone, left, top, animationMsDuration, eventEmitter, false, false, false, true);
+            }
+            else {
+                coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter, false, false, false, true);
             }
 
             showItem(connectionToProcess.item);
