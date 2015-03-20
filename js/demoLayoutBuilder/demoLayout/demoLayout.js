@@ -56,13 +56,15 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         me._gridifierSettings.gridTransformType = "expand";
 
-        me._gridifierSettings.prependType = "mirroredPrepend";
-        //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
-        //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
-        me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
-        me._gridifierSettings.alignmentType = "center";
+        //me._gridifierSettings.prependType = "mirroredPrepend";
+        me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
+        me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
+        //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
+        //me._gridifierSettings.alignmentType = "center";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
         me._gridifierSettings.dragifier = true;
+        //me._gridifierSettings.sortDispersionMode = "custom";
+        //me._gridifierSettings.sortDispersionValue = "200px";
 
         // me._gridifierSettings.sort = function(firstItem, secondItem) { 
         //     var firstItemClassParts = firstItem.getAttribute("class").split(" ");
@@ -218,40 +220,44 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierDynamicSettings._batchSize = 50;
         for(var i = 0; i < 50; i++) {
             if(i % 2 == 0) {
-                // var width = "100px";
-                // var height = "50px";
-                var width = "200px";
-                var height = "200px";
+                 var width = "200px";
+                 var height = "200px";
+                 //var width = "100px";
+                 //var height = "50px";
+                //var width = "200px";
+                //var height = "200px";
             }
             else {
-               // var width = "50px";
-               //  var height = "100px";
-                var width = "100px";
-                var height = "100px";
+                var width = "200px";
+                var height = "600px";
+               //var width = "50px";
+                 //var height = "100px";
+                //var width = "100px";
+                //var height = "100px";
             }
 
-            me._gridifierDynamicSettings._itemSizes[i].width = width;
-            me._gridifierDynamicSettings._itemSizes[i].height = height;
+            //me._gridifierDynamicSettings._itemSizes[i].width = width;
+            //me._gridifierDynamicSettings._itemSizes[i].height = height;
         }
 
 
 
-        // me._gridifierDynamicSettings._itemSizes[0].width = "5%";  // @todo -> Delete, tmp
-        // //me._gridifierDynamicSettings._itemSizes[0].width = "25px";
-        // me._gridifierDynamicSettings._itemSizes[0].height = "100px";
+        me._gridifierDynamicSettings._itemSizes[0].width = "200px";  // @todo -> Delete, tmp
+        //me._gridifierDynamicSettings._itemSizes[0].width = "25px";
+        me._gridifierDynamicSettings._itemSizes[0].height = "200px";
 
-        // me._gridifierDynamicSettings._itemSizes[1].width = "20%";
-        // me._gridifierDynamicSettings._itemSizes[1].height = "200px";
+        me._gridifierDynamicSettings._itemSizes[1].width = "200px";
+        me._gridifierDynamicSettings._itemSizes[1].height = "200px";
 
-        // me._gridifierDynamicSettings._itemSizes[2].width = "25%";
-        // me._gridifierDynamicSettings._itemSizes[2].height = "300px";
-        // //me._gridifierDynamicSettings._itemSizes[2].height = "335px";
+        me._gridifierDynamicSettings._itemSizes[2].width = "200px";
+        me._gridifierDynamicSettings._itemSizes[2].height = "200px";
+        //me._gridifierDynamicSettings._itemSizes[2].height = "335px";
 
-        // me._gridifierDynamicSettings._itemSizes[3].width = "5%";
-        // me._gridifierDynamicSettings._itemSizes[3].height = "100px";
+        me._gridifierDynamicSettings._itemSizes[3].width = "200";
+        me._gridifierDynamicSettings._itemSizes[3].height = "200px";
 
-        // me._gridifierDynamicSettings._itemSizes[4].width = "5%";
-        // me._gridifierDynamicSettings._itemSizes[4].height = "200px"; // @todo -> Delete, tmp
+        me._gridifierDynamicSettings._itemSizes[4].width = "400";
+        me._gridifierDynamicSettings._itemSizes[4].height = "400px"; // @todo -> Delete, tmp
 
 
 
@@ -348,8 +354,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         //me._gridifierSettings.toggleAnimationMsDuration = 500;
         //me._gridifierSettings.coordsChangeAnimationMsDuration = 500;
-        me._gridifierSettings.toggleAnimationMsDuration = 5000;
-        me._gridifierSettings.coordsChangeAnimationMsDuration = 5000;
+        me._gridifierSettings.toggleAnimationMsDuration = 500;
+        me._gridifierSettings.coordsChangeAnimationMsDuration = 500;
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
 
         me._gridifier.setItemClonesManagerLifecycleCallbacks();

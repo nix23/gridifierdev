@@ -12,19 +12,19 @@ Gridifier.HorizontalGrid.Appender = function(gridifier,
     this._gridifier = null;
     this._settings = null;
     this._sizesResolverManager = null;
-
+    this._guid = null;
+    this._renderer = null;
+    this._normalizer = null;
+    this._operation = null;
     this._connectors = null;
     this._connections = null;
+
     this._connectorsCleaner = null;
     this._connectorsShifter = null;
     this._connectorsSelector = null;
     this._connectorsSorter = null;
     this._itemCoordsExtractor = null;
     this._connectionsIntersector = null;
-    this._guid = null;
-    this._renderer = null;
-    this._normalizer = null;
-    this._operation = null;
 
     this._css = {
     };
@@ -33,7 +33,10 @@ Gridifier.HorizontalGrid.Appender = function(gridifier,
         me._gridifier = gridifier;
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
-
+        me._guid = guid;
+        me._renderer = renderer;
+        me._normalizer = normalizer;
+        me._operation = operation;
         me._connectors = connectors;
         me._connections = connections;
 
@@ -47,11 +50,6 @@ Gridifier.HorizontalGrid.Appender = function(gridifier,
         me._connectorsSorter = new Gridifier.HorizontalGrid.ConnectorsSorter();
         me._itemCoordsExtractor = new Gridifier.HorizontalGrid.ItemCoordsExtractor(me._gridifier, me._sizesResolverManager);
         me._connectionsIntersector = new Gridifier.HorizontalGrid.ConnectionsIntersector(me._connections);
-
-        me._guid = guid;
-        me._renderer = renderer;
-        me._normalizer = normalizer;
-        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -223,6 +221,18 @@ Gridifier.HorizontalGrid.Appender.prototype._createConnectionPerItem = function(
 
 Gridifier.HorizontalGrid.Appender.prototype._filterConnectorsPerNextConnection = function() {
     var connectors = this._connectors.getClone();
+
+    this._connectorsSelector.attachConnectors(connectors);
+    this._connectorsSelector.selectOnlySpecifiedSideConnectorsOnPrependedItems(Gridifier.Connectors.SIDES.RIGHT.TOP);
+    connectors = this._connectorsSelector.getSelectedConnectors();
+    /* @system-log-start */
+    Logger.log(
+        "createConnectionPerItem",
+        "filterConnectorsPerNextConnection -> selectOnlySpecifiedSideConnectorsOnPrependedItems(RIGHT.TOP)",
+        connectors,
+        this._connections.get()
+    );
+    /* @system-log-end */
 
     if(this._settings.isDefaultIntersectionStrategy()) {
         this._connectorsShifter.attachConnectors(connectors);

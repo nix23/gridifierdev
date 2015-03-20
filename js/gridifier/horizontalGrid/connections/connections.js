@@ -213,9 +213,18 @@ Gridifier.HorizontalGrid.Connections.prototype.isAnyConnectionItemGUIDBiggerThan
 Gridifier.HorizontalGrid.Connections.prototype.getAllConnectionsBehindX = function(x) {
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
-        if(this._connections[i].x1 - 10000 > x) // @todo -> Delete, for testing
-        //if(this._connections[i].x1 > x)
-            connections.push(this._connections[i]);
+        if(this._settings.isDisabledSortDispersion()) {
+            if(this._connections[i].x1 > x)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomSortDispersion()) {
+            var sortDispersionValue = this._settings.getSortDispersionValue();
+            if(this._connections[i].x1 - sortDispersionValue > x)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+            ; // No connections
+        }
     }
 
     return connections;
@@ -225,8 +234,18 @@ Gridifier.HorizontalGrid.Connections.prototype.getAllConnectionsBehindX = functi
 Gridifier.HorizontalGrid.Connections.prototype.getAllConnectionsBeforeX = function(x) {
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
-        if(this._connections[i].x2 < x)
-            connections.push(this._connections[i]);
+        if(this._settings.isDisabledSortDispersion()) {
+            if(this._connections[i].x2 < x)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomSortDispersion()) {
+            var sortDispersionValue = this._settings.getSortDispersionValue();
+            if(this._connections[i].x2 + sortDispersionValue < x)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+            ; // No connections
+        }
     }
 
     return connections;

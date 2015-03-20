@@ -492,10 +492,16 @@ Gridifier.prototype.getItemClonesManager = function() {
 }
 
 Gridifier.prototype.hasItemBindedClone = function(item) {
+    var items = this._collector.toDOMCollection(item);
+    var item = items[0];
+
     return this._itemClonesManager.hasBindedClone(item);
 }
 
 Gridifier.prototype.getItemClone = function(item) {
+    var items = this._collector.toDOMCollection(item);
+    var item = items[0];
+
     if(!this._itemClonesManager.hasBindedClone(item))
         new Error("Gridifier error: item has no binded clone.(Wrong item?). Item = ", item);
 

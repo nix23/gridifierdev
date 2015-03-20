@@ -28,7 +28,7 @@ DemoLayoutBuilder = function($targetEl) {
         
         this._bindEvents(); 
         $(me._gridConfigurator).trigger(DemoLayoutBuilder.Configurator.EVENT_CREATE_VERTICAL_GRID, [{
-        //$(me._gridConfigurator).trigger(DemoLayoutBuilder.Configurator.EVENT_CREATE_HORIZONTAL_GRID, [{
+       //$(me._gridConfigurator).trigger(DemoLayoutBuilder.Configurator.EVENT_CREATE_HORIZONTAL_GRID, [{
             appendType: "defaultAppend",
             //gridType: "horizontalGrid",
             gridType: "verticalGrid",

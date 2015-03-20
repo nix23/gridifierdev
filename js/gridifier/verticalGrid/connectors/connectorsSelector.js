@@ -83,3 +83,21 @@ Gridifier.VerticalGrid.ConnectorsSelector.prototype.selectOnlyMostTopConnectorFr
             this._connectors.splice(i, 1);
     }
 }
+
+Gridifier.VerticalGrid.ConnectorsSelector.prototype.selectOnlySpecifiedSideConnectorsOnAppendedItems = function(side) {
+    for(var i = 0; i < this._connectors.length; i++) {
+        if(!this._guid.wasItemPrepended(this._connectors[i].itemGUID) && side != this._connectors[i].side) {
+            this._connectors.splice(i, 1);
+            i--;
+        }
+    }
+}
+
+Gridifier.VerticalGrid.ConnectorsSelector.prototype.selectOnlySpecifiedSideConnectorsOnPrependedItems = function(side) {
+    for(var i = 0; i < this._connectors.length; i++) {
+        if(this._guid.wasItemPrepended(this._connectors[i].itemGUID) && side != this._connectors[i].side) {
+            this._connectors.splice(i, 1);
+            i--;
+        }
+    }
+}

@@ -219,6 +219,7 @@ Gridifier.SizesTransformer.Core.prototype.retransformAllConnections = function()
 
     var applyRetransform = function() {
         connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
+        this._guid.unmarkAllPrependedItems();
 
         var itemsToReappend = [];
         var connectionsToKeep = [];

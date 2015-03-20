@@ -213,20 +213,38 @@ Gridifier.VerticalGrid.Connections.prototype.isAnyConnectionItemGUIDBiggerThan =
 Gridifier.VerticalGrid.Connections.prototype.getAllConnectionsBelowY = function(y) {
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
-        if(this._connections[i].y1 - 10000 > y) // @todo -> Delete, for testing
-        //if(this._connections[i].y1 > y)
-            connections.push(this._connections[i]);
+        if(this._settings.isDisabledSortDispersion()) {
+            if(this._connections[i].y1 > y)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomSortDispersion()) {
+            var sortDispersionValue = this._settings.getSortDispersionValue();
+            if(this._connections[i].y1 - sortDispersionValue > y)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+            ; // No connections
+        }
     }
 
     return connections;
 }
 
 Gridifier.VerticalGrid.Connections.prototype.getAllConnectionsAboveY = function(y) {
-    // @todo -> Place CSD here too :)
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
-        if(this._connections[i].y2 < y)
-            connections.push(this._connections[i]);
+        if(this._settings.isDisabledSortDispersion()) {
+            if(this._connections[i].y2 < y)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomSortDispersion()) {
+            var sortDispersionValue = this._settings.getSortDispersionValue();
+            if(this._connections[i].y2 + sortDispersionValue < y)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+            ; // No connections
+        }
     }
 
     return connections;

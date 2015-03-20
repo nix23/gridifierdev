@@ -3,6 +3,7 @@ Gridifier.GUID = function() {
 
     this._maxItemGUID = 9999;
     this._minItemGUID = 10000;
+    this._firstPrependedItemGUID = null;
 
     this._css = {
     };
@@ -64,4 +65,22 @@ Gridifier.GUID.prototype.markNextPrependedItem = function(item) {
     item.setAttribute(Gridifier.GUID.GUID_DATA_ATTR, this._minItemGUID);
 
     return this._minItemGUID;
+}
+
+Gridifier.GUID.prototype.markAsPrependedItem = function(item) {
+    if(this._firstPrependedItemGUID != null)
+        return;
+
+    this._firstPrependedItemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
+}
+
+Gridifier.GUID.prototype.unmarkAllPrependedItems = function() {
+    this._firstPrependedItemGUID = null;
+}
+
+Gridifier.GUID.prototype.wasItemPrepended = function(itemGUID) {
+    if(this._firstPrependedItemGUID == null)
+        return false;
+
+    return Dom.toInt(itemGUID) <= this._firstPrependedItemGUID;
 }
