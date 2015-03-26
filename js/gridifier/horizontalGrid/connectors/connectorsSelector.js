@@ -35,7 +35,6 @@ Gridifier.HorizontalGrid.ConnectorsSelector.prototype.getSelectedConnectors = fu
     return this._connectors;
 }
 
-// @todo -> Refactor this 2 methods in 1??? (Dynamic conds)
 Gridifier.HorizontalGrid.ConnectorsSelector.prototype.selectOnlyMostRightConnectorFromSide = function(side) {
     var mostRightConnectorItemGUID = null;
     var mostRightConnectorX = null;
@@ -84,9 +83,14 @@ Gridifier.HorizontalGrid.ConnectorsSelector.prototype.selectOnlyMostLeftConnecto
     }
 }
 
+Gridifier.HorizontalGrid.ConnectorsSelector.prototype._isInitialConnector = function(connector) {
+    return connector.itemGUID == Gridifier.Connectors.INITIAL_CONNECTOR_ITEM_GUID;
+}
+
 Gridifier.HorizontalGrid.ConnectorsSelector.prototype.selectOnlySpecifiedSideConnectorsOnAppendedItems = function(side) {
     for(var i = 0; i < this._connectors.length; i++) {
-        if(!this._guid.wasItemPrepended(this._connectors[i].itemGUID) && side != this._connectors[i].side) {
+        if(!this._isInitialConnector(this._connectors[i]) &&
+            !this._guid.wasItemPrepended(this._connectors[i].itemGUID) && side != this._connectors[i].side) {
             this._connectors.splice(i, 1);
             i--;
         }
@@ -95,7 +99,8 @@ Gridifier.HorizontalGrid.ConnectorsSelector.prototype.selectOnlySpecifiedSideCon
 
 Gridifier.HorizontalGrid.ConnectorsSelector.prototype.selectOnlySpecifiedSideConnectorsOnPrependedItems = function(side) {
     for(var i = 0; i < this._connectors.length; i++) {
-        if(this._guid.wasItemPrepended(this._connectors[i].itemGUID) && side != this._connectors[i].side) {
+        if(!this._isInitialConnector(this._connectors[i]) &&
+            this._guid.wasItemPrepended(this._connectors[i].itemGUID) && side != this._connectors[i].side) {
             this._connectors.splice(i, 1);
             i--;
         }

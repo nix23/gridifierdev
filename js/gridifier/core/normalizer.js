@@ -4,9 +4,6 @@ Gridifier.Normalizer = function(gridifier, sizesResolverManager) {
     this._gridifier = null;
     this._sizesResolverManager = null;
 
-    // @todo -> Make option to disable/enable this option, and write docs about it.
-    // (How it works, and why it can be disabled on px-valued items)
-    // this._roundingNormalizationValue = 2; // @todo -> Looks like without Math.floor in SR 1 pixel is enough(Per IE)
     // This is required per % w/h support in IE8 and... FF!!!! (omg)
     this._roundingNormalizationValue = 1;
 

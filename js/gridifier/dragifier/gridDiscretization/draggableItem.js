@@ -45,6 +45,7 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
         me._sizesResolverManager = sizesResolverManager;
 
         me._dragIdentifiers = [];
+
         me._dragifierRenderer = new Gridifier.Dragifier.Renderer(
             me._settings
         );
@@ -83,6 +84,8 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
     return this;
 }
 
+Gridifier.Dragifier.GridDiscretizationDraggableItem.REAPPEND_GRID_ITEMS_DELAY = 100;
+
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.bindDraggableItem = function(item,
                                                                                            cursorX,
                                                                                            cursorY) {
@@ -106,7 +109,6 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.bindDraggableItem 
     this._hideDraggableItem();
 }
 
-// @todo -> Move to composed class
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.getDraggableItem = function() {
     return this._draggableItem;
 }
@@ -139,8 +141,8 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.getDragIdentifiers
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._initDraggableItem = function(item) {
     this._draggableItem = item;
-    // @todo -> Fix this(visibility uses transition timeout, Replace global from all???)
-    Dom.css3.transitionProperty(this._draggableItem, "Visibility 0ms ease");
+    if(Dom.isBrowserSupportingTransitions())
+        Dom.css3.transitionProperty(this._draggableItem, "Visibility 0ms ease");
 }
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._initDraggableItemConnection = function() {
@@ -157,9 +159,6 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._hideDraggableItem
         var draggableItemRendererClone = itemClonesManager.getBindedClone(this._draggableItem);
         draggableItemRendererClone.style.visibility = "hidden";
     }
-
-    // @todo -> Replace with real hidder
-    Dom.css.addClass(document.body, "disableSelect");
 }
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.processDragMove = function(cursorX, cursorY) {
@@ -217,7 +216,7 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._transformGrid = f
     var me = this;
     setTimeout(function() {
         me._dragifierCore.reappendGridItems();
-    }, 100); // @todo -> Move 100 to const
+    }, Gridifier.Dragifier.GridDiscretizationDraggableItem.REAPPEND_GRID_ITEMS_DELAY);
 }
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._adjustDraggableItemPositions = function(draggableItemNewCoords) {
@@ -254,9 +253,6 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.unbindDraggableIte
     this._showDraggableItem();
     this._draggableItem = null;
     this._discretizer.deleteDemonstrator();
-
-    // @todo -> Replace with real hidder
-    Dom.css.removeClass(document.body, "disableSelect");
 }
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._showDraggableItem = function() {

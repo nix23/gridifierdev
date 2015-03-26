@@ -31,18 +31,6 @@ Gridifier.ConnectorsIntersector.prototype.getMostLeftFromIntersectedRightItems =
     var connections = this._connections.get();
     var mostLeftConnection = null;
 
-    // for(var i = 0; i < connections.length; i++) {
-    //     if(connector.y >= connections[i].y1 && connector.y <= connections[i].y2 
-    //         && connector.x < connections[i].x1) {
-    //         if(mostLeftConnection == null)
-    //             mostLeftConnection = connections[i];
-    //         else {
-    //             if(connections[i].x1 < mostLeftConnection.x1)
-    //                 mostLeftConnection = connections[i];
-    //         }
-    //     }
-    // }
-
     var connectionFinder = function(connection) {
         if(connector.y >= connection.y1 && connector.y <= connection.y2 
             && connector.x < connection.x1) {
@@ -98,18 +86,6 @@ Gridifier.ConnectorsIntersector.prototype.getMostBottomFromIntersectedTopOrTopLe
         }
     }
 
-    // for(var i = 0; i < connections.length; i++) {
-    //     if(((connector.x >= connections[i].x1 && connector.x <= connections[i].x2) || (connector.x > connections[i].x2))
-    //         && connector.y > connections[i].y2) {
-    //         if(mostBottomConnection == null)
-    //             mostBottomConnection = connections[i];
-    //         else {
-    //             if(connections[i].y2 > mostBottomConnection.y2)
-    //                 mostBottomConnection = connections[i];
-    //         }
-    //     }
-    // }
-
     return mostBottomConnection;
 }
 
@@ -142,18 +118,6 @@ Gridifier.ConnectorsIntersector.prototype.getMostBottomFromIntersectedTopOrTopRi
 Gridifier.ConnectorsIntersector.prototype.getMostRightFromIntersectedLeftItems = function(connector) {
     var connections = this._connections.get();
     var mostRightConnection = null;
-
-    // for(var i = 0; i < connections.length; i++) {
-    //     if(connector.y >= connections[i].y1 && connector.y <= connections[i].y2 
-    //        && connector.x > connections[i].x2) {
-    //         if(mostRightConnection == null)
-    //             mostRightConnection = connections[i];
-    //         else {
-    //             if(connections[i].x > mostRightConnection.x2)
-    //                 mostRightConnection = connections[i];
-    //         }
-    //     }
-    // }
 
     var connectionFinder = function(connection) {
         if(connector.y >= connection.y1 && connector.y <= connection.y2
@@ -188,18 +152,6 @@ Gridifier.ConnectorsIntersector.prototype.getMostRightFromIntersectedLeftItems =
 Gridifier.ConnectorsIntersector.prototype.getMostTopFromIntersectedBottomOrBottomRightItems = function(connector) {
     var connections = this._connections.get();
     var mostTopConnection = null;
-
-    // for(var i = 0; i < connections.length; i++) {
-    //     if(((connector.x >= connections[i].x1 && connector.x <= connections[i].x2) || (connector.x < connections[i].x1))
-    //         && connector.y < connections[i].y1) {
-    //         if(mostTopConnection == null)
-    //             mostTopConnection = connections[i];
-    //         else {
-    //             if(connections[i].y1 < mostTopConnection.y1)
-    //                 mostTopConnection = connections[i];
-    //         }
-    //     }
-    // }
 
     if(this._settings.isVerticalGrid())
         var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedAndLowerConnections(connector);

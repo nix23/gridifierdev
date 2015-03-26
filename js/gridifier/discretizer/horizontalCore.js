@@ -169,7 +169,6 @@ Gridifier.Discretizer.HorizontalCore.prototype.normalizeItemNewConnectionHorizon
         newConnectionCoords.x2 = itemWidth - 1;
     }
 
-    // @todo -> Check if expand is required(When item with big width is moved right)
     if(newConnectionCoords.x2 > this._gridifier.getGridX2()) {
         newConnectionCoords.x2 = this._gridifier.getGridX2();
         newConnectionCoords.x1 = newConnectionCoords.x2 - itemWidth + 1;

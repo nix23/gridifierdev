@@ -5,6 +5,7 @@ Gridifier.Discretizer.Demonstrator = function(gridifier, settings) {
     this._settings = null;
 
     this._demonstrator = null;
+    this._demonstratorClickHandler = null;
 
     this._css = {
     };
@@ -51,7 +52,6 @@ Gridifier.Discretizer.Demonstrator.prototype._createDemonstrator = function() {
     });
 }
 
-// @todo -> Move to user functions??? (Call from function) (Make customizible)
 Gridifier.Discretizer.Demonstrator.prototype._decorateDemonstrator = function() {
     Dom.css.set(this._demonstrator, {
         background: "rgb(235,235,235)",
@@ -61,12 +61,13 @@ Gridifier.Discretizer.Demonstrator.prototype._decorateDemonstrator = function() 
 }
 
 Gridifier.Discretizer.Demonstrator.prototype._bindDemonstratorDeleteOnClick = function() {
-    // @todo -> Replace with real event
-   var me = this;
-   $(this._demonstrator).on("click", function() {
-        $(this).off("click");
+    var me = this;
+    this._demonstratorClickHandler = function() {
+        Event.remove(me._demonstrator, "click", me._demonstratorClickHandler);
         me["delete"].call(me);
-    });
+    };
+
+    Event.add(this._demonstrator, "click", this._demonstratorClickHandler);
 }
 
 Gridifier.Discretizer.Demonstrator.prototype.update = function(cells) {

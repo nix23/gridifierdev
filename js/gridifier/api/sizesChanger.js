@@ -58,7 +58,11 @@ Gridifier.Api.SizesChanger.prototype.getSizesChangerFunction = function() {
 
 Gridifier.Api.SizesChanger.prototype._addDefaultSizesChanger = function() {
     this._sizesChangerFunctions["default"] = function(item, newWidth, newHeight) {
-        Dom.css3.transitionProperty(item, "width 0ms ease, height 0ms ease");
+        if(Dom.isBrowserSupportingTransitions()) {
+            Dom.css3.transitionProperty(item, "width 0ms ease");
+            Dom.css3.transitionProperty(item, "height 0ms ease");
+        }
+
         Dom.css.set(item, {
             width: newWidth,
             height: newHeight
@@ -68,7 +72,11 @@ Gridifier.Api.SizesChanger.prototype._addDefaultSizesChanger = function() {
 
 Gridifier.Api.SizesChanger.prototype._addDefaultPaddingBottomSizesChanger = function() {
     this._sizesChangerFunctions["defaultPaddingBottom"] = function(item, newWidth, newPaddingBottom) {
-        Dom.css3.transitionProperty(item, "width 0ms ease, padding-bottom 0ms ease");
+        if(Dom.isBrowserSupportingTransitions()) {
+            Dom.css3.transitionProperty(item, "width 0ms ease");
+            Dom.css3.transitionProperty(item, "padding-bottom 0ms ease");
+        }
+
         Dom.css.set(item, {
             width: newWidth,
             paddingBottom: newPaddingBottom
@@ -78,10 +86,11 @@ Gridifier.Api.SizesChanger.prototype._addDefaultPaddingBottomSizesChanger = func
 
 Gridifier.Api.SizesChanger.prototype._addSimultaneousCSS3TransitionSizesChanger = function() {
     this._sizesChangerFunctions.simultaneousCSS3Transition = function(item, newWidth, newHeight) {
-        // @todo -> correctly parse params
-        //var transition = item.style.transition;
+        if(Dom.isBrowserSupportingTransitions()) {
+            Dom.css3.transitionProperty(item, "width 500ms ease");
+            Dom.css3.transitionProperty(item, "height 500ms ease");
+        }
 
-        //Dom.css3.transition(item, "width 300ms ease, height 300ms ease");
         Dom.css.set(item, {
             width: newWidth,
             height: newHeight

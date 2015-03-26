@@ -19,6 +19,7 @@ var Logger = {
     logFindItemConnectionCoordsIntersectionFound: function() { return false; },
     logFindItemConnectionCoordsWrongSorting: function() { return false; },
     logFindItemConnectionCoordsVerticalIntersectionsError: function() { return false; },
+    logFindItemConnectionCoordsHorizontalIntersectionsError: function() { return false; },
     logFindItemConnectionCoordsFound: function() { return false; }
 }
 

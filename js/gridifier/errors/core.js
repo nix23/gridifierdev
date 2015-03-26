@@ -66,6 +66,14 @@ Gridifier.CoreErrors.prototype._parseIfIsCoreError = function(errorType) {
         this._markAsCoreError();
         this._wrongInsertAfterTargetItem();
     }
+    else if(errorType == errors.INSERTER.TOO_WIDE_ITEM_ON_VERTICAL_GRID_INSERT) {
+        this._markAsCoreError();
+        this._tooWideItemOnVerticalGridInsert();
+    }
+    else if(errorType == errors.INSERTER.TOO_TALL_ITEM_ON_HORIZONTAL_GRID_INSERT) {
+        this._markAsCoreError();
+        this._tooTallItemOnHorizontalGridInsert();
+    }
 }
 
 Gridifier.CoreErrors.prototype._markAsCoreError = function() {
@@ -129,6 +137,32 @@ Gridifier.CoreErrors.prototype._wrongInsertAfterTargetItem = function() {
 
     msg += "Wrong target item passed to the insertAfter function. It must be item, which was processed by gridifier. ";
     msg += "Got: " + error + ".";
+
+    this._errorMsg = msg;
+}
+
+Gridifier.CoreErrors.prototype._tooWideItemOnVerticalGridInsert = function() {
+    var msg = this._error.getErrorMsgPrefix();
+    var error = this._error.getErrorParam();
+
+    msg += "Can't insert item '" + error + "'. Probably it has px based width and it's width is wider than grid width. ";
+    msg += "This can happen in such cases:\n";
+    msg += "    1. Px-width item is wider than grid from start.(Before attaching to gridifier)\n";
+    msg += "    2. Px-width item became wider than grid after grid resize.\n";
+    msg += "    3. Px-width item became wider after applying transform/toggle operation.\n";
+
+    this._errorMsg = msg;
+}
+
+Gridifier.CoreErrors.prototype._tooTallItemOnHorizontalGridInsert = function() {
+    var msg = this._error.getErrorMsgPrefix();
+    var error = this._error.getErrorParam();
+
+    msg += "Can't insert item '" + error + "'. Probably it has px based height and it's height is taller than grid height. ";
+    msg += "This can happend in such cases:\n";
+    msg += "    1. Px-height item is taller than grid from start.(Before attaching to gridifier)\n";
+    msg += "    2. Px-height item became taller than grid after grid resize.\n";
+    msg += "    3. Px-height item became taller after applying transform/toggle operation.\n";
 
     this._errorMsg = msg;
 }

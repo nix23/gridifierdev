@@ -179,7 +179,6 @@ Gridifier.Discretizer.VerticalCore.prototype.normalizeItemNewConnectionVerticalC
         newConnectionCoords.y2 = itemHeight - 1;
     }
 
-    // @todo -> Check if expand is required(When item with big height is moved down)
     if(newConnectionCoords.y2 > this._gridifier.getGridY2()) {
         newConnectionCoords.y2 = this._gridifier.getGridY2();
         newConnectionCoords.y1 = newConnectionCoords.y2 - itemHeight + 1;

@@ -114,7 +114,7 @@ Gridifier.Operations.Append.prototype.executeInsertBefore = function(items, befo
     }
     else {
         var beforeItem = (this._collector.toDOMCollection(beforeItem))[0];
-        // This check is required, if afterItem is jQuery find result without DOMElem
+        // This check is required, if beforeItem is jQuery find result without DOMElem
         if(typeof beforeItem == "undefined" || beforeItem == null)
             var beforeItem = connections[0].item;
     }
@@ -149,12 +149,12 @@ Gridifier.Operations.Append.prototype.executeInsertBefore = function(items, befo
         this._reversedAppender.recreateConnectorsPerAllConnectedItems();
 
     this.execute(items);
-    // @todo -> Process customSd mode
+
     if(this._settings.isDisabledSortDispersion()) {
         this._connections.restore(connectionsToRetransform);
         this._connections.remapAllItemGUIDSInSortedConnections(connectionsToRetransform);
     }
-    else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+    else if(this._settings.isCustomSortDispersion() || this._settings.isCustomAllEmptySpaceSortDispersion()) {
         this._connections.restoreOnCustomSortDispersionMode(connectionsToRetransform);
         this._connections.remapAllItemGUIDS();
     }
@@ -212,12 +212,12 @@ Gridifier.Operations.Append.prototype.executeInsertAfter = function(items, after
         this._reversedAppender.recreateConnectorsPerAllConnectedItems();
 
     this.execute(items);
-    // @todo -> Process custom SD
+
     if(this._settings.isDisabledSortDispersion()) {
         this._connections.restore(connectionsToRetransform);
         this._connections.remapAllItemGUIDSInSortedConnections(connectionsToRetransform);
     }
-    else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+    else if(this._settings.isCustomSortDispersion() || this._settings.isCustomAllEmptySpaceSortDispersion()) {
         this._connections.restoreOnCustomSortDispersionMode(connectionsToRetransform);
         this._connections.remapAllItemGUIDS();
     }

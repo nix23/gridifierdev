@@ -47,7 +47,6 @@ Gridifier.Disconnector = function(gridifier,
     return this;
 }
 
-// @todo -> Check if sort and GUIDS swap is required
 Gridifier.Disconnector.prototype.disconnect = function(items) {
     var items = this._collector.toDOMCollection(items);
     this._collector.ensureAllItemsAreConnectedToGrid(items);

@@ -77,7 +77,6 @@ Gridifier.VerticalGrid.Connections.prototype.reinitRanges = function() {
 }
 
 Gridifier.VerticalGrid.Connections.prototype.getAllHorizontallyIntersectedAndUpperConnections = function(connector) {
-    //return this._ranges.getAllConnectionsFromIntersectedAndUpperRanges(connector.y);
     return this._ranges.getAllConnectionsFromIntersectedAndUpperRanges(connector.y);
 }
 
@@ -155,8 +154,9 @@ Gridifier.VerticalGrid.Connections.prototype.getMaxY2 = function() {
     return this._connectionsCore.getMaxY2();
 }
 
-Gridifier.VerticalGrid.Connections.prototype.findConnectionByItem = function(item) {
-    return this._connectionsCore.findConnectionByItem(item);
+Gridifier.VerticalGrid.Connections.prototype.findConnectionByItem = function(item, disableWasItemFoundValidation) {
+    var disableWasItemFindValidation = disableWasItemFoundValidation || false;
+    return this._connectionsCore.findConnectionByItem(item, disableWasItemFoundValidation);
 }
 
 Gridifier.VerticalGrid.Connections.prototype.remapAllItemGUIDS = function() {

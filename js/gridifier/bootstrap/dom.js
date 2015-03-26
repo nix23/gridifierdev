@@ -1,16 +1,17 @@
 // DOM abstraction layer
 var Dom = {
     hasDOMElemOwnPropertyFunction: null,
+    _isBrowserSupportingTransitions: null,
 
     init: function() {
         this.createTrimFunction();
         this.createHasDOMElemOwnPropertyFunction();
+        this._determineIfBrowserIsSupportingTransitions();
     },
 
-    // @todo -> Refactor this(Don't overload users JS)
     createTrimFunction: function() {
-        if(typeof String.prototype.trim !== 'function') {
-            String.prototype.trim = function() {
+        if(typeof String.prototype.gridifierTrim !== 'function') {
+            String.prototype.gridifierTrim = function() {
                 return this.replace(/^\s+|\s+$/g, '');
             }
         }
@@ -42,12 +43,27 @@ var Dom = {
         rootElement.removeChild(testerDiv);
     },
 
+    _determineIfBrowserIsSupportingTransitions: function() {
+        var testerEl = document.createElement("div");
+
+        var transitionEndEventNames = {
+            WebkitTransition : 'webkitTransitionEnd',
+            MozTransition      : 'transitionend',
+            OTransition         : 'oTransitionEnd otransitionend',
+            transition            : 'transitionend'
+        };
+
+        this._isBrowserSupportingTransitions = false;
+        for(var eventName in transitionEndEventNames) {
+            if(testerEl.style[eventName] !== undefined)
+                this._isBrowserSupportingTransitions = true;
+        }
+    },
+
     toInt: function(maybeNotInt) {
         return parseInt(maybeNotInt, 10);
     },
 
-    // @todo -> Check if this class sees global jQuery object
-    // from inside of the module definition(Require.js)
     isJqueryObject: function(maybeJqueryObject) {
         if(typeof jQuery == "undefined")
             return false;
@@ -93,21 +109,7 @@ var Dom = {
     },
 
     isBrowserSupportingTransitions: function() {
-        var testerEl = document.createElement("div");
-
-        var transitionEndEventNames = {
-          WebkitTransition : 'webkitTransitionEnd',
-          MozTransition      : 'transitionend',
-          OTransition         : 'oTransitionEnd otransitionend',
-          transition            : 'transitionend'
-        };
-
-        for(var eventName in transitionEndEventNames) {
-            if(testerEl.style[eventName] !== undefined)
-                return true;
-        }
-
-        return false;
+        return this._isBrowserSupportingTransitions;
     },
 
     hasDOMElemOwnProperty: function(DOMElem, propertyToMatch) {
@@ -132,7 +134,7 @@ var Dom = {
 
             for(var i = 0; i < classes.length; i++)
             {
-                classes[i] = classes[i].trim();
+                classes[i] = classes[i].gridifierTrim();
                 if(classes[i] == classToFind)
                     return true;
             }
@@ -155,7 +157,7 @@ var Dom = {
             var cleanedClass = "";
 
             for(var i = 0; i < classes.length; i++) {
-                if(classes[i].trim() != classToRemove)
+                if(classes[i].gridifierTrim() != classToRemove)
                     cleanedClass += classes[i] + " ";
             }
             cleanedClass = cleanedClass.substring(0, cleanedClass.length - 1);
@@ -174,8 +176,6 @@ var Dom = {
         prefixedBackfaceVisibilityProps: ["WebkitBackfaceVisibility", "MozBackfaceVisibility", "backfaceVisibility"],
 
         transition: function(DOMElem, propertyValue) {
-            // for(var i = 0; i < this.prefixedTransitionProps.length; i++)
-            //     DOMElem.style[this.prefixedTransitionProps[i]] = propertyValue;
             DOMElem.style[Prefixer.get("transition", DOMElem)] = propertyValue;
         },
 
@@ -189,7 +189,7 @@ var Dom = {
             var newTransition = property;
             var currentTransitionProps = currentTransition.split(",");
             for(var i = 0; i < currentTransitionProps.length; i++) {
-                var currentTransitionProp = currentTransitionProps[i].trim();
+                var currentTransitionProp = currentTransitionProps[i].gridifierTrim();
                 if(currentTransitionProp.length == 0)
                     continue;
                 
@@ -201,16 +201,13 @@ var Dom = {
                 }
             }
 
-            DOMElem.style[Prefixer.get("transition", DOMElem)] = newTransition.trim();
+            DOMElem.style[Prefixer.get("transition", DOMElem)] = newTransition.gridifierTrim();
         },
 
         transform: function(DOMElem, propertyValue) {
-            // for(var i = 0; i < this.prefixedTransformProps.length; i++)
-            //     DOMElem.style[this.prefixedTransformProps[i]] = propertyValue;
             DOMElem.style[Prefixer.get("transform", DOMElem)] = propertyValue;
         },
 
-        // @todo -> Process array of values???
         transformProperty: function(DOMElem, property, propertyValue) {
             var currentTransform = DOMElem.style[Prefixer.get('transform', DOMElem)];
             if(currentTransform.length == 0) {
@@ -222,8 +219,8 @@ var Dom = {
             var currentTransformProps = currentTransform.split(/\)/);
             var hasCurrentTransformProperty = false;
             for(var i = 0; i < currentTransformProps.length; i++) {
-                var currentTransformProp = currentTransformProps[i].trim();
-                if(currentTransformProp.trim().length == 0)
+                var currentTransformProp = currentTransformProps[i].gridifierTrim();
+                if(currentTransformProp.gridifierTrim().length == 0)
                     continue;
                 
                 if(currentTransformProp.search(property) !== -1) {
@@ -238,7 +235,7 @@ var Dom = {
             if(!hasCurrentTransformProperty)
                 newTransform += " " + property + "(" + propertyValue + ")";
 
-            DOMElem.style[Prefixer.get('transform', DOMElem)] = newTransform.trim();
+            DOMElem.style[Prefixer.get('transform', DOMElem)] = newTransform.gridifierTrim();
         },
 
         opacity: function(DOMElem, opacityValue) {

@@ -99,8 +99,6 @@ Gridifier.ConnectorsShifter.prototype.shiftAllConnectors = function() {
     }
 }
 
-// @todo -> Refactor, remove isIntersecting functions, and keep just getters, check result == null?
-// It's important, because this will boost performance!
 Gridifier.ConnectorsShifter.prototype._shiftLeftTopConnector = function(connector) {
     var mostBottomConnection = this._ci.getMostBottomFromIntersectedTopOrTopLeftItems(connector);
 

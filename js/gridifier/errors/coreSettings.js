@@ -74,6 +74,10 @@ Gridifier.CoreSettingsErrors.prototype._parseIfIsCoreSettingsError = function(er
         this._markAsCoreSettingsError();
         this._invalidSortDispersionValueError();
     }
+    else if(errorType == errors.INVALID_DRAGIFIER_DISCRETIZATION_MODE) {
+        this._markAsCoreSettingsError();
+        this._invalidDragifierDiscretizationModeError();
+    }
 }
 
 Gridifier.CoreSettingsErrors.prototype._markAsCoreSettingsError = function() {
@@ -163,6 +167,17 @@ Gridifier.CoreSettingsErrors.prototype._invalidSortDispersionValueError = functi
 
     msg += "Wrong 'sortDispersionValue' param value. It must be a string with number as prefix, ";
     msg += "and px as postfix.(100px). Got: '" + this._error.getErrorParam() + "'.";
+
+    this._errorMsg = msg;
+}
+
+Gridifier.CoreSettingsErrors.prototype._invalidDragifierDiscretizationModeError = function() {
+    var msg = this._error.getErrorMsgPrefix();
+
+    msg += "Can't combine 'gridDiscretization' dragifier algorithm param with following settings: \n";
+    msg += "    1. 'discretization' dragifier mode doesn't support noIntersections strategy.\n";
+    msg += "    2. 'discretization' dragifier mode requires 'sortDispersion' parameter to be equal to the 'customAllEmptySpace' value.";
+    msg += " (This mode must have all grid space available per drags.)";
 
     this._errorMsg = msg;
 }

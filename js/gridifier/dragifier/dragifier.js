@@ -19,8 +19,19 @@ Gridifier.Dragifier = function(gridifier,
     this._settings = null;
     this._sizesResolverManager = null;
 
+    this._connectedItemMarker = null;
+
+    this._touchStartHandler = null;
+    this._touchMoveHandler = null;
+    this._touchEndHandler = null;
+    this._mouseDownHandler = null;
+    this._mouseMoveHandler = null;
+    this._mouseUpHandler = null;
+
     this._draggableItems = [];
     this._isDragging = false;
+
+    this._areDragifierEventsBinded = false;
 
     this._css = {
     };
@@ -36,46 +47,49 @@ Gridifier.Dragifier = function(gridifier,
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
 
+        me._connectedItemMarker = new Gridifier.ConnectedItemMarker();
+        me._dragifierApi = new Gridifier.Api.Dragifier();
+
+        me._bindEvents();
         if(me._settings.shouldEnableDragifierOnInit()) {
-            me._bindEvents();
+            me.bindDragifierEvents();
         }
     };
 
     this._bindEvents = function() {
-        // @todo -> Move this to selector, and if child is passed, find closest gridItem(Depending on
-        //          that, which was set up in settings)
-        var draggableItemSelector = me._settings.getDragifierItemSelector();
+        me._touchStartHandler = function(event) {
+            var connectedItem = me._findClosestConnectedItem(event.target);
+            if(connectedItem == null) return;
 
-        // @todo -> Replace with native events
-        $(me._gridifier.getGrid()).on("touchstart", draggableItemSelector, function(event) {
             event.preventDefault();
+            me._disableUserSelect();
             me._sizesResolverManager.startCachingTransaction();
             me._isDragging = true;
 
-            if(me._isAlreadyDraggable($(this).get(0))) {
-                var newTouch = event.originalEvent.changedTouches[0];
-                var alreadyDraggableItem = me._findAlreadyDraggableItem($(this).get(0));
+            if(me._isAlreadyDraggable(connectedItem)) {
+                var newTouch = event.changedTouches[0];
+                var alreadyDraggableItem = me._findAlreadyDraggableItem(connectedItem);
                 alreadyDraggableItem.addDragIdentifier(newTouch.identifier);
                 return;
             }
 
             var draggableItem = me._createDraggableItem();
-            var initialTouch = event.originalEvent.changedTouches[0];
+            var initialTouch = event.changedTouches[0];
 
-            draggableItem.bindDraggableItem($(this).get(0), initialTouch.pageX, initialTouch.pageY);
+            draggableItem.bindDraggableItem(connectedItem, initialTouch.pageX, initialTouch.pageY);
             draggableItem.addDragIdentifier(initialTouch.identifier);
-            
-            me._draggableItems.push(draggableItem);
-        });
 
-        $("body").on("touchend", draggableItemSelector, function(event) {
+            me._draggableItems.push(draggableItem);
+        };
+
+        me._touchEndHandler = function(event) {
             if(!me._isDragging) return;
             event.preventDefault();
 
             setTimeout(function() {
                 if(!me._isDragging) return;
-                
-                var touches = event.originalEvent.changedTouches;
+
+                var touches = event.changedTouches;
                 for(var i = 0; i < touches.length; i++) {
                     var draggableItemData = me._findDraggableItemByIdentifier(touches[i].identifier, true);
                     if(draggableItemData.item == null)
@@ -89,20 +103,21 @@ Gridifier.Dragifier = function(gridifier,
                 }
 
                 if(me._draggableItems.length == 0) {
+                    me._enableUserSelect();
                     me._isDragging = false;
                     me._sizesResolverManager.stopCachingTransaction();
                 }
             }, 0);
-        });
+        };
 
-        $("body").on("touchmove", function(event) {
+        me._touchMoveHandler = function(event) {
             if(!me._isDragging) return;
             event.preventDefault();
 
             setTimeout(function() {
                 if(!me._isDragging) return;
 
-                var touches = event.originalEvent.changedTouches;
+                var touches = event.changedTouches;
                 for(var i = 0; i < touches.length; i++) {
                     var draggableItem = me._findDraggableItemByIdentifier(touches[i].identifier);
                     if(draggableItem == null)
@@ -110,37 +125,41 @@ Gridifier.Dragifier = function(gridifier,
                     draggableItem.processDragMove(touches[i].pageX, touches[i].pageY);
                 }
            }, 0);
-        });
+        };
 
-        $(me._gridifier.getGrid()).on("mousedown", draggableItemSelector, function(event) {
+        me._mouseDownHandler = function(event) {
+            var connectedItem = me._findClosestConnectedItem(event.target);
+            if(connectedItem == null) return;
+
             event.preventDefault();
+            me._disableUserSelect();
             me._sizesResolverManager.startCachingTransaction();
             me._isDragging = true;
 
             var draggableItem = me._createDraggableItem();
 
-            draggableItem.bindDraggableItem($(this).get(0), event.pageX, event.pageY);
+            draggableItem.bindDraggableItem(connectedItem, event.pageX, event.pageY);
             me._draggableItems.push(draggableItem);
-        });
+        };
 
-        $("body").on("mouseup.gridifier.dragifier", function() {
+        me._mouseUpHandler = function() {
             setTimeout(function() {
                 if(!me._isDragging) return;
-                
+
+                me._enableUserSelect();
                 me._draggableItems[0].unbindDraggableItem();
                 me._draggableItems.splice(0, 1);
                 me._isDragging = false;
                 me._sizesResolverManager.stopCachingTransaction();
             }, 0);
-        });
+        };
 
-        $("body").on("mousemove.gridfier.dragifier", function(event) {
+        me._mouseMoveHandler = function(event) {
             setTimeout(function() {
                 if(!me._isDragging) return;
-
                 me._draggableItems[0].processDragMove(event.pageX, event.pageY);
            }, 0);
-        });
+        };
     };
 
     this._unbindEvents = function() {
@@ -156,9 +175,86 @@ Gridifier.Dragifier = function(gridifier,
 
 Gridifier.Dragifier.IS_DRAGGABLE_ITEM_DATA_ATTR = "data-gridifier-is-draggable-item";
 
+Gridifier.Dragifier.prototype.bindDragifierEvents = function() {
+    if(this._areDragifierEventsBinded)
+        return;
+
+    this._areDragifierEventsBinded = true;
+
+    Event.add(this._gridifier.getGrid(), "mousedown", this._mouseDownHandler);
+    Event.add(document.body, "mouseup", this._mouseUpHandler);
+    Event.add(document.body, "mousemove", this._mouseMoveHandler);
+
+    Event.add(this._gridifier.getGrid(), "touchstart", this._touchStartHandler);
+    Event.add(document.body, "touchend", this._touchEndHandler);
+    Event.add(document.body, "touchmove", this._touchMoveHandler);
+}
+
+Gridifier.Dragifier.prototype.unbindDragifierEvents = function() {
+    if(!this._areDragifierEventsBinded)
+        return;
+
+    this._areDragifierEventsBinded = false;
+
+    Event.remove(this._gridifier.getGrid(), "mousedown", this._mouseDownHandler);
+    Event.remove(document.body, "mouseup", this._mouseUpHandler);
+    Event.remove(document.body, "mousemove", this._mouseMoveHandler);
+
+    Event.remove(this._gridifier.getGrid(), "touchstart", this._touchStartHandler);
+    Event.remove(document.body, "touchend", this._touchEndHandler);
+    Event.remove(document.body, "touchmove", this._touchMoveHandler);
+}
+
+Gridifier.Dragifier.prototype._disableUserSelect = function() {
+    var dragifierUserSelectToggler = this._settings.getDragifierUserSelectToggler();
+    dragifierUserSelectToggler.disableSelect();
+}
+
+Gridifier.Dragifier.prototype._enableUserSelect = function() {
+    var dragifierUserSelectToggler = this._settings.getDragifierUserSelectToggler();
+    dragifierUserSelectToggler.enableSelect();
+}
+
+Gridifier.Dragifier.prototype._findClosestConnectedItem = function(maybeConnectedItemChild) {
+    var grid = this._gridifier.getGrid();
+    var draggableItemSelector = this._settings.getDragifierItemSelector();
+
+    if(maybeConnectedItemChild == grid)
+        return null;
+
+    if(typeof draggableItemSelector == "boolean" && !draggableItemSelector)
+        var checkThatAnyBubblePhaseElemHasClass = false;
+    else
+        var checkThatAnyBubblePhaseElemHasClass = true;
+
+    var connectedItem = null;
+    var parentNode = null;
+    var hasAnyBubblePhaseElemClass = false;
+
+    while(connectedItem == null && parentNode != grid) {
+        if(parentNode == null)
+            parentNode = maybeConnectedItemChild;
+        else
+            parentNode = parentNode.parentNode;
+
+        if(checkThatAnyBubblePhaseElemHasClass) {
+            if(Dom.css.hasClass(parentNode, draggableItemSelector))
+                hasAnyBubblePhaseElemClass = true;
+        }
+
+        if(this._connectedItemMarker.isItemConnected(parentNode))
+            connectedItem = parentNode;
+    }
+
+    if(connectedItem == null || (checkThatAnyBubblePhaseElemHasClass && !hasAnyBubblePhaseElemClass)) {
+        return null;
+    }
+
+    return connectedItem;
+}
+
 Gridifier.Dragifier.prototype._createDraggableItem = function() {
-    // @todo -> Add customSD mode
-    if(this._settings.isDisabledSortDispersion()) {
+    if(this._settings.isIntersectionDragifierMode()) {
         var draggableItem = new Gridifier.Dragifier.ConnectionIntersectionDraggableItem(
             this._gridifier, 
             this._appender,
@@ -171,7 +267,7 @@ Gridifier.Dragifier.prototype._createDraggableItem = function() {
             this._sizesResolverManager
         );
     }
-    else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+    else if(this._settings.isDiscretizationDragifierMode()) {
         var draggableItem = new Gridifier.Dragifier.GridDiscretizationDraggableItem(
             this._gridifier, 
             this._appender,

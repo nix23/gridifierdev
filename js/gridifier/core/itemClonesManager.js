@@ -81,7 +81,8 @@ Gridifier.ItemClonesManager.prototype.getBindedClone = function(item) {
    for(var i = 0; i < this._itemClones.length; i++) {
       if(this._itemClones[i].getAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR)
          == item.getAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR)) {
-         bindedClone = this._itemClones[i];
+          bindedClone = this._itemClones[i];
+          break;
       }
    }
 

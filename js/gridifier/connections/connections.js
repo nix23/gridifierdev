@@ -74,11 +74,14 @@ Gridifier.Connections.prototype.setSizesTransformerInstance = function(sizesTran
     this._sizesTransformer = sizesTransformer;
 }
 
-Gridifier.Connections.prototype.findConnectionByItem = function(item) {
+Gridifier.Connections.prototype.findConnectionByItem = function(item, disableWasItemFoundValidation) {
     var connections = this._connections.get();
-    if(connections.length == 0) 
-        new Gridifier.Error(Gridifier.Error.ERROR_TYPES.CONNECTIONS.NO_CONNECTIONS);
-    
+
+    if(!disableWasItemFoundValidation) {
+        if(connections.length == 0)
+            new Gridifier.Error(Gridifier.Error.ERROR_TYPES.CONNECTIONS.NO_CONNECTIONS);
+    }
+
     var itemGUID = this._guid.getItemGUID(item);
     var connectionItem = null;
     for(var i = 0; i < connections.length; i++) {
@@ -96,11 +99,13 @@ Gridifier.Connections.prototype.findConnectionByItem = function(item) {
         }
     }
 
-    if(connectionItem == null) {
-        new Gridifier.Error(
-            Gridifier.Error.ERROR_TYPES.CONNECTIONS.CONNECTION_BY_ITEM_NOT_FOUND,
-            {item: item, connections: connections}
-        );
+    if(!disableWasItemFoundValidation) {
+        if(connectionItem == null) {
+            new Gridifier.Error(
+                Gridifier.Error.ERROR_TYPES.CONNECTIONS.CONNECTION_BY_ITEM_NOT_FOUND,
+                {item: item, connections: connections}
+            );
+        }
     }
 
     return connectionItem;
@@ -144,8 +149,6 @@ Gridifier.Connections.prototype.createItemConnection = function(item, itemConnec
     connection.item = item;
     connection.itemGUID = Dom.toInt(this._guid.getItemGUID(item));
 
-    // @todo -> Move to consts???
-    // Used with noIntersections strategy
     if(!connection.hasOwnProperty("horizontalOffset"))
         connection.horizontalOffset = 0;
     if(!connection.hasOwnProperty("verticalOffset"))

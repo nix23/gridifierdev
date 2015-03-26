@@ -92,26 +92,6 @@ var SizesResolver = {
         parentDOMElemParentNode.appendChild(parentDOMElemClone);
         
         var unrenderedComputedCSSSource = this.getComputedCSS(DOMElemClone);
-
-        // @todo -> Determine, if this is still required. Looks like percentage values
-        //          are returned correctly now.(Probably bug was in Safari 5.1.7)
-        // var additionalComputedCSS = {};
-
-        // if(typeof unrenderedComputedCSSSource.getPropertyCSSValue != "undefined") {
-        //     msProfiler.stop();
-        //     msProfiler.start("rest2");
-        //     additionalComputedCSS.paddingLeft = unrenderedComputedCSSSource.getPropertyCSSValue("padding-left").cssText;
-        //     additionalComputedCSS.paddingRight = unrenderedComputedCSSSource.getPropertyCSSValue("padding-right").cssText;
-        //     additionalComputedCSS.marginLeft = unrenderedComputedCSSSource.getPropertyCSSValue("margin-left").cssText;
-        //     additionalComputedCSS.marginRight = unrenderedComputedCSSSource.getPropertyCSSValue("margin-right").cssText;
-        //     additionalComputedCSS.paddingTop = unrenderedComputedCSSSource.getPropertyCSSValue("padding-top").cssText;
-        //     additionalComputedCSS.paddingBottom = unrenderedComputedCSSSource.getPropertyCSSValue("padding-bottom").cssText;
-        //     additionalComputedCSS.marginTop = unrenderedComputedCSSSource.getPropertyCSSValue("margin-top").cssText;
-        //     additionalComputedCSS.marginBottom = unrenderedComputedCSSSource.getPropertyCSSValue("margin-bottom").cssText;
-        //     additionalComputedCSS.width = unrenderedComputedCSSSource.getPropertyCSSValue("width").cssText;
-        //     additionalComputedCSS.height = unrenderedComputedCSSSource.getPropertyCSSValue("height").cssText;
-        // }
-
         var unrenderedComputedCSS = {};
 
         var props = ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom",
@@ -120,9 +100,6 @@ var SizesResolver = {
         for(var i = 0; i < props.length; i++) {
             unrenderedComputedCSS[props[i]] = unrenderedComputedCSSSource[props[i]];
         }
-
-        // for(var key in additionalComputedCSS)
-        //     unrenderedComputedCSS[key] = additionalComputedCSS[key];
         
         parentDOMElemParentNode.removeChild(parentDOMElemClone);
         
@@ -142,7 +119,6 @@ var SizesResolver = {
     },
 
     _ensureComputedCSSHasProperty: function(elementComputedCSS, cssProperty) {
-        //if(!Object.prototype.hasOwnProperty.call(elementComputedCSS, cssProperty)) {
         if(!(cssProperty in elementComputedCSS)) {
             var msg = "";
 
@@ -243,8 +219,7 @@ var SizesResolver = {
             return 0;
 
         var computedProperties = this.getComputedProperties("forPositionLeft", elementComputedCSS, DOMElem);
-        // @todo -> delete Math.round ???(%)
-        return DOMElem.offsetLeft - Math.round(computedProperties.marginLeft);
+        return DOMElem.offsetLeft - computedProperties.marginLeft;
     },
 
     positionTop: function(DOMElem)
@@ -255,8 +230,7 @@ var SizesResolver = {
             return 0;
 
         var computedProperties = this.getComputedProperties("forPositionTop", elementComputedCSS, DOMElem);
-        // @todo -> delete Math.round ????(%)
-        return DOMElem.offsetTop - Math.round(computedProperties.marginTop);
+        return DOMElem.offsetTop - computedProperties.marginTop;
     },
 
     offsetLeft: function(DOMElem)
@@ -357,5 +331,37 @@ var SizesResolver = {
         }
 
         return computedProperties;
+    },
+
+    cloneComputedStyle: function(sourceItem, targetItem) {
+        var camelize = function(text) {
+            return text.replace(/-+(.)?/g, function (match, chr) {
+                return chr ? chr.toUpperCase() : '';
+            });
+        };
+
+        var sourceItemComputedStyle = this.getComputedCSS(sourceItem);
+
+        for(var prop in sourceItemComputedStyle) {
+            if(prop == "cssText")
+                continue;
+
+            var propName = camelize(prop);
+            if(targetItem.style[propName] != sourceItemComputedStyle[propName])
+                targetItem.style[propName] = sourceItemComputedStyle[propName];
+        }
+
+        // Some properties could be overwritten by further rules.
+        // For example in FF/IE borders are overwritten by some from further rules.
+        var propsToReclone = ["borderLeftWidth", "borderRightWidth", "borderTopWidth", "borderBottomWidth",
+            "borderLeftColor", "borderRightColor", "borderTopColor", "borderBottomColor",
+            "borderLeftStyle", "borderRightStyle", "borderTopStyle", "borderBottomStyle",
+            "font", "fontSize", "fontWeight"];
+        for(var i = 0; i < propsToReclone.length; i++) {
+            var propName = propsToReclone[i];
+            if(typeof sourceItemComputedStyle[propName] != "undefined" &&
+                targetItem.style[propName] != sourceItemComputedStyle[propName])
+                targetItem.style[propName] = sourceItemComputedStyle[propName];
+        }
     }
 }

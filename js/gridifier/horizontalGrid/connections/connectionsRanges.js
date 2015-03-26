@@ -29,11 +29,7 @@ Gridifier.HorizontalGrid.ConnectionsRanges = function(connections) {
     return this;
 }
 
-//@todo -> Xranitj otdelnie srezi dlja appenda/prependa srazu so vsemi elementami(bez perebora nod)???
-
-// @todo -> Should it be so large???(mobiles)
 Gridifier.HorizontalGrid.ConnectionsRanges.RANGE_PX_WIDTH = 500;
-//Gridifier.HorizontalGrid.ConnectionsRanges.RANGE_PX_HEIGHT = 200;
 
 Gridifier.HorizontalGrid.ConnectionsRanges.prototype.init = function() {
     this._ranges = [];

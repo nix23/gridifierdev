@@ -29,11 +29,8 @@ Gridifier.VerticalGrid.ConnectionsRanges = function(connections) {
     return this;
 }
 
-//@todo -> Xranitj otdelnie srezi dlja appenda/prependa srazu so vsemi elementami(bez perebora nod)???
 
-// @todo -> Should it be so large???(mobiles)
 Gridifier.VerticalGrid.ConnectionsRanges.RANGE_PX_HEIGHT = 500;
-//Gridifier.VerticalGrid.ConnectionsRanges.RANGE_PX_HEIGHT = 200;
 
 Gridifier.VerticalGrid.ConnectionsRanges.prototype.init = function() {
     this._ranges = [];
@@ -161,51 +158,6 @@ Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersec
     return connectionIndexes;
 }
 
-// Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersectedAndUpperRanges = function(y) {
-//     var connections = this._connections.get();
-//     var rangeConnections = [];
-//     var addedConnectionIndexes = [];
-//     var intersectedRangeIndex = null;
-
-//     var isConnectionAlreadyAdded = function(connectionIndex) {
-//         for(var i = 0; i < addedConnectionIndexes.length; i++) {
-//             if(connectionIndex == addedConnectionIndexes[i])
-//                 return true;
-//         }
-
-//         return false;
-//     }
-
-//     for(var i = 0; i < this._ranges.length; i++) {
-//         if(y >= this._ranges[i].y1 && y <= this._ranges[i].y2) {
-//             for(var j = 0; j < this._ranges[i].connectionIndexes.length; j++) {
-//                 var connectionIndex = this._ranges[i].connectionIndexes[j];
-
-//                 if(!isConnectionAlreadyAdded(connectionIndex)) {
-//                     rangeConnections.push(connections[connectionIndex]);
-//                     addedConnectionIndexes.push(connectionIndex);
-//                 }
-//             }
-
-//             intersectedRangeIndex = i;
-//             break;
-//         }
-//     }
-
-//     for(var i = intersectedRangeIndex; i >= 0; i--) {
-//         for(var j = 0; j < this._ranges[i].connectionIndexes.length; j++) {
-//             var connectionIndex = this._ranges[i].connectionIndexes[j];
-
-//             if(!isConnectionAlreadyAdded(connectionIndex)) {
-//                 rangeConnections.push(connections[connectionIndex]);
-//                 addedConnectionIndexes.push(connectionIndex);
-//             }
-//         }
-//     }
-
-//     return rangeConnections;
-// }
-
 Gridifier.VerticalGrid.ConnectionsRanges.prototype.mapAllIntersectedAndLowerConnectionsPerEachConnector = function(sortedConnectors) {
     var currentConnectorRangeIndex = 0;
     var currentConnectorConnectionIndexes = [];
@@ -296,108 +248,3 @@ Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersec
 
     return connectionIndexes;
 }
-
-// Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersectedAndLowerRanges = function(y) {
-//     var connections = this._connections.get();
-//     var rangeConnections = [];
-//     var intersectedRangeIndex = null;
-
-    //timer.start();
-   // timer.start();
-    // for(var i = 0; i < this._ranges.length; i++) {
-    //     if(y >= this._ranges[i].y1 && y <= this._ranges[i].y2) {
-    //         for(var j = 0; j < this._ranges[i].connectionIndexes.length; j++) {
-    //             rangeConnections.push(connections[this._ranges[i].connectionIndexes[j]]);
-    //         }
-
-    //         intersectedRangeIndex = i;
-    //         break;
-    //     }
-    // }
-    // var time = timer.get();
-    // if(time > 0.050) {
-    //     console.log("cycle 1 = " + time);
-    //     console.log("items count = " + this._ranges[intersectedRangeIndex].connectionIndexes.length);
-    //     console.log("");
-    // }
-    
-    // var before = rangeConnections.length;
-    // timer.start();
-    // for(var i = intersectedRangeIndex; i < this._ranges.length; i++) {
-    //     for(var j = 0; j < this._ranges[i].connectionIndexes.length; j++) {
-    //         rangeConnections.push(connections[this._ranges[i].connectionIndexes[j]]);
-    //     }
-    // }
-    // var time = timer.get();
-    // if(time > 0.050) {
-    //     console.log("cycle 2 = " + time);
-    //     console.log("items count = " + (rangeConnections.length - before));
-    //     console.log("");
-    // }
-    // var spentTime = timer.get();
-    // if(spentTime > 0.50) {
-    //     var totalElemsCount = 0;
-    //     for(var i = intersectedRangeIndex; i < this._ranges.length; i++) {
-    //         totalElemsCount += this._ranges[i].connectionIndexes.length;
-    //     }
-
-    //     console.log("total elems count in intersected and bottom ranges = " + totalElemsCount);
-    //     console.log("start index = " + intersectedRangeIndex);
-    //     console.log("ranges count = " + this._ranges.length);
-    //     console.log("total spent time = " + spentTime);
-    // }
-
-//     return rangeConnections;
-// }
-
-// Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersectedAndLowerRanges = function(y) {
-//     var connections = this._connections.get();
-//     var rangeConnections = [];
-//     var addedConnectionIndexes = [];
-//     var intersectedRangeIndex = null;
-
-//     var isConnectionAlreadyAdded = function(connectionIndex) {
-//         for(var i = 0; i < addedConnectionIndexes.length; i++) {
-//             if(connectionIndex == addedConnectionIndexes[i])
-//                 return true;
-//         }
-
-//         return false;
-//     }
-//     timer.start();
-//     for(var i = 0; i < this._ranges.length; i++) {
-//         if(y >= this._ranges[i].y1 && y <= this._ranges[i].y2) {
-//             for(var j = 0; j < this._ranges[i].connectionIndexes.length; j++) {
-//                 var connectionIndex = this._ranges[i].connectionIndexes[j];
-
-//                 if(!isConnectionAlreadyAdded(connectionIndex)) {
-//                     rangeConnections.push(connections[connectionIndex]);
-//                     addedConnectionIndexes.push(connectionIndex);
-//                 }
-//             }
-
-//             intersectedRangeIndex = i;
-//             break;
-//         }
-//     }
-//     var time = timer.get();
-//     if(time > 0.100) {
-//         console.log("first cycle = " + time);
-//         console.log("ran len = " + this._ranges.length);
-//     }
-//     timer.start();
-//     for(var i = intersectedRangeIndex; i < this._ranges.length; i++) {
-//         for(var j = 0; j < this._ranges[i].connectionIndexes.length; j++) {
-//             var connectionIndex = this._ranges[i].connectionIndexes[j];
-
-//             if(!isConnectionAlreadyAdded(connectionIndex)) {
-//                 rangeConnections.push(connections[connectionIndex]);
-//                 addedConnectionIndexes.push(connectionIndex);
-//             }
-//         }
-//     }
-//     var time = timer.get();
-//     if(time > 0.100) console.log("second cycle = " + time);
-
-//     return rangeConnections;
-// }

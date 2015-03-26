@@ -68,7 +68,7 @@ Gridifier.VerticalGrid.Appender = function(gridifier,
 
 Gridifier.VerticalGrid.Appender.prototype.append = function(item) {
     this._initConnectors();
-    //timer.start();
+
     var connection = this._createConnectionPerItem(item);
     /* @system-log-start */
     Logger.log(
@@ -78,18 +78,7 @@ Gridifier.VerticalGrid.Appender.prototype.append = function(item) {
         this._connections.get()
     );
     /* @system-log-end */
-    //console.log("create connection = ", timer.get());
-    // var result = timer.get();
-    // if(typeof window.appendsCount == "undefined") {
-    //     window.appendsCount = 1;
-    //     window.totalTime = result;
-    // }
-    // else {
-    //     window.appendsCount++;
-    //     window.totalTime += result;
-    // }
     this._connections.attachConnectionToRanges(connection);
-    
     this._connectorsCleaner.deleteAllTooHighConnectorsFromMostBottomConnector();
     /* @system-log-start */
     Logger.log(
@@ -99,7 +88,6 @@ Gridifier.VerticalGrid.Appender.prototype.append = function(item) {
         this._connections.get()
     );
     /* @system-log-end */
-    //timer.start();
     this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
     /* @system-log-start */
     Logger.log(
@@ -211,16 +199,11 @@ Gridifier.VerticalGrid.Appender.prototype._addItemConnectors = function(itemCoor
 }
 
 Gridifier.VerticalGrid.Appender.prototype._createConnectionPerItem = function(item) {
-    //timer.start("filter = ");
     var sortedConnectors = this._filterConnectorsPerNextConnection();
-     //timer.stop();
-     //timer.start("findic = ");
+
     var itemConnectionCoords = this._findItemConnectionCoords(item, sortedConnectors);
-    //timer.stop(); console.log("");
-    //timer.start("add");
     var connection = this._connections.add(item, itemConnectionCoords);
-    //timer.stop();
-    //timer.start("expandVerticallyAllRowConnections");
+
     if(this._settings.isNoIntersectionsStrategy()) {
         this._connections.expandVerticallyAllRowConnectionsToMostTall(connection);
         /* @system-log-start */
@@ -233,7 +216,7 @@ Gridifier.VerticalGrid.Appender.prototype._createConnectionPerItem = function(it
         /* @system-log-end */
     }
     this._addItemConnectors(itemConnectionCoords, this._guid.getItemGUID(item));
-    // timer.stop();
+
     return connection;
 }
 
@@ -252,7 +235,7 @@ Gridifier.VerticalGrid.Appender.prototype._filterConnectorsPerNextConnection = f
     );
     /* @system-log-end */
 
-    if(this._settings.isDefaultIntersectionStrategy()) { //timer.start();
+    if(this._settings.isDefaultIntersectionStrategy()) {
         this._connectorsShifter.attachConnectors(connectors);
         this._connectorsShifter.shiftAllConnectors();
         connectors = this._connectorsShifter.getAllConnectors();
@@ -264,7 +247,6 @@ Gridifier.VerticalGrid.Appender.prototype._filterConnectorsPerNextConnection = f
             this._connections.get()
         );
         /* @system-log-end */
-        //console.log("shift all connectors = " + timer.get());
     }
     else if(this._settings.isNoIntersectionsStrategy()) {
         var connectorsSide = Gridifier.Connectors.SIDES.BOTTOM.RIGHT;
@@ -296,7 +278,7 @@ Gridifier.VerticalGrid.Appender.prototype._filterConnectorsPerNextConnection = f
     
     this._connectorsSorter.attachConnectors(connectors); 
     this._connectorsSorter.sortConnectorsForAppend(Gridifier.APPEND_TYPES.DEFAULT_APPEND);
-    //console.log("sort connector = " + timer.get()); console.log("");
+
     return this._connectorsSorter.getConnectors();
 }
 
@@ -365,6 +347,11 @@ Gridifier.VerticalGrid.Appender.prototype._findItemConnectionCoords = function(i
             /* @system-log-end */
             break;
         }
+    }
+
+    if(itemConnectionCoords == null) {
+        var errorType = Gridifier.Error.ERROR_TYPES.INSERTER.TOO_WIDE_ITEM_ON_VERTICAL_GRID_INSERT;
+        new Gridifier.Error(errorType, item);
     }
     
     return itemConnectionCoords;

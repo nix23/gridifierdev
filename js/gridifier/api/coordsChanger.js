@@ -73,14 +73,15 @@ Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
         var isItemInitializationCall = isItemInitializationCall || false;
         if(isItemInitializationCall) {
             // Custom init logic per coordsChanger sync can be placed here
+            // (We are no passing this flag from CSS3 coordsChanger fallback methods,
+            //  because no special initialization is required here)
             return;
         }
 
-        //Dom.css3.transitionProperty(item, "left 0ms ease, top 0ms ease"); If !ie8(isSupporting)
-        Dom.css.set(item, {
-            left: newLeft,
-            top: newTop
-        });
+        if(newLeft != item.style.left)
+            Dom.css.set(item, {left: newLeft});
+        if(newTop != item.style.top)
+            Dom.css.set(item, {top: newTop});
 
         if(emitTransformEvent) {
             eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
@@ -89,6 +90,8 @@ Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
 }
 
 Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function() {
+    var me = this;
+
     this._coordsChangerFunctions.CSS3Position = function(item,
                                                          newLeft,
                                                          newTop,
@@ -98,7 +101,12 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
                                                          newWidth,
                                                          newHeight,
                                                          isItemInitializationCall) {
-        // @todo -> If not supporting -> def
+        if(!Dom.isBrowserSupportingTransitions()) {
+            me._coordsChangerFunctions["default"](
+                item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+            );
+            return;
+        }
 
         var isItemInitializationCall = isItemInitializationCall || false;
         if(isItemInitializationCall) {
@@ -106,19 +114,15 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
             return;
         }
 
-        Dom.css3.transitionProperty(
-            item, 
-            Prefixer.getForCSS('left', item) + " " + animationMsDuration + "ms ease"
-        );
-        Dom.css3.transitionProperty(
-            item,
-            Prefixer.getForCSS('top', item) + " " + animationMsDuration + "ms ease"
-        );
+        if(newLeft != item.style.left) {
+            Dom.css3.transitionProperty(item, "left " + animationMsDuration + "ms ease");
+            Dom.css.set(item, {left: newLeft});
+        }
 
-        Dom.css.set(item, {
-            left: parseFloat(newLeft) + "px",
-            top: parseFloat(newTop) + "px"
-        });
+        if(newTop != item.style.top) {
+            Dom.css3.transitionProperty(item, "top " + animationMsDuration + "ms ease");
+            Dom.css.set(item, {top: newTop});
+        }
 
         if(emitTransformEvent) {
             setTimeout(function() {
@@ -129,6 +133,8 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
 }
 
 Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function() {
+    var me = this;
+
     this._coordsChangerFunctions.CSS3Translate = function(item, 
                                                           newLeft, 
                                                           newTop,
@@ -138,7 +144,12 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function(
                                                           newWidth,
                                                           newHeight,
                                                           isItemInitializationCall) {
-        // @todo -> if !supporting transitions -> default
+        if(!Dom.isBrowserSupportingTransitions()) {
+            me._coordsChangerFunctions["default"](
+                item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+            );
+            return;
+        }
 
         var isItemInitializationCall = isItemInitializationCall || false;
         if(isItemInitializationCall) {
@@ -165,13 +176,31 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function(
             var translateY = (currentTop - newTop) * -1;
         else
             var translateY = 0;
-        
-        Dom.css3.transitionProperty(
-            item, 
-            Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
-        );
-        
-        Dom.css3.transformProperty(item, "translate", translateX + "px," + translateY + "px");
+
+        var translateRegexp = /.*translate\((.*)\).*/;
+        var matches = translateRegexp.exec(item.style[Prefixer.get("transform")]);
+        if(matches == null || typeof matches[1] == "undefined" || matches[1] == null) {
+            var setNewTranslate = true;
+        }
+        else {
+            var translateParts = matches[1].split(",");
+            var lastTranslateX = translateParts[0].gridifierTrim();
+            var lastTranslateY = translateParts[1].gridifierTrim();
+
+            if(lastTranslateX == (translateX + "px") && lastTranslateY == (translateY + "px"))
+                var setNewTranslate = false;
+            else
+                var setNewTranslate = true;
+        }
+
+        if(setNewTranslate) {
+            Dom.css3.transitionProperty(
+                item,
+                Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+            );
+
+            Dom.css3.transformProperty(item, "translate", translateX + "px," + translateY + "px");
+        }
 
         if(emitTransformEvent) {
             setTimeout(function() {
@@ -182,6 +211,8 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function(
 }
 
 Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = function() {
+    var me = this;
+
     this._coordsChangerFunctions.CSS3Translate3D = function(item, 
                                                             newLeft, 
                                                             newTop,
@@ -191,7 +222,12 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
                                                             newWidth,
                                                             newHeight,
                                                             isItemInitializationCall) {
-        // @todo -> if !supporting transitions -> default
+        if(!Dom.isBrowserSupportingTransitions()) {
+            me._coordsChangerFunctions["default"](
+                item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+            );
+            return;
+        }
 
         var isItemInitializationCall = isItemInitializationCall || false;
         if(isItemInitializationCall) {
@@ -219,14 +255,32 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
         else
             var translateY = 0;
 
-        Dom.css3.transitionProperty(
-            item,
-            Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
-        );
+        var translateRegexp = /.*translate3d\((.*)\).*/;
+        var matches = translateRegexp.exec(item.style[Prefixer.get("transform")]);
+        if(matches == null || typeof matches[1] == "undefined" || matches[1] == null) {
+            var setNewTranslate = true;
+        }
+        else {
+            var translateParts = matches[1].split(",");
+            var lastTranslateX = translateParts[0].gridifierTrim();
+            var lastTranslateY = translateParts[1].gridifierTrim();
 
-        Dom.css3.perspective(item, "1000");
-        Dom.css3.backfaceVisibility(item, "hidden");
-        Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px,0px");
+            if(lastTranslateX == (translateX + "px") && lastTranslateY == (translateY + "px"))
+                var setNewTranslate = false;
+            else
+                var setNewTranslate = true;
+        }
+
+        if(setNewTranslate) {
+            Dom.css3.transitionProperty(
+                item,
+                Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+            );
+
+            Dom.css3.perspective(item, "1000");
+            Dom.css3.backfaceVisibility(item, "hidden");
+            Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px,0px");
+        }
 
         if (emitTransformEvent) {
             setTimeout(function () {
@@ -269,7 +323,12 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
                                                                   newWidth,
                                                                   newHeight,
                                                                   isItemInitializationCall) {
-        // @todo -> if !supporting transitions -> default
+        if(!Dom.isBrowserSupportingTransitions()) {
+            me._coordsChangerFunctions["default"](
+                item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+            );
+            return;
+        }
 
         // We should preinit item transform property with scale3d(1,1,1) rule.
         // Otherwise animation will break on scale3d applying any later time.
@@ -286,7 +345,7 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
             return;
         }
 
-        if(item.hasAttribute(Gridifier.Dragifier.IS_DRAGGABLE_ITEM_DATA_ATTR))
+        if(Dom.hasAttribute(item, Gridifier.Dragifier.IS_DRAGGABLE_ITEM_DATA_ATTR))
             var isDraggableItem = true;
         else
             var isDraggableItem = false;
@@ -301,39 +360,47 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
         }
 
         var cc = Gridifier.Api.CoordsChanger;
-        if(!isDraggableItem && !Dom.hasAttribute(itemClone, cc.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR))
-            itemClone.style.visibility = "visible";
+        if(!isDraggableItem && !Dom.hasAttribute(itemClone, cc.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR)) {
+            if(itemClone.style.visibility != "visible")
+                itemClone.style.visibility = "visible";
+        }
 
-        if(Dom.hasAttribute(item, itemShownDataAttr))
-            item.style.visibility = "hidden";
+        if(Dom.hasAttribute(item, itemShownDataAttr)) {
+            if(item.style.visibility != "hidden")
+                item.style.visibility = "hidden";
+        }
 
         if(emitTransformEvent) {
             var sizesChanger = me._settings.getSizesChanger();
             sizesChanger(itemClone, newWidth, newHeight);
 
-            setTimeout(function() {
+            setTimeout(function () {
                 eventEmitter.emitTransformEvent(itemClone, newWidth, newHeight, newLeft, newTop);
             }, animationMsDuration + 20);
         }
 
-        Dom.css.set(item, {
-            left: newLeft,
-            top: newTop
-        });
+        if(newLeft != item.style.left)
+            Dom.css.set(item, {left: newLeft});
+
+        if(newTop != item.style.top)
+            Dom.css.set(item, {top: newTop});
 
         me._coordsChangerFunctions.CSS3Translate3D(
             itemClone, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
         );
 
         if(clonesHideTimeouts[guid] != null) {
-           clearTimeout(clonesHideTimeouts[guid]);
-           clonesHideTimeouts[guid] = null;
+            clearTimeout(clonesHideTimeouts[guid]);
+            clonesHideTimeouts[guid] = null;
         }
 
-        clonesHideTimeouts[guid] = setTimeout(function() {
-            if (Dom.hasAttribute(item, itemShownDataAttr) && !isDraggableItem) {
-                item.style.visibility = "visible";
-                itemClone.style.visibility = "hidden";
+        clonesHideTimeouts[guid] = setTimeout(function () {
+            if(Dom.hasAttribute(item, itemShownDataAttr) && !isDraggableItem) {
+                if(item.style.visibility != "visible")
+                    item.style.visibility = "visible";
+
+                if(itemClone.style.visibility != "hidden")
+                    itemClone.style.visibility = "hidden";
             }
         }, animationMsDuration);
     };

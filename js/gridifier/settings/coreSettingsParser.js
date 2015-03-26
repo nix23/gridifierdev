@@ -182,6 +182,13 @@ Gridifier.CoreSettingsParser.prototype.parseSortDispersionValue = function() {
     return sortDispersionValue;
 }
 
+Gridifier.CoreSettingsParser.prototype.parseResizeTimeoutValue = function() {
+    if(!this._settings.hasOwnProperty("resizeTimeout"))
+        return null;
+
+    return Dom.toInt(this._settings.resizeTimeout);
+}
+
 Gridifier.CoreSettingsParser.prototype.parseDisableItemHideOnGridAttachValue = function() {
     if(!this._settings.hasOwnProperty("disableItemHideOnGridAttach"))
         return false;
@@ -234,6 +241,20 @@ Gridifier.CoreSettingsParser.prototype.parseGridTransformTimeout = function() {
     return this._settings.gridTransformTimeout;
 }
 
+Gridifier.CoreSettingsParser.prototype.parseRetransformQueueBatchSize = function() {
+    if(!this._settings.hasOwnProperty("retransformQueueBatchSize"))
+        return Gridifier.RETRANSFORM_QUEUE_DEFAULT_BATCH_SIZE;
+
+    return this._settings.retransformQueueBatchSize;
+}
+
+Gridifier.CoreSettingsParser.prototype.parseRetransformQueueBatchTimeout = function() {
+    if(!this._settings.hasOwnProperty("retransformQueueBatchTimeout"))
+        return Gridifier.RETRANSFORM_QUEUE_DEFAULT_BATCH_TIMEOUT;
+
+    return this._settings.retransformQueueBatchTimeout;
+}
+
 Gridifier.CoreSettingsParser.prototype.parseGridItemMarkingStrategy = function() {
     if(!this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_CLASS) 
         && !this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_DATA_ATTR)
@@ -264,17 +285,30 @@ Gridifier.CoreSettingsParser.prototype.parseGridItemMarkingStrategy = function()
     }
 }
 
+Gridifier.CoreSettingsParser.prototype.parseDragifierMode = function() {
+    if(this._settings.hasOwnProperty("dragifierMode") &&
+        (this._settings.dragifierMode == Gridifier.DRAGIFIER_MODES.INTERSECTION ||
+         this._settings.dragifierMode == Gridifier.DRAGIFIER_MODES.DISCRETIZATION)) {
+        if(this._settings.dragifierMode == Gridifier.DRAGIFIER_MODES.DISCRETIZATION) {
+            if(this._settingsCore.isNoIntersectionsStrategy() || !this._settingsCore.isCustomAllEmptySpaceSortDispersion()) {
+                new Gridifier.Error(
+                    Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_DRAGIFIER_DISCRETIZATION_MODE
+                );
+            }
+        }
+
+        return this._settings.dragifierMode;
+    }
+
+    return Gridifier.DRAGIFIER_MODES.INTERSECTION;
+}
+
 Gridifier.CoreSettingsParser.prototype.parseDragifierSettings = function() {
     if(this._settings.hasOwnProperty("dragifier") && this._settings.dragifier) {
         var shouldEnableDragifierOnInit = true;
 
         if(typeof this._settings.dragifier == "boolean") {
-            if(this._settingsCore.isByClassGridItemMarkingStrategy()) {
-                var dragifierItemSelector = "." + this._settingsCore.getGridItemMarkingValue();
-            }
-            else if(this._settingsCore.isByDataAttrGridItemMarkingStrategy()) {
-                var dragifierItemSelector = "[" + this._settingsCore.getGridItemMarkingValue() + "]";
-            }
+            var dragifierItemSelector = false;
         }
         else {
             var dragifierItemSelector = this._settings.dragifier;
@@ -287,12 +321,7 @@ Gridifier.CoreSettingsParser.prototype.parseDragifierSettings = function() {
     }
 
     var shouldEnableDragifierOnInit = false;
-    if(this._settingsCore.isByClassGridItemMarkingStrategy()) {
-        var dragifierItemSelector = "." + this._settingsCore.getGridItemMarkingValue();
-    }
-    else if(this._settingsCore.isByDataAttrGridItemMarkingStrategy()) {
-        var dragifierItemSelector = "[" + this._settingsCore.getGridItemMarkingValue() + "]";
-    }
+    var dragifierItemSelector = false;
 
     return {
         shouldEnableDragifierOnInit: shouldEnableDragifierOnInit,

@@ -1,8 +1,8 @@
-Gridifier.Dragifier.Renderer = function(settings) {
+Gridifier.Dragifier.Renderer = function(settings, dragifierApi) {
     var me = this;
 
     this._settings = null;
-    this._renderFunction = null;
+    this._coordsChanger = null;
 
     this._css = {
     };
@@ -10,9 +10,7 @@ Gridifier.Dragifier.Renderer = function(settings) {
     this._construct = function() {
         me._settings = settings;
 
-        // @todo -> Parse settings and implement def func
-        me._setTransitionRenderFunction();
-
+        me._setRenderFunction();
         me._bindEvents();
     };
 
@@ -31,32 +29,10 @@ Gridifier.Dragifier.Renderer = function(settings) {
     return this;
 }
 
-Gridifier.Dragifier.Renderer.prototype._setTransitionRenderFunction = function() {
-    this._renderFunction = function(item, newLeft, newTop) {
-        var newLeft = parseFloat(newLeft);
-        var newTop = parseFloat(newTop);
-
-        var currentLeft = parseFloat(item.style.left);
-        var currentTop = parseFloat(item.style.top);
-
-        if(newLeft > currentLeft)
-            var translateX = newLeft - currentLeft;
-        else if(newLeft < currentLeft)
-            var translateX = (currentLeft - newLeft) * -1;
-        else 
-            var translateX = 0;
-
-        if(newTop > currentTop)
-            var translateY = newTop - currentTop;
-        else if(newTop < currentTop)
-            var translateY = (currentTop - newTop) * -1;
-        else
-            var translateY = 0;
-
-        Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px, 0px");
-    };
+Gridifier.Dragifier.Renderer.prototype._setRenderFunction = function() {
+    this._coordsChanger = this._settings.getDraggableItemCoordsChanger();
 }
 
 Gridifier.Dragifier.Renderer.prototype.render = function(item, newLeft, newTop) {
-    this._renderFunction(item, newLeft, newTop);
+    this._coordsChanger(item, newLeft, newTop);
 }

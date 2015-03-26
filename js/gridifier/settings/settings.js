@@ -22,21 +22,20 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
     this._sortDispersionMode = null;
     this._sortDispersionValue = null;
 
-    // @todo -> Pass global param duration to gridifier?(Or render/show duration???) Pass them as params in API calls???
-    // @todo -> Move this functions to separate files to allow easily override them?
-    //               User should have the ability to overide rotateX and rotateY in such manner,
-    //               that they would call for example scale in ie10/ie9 etc....
-    //              User should have control over direction of rotate and perspective size.
     this._toggleApi = null;
     this._toggleTimeouterApi = null;
     this._sortApi = null;
     this._filterApi = null;
     this._coordsChangerApi = null;
     this._sizesChangerApi = null;
+    this._dragifierApi = null;
+
+    this._resizeTimeout = null;
 
     this._gridItemMarkingStrategyType = null;
     this._gridItemMarkingValue = null;
 
+    this._dragifierMode = null;
     this._shouldEnableDragifierOnInit = false;
     this._dragifierItemSelector = null;
 
@@ -49,6 +48,9 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
 
     this._gridTransformType = null;
     this._gridTransformTimeout = null;
+
+    this._retransformQueueBatchSize = null;
+    this._retransformQueueBatchTimeout = null;
 
     this._css = {
     };
@@ -69,6 +71,7 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
         me._filterApi = new Gridifier.Api.Filter(me, me._eventEmitter);
         me._coordsChangerApi = new Gridifier.Api.CoordsChanger(me, me._gridifier, me._eventEmitter);
         me._sizesChangerApi = new Gridifier.Api.SizesChanger(me, me._eventEmitter);
+        me._dragifierApi = new Gridifier.Api.Dragifier();
 
         me._parse();
     };
@@ -101,6 +104,7 @@ Gridifier.Settings.prototype._parse = function() {
     this._sortDispersionMode = this._coreSettingsParser.parseSortDispersionMode();
     this._sortDispersionValue = this._coreSettingsParser.parseSortDispersionValue();
 
+    this._resizeTimeout = this._coreSettingsParser.parseResizeTimeoutValue();
     this._shouldDisableItemHideOnGridAttach = this._coreSettingsParser.parseDisableItemHideOnGridAttachValue();
     this._toggleAnimationMsDuration = this._coreSettingsParser.parseToggleAnimationMsDuration();
     this._coordsChangeAnimationMsDuration = this._coreSettingsParser.parseCoordsChangeAnimationMsDuration();
@@ -108,17 +112,21 @@ Gridifier.Settings.prototype._parse = function() {
     this._rotateBackface = this._coreSettingsParser.parseRotateBackface();
     this._gridTransformType = this._coreSettingsParser.parseGridTransformType();
     this._gridTransformTimeout = this._coreSettingsParser.parseGridTransformTimeout();
+    this._retransformQueueBatchSize = this._coreSettingsParser.parseRetransformQueueBatchSize();
+    this._retransformQueueBatchTimeout = this._coreSettingsParser.parseRetransformQueueBatchTimeout();
 
     this._apiSettingsParser.parseToggleOptions(this._toggleApi);
     this._apiSettingsParser.parseSortOptions(this._sortApi);
     this._apiSettingsParser.parseFilterOptions(this._filterApi);
     this._apiSettingsParser.parseCoordsChangerOptions(this._coordsChangerApi);
     this._apiSettingsParser.parseSizesChangerOptions(this._sizesChangerApi);
+    this._apiSettingsParser.parseDraggableItemDecoratorOptions(this._dragifierApi);
 
     var gridItemMarkingStrategyData = this._coreSettingsParser.parseGridItemMarkingStrategy();
     this._gridItemMarkingStrategyType = gridItemMarkingStrategyData.gridItemMarkingStrategyType;
     this._gridItemMarkingValue = gridItemMarkingStrategyData.gridItemMarkingValue;
-    
+
+    this._dragifierMode = this._coreSettingsParser.parseDragifierMode();
     var dragifierData = this._coreSettingsParser.parseDragifierSettings();
     this._shouldEnableDragifierOnInit = dragifierData.shouldEnableDragifierOnInit;
     this._dragifierItemSelector = dragifierData.dragifierItemSelector;
@@ -134,6 +142,10 @@ Gridifier.Settings.prototype.getEventEmitter = function() {
 
 Gridifier.Settings.prototype.getSizesResolverManager = function() {
     return this._sizesResolverManager;
+}
+
+Gridifier.Settings.prototype.getResizeTimeout = function() {
+    return this._resizeTimeout;
 }
 
 Gridifier.Settings.prototype.getToggleAnimationMsDuration = function() {
@@ -172,8 +184,28 @@ Gridifier.Settings.prototype.getGridTransformTimeout = function() {
     return this._gridTransformTimeout;
 }
 
+Gridifier.Settings.prototype.getRetransformQueueBatchSize = function() {
+    return this._retransformQueueBatchSize;
+}
+
+Gridifier.Settings.prototype.getRetransformQueueBatchTimeout = function() {
+    return this._retransformQueueBatchTimeout;
+}
+
 Gridifier.Settings.prototype.getToggleTimeouter = function() {
     return this._toggleTimeouterApi;
+}
+
+Gridifier.Settings.prototype.getDraggableItemCoordsChanger = function() {
+    return this._dragifierApi.getDraggableItemCoordsChanger();
+}
+
+Gridifier.Settings.prototype.getDraggableItemPointerDecorator = function() {
+    return this._dragifierApi.getDraggableItemPointerDecorator();
+}
+
+Gridifier.Settings.prototype.getDragifierUserSelectToggler = function() {
+    return this._dragifierApi.getDragifierUserSelectToggler();
 }
 
 Gridifier.Settings.prototype.isVerticalGrid = function() {
@@ -288,12 +320,20 @@ Gridifier.Settings.prototype.setSizesChanger = function(sizesChangerFunctionName
     this._sizesChangerApi.setSizesChangerFunction(sizesChangerFunctionName);
 }
 
+Gridifier.Settings.prototype.setDraggableItemDecorator = function(draggableItemDecoratorFunctionName) {
+    this._dragifierApi.setDraggableItemDecoratorFunction(draggableItemDecoratorFunctionName);
+}
+
 Gridifier.Settings.prototype.getCoordsChanger = function() {
     return this._coordsChangerApi.getCoordsChangerFunction();
 }
 
 Gridifier.Settings.prototype.getSizesChanger = function() {
     return this._sizesChangerApi.getSizesChangerFunction();
+}
+
+Gridifier.Settings.prototype.getDraggableItemDecorator = function() {
+    return this._dragifierApi.getDraggableItemDecoratorFunction();
 }
 
 Gridifier.Settings.prototype.isByClassGridItemMarkingStrategy = function() {
@@ -314,6 +354,14 @@ Gridifier.Settings.prototype.getGridItemMarkingType = function() {
 
 Gridifier.Settings.prototype.getGridItemMarkingValue = function() {
     return this._gridItemMarkingValue;
+}
+
+Gridifier.Settings.prototype.isIntersectionDragifierMode = function() {
+    return this._dragifierMode == Gridifier.DRAGIFIER_MODES.INTERSECTION;
+}
+
+Gridifier.Settings.prototype.isDiscretizationDragifierMode = function() {
+    return this._dragifierMode == Gridifier.DRAGIFIER_MODES.DISCRETIZATION;
 }
 
 Gridifier.Settings.prototype.shouldEnableDragifierOnInit = function() {

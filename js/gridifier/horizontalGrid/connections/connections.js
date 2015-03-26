@@ -155,8 +155,9 @@ Gridifier.HorizontalGrid.Connections.prototype.getMaxY2 = function() {
     return this._connectionsCore.getMaxY2();
 }
 
-Gridifier.HorizontalGrid.Connections.prototype.findConnectionByItem = function(item) {
-    return this._connectionsCore.findConnectionByItem(item);
+Gridifier.HorizontalGrid.Connections.prototype.findConnectionByItem = function(item, disableWasItemFoundValidation) {
+    var disableWasItemFoundValidation = disableWasItemFoundValidation || false;
+    return this._connectionsCore.findConnectionByItem(item, disableWasItemFoundValidation);
 }
 
 Gridifier.HorizontalGrid.Connections.prototype.remapAllItemGUIDS = function() {

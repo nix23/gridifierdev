@@ -141,6 +141,7 @@ Gridifier.Renderer.prototype.renderConnections = function(connections, exceptCon
 // (Example: slide show method -> calling 0ms offset translate at start, than this refresh
 // will be called before slideOutTimeout without a delay.(Will move items instantly)
 Gridifier.Renderer.prototype.renderConnectionsAfterDelay = function(connections, delay) {
+    var me = this;
     var delay = delay || 20;
 
     for(var i = 0; i < connections.length; i++) {

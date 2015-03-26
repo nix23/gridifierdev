@@ -8,7 +8,9 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
                                                       transformerConnectors,
                                                       settings, 
                                                       guid,
-                                                      transformedItemMarker) {
+                                                      transformedItemMarker,
+                                                      emptySpaceNormalizer,
+                                                      sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
@@ -22,9 +24,10 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
     this._settings = null;
     this._guid = null;
     this._transformedItemMarker = null;
+    this._emptySpaceNormalizer = null;
+    this._sizesResolverManager = null;
 
     this._reappendQueue = null;
-    this._batchSize = 12;
     this._reappendNextQueuedItemsBatchTimeout = null;
     this._reappendedQueueData = null;
     this._reappendStartViewportWidth = null;
@@ -45,6 +48,8 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
         me._settings = settings;
         me._guid = guid;
         me._transformedItemMarker = transformedItemMarker;
+        me._emptySpaceNormalizer = emptySpaceNormalizer;
+        me._sizesResolverManager = sizesResolverManager;
     };
 
     this._bindEvents = function() {
@@ -61,21 +66,7 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
     return this;
 }
 
-// @todo -> Check if horizontal grid works correctly here
 Gridifier.SizesTransformer.ItemsReappender.prototype.isReversedAppendShouldBeUsedPerItemInsert = function(item) {
-    // if(this._guid.wasItemPrepended(this._guid.getItemGUID(item)) 
-    //    && !this._settings.isMirroredPrepend()) {
-    //     if(this._settings.isDefaultPrepend())
-    //         return false;
-    //     else if(this._settings.isReversedPrepend())
-    //         return true;
-    // }
-    // else if(this._guid.wasItemAppended(this._guid.getItemGUID(item))) {
-    //     if(this._settings.isDefaultAppend())
-    //         return false;
-    //     else if(this._settings.isReversedAppend())
-    //         return true;
-    // }
     if(this._settings.isDefaultAppend())
         return false;
     else if(this._settings.isReversedAppend())
@@ -119,24 +110,28 @@ Gridifier.SizesTransformer.ItemsReappender.prototype.getQueuedConnectionsPerTran
 }
 
 Gridifier.SizesTransformer.ItemsReappender.prototype.startReappendingQueuedItems = function() {
-    //this._lastReappendedItemGUID = null;
-    // @todo -> Replace with JS events
-    this._reappendStartViewportWidth = $(window).width();
-    this._reappendStartViewportHeight = $(window).height();
+    this._reappendStartViewportWidth = this._sizesResolverManager.viewportWidth();
+    this._reappendStartViewportHeight = this._sizesResolverManager.viewportHeight();
 
     this._reappendNextQueuedItemsBatch();
 }
 
 Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBatch = function() {
-    var batchSize = this._batchSize;
+    var batchSize = this._settings.getRetransformQueueBatchSize();
     if(batchSize > this._reappendQueue.length)
         batchSize = this._reappendQueue.length;
 
+    if(this._settings.isVerticalGrid()) {
+        if(this._sizesResolverManager.viewportWidth() != this._reappendStartViewportWidth)
+            return;
+    }
+    else if(this._settings.isHorizontalGrid()) {
+        if(this._sizesResolverManager.viewportHeight() != this._reappendStartViewportHeight)
+            return;
+    }
+
+    this._sizesResolverManager.startCachingTransaction();
     var reappendedItemGUIDS = [];
-    // @todo -> Replace with JS events
-    // @todo -> Check settings ver.grid/hor.grid
-    if($(window).width() != this._reappendStartViewportWidth)
-        return;
 
     for(var i = 0; i < batchSize; i++) {
         var nextItemToReappend = this._reappendQueue[i].itemToReappend;
@@ -151,8 +146,7 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
         if(this._settings.isVerticalGrid())
             this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
         else if(this._settings.isHorizontalGrid())
-            // @todo -> Delete horizontal grid connectors here
-            ;
+            this._connectorsCleaner.deleteAllIntersectedFromRightConnectors();
         /* @system-log-start */
         Logger.log( 
             "reappendItems",
@@ -162,15 +156,18 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
         );
         /* @system-log-end */
 
-        //this._lastReappendedItemGUID = this._guid.getItemGUID(nextItemToReappend);
         reappendedItemGUIDS.push(this._guid.getItemGUID(nextItemToReappend));
     }
 
+    this._sizesResolverManager.stopCachingTransaction();
     var reappendedConnections = this._connections.getConnectionsByItemGUIDS(reappendedItemGUIDS);
     this._gridifier.getRenderer().renderTransformedConnections(reappendedConnections);
 
     this._reappendedQueueData = this._reappendedQueueData.concat(this._reappendQueue.splice(0, batchSize));
     if(this._reappendQueue.length == 0) {
+        //if(this._settings.isNoIntersectionsStrategy()) {
+        //    this._emptySpaceNormalizer.normalizeFreeSpace();
+        //}
         this._reappendNextQueuedItemsBatchTimeout = null;
         /* @system-log-start */
         Logger.stopLoggingOperation();
@@ -179,10 +176,11 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
     }
 
     var me = this;
+    var batchTimeout = this._settings.getRetransformQueueBatchTimeout();
+
     this._reappendNextQueuedItemsBatchTimeout = setTimeout(function() {
         me._reappendNextQueuedItemsBatch.call(me);
-    //}, 25); // Move to const
-    }, 25); 
+    }, batchTimeout);
 }
 
 Gridifier.SizesTransformer.ItemsReappender.prototype._reappendItem = function(reappendType,

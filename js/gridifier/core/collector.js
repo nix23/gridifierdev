@@ -177,9 +177,6 @@ Gridifier.Collector.prototype.ensureAllItemsCanBeAttachedToGrid = function(items
     }
 }
 
-// @todo -> pass as parameter append or prepend to collect method
-//               declare as constants
-
 Gridifier.Collector.prototype.collect = function() {
     var items = this._collectorFunction(this._grid);
     return items;
@@ -277,9 +274,6 @@ Gridifier.Collector.prototype.sortCollection = function(items) {
     }
 
     return items;
-    // @todo -> check if reverse of the itams is required
-    // if(this.gridifier.isAppending())
-    //      return items.reverse()
 }
 
 Gridifier.Collector.prototype.filterNotRestrictedToCollectItems = function(items) {

@@ -33,6 +33,10 @@ Gridifier = function(grid, settings) {
     this._toggleOperation = null;
     this._transformOperation = null;
 
+    this._dragifier = null;
+
+    this._resizeEventHandler = null;
+
     this._css = {
     };
 
@@ -164,8 +168,7 @@ Gridifier = function(grid, settings) {
         );
         me._renderer.setSilentRendererInstance(me._silentRenderer);
 
-        // @todo -> Remove from local var
-        var dragifier = new Gridifier.Dragifier(
+        me._dragifier = new Gridifier.Dragifier(
             me, 
             me._appender,
             me._reversedAppender,
@@ -177,30 +180,34 @@ Gridifier = function(grid, settings) {
             me._sizesResolverManager
         );
 
-        // @todo -> run first iteration?(Process items that were at start)
         me._bindEvents();
     };
 
     this._bindEvents = function() {
+        var processResizeEventAfterMsDelay = me._settings.getResizeTimeout();
         var processResizeEventTimeout = null;
-        //var processResizeEvent = 100;
-        // @todo get from settings??
-        // @todo -> Make this adjustable or enable by default???(Resize timeouts)
-        Event.add(window, "resize", function() {
-            // if(processResizeEventTimeout != null) {
-            //     clearTimeout(processResizeEventTimeout);
-            //     processResizeEventTimeout = null;
-            // }
-            
-            // @todo -> Make this as optional parameter???
-           //processResizeEventTimeout = setTimeout(function() {
-            me.triggerResize();
-            //}, processResizeEvent);
-        });
+
+        me._resizeEventHandler = function() {
+            if(processResizeEventAfterMsDelay == null) {
+                me.triggerResize();
+                return;
+            }
+
+            if(processResizeEventTimeout != null) {
+                clearTimeout(processResizeEventTimeout);
+                processResizeEventTimeout = null;
+            }
+
+            processResizeEventTimeout = setTimeout(function() {
+                me.triggerResize();
+            }, processResizeEventAfterMsDelay);
+        };
+
+        Event.add(window, "resize", me._resizeEventHandler);
     };
 
     this._unbindEvents = function() {
-        // @todo -> Remove resize handler
+        Event.remove(window, "resize");
     };
 
     this.destruct = function() {
@@ -250,21 +257,7 @@ Gridifier.prototype.scheduleGridSizesUpdate = function() {
 }
 
 Gridifier.prototype.triggerResize = function() {
-    this._sizesResolverManager.startCachingTransaction();
     this.retransformAllSizes();
-    this._sizesResolverManager.stopCachingTransaction();
-}
-
-// Write tests soon per everything :}
-// Method names -> gridify, watchify?
-// @todo -> User can write this method???? Why should it be inside lib?
-Gridifier.prototype.watch = function() {
-    // @todo -> Watch per DOM appends-prepends through setTimeout,
-    //  and process changes.
-    // Or don't think about appends-prepends, Just use WATCH_INSERT_TYPE param.(By def append)
-    // We don't need depend on DOM structure of the wrapper.
-    //  Process deletes.
-    // Or custom watch logic -> Depending on some param of new item append or prepend
 }
 
 Gridifier.prototype.toggleBy = function(toggleFunctionName) {
@@ -295,7 +288,7 @@ Gridifier.prototype.resort = function() {
 }
 
 Gridifier.prototype.collect = function() {
-    ;
+    return this._collector.collect();
 }
 
 Gridifier.prototype.disconnect = function(items) {
@@ -320,6 +313,11 @@ Gridifier.prototype.setCoordsChanger = function(coordsChangerName) {
 
 Gridifier.prototype.setSizesChanger = function(sizesChangerName) {
     this._settings.setSizesChanger(sizesChangerName);
+    return this;
+}
+
+Gridifier.prototype.setDraggableItemDecorator = function(draggableItemDecoratorName) {
+    this._settings.setDraggableItemDecorator(draggableItemDecoratorName);
     return this;
 }
 
@@ -366,7 +364,6 @@ Gridifier.prototype.setCoordsChangeAnimationMsDuration = function(animationMsDur
 
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     if(this._settings.isMirroredPrepend()) {
-        // @todo -> should reverse collection
         this.insertBefore(items, null, batchSize, batchTimeout);
         return this;
     }
@@ -464,6 +461,14 @@ Gridifier.prototype.transformSizesWithPaddingBottom = function(maybeItem, newWid
     this._transformOperation.execute(maybeItem, newWidth, newPaddingBottom, true);
 }
 
+Gridifier.prototype.bindDragifierEvents = function() {
+    this._dragifier.bindDragifierEvents();
+}
+
+Gridifier.prototype.unbindDragifierEvents = function() {
+    this._dragifier.unbindDragifierEvents();
+}
+
 Gridifier.prototype.addPreInsertLifecycleCallback = function(callback) {
     this._lifecycleCallbacks.addPreInsertCallback(callback);
 }
@@ -498,6 +503,13 @@ Gridifier.prototype.hasItemBindedClone = function(item) {
     return this._itemClonesManager.hasBindedClone(item);
 }
 
+Gridifier.prototype.isItemClone = function(item) {
+    var items = this._collector.toDOMCollection(item);
+    var item = items[0];
+
+    return this._itemClonesManager.isItemClone(item);
+}
+
 Gridifier.prototype.getItemClone = function(item) {
     var items = this._collector.toDOMCollection(item);
     var item = items[0];
@@ -507,8 +519,6 @@ Gridifier.prototype.getItemClone = function(item) {
 
     return this._itemClonesManager.getBindedClone(item);
 }
-
-// @todo -> Add to items numbers besides GUIDS, and rebuild them on item deletes(Also use in sorting per drag?)
 
 Gridifier.Api = {};
 Gridifier.HorizontalGrid = {};
@@ -539,6 +549,8 @@ Gridifier.SORT_DISPERSION_MODES = {DISABLED: "disabled", CUSTOM: "custom", CUSTO
 Gridifier.GRID_ITEM_MARKING_STRATEGIES = {BY_CLASS: "class", BY_DATA_ATTR: "data", BY_QUERY: "query"};
 Gridifier.GRID_ITEM_MARKING_DEFAULTS = {CLASS: "gridifier-item", DATA_ATTR: "data-gridifier-item", QUERY: "div > div"};
 
+Gridifier.DRAGIFIER_MODES = {INTERSECTION: "intersection", DISCRETIZATION: "discretization"};
+
 Gridifier.OPERATIONS = {PREPEND: 0, REVERSED_PREPEND: 1, APPEND: 2, REVERSED_APPEND: 3, MIRRORED_PREPEND: 4};
 Gridifier.DEFAULT_TOGGLE_ANIMATION_MS_DURATION = 500;
 Gridifier.DEFAULT_COORDS_CHANGE_ANIMATION_MS_DURATION = 500;
@@ -548,3 +560,6 @@ Gridifier.DEFAULT_ROTATE_BACKFACE = true;
 
 Gridifier.GRID_TRANSFORM_TYPES = {EXPAND: "expand", FIT: "fit"};
 Gridifier.DEFAULT_GRID_TRANSFORM_TIMEOUT = 100;
+
+Gridifier.RETRANSFORM_QUEUE_DEFAULT_BATCH_SIZE = 12;
+Gridifier.RETRANSFORM_QUEUE_DEFAULT_BATCH_TIMEOUT = 25;

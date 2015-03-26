@@ -81,6 +81,10 @@ Gridifier.Connectors.isTopRightSideConnector = function(connector) {
     return connector.side == Gridifier.Connectors.SIDES.TOP.RIGHT;
 }
 
+Gridifier.Connectors.isInitialConnector = function(connector) {
+    return connector.itemGUID == Gridifier.Connectors.INITIAL_CONNECTOR_ITEM_GUID;
+}
+
 Gridifier.Connectors.prototype._addConnector = function(type, side, x, y, itemGUID) {
     if(typeof itemGUID == "undefined")
         var itemGUID = Gridifier.Connectors.INITIAL_CONNECTOR_ITEM_GUID;

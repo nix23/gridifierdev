@@ -92,6 +92,10 @@ Gridifier.SizesTransformer.Core = function(gridifier,
             me._operation
         );
 
+        me._emptySpaceNormalizer = new Gridifier.SizesTransformer.EmptySpaceNormalizer(
+            me._connections, me._connectors, me._settings
+        );
+
         me._itemsReappender = new Gridifier.SizesTransformer.ItemsReappender(
             me._gridifier,
             me._appender,
@@ -103,13 +107,11 @@ Gridifier.SizesTransformer.Core = function(gridifier,
             me._transformerConnectors,
             me._settings, 
             me._guid,
-            me._transformedItemMarker
+            me._transformedItemMarker,
+            me._emptySpaceNormalizer,
+            me._sizesResolverManager
         );
         me._transformerConnectors.setItemsReappenderInstance(me._itemsReappender);
-
-        me._emptySpaceNormalizer = new Gridifier.SizesTransformer.EmptySpaceNormalizer(
-            me._connections, me._connectors, me._settings
-        );
     };
 
     this._bindEvents = function() {
@@ -147,6 +149,7 @@ Gridifier.SizesTransformer.Core.prototype.transformConnectionSizes = function(tr
     // Timeout is required here because of DOM-tree changes inside transformed item clones creation.
     // (Optimizing getComputedStyle after reflow performance)
     var applyTransform = function() {
+        this._guid.unmarkAllPrependedItems();
         this._transformedItemMarker.markEachConnectionItemWithTransformData(transformationData);
 
         var connectionsToReappend = [];
@@ -177,11 +180,6 @@ Gridifier.SizesTransformer.Core.prototype.transformConnectionSizes = function(tr
 
         this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
         this._itemsReappender.startReappendingQueuedItems();
-
-        // @todo -> Enable this setting
-        //if(me._settings.isNoIntersectionsStrategy()) {
-        //    me._emptySpaceNormalizer.emptySpaceNormalizer.normalizeFreeSpace();
-        //}
     }
 
     var me = this;
@@ -212,6 +210,8 @@ Gridifier.SizesTransformer.Core.prototype.stopRetransformAllConnectionsQueue = f
 
 Gridifier.SizesTransformer.Core.prototype.retransformAllConnections = function() {
     this.stopRetransformAllConnectionsQueue();
+
+    var me = this;
     var connections = this._connections.get();
     
     if(connections.length == 0)
@@ -268,11 +268,6 @@ Gridifier.SizesTransformer.Core.prototype.retransformAllConnections = function()
 
         this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
         this._itemsReappender.startReappendingQueuedItems();
-
-        // @todo -> Enable this setting (Is it required here?) Move this declaration after queue flush
-        //if(me._settings.isNoIntersectionsStrategy()) {
-        //    me._emptySpaceNormalizer.emptySpaceNormalizer.normalizeFreeSpace();
-        //}
     }
 
     var wereItemSizesSyncs = this._syncAllScheduledToTransformItemSizes(connections);
@@ -332,6 +327,7 @@ Gridifier.SizesTransformer.Core.prototype.retransformFrom = function(firstConnec
         }
     }
 
+    this._guid.unmarkAllPrependedItems();
     var itemsToReappendData = this._itemsToReappendFinder.findAllOnSizesTransform(
         connectionsToReappend, firstConnectionToRetransform
     );
@@ -347,9 +343,4 @@ Gridifier.SizesTransformer.Core.prototype.retransformFrom = function(firstConnec
 
     this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
     this._itemsReappender.startReappendingQueuedItems();
-
-    // @todo -> Enable this setting
-    //if(me._settings.isNoIntersectionsStrategy()) {
-    //    me._emptySpaceNormalizer.emptySpaceNormalizer.normalizeFreeSpace();
-    //}
 }

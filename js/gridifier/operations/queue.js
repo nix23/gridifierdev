@@ -332,35 +332,6 @@ Gridifier.Operations.Queue.prototype._processQueuedOperations = function() {
 
     if(wereAllQueueOperationsExecuted)
         this._isWaitingForTransformerQueueRelease = false;
-
-    // if(this._sizesTransformer.isTransformerQueueEmpty()) {
-    //     for(var i = 0; i < this._queuedOperations.length; i++) {
-    //         if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.APPEND) {
-    //             this._append(this._queuedOperations[i].items);
-    //         }
-    //         else if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.PREPEND) {
-    //             this._prepend(this._queuedOperations[i].items);
-    //         }
-    //         else if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.INSERT_BEFORE) {
-    //             this._insertBefore(
-    //                 this._queuedOperations[i].items,
-    //                 this._queuedOperations[i].beforeItem
-    //             );
-    //         }
-    //         else {
-    //             var operationType = this._queuedOperations[i].queuedOperationType;
-    //             throw new Error("Unknown queued operation type = '" + operationType + "'");
-    //         }
-    //     }
-
-    //     this._queuedOperations = [];
-    //     this._isWaitingForTransformerQueueRelease = false;
-    // }
-    // else {
-    //     setTimeout(function() {
-    //         me._processQueuedOperations.call(me);
-    //     }, Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
-    // }
 }
 
 Gridifier.Operations.Queue.prototype._executePrependOperation = function(items) {

@@ -35,7 +35,6 @@ Gridifier.Api.Toggle = function(settings, gridifier, eventEmitter, sizesResolver
         me._addScale();
         me._addFade();
         me._addVisibility();
-        me._addVoid();
     };
 
     this._bindEvents = function() {
@@ -105,7 +104,16 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
     var me = this;
 
     this._toggleFunctions[rotatorName] = {
-        "show": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
+        "show": function(item,
+                         grid,
+                         animationMsDuration,
+                         timeouter,
+                         eventEmitter,
+                         sizesResolverManager,
+                         coordsChanger,
+                         collector,
+                         left,
+                         top) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
@@ -116,15 +124,24 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
-                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter);
-                me._rotateApi[showRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter);
+                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top);
+                me._rotateApi[showRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter, left, top);
             }
             else {
-                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter);
+                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top);
             }
         },
 
-        "hide": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
+        "hide": function(item,
+                         grid,
+                         animationMsDuration,
+                         timeouter,
+                         eventEmitter,
+                         sizesResolverManager,
+                         coordsChanger,
+                         collector,
+                         left,
+                         top) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "hidden";
@@ -135,11 +152,11 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
-                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter);
-                me._rotateApi[hideRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter);
+                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top);
+                me._rotateApi[hideRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter, left, top);
             }
             else {
-                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter);
+                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top);
             }
         }
     };
@@ -173,12 +190,13 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
 
             var executeScaleShow = function(item) {
                 if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
+                    Dom.css3.transition(item, "none");
                     Dom.css3.transformProperty(item, "scale3d", "0,0,0");
                     item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
                 }
 
                 var setItemPrescaleVisibility = function(item) {
-                    item.style.visibility = "visible"
+                    item.style.visibility = "visible";
                 }
 
                 // Ie11 blinking fix(:))
@@ -370,20 +388,6 @@ Gridifier.Api.Toggle.prototype._addVisibility = function() {
             timeouter.flush(item);
             item.style.visibility = "hidden";
             eventEmitter.emitHideEvent(item);
-        }
-    };
-}
-
-Gridifier.Api.Toggle.prototype._addVoid = function() {
-    var me = this;
-
-    this._toggleFunctions.void = {
-        "show": function(item) {
-            me._eventEmitter.emitShowEvent(item); // @pass event emitter to call
-        },
-
-        "hide": function(item) {
-            me._eventEmitter.emitHideEvent(item); // @pass event emitter to call
         }
     };
 }

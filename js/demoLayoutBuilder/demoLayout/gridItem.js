@@ -87,11 +87,19 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
     else if(window.borderType == 4)
         var borderColor = "blue";
 
+    var res = Math.floor(Math.random()*(2-1+1)+1);
+    if(res == 1)
+        var pb = "15%";
+    else
+        var pb = "7.5%";
+
     this._$gridItem.css({
         width: itemSizes.width,
         height: itemSizes.height,
+        //margin: "2em",
         //height: 0,
-        //paddingBottom: "15%",
+        //paddingBottom: pb,
+        //marginBottom: "10px",
         //height: "30%",
 
         // width: "33.43%",
@@ -122,7 +130,7 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         // width: "25%",
         // height: "200px",
         //border: itemBorder + "px rgb(60,60,60) solid",
-        //border: "3px " + borderColor + " solid",
+       // border: "1px " + borderColor + " solid",
         border: "3px black solid",
         //margin: itemMargin + "px",
         // "margin-left": "1.66%",

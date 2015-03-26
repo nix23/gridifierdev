@@ -348,5 +348,10 @@ Gridifier.HorizontalGrid.Appender.prototype._findItemConnectionCoords = function
         }
     }
 
+    if(itemConnectionCoords == null) {
+        var errorType = Gridifier.Error.ERROR_TYPES.INSERTER.TOO_TALL_ITEM_ON_HORIZONTAL_GRID_INSERT;
+        new Gridifier.Error(errorType, item);
+    }
+
     return itemConnectionCoords;
 }

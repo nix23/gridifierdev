@@ -89,7 +89,6 @@ Gridifier.HorizontalGrid.ConnectionsHorizontalIntersector.prototype.getMostWideF
             if(mostWideHorizontallyIntersectedConnection == null)
                 mostWideHorizontallyIntersectedConnection = maybeIntersectableConnection;
             else {
-                // @todo -> Should here add +1 in formulas?
                 var maybeIntersectableConnectionWidth = Math.abs(
                     maybeIntersectableConnection.x2 - maybeIntersectableConnection.x1
                 );
@@ -130,37 +129,49 @@ Gridifier.HorizontalGrid.ConnectionsHorizontalIntersector.prototype.expandHorizo
         return;
     
     var colConnectionsToExpand = this.getAllHorizontallyIntersectedConnections(newConnection);
-    this._lastColHorizontallyExpandedConnections = colConnectionsToExpand;
+    var expandedConnectionsWithNewOffsets = [];
 
     for(var i = 0; i < colConnectionsToExpand.length; i++) {
         colConnectionsToExpand[i].x1 = mostWideConnection.x1;
         colConnectionsToExpand[i].x2 = mostWideConnection.x2;
 
-        if(this._settings.isHorizontalGridLeftAlignmentType())
+        if(this._settings.isHorizontalGridLeftAlignmentType()) {
+            if(colConnectionsToExpand[i].horizontalOffset != 0)
+                expandedConnectionsWithNewOffsets.push(colConnectionsToExpand[i]);
+
             colConnectionsToExpand[i].horizontalOffset = 0;
+        }
         else if(this._settings.isHorizontalGridCenterAlignmentType()) {
             var x1 = colConnectionsToExpand[i].x1;
             var x2 = colConnectionsToExpand[i].x2;
 
             var targetSizes = this._itemCoordsExtractor.getItemTargetSizes(colConnectionsToExpand[i].item);
-            // @todo -> Check if (-1) is required
-            var itemWidth = targetSizes.targetWidth - 1;
+            var itemWidth = targetSizes.targetWidth;
 
-            //var itemWidth = colConnectionsToExpand[i].itemWidthWithMargins - 1;
-            // @todo fix to return Math.round(Math.abs(y2 - y1 + 1) / 2) - Math.round(itemHeight / 2);
-            colConnectionsToExpand[i].horizontalOffset = Math.round(Math.abs(x2 - x1) / 2) - Math.round(itemWidth / 2);
+            var newHorizontalOffset = (Math.abs(x2 - x1 + 1) / 2) - (itemWidth / 2);
+
+            if(colConnectionsToExpand[i].horizontalOffset != newHorizontalOffset) {
+                colConnectionsToExpand[i].horizontalOffset = newHorizontalOffset;
+                expandedConnectionsWithNewOffsets.push(colConnectionsToExpand[i]);
+            }
         }
         else if(this._settings.isHorizontalGridRightAlignmentType()) {
             var x1 = colConnectionsToExpand[i].x1;
             var x2 = colConnectionsToExpand[i].x2;
 
             var targetSizes = this._itemCoordsExtractor.getItemTargetSizes(colConnectionsToExpand[i].item);
-            // @todo -> Check if (-1) is required
-            var itemWidth = targetSizes.targetWidth - 1;
-            
-            //var itemWidth = colConnectionsToExpand[i].itemWidthWithMargins - 1;
-            // @todo fix (y2 - y1 + 1) 
-            colConnectionsToExpand[i].horizontalOffset = Math.abs(x2 - x1) - itemWidth;
+            var itemWidth = targetSizes.targetWidth;
+
+            var newHorizontalOffset = Math.abs(x2 - x1 + 1) - itemWidth;
+
+            if(colConnectionsToExpand[i].horizontalOffset != newHorizontalOffset) {
+                colConnectionsToExpand[i].horizontalOffset = newHorizontalOffset;
+                expandedConnectionsWithNewOffsets.push(colConnectionsToExpand[i]);
+            }
         }
     }
+
+    // We should rerender only connections with new horizontal offsets(Otherwise some browsers
+    // will produce noticeable 'freezes' on rerender cycle)
+    this._lastColHorizontallyExpandedConnections = expandedConnectionsWithNewOffsets;
 }

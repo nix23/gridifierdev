@@ -72,8 +72,6 @@ Gridifier.Discretizer.CELL_CENTER_X = "centerX";
 Gridifier.Discretizer.CELL_CENTER_Y = "centerY";
 
 Gridifier.Discretizer.prototype.discretizeGrid = function() {
-    //var discretizationHorizontalStep = this._connections.getMinConnectionWidth() - 1;
-    //var discretizationVerticalStep = this._connections.getMinConnectionHeight() - 1;
     var discretizationHorizontalStep = this._connections.getMinConnectionWidth();
     var discretizationVerticalStep = this._connections.getMinConnectionHeight();
 

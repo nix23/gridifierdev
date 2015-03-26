@@ -75,7 +75,6 @@ Gridifier.TransformerConnectors.prototype.recreateConnectorsPerFirstItemReappend
     }
 }
 
-// @todo -> Change to use firstConnectionToReappend
 Gridifier.TransformerConnectors.prototype._recreateConnectorsPerReversedItemReappend = function(firstItemToReappend,
                                                                                                 firstConnectionToReappend) {
     this._connections.reinitRanges();

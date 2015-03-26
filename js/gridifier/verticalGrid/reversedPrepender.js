@@ -371,5 +371,10 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype._findItemConnectionCoords = f
         }
     }
 
+    if(itemConnectionCoords == null) {
+        var errorType = Gridifier.Error.ERROR_TYPES.INSERTER.TOO_WIDE_ITEM_ON_VERTICAL_GRID_INSERT;
+        new Gridifier.Error(errorType, item);
+    }
+
     return itemConnectionCoords;
 }

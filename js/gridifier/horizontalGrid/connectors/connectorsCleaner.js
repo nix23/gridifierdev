@@ -143,24 +143,6 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.deleteAllTooRightConnectors
 }
 
 Gridifier.HorizontalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersectingAnyRightConnectionItem = function(mappedConnector) {
-    //var connections = this._connections.get();
-    //var connections = this._connections.getAllHorizontallyIntersectedAndLowerConnections(connector);
-    //if(time > 0.199)
-      //  console.log("time = " + time);
-    // console.log("CONN COUNT = ", connections.length);
-    // console.log("connector info = ", $.parseJSON(JSON.stringify(connector)));
-
-    // for(var i = 0; i < connections.length; i++) {
-    //     if(this.isConnectorInsideOrBeforeItemIntersectionStrategy()) 
-    //         var verticalIntersectionCond = (connector.y <= connections[i].y2);
-    //     else if(this.isConnectorInsideItemIntersectionStrategy())
-    //         var verticalIntersectionCond = (connector.y <= connections[i].y2 
-    //                                                           && connector.y >= connections[i].y1);
-
-    //     if(connector.x >= connections[i].x1 && connector.x <= connections[i].x2
-    //         && verticalIntersectionCond) 
-    //         return true;
-    // }
     var connections = this._connections.get();
 
     for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
@@ -183,14 +165,9 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersect
 }
 
 Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.deleteAllIntersectedFromRightConnectors = function() {
-    //timer.start();
     var connectors = this._connectors.get();
-    //console.log("get connectors = " + timer.get());
-    //timer.start();
     var mappedConnectors = this._connectors.getClone();
-    //console.log("clone connectors = " + timer.get());
 
-    //timer.start();
     mappedConnectors.sort(function(firstConnector, secondConnector) {
         if(firstConnector.x == secondConnector.x)
             return 0;
@@ -199,38 +176,24 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.deleteAllIntersectedFromRig
         else 
             return 1;
     });
-    //console.log("sort connectors = " + timer.get());
-    //timer.start();
+
     mappedConnectors = this._connections.mapAllIntersectedAndRightConnectionsPerEachConnector(
         mappedConnectors
     );
-    //console.log("map connectors = " + timer.get());
 
-    //timer.start();
     for(var i = 0; i < mappedConnectors.length; i++) {
         if(this._isMappedConnectorIntersectingAnyRightConnectionItem(mappedConnectors[i])) 
             connectors[mappedConnectors[i].connectorIndex].isIntersected = true;
         else
             connectors[mappedConnectors[i].connectorIndex].isIntersected = false;
     }
-    //console.log("isIntersecting = " + timer.get());
 
-    //timer.start();
     for(var i = 0; i < connectors.length; i++) {
         if(connectors[i].isIntersected) {
             connectors.splice(i, 1);
             i--;
         }
     }
-    //console.log("isIntersecting = " + timer.get());
-    //console.log("");
-
-    // for(var i = 0; i < connectors.length; i++) {
-    //     if(this.isConnectorIntersectingAnyBottomConnectionItem(connectors[i])) {
-    //         connectors.splice(i, 1);
-    //         i--;
-    //     }
-    // }
 }
 
 Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.deleteAllTooLeftConnectorsFromMostRightConnector = function() {

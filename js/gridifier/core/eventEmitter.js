@@ -60,11 +60,6 @@ Gridifier.EventEmitter.prototype.onConnectionCreate = function(callbackFn) {
     this._connectionCreateCallbacks.push(callbackFn);
 }
 
-// @todo -> Add off events
-// @todo -> Add once events
-// @todo -> Think about event types 
-//          (Otsilatj eventi -> onDelete, onResize, onAdd, onReady. Event proxy? (backbone, window).)
-
 Gridifier.EventEmitter.prototype.emitShowEvent = function(item) {
     for(var i = 0; i < this._showCallbacks.length; i++) {
         this._showCallbacks[i](item);

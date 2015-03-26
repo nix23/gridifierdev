@@ -43,8 +43,7 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
 
         me._dragIdentifiers = [];
 
-        // @todo -> Check settings, or merge intersections logic
-        me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(
+        me._connectionsIntersector = new Gridifier.ConnectionsIntersector(
             me._connections
         );
 
@@ -126,8 +125,8 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.getDragIdentif
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._initDraggableItem = function(item) {
     this._draggableItem = item;
-    // @todo -> Fix this(visibility uses transition timeout, Replace global from all???)
-    Dom.css3.transitionProperty(this._draggableItem, "Visibility 0ms ease");
+    if(Dom.isBrowserSupportingTransitions())
+        Dom.css3.transitionProperty(this._draggableItem, "Visibility 0ms ease");
 }
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._hideDraggableItem = function() {
@@ -139,9 +138,6 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._hideDraggable
         var draggableItemRendererClone = itemClonesManager.getBindedClone(this._draggableItem);
         draggableItemRendererClone.style.visibility = "hidden";
     }
-
-    // @todo -> Replace with real hidder
-    Dom.css.addClass(document.body, "disableSelect");
 }
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.processDragMove = function(cursorX, cursorY) {
@@ -163,8 +159,11 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.processDragMov
     if(newIntersectedConnections.length == 0)
         return;
 
-    this._swapItemGUIDS(newIntersectedConnections);
-    this._dragifierCore.reappendGridItems();
+    //this._swapItemGUIDS(newIntersectedConnections);
+        //this._dragifierCore.reappendGridItems();
+
+    if(this._swapItemPositions(newIntersectedConnections))
+        this._dragifierCore.reappendGridItems();
 }
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._getNewIntersectedConnections = function(draggableItemCloneNewGridPosition) {
@@ -197,15 +196,54 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._swapItemGUIDS
     this._guid.setItemGUID(intersectedConnectionWithSmallestGUID.item, draggableItemGUID);
 }
 
+/*
+    Connection could be still deleted on fast dragging, so we should perform drag in this mode
+    only if the connection was reappended through reappend queue. On Grid Discretization algorithm
+    connection is marked as RESTRICTED_TO_COLLECT, so no such check is required.
+ */
+Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._swapItemPositions = function(newIntersectedConnections) {
+    var draggableItemConnection = this._connections.findConnectionByItem(this._draggableItem, true);
+    if(draggableItemConnection == null)
+        return false;
+
+    if(this._settings.isVerticalGrid()) {
+        var connectionsSorter = new Gridifier.VerticalGrid.ConnectionsSorter(
+            this._connections, this._settings, this._guid
+        );
+        newIntersectedConnections = connectionsSorter.sortConnectionsPerReappend(newIntersectedConnections);
+    }
+    else if(this._settings.isHorizontalGrid()) {
+        var connectionsSorter = new Gridifier.HorizontalGrid.ConnectionsSorter(
+           this._connections, this._settings, this._guid
+        );
+        newIntersectedConnections = connectionsSorter.sortConnectionsPerReappend(newIntersectedConnections);
+    }
+
+    var intersectedConnectionWithSmallestPosition = newIntersectedConnections[0];
+
+    var draggableItemGUID = this._guid.getItemGUID(this._draggableItem);
+    var intersectedConnectionWithSmallestPositionGUID = this._guid.getItemGUID(intersectedConnectionWithSmallestPosition.item);
+
+    this._guid.setItemGUID(this._draggableItem, intersectedConnectionWithSmallestPositionGUID);
+    this._guid.setItemGUID(intersectedConnectionWithSmallestPosition.item, draggableItemGUID);
+
+    var tempItem = draggableItemConnection.item;
+    draggableItemConnection.item = intersectedConnectionWithSmallestPosition.item;
+    intersectedConnectionWithSmallestPosition.item = tempItem;
+
+    var tempGUID = draggableItemConnection.itemGUID;
+    draggableItemConnection.itemGUID = intersectedConnectionWithSmallestPositionGUID;
+    intersectedConnectionWithSmallestPosition.itemGUID = tempGUID;
+
+    return true;
+}
+
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.unbindDraggableItem = function() {
     document.body.removeChild(this._draggableItemClone);
 
     this._showDraggableItem();
     this._draggableItem = null;
     this._draggableItem = null;
-
-    // @todo -> Replace with real hidder
-    Dom.css.removeClass(document.body, "disableSelect");
 }
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._showDraggableItem = function() {

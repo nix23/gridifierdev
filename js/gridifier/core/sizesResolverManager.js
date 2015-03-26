@@ -380,3 +380,38 @@ Gridifier.SizesResolverManager.prototype.offsetTop = function(DOMElem, substract
 
     return offsetTop;
 }
+
+Gridifier.SizesResolverManager.prototype.viewportWidth = function() {
+    return document.documentElement.clientWidth;
+}
+
+Gridifier.SizesResolverManager.prototype.viewportHeight = function() {
+    return document.documentElement.clientHeight;
+}
+
+Gridifier.SizesResolverManager.prototype.copyComputedStyle = function(sourceItem, targetItem) {
+    var me = this;
+
+    var copyRecursive = function(sourceItem, targetItem) {
+        SizesResolver.cloneComputedStyle(sourceItem, targetItem);
+
+        for(var i = 0; i < sourceItem.childNodes.length; i++) {
+            if(sourceItem.childNodes[i].nodeType == 1) {
+                copyRecursive(sourceItem.childNodes[i], targetItem.childNodes[i]);
+
+                var childNodeComputedStyle = SizesResolver.getComputedCSS(sourceItem.childNodes[i]);
+
+                // Don't override 'auto' value
+                if(/.*px.*/.test(childNodeComputedStyle.left))
+                    targetItem.childNodes[i].style.left = me.positionLeft(sourceItem.childNodes[i]) + "px";
+                if(/.*px.*/.test(childNodeComputedStyle.top))
+                    targetItem.childNodes[i].style.top = me.positionTop(sourceItem.childNodes[i]) + "px";
+
+                targetItem.childNodes[i].style.width = me.outerWidth(sourceItem.childNodes[i]) + "px";
+                targetItem.childNodes[i].style.height = me.outerHeight(sourceItem.childNodes[i]) + "px";
+            }
+        }
+    }
+
+    copyRecursive(sourceItem, targetItem);
+}

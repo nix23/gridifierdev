@@ -28,14 +28,8 @@ Gridifier.SizesTransformer.EmptySpaceNormalizer = function(connections, connecto
     return this;
 }
 
-    // @TODO -> WARNING!!! THIS SHOULD BE USED WHEN !NO_INTERSECTIONS STRATEGY TO FIX PREPENDED TRANSFORMS
-    //  (FIX THIS!!!!)
-    // @todo -> Check if this fix should be made always
-    // @todo -> Also this should be applied somewhere in the end of the queue
-    // if(this._settings.isNoIntersectionsStrategy()) {
-
-    // }
-
+// Maybe this class will be required to normalize free space after prepended item transforms
+// in the end of the transormation queue.
 Gridifier.SizesTransformer.EmptySpaceNormalizer.prototype.normalizeFreeSpace = function() {
     if(this._settings.isVerticalGrid())
         this._applyNoIntersectionsStrategyTopFreeSpaceFixOnPrependedItemTransform();
@@ -77,5 +71,5 @@ Gridifier.SizesTransformer.EmptySpaceNormalizer.prototype._applyNoIntersectionsS
 }
 
 Gridifier.SizesTransformer.EmptySpaceNormalizer.prototype._applyNoIntersectionsStrategyLeftFreeSpaceFixOnPrependedItemTransform = function() {
-    // @todo -> Implement horizontal fix here
+    ;
 }

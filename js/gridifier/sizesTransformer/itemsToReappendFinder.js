@@ -52,7 +52,6 @@ Gridifier.SizesTransformer.ItemsToReappendFinder.prototype.findAllOnSizesTransfo
         // transformed item may become smaller).
         // When customSortDispersion is used, element with bigger guid can be above.(Depending 
         // on the dispersion param).
-        // @todo -> custom sort dispersion should have custom y1(VG) and custom x1(HG)
         else if(this._settings.isCustomSortDispersion() || this._settings.isCustomAllEmptySpaceSortDispersion() ||
                 this._settings.isNoIntersectionsStrategy()) {
             if(this._settings.isVerticalGrid()) {

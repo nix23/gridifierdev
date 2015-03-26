@@ -92,26 +92,6 @@ var SizesResolver = {
         parentDOMElemParentNode.appendChild(parentDOMElemClone);
         
         var unrenderedComputedCSSSource = this.getComputedCSS(DOMElemClone);
-
-        // @todo -> Determine, if this is still required. Looks like percentage values
-        //          are returned correctly now.(Probably bug was in Safari 5.1.7)
-        // var additionalComputedCSS = {};
-
-        // if(typeof unrenderedComputedCSSSource.getPropertyCSSValue != "undefined") {
-        //     msProfiler.stop();
-        //     msProfiler.start("rest2");
-        //     additionalComputedCSS.paddingLeft = unrenderedComputedCSSSource.getPropertyCSSValue("padding-left").cssText;
-        //     additionalComputedCSS.paddingRight = unrenderedComputedCSSSource.getPropertyCSSValue("padding-right").cssText;
-        //     additionalComputedCSS.marginLeft = unrenderedComputedCSSSource.getPropertyCSSValue("margin-left").cssText;
-        //     additionalComputedCSS.marginRight = unrenderedComputedCSSSource.getPropertyCSSValue("margin-right").cssText;
-        //     additionalComputedCSS.paddingTop = unrenderedComputedCSSSource.getPropertyCSSValue("padding-top").cssText;
-        //     additionalComputedCSS.paddingBottom = unrenderedComputedCSSSource.getPropertyCSSValue("padding-bottom").cssText;
-        //     additionalComputedCSS.marginTop = unrenderedComputedCSSSource.getPropertyCSSValue("margin-top").cssText;
-        //     additionalComputedCSS.marginBottom = unrenderedComputedCSSSource.getPropertyCSSValue("margin-bottom").cssText;
-        //     additionalComputedCSS.width = unrenderedComputedCSSSource.getPropertyCSSValue("width").cssText;
-        //     additionalComputedCSS.height = unrenderedComputedCSSSource.getPropertyCSSValue("height").cssText;
-        // }
-
         var unrenderedComputedCSS = {};
 
         var props = ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom",
@@ -120,9 +100,6 @@ var SizesResolver = {
         for(var i = 0; i < props.length; i++) {
             unrenderedComputedCSS[props[i]] = unrenderedComputedCSSSource[props[i]];
         }
-
-        // for(var key in additionalComputedCSS)
-        //     unrenderedComputedCSS[key] = additionalComputedCSS[key];
         
         parentDOMElemParentNode.removeChild(parentDOMElemClone);
         
@@ -142,7 +119,6 @@ var SizesResolver = {
     },
 
     _ensureComputedCSSHasProperty: function(elementComputedCSS, cssProperty) {
-        //if(!Object.prototype.hasOwnProperty.call(elementComputedCSS, cssProperty)) {
         if(!(cssProperty in elementComputedCSS)) {
             var msg = "";
 
@@ -243,8 +219,7 @@ var SizesResolver = {
             return 0;
 
         var computedProperties = this.getComputedProperties("forPositionLeft", elementComputedCSS, DOMElem);
-        // @todo -> delete Math.round ???(%)
-        return DOMElem.offsetLeft - Math.round(computedProperties.marginLeft);
+        return DOMElem.offsetLeft - computedProperties.marginLeft;
     },
 
     positionTop: function(DOMElem)
@@ -255,8 +230,7 @@ var SizesResolver = {
             return 0;
 
         var computedProperties = this.getComputedProperties("forPositionTop", elementComputedCSS, DOMElem);
-        // @todo -> delete Math.round ????(%)
-        return DOMElem.offsetTop - Math.round(computedProperties.marginTop);
+        return DOMElem.offsetTop - computedProperties.marginTop;
     },
 
     offsetLeft: function(DOMElem)
@@ -357,6 +331,38 @@ var SizesResolver = {
         }
 
         return computedProperties;
+    },
+
+    cloneComputedStyle: function(sourceItem, targetItem) {
+        var camelize = function(text) {
+            return text.replace(/-+(.)?/g, function (match, chr) {
+                return chr ? chr.toUpperCase() : '';
+            });
+        };
+
+        var sourceItemComputedStyle = this.getComputedCSS(sourceItem);
+
+        for(var prop in sourceItemComputedStyle) {
+            if(prop == "cssText")
+                continue;
+
+            var propName = camelize(prop);
+            if(targetItem.style[propName] != sourceItemComputedStyle[propName])
+                targetItem.style[propName] = sourceItemComputedStyle[propName];
+        }
+
+        // Some properties could be overwritten by further rules.
+        // For example in FF/IE borders are overwritten by some from further rules.
+        var propsToReclone = ["borderLeftWidth", "borderRightWidth", "borderTopWidth", "borderBottomWidth",
+            "borderLeftColor", "borderRightColor", "borderTopColor", "borderBottomColor",
+            "borderLeftStyle", "borderRightStyle", "borderTopStyle", "borderBottomStyle",
+            "font", "fontSize", "fontWeight"];
+        for(var i = 0; i < propsToReclone.length; i++) {
+            var propName = propsToReclone[i];
+            if(typeof sourceItemComputedStyle[propName] != "undefined" &&
+                targetItem.style[propName] != sourceItemComputedStyle[propName])
+                targetItem.style[propName] = sourceItemComputedStyle[propName];
+        }
     }
 }
 
@@ -436,13 +442,6 @@ SizesResolver.determinePercentageCSSValuesCalcStrategy = function() {
 // @disablePercentageCSSRecalc -> HTML node can't have size with fractional value,
 //                                so we should supress this calculation in IE8/Safari 5.1.7,etc...
 SizesResolver.outerWidth = function(DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc) {
-    // var deepness = deepness || 0;
-    // var nodeName = DOMElem.getAttribute("class");
-    // if(nodeName == null || nodeName.length == 0)
-    //     var nodeName = DOMElem.getAttribute("id");
-    // console.log(DOMElem.nodeName);
-    //console.log("calculating per = " + nodeName);
-    // msProfiler.start("(" + deepness + ") outerWidth per item "+ nodeName + " = ");
     var includeMargins = includeMargins || false;
     var disablePercentageCSSRecalc = disablePercentageCSSRecalc || false;
     var disableBordersCalc = disableBordersCalc || false;
@@ -473,21 +472,7 @@ SizesResolver.outerWidth = function(DOMElem, includeMargins, disablePercentageCS
     // The HTMLElement.offsetWidth read-only property returns the layout width of an element. Typically, 
     // an element's offsetWidth is a measurement which includes the element borders, the element horizontal padding, 
     // the element vertical scrollbar (if present, if rendered) and the element CSS width.
-    //var outerWidth = DOMElem.offsetWidth; // @todo -> Check all cases, looks like outerWidth here s redundant
     var outerWidth = 0;
-    //if(Dom.css.hasClass(DOMElem, "gridItem")) {
-       // timer.start();
-        //elementComputedCSS.getPropertyCSSValue("width");
-        //elementComputedCSS.getPropertyValue("width");
-        //var elementComputedCSS = elementComputedCSS.
-        // var elementWidth = elementComputedCSS.width;
-        // var time = timer.get();
-        // var message = "time = " + time + " class = " + DOMElem.getAttribute("class") + "<br>";
-        // if(time > 0.100) {
-        //     console.log(message);
-        // }
-    //}
-
     var normalizedComputedWidth = this.normalizeComputedCSSSizeValue(elementComputedCSS.width);
     
     if(normalizedComputedWidth !== false)
@@ -498,8 +483,7 @@ SizesResolver.outerWidth = function(DOMElem, includeMargins, disablePercentageCS
     
     if(recalculatePercentageCSSValues) {
         recalculatedDOMElemComputedCSS = this._getComputedCSSWithMaybePercentageSizes(DOMElem);
-         // msProfiler.stop();
-         // console.log("Recursive call to calc width");
+
         if(DOMElem.parentNode.nodeName == "HTML")
             var disablePercentageCSSRecalcPerHTMLNode = true;
         else
@@ -513,12 +497,7 @@ SizesResolver.outerWidth = function(DOMElem, includeMargins, disablePercentageCS
             && this.hasPercentageCSSValue("width", DOMElem, recalculatedDOMElemComputedCSS)) {
             parentDOMElemWidth -= this.lastRecalculatedDOMElBorderWidth;
         }
-        // console.log("End of recursive call"); msProfiler.start("Ending after recursive call");
     }
-    
-    // console.log("outerWidth: ", outerWidth);
-    // console.log("elementComputedCSS.width: ", elementComputedCSS.width);
-    // console.log("parentDOMElemWidth: ", parentDOMElemWidth);
 
     if(recalculatePercentageCSSValues && 
             (this.hasPercentageCSSValue("paddingLeft", DOMElem, recalculatedDOMElemComputedCSS) || 
@@ -526,7 +505,6 @@ SizesResolver.outerWidth = function(DOMElem, includeMargins, disablePercentageCS
         paddingWidth = this._recalculateTwoSidePropertyWithPercentageValues(
             DOMElem,
             parentDOMElemWidth,
-            //this.lastRecalculatedDOMElRawWidth,
             computedProperties, 
             recalculatedDOMElemComputedCSS, 
             "padding", 
@@ -566,7 +544,6 @@ SizesResolver.outerWidth = function(DOMElem, includeMargins, disablePercentageCS
 
         outerWidth += marginWidth;
     }
-    //msProfiler.stop(); console.log("");
     
     return outerWidth;
 };
@@ -601,7 +578,6 @@ SizesResolver.outerHeight = function(DOMElem, includeMargins, disablePercentageC
     var marginHeight = computedProperties.marginTop + computedProperties.marginBottom;
     var borderHeight = computedProperties.borderTopWidth + computedProperties.borderBottomWidth;
 
-    //var outerHeight = DOMElem.offsetHeight;
     var outerHeight = 0;
     var normalizedComputedHeight = this.normalizeComputedCSSSizeValue(elementComputedCSS.height);
 
@@ -850,16 +826,17 @@ var Prefixer = {
 // DOM abstraction layer
 var Dom = {
     hasDOMElemOwnPropertyFunction: null,
+    _isBrowserSupportingTransitions: null,
 
     init: function() {
         this.createTrimFunction();
         this.createHasDOMElemOwnPropertyFunction();
+        this._determineIfBrowserIsSupportingTransitions();
     },
 
-    // @todo -> Refactor this(Don't overload users JS)
     createTrimFunction: function() {
-        if(typeof String.prototype.trim !== 'function') {
-            String.prototype.trim = function() {
+        if(typeof String.prototype.gridifierTrim !== 'function') {
+            String.prototype.gridifierTrim = function() {
                 return this.replace(/^\s+|\s+$/g, '');
             }
         }
@@ -891,12 +868,27 @@ var Dom = {
         rootElement.removeChild(testerDiv);
     },
 
+    _determineIfBrowserIsSupportingTransitions: function() {
+        var testerEl = document.createElement("div");
+
+        var transitionEndEventNames = {
+            WebkitTransition : 'webkitTransitionEnd',
+            MozTransition      : 'transitionend',
+            OTransition         : 'oTransitionEnd otransitionend',
+            transition            : 'transitionend'
+        };
+
+        this._isBrowserSupportingTransitions = false;
+        for(var eventName in transitionEndEventNames) {
+            if(testerEl.style[eventName] !== undefined)
+                this._isBrowserSupportingTransitions = true;
+        }
+    },
+
     toInt: function(maybeNotInt) {
         return parseInt(maybeNotInt, 10);
     },
 
-    // @todo -> Check if this class sees global jQuery object
-    // from inside of the module definition(Require.js)
     isJqueryObject: function(maybeJqueryObject) {
         if(typeof jQuery == "undefined")
             return false;
@@ -942,21 +934,7 @@ var Dom = {
     },
 
     isBrowserSupportingTransitions: function() {
-        var testerEl = document.createElement("div");
-
-        var transitionEndEventNames = {
-          WebkitTransition : 'webkitTransitionEnd',
-          MozTransition      : 'transitionend',
-          OTransition         : 'oTransitionEnd otransitionend',
-          transition            : 'transitionend'
-        };
-
-        for(var eventName in transitionEndEventNames) {
-            if(testerEl.style[eventName] !== undefined)
-                return true;
-        }
-
-        return false;
+        return this._isBrowserSupportingTransitions;
     },
 
     hasDOMElemOwnProperty: function(DOMElem, propertyToMatch) {
@@ -981,7 +959,7 @@ var Dom = {
 
             for(var i = 0; i < classes.length; i++)
             {
-                classes[i] = classes[i].trim();
+                classes[i] = classes[i].gridifierTrim();
                 if(classes[i] == classToFind)
                     return true;
             }
@@ -1004,7 +982,7 @@ var Dom = {
             var cleanedClass = "";
 
             for(var i = 0; i < classes.length; i++) {
-                if(classes[i].trim() != classToRemove)
+                if(classes[i].gridifierTrim() != classToRemove)
                     cleanedClass += classes[i] + " ";
             }
             cleanedClass = cleanedClass.substring(0, cleanedClass.length - 1);
@@ -1023,8 +1001,6 @@ var Dom = {
         prefixedBackfaceVisibilityProps: ["WebkitBackfaceVisibility", "MozBackfaceVisibility", "backfaceVisibility"],
 
         transition: function(DOMElem, propertyValue) {
-            // for(var i = 0; i < this.prefixedTransitionProps.length; i++)
-            //     DOMElem.style[this.prefixedTransitionProps[i]] = propertyValue;
             DOMElem.style[Prefixer.get("transition", DOMElem)] = propertyValue;
         },
 
@@ -1038,7 +1014,7 @@ var Dom = {
             var newTransition = property;
             var currentTransitionProps = currentTransition.split(",");
             for(var i = 0; i < currentTransitionProps.length; i++) {
-                var currentTransitionProp = currentTransitionProps[i].trim();
+                var currentTransitionProp = currentTransitionProps[i].gridifierTrim();
                 if(currentTransitionProp.length == 0)
                     continue;
                 
@@ -1050,16 +1026,13 @@ var Dom = {
                 }
             }
 
-            DOMElem.style[Prefixer.get("transition", DOMElem)] = newTransition.trim();
+            DOMElem.style[Prefixer.get("transition", DOMElem)] = newTransition.gridifierTrim();
         },
 
         transform: function(DOMElem, propertyValue) {
-            // for(var i = 0; i < this.prefixedTransformProps.length; i++)
-            //     DOMElem.style[this.prefixedTransformProps[i]] = propertyValue;
             DOMElem.style[Prefixer.get("transform", DOMElem)] = propertyValue;
         },
 
-        // @todo -> Process array of values???
         transformProperty: function(DOMElem, property, propertyValue) {
             var currentTransform = DOMElem.style[Prefixer.get('transform', DOMElem)];
             if(currentTransform.length == 0) {
@@ -1071,8 +1044,8 @@ var Dom = {
             var currentTransformProps = currentTransform.split(/\)/);
             var hasCurrentTransformProperty = false;
             for(var i = 0; i < currentTransformProps.length; i++) {
-                var currentTransformProp = currentTransformProps[i].trim();
-                if(currentTransformProp.trim().length == 0)
+                var currentTransformProp = currentTransformProps[i].gridifierTrim();
+                if(currentTransformProp.gridifierTrim().length == 0)
                     continue;
                 
                 if(currentTransformProp.search(property) !== -1) {
@@ -1087,7 +1060,7 @@ var Dom = {
             if(!hasCurrentTransformProperty)
                 newTransform += " " + property + "(" + propertyValue + ")";
 
-            DOMElem.style[Prefixer.get('transform', DOMElem)] = newTransform.trim();
+            DOMElem.style[Prefixer.get('transform', DOMElem)] = newTransform.gridifierTrim();
         },
 
         opacity: function(DOMElem, opacityValue) {
@@ -1175,6 +1148,10 @@ Gridifier = function(grid, settings) {
     this._operationsQueue = null;
     this._toggleOperation = null;
     this._transformOperation = null;
+
+    this._dragifier = null;
+
+    this._resizeEventHandler = null;
 
     this._css = {
     };
@@ -1307,8 +1284,7 @@ Gridifier = function(grid, settings) {
         );
         me._renderer.setSilentRendererInstance(me._silentRenderer);
 
-        // @todo -> Remove from local var
-        var dragifier = new Gridifier.Dragifier(
+        me._dragifier = new Gridifier.Dragifier(
             me, 
             me._appender,
             me._reversedAppender,
@@ -1320,30 +1296,34 @@ Gridifier = function(grid, settings) {
             me._sizesResolverManager
         );
 
-        // @todo -> run first iteration?(Process items that were at start)
         me._bindEvents();
     };
 
     this._bindEvents = function() {
+        var processResizeEventAfterMsDelay = me._settings.getResizeTimeout();
         var processResizeEventTimeout = null;
-        //var processResizeEvent = 100;
-        // @todo get from settings??
-        // @todo -> Make this adjustable or enable by default???(Resize timeouts)
-        Event.add(window, "resize", function() {
-            // if(processResizeEventTimeout != null) {
-            //     clearTimeout(processResizeEventTimeout);
-            //     processResizeEventTimeout = null;
-            // }
-            
-            // @todo -> Make this as optional parameter???
-           //processResizeEventTimeout = setTimeout(function() {
-            me.triggerResize();
-            //}, processResizeEvent);
-        });
+
+        me._resizeEventHandler = function() {
+            if(processResizeEventAfterMsDelay == null) {
+                me.triggerResize();
+                return;
+            }
+
+            if(processResizeEventTimeout != null) {
+                clearTimeout(processResizeEventTimeout);
+                processResizeEventTimeout = null;
+            }
+
+            processResizeEventTimeout = setTimeout(function() {
+                me.triggerResize();
+            }, processResizeEventAfterMsDelay);
+        };
+
+        Event.add(window, "resize", me._resizeEventHandler);
     };
 
     this._unbindEvents = function() {
-        // @todo -> Remove resize handler
+        Event.remove(window, "resize");
     };
 
     this.destruct = function() {
@@ -1393,21 +1373,7 @@ Gridifier.prototype.scheduleGridSizesUpdate = function() {
 }
 
 Gridifier.prototype.triggerResize = function() {
-    this._sizesResolverManager.startCachingTransaction();
     this.retransformAllSizes();
-    this._sizesResolverManager.stopCachingTransaction();
-}
-
-// Write tests soon per everything :}
-// Method names -> gridify, watchify?
-// @todo -> User can write this method???? Why should it be inside lib?
-Gridifier.prototype.watch = function() {
-    // @todo -> Watch per DOM appends-prepends through setTimeout,
-    //  and process changes.
-    // Or don't think about appends-prepends, Just use WATCH_INSERT_TYPE param.(By def append)
-    // We don't need depend on DOM structure of the wrapper.
-    //  Process deletes.
-    // Or custom watch logic -> Depending on some param of new item append or prepend
 }
 
 Gridifier.prototype.toggleBy = function(toggleFunctionName) {
@@ -1438,7 +1404,7 @@ Gridifier.prototype.resort = function() {
 }
 
 Gridifier.prototype.collect = function() {
-    ;
+    return this._collector.collect();
 }
 
 Gridifier.prototype.disconnect = function(items) {
@@ -1463,6 +1429,11 @@ Gridifier.prototype.setCoordsChanger = function(coordsChangerName) {
 
 Gridifier.prototype.setSizesChanger = function(sizesChangerName) {
     this._settings.setSizesChanger(sizesChangerName);
+    return this;
+}
+
+Gridifier.prototype.setDraggableItemDecorator = function(draggableItemDecoratorName) {
+    this._settings.setDraggableItemDecorator(draggableItemDecoratorName);
     return this;
 }
 
@@ -1509,7 +1480,6 @@ Gridifier.prototype.setCoordsChangeAnimationMsDuration = function(animationMsDur
 
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     if(this._settings.isMirroredPrepend()) {
-        // @todo -> should reverse collection
         this.insertBefore(items, null, batchSize, batchTimeout);
         return this;
     }
@@ -1607,6 +1577,14 @@ Gridifier.prototype.transformSizesWithPaddingBottom = function(maybeItem, newWid
     this._transformOperation.execute(maybeItem, newWidth, newPaddingBottom, true);
 }
 
+Gridifier.prototype.bindDragifierEvents = function() {
+    this._dragifier.bindDragifierEvents();
+}
+
+Gridifier.prototype.unbindDragifierEvents = function() {
+    this._dragifier.unbindDragifierEvents();
+}
+
 Gridifier.prototype.addPreInsertLifecycleCallback = function(callback) {
     this._lifecycleCallbacks.addPreInsertCallback(callback);
 }
@@ -1635,17 +1613,28 @@ Gridifier.prototype.getItemClonesManager = function() {
 }
 
 Gridifier.prototype.hasItemBindedClone = function(item) {
+    var items = this._collector.toDOMCollection(item);
+    var item = items[0];
+
     return this._itemClonesManager.hasBindedClone(item);
 }
 
+Gridifier.prototype.isItemClone = function(item) {
+    var items = this._collector.toDOMCollection(item);
+    var item = items[0];
+
+    return this._itemClonesManager.isItemClone(item);
+}
+
 Gridifier.prototype.getItemClone = function(item) {
+    var items = this._collector.toDOMCollection(item);
+    var item = items[0];
+
     if(!this._itemClonesManager.hasBindedClone(item))
         new Error("Gridifier error: item has no binded clone.(Wrong item?). Item = ", item);
 
     return this._itemClonesManager.getBindedClone(item);
 }
-
-// @todo -> Add to items numbers besides GUIDS, and rebuild them on item deletes(Also use in sorting per drag?)
 
 Gridifier.Api = {};
 Gridifier.HorizontalGrid = {};
@@ -1685,6 +1674,9 @@ Gridifier.DEFAULT_ROTATE_BACKFACE = true;
 
 Gridifier.GRID_TRANSFORM_TYPES = {EXPAND: "expand", FIT: "fit"};
 Gridifier.DEFAULT_GRID_TRANSFORM_TIMEOUT = 100;
+
+Gridifier.RETRANSFORM_QUEUE_DEFAULT_BATCH_SIZE = 12;
+Gridifier.RETRANSFORM_QUEUE_DEFAULT_BATCH_TIMEOUT = 25;
 
 Gridifier.Api.CoordsChanger = function(settings, gridifier, eventEmitter) {
     var me = this;
@@ -1761,14 +1753,15 @@ Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
         var isItemInitializationCall = isItemInitializationCall || false;
         if(isItemInitializationCall) {
             // Custom init logic per coordsChanger sync can be placed here
+            // (We are no passing this flag from CSS3 coordsChanger fallback methods,
+            //  because no special initialization is required here)
             return;
         }
 
-        //Dom.css3.transitionProperty(item, "left 0ms ease, top 0ms ease"); If !ie8(isSupporting)
-        Dom.css.set(item, {
-            left: newLeft,
-            top: newTop
-        });
+        if(newLeft != item.style.left)
+            Dom.css.set(item, {left: newLeft});
+        if(newTop != item.style.top)
+            Dom.css.set(item, {top: newTop});
 
         if(emitTransformEvent) {
             eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
@@ -1777,6 +1770,8 @@ Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
 }
 
 Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function() {
+    var me = this;
+
     this._coordsChangerFunctions.CSS3Position = function(item,
                                                          newLeft,
                                                          newTop,
@@ -1786,7 +1781,12 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
                                                          newWidth,
                                                          newHeight,
                                                          isItemInitializationCall) {
-        // @todo -> If not supporting -> def
+        if(!Dom.isBrowserSupportingTransitions()) {
+            me._coordsChangerFunctions["default"](
+                item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+            );
+            return;
+        }
 
         var isItemInitializationCall = isItemInitializationCall || false;
         if(isItemInitializationCall) {
@@ -1794,19 +1794,15 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
             return;
         }
 
-        Dom.css3.transitionProperty(
-            item, 
-            Prefixer.getForCSS('left', item) + " " + animationMsDuration + "ms ease"
-        );
-        Dom.css3.transitionProperty(
-            item,
-            Prefixer.getForCSS('top', item) + " " + animationMsDuration + "ms ease"
-        );
+        if(newLeft != item.style.left) {
+            Dom.css3.transitionProperty(item, "left " + animationMsDuration + "ms ease");
+            Dom.css.set(item, {left: newLeft});
+        }
 
-        Dom.css.set(item, {
-            left: parseFloat(newLeft) + "px",
-            top: parseFloat(newTop) + "px"
-        });
+        if(newTop != item.style.top) {
+            Dom.css3.transitionProperty(item, "top " + animationMsDuration + "ms ease");
+            Dom.css.set(item, {top: newTop});
+        }
 
         if(emitTransformEvent) {
             setTimeout(function() {
@@ -1817,6 +1813,8 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
 }
 
 Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function() {
+    var me = this;
+
     this._coordsChangerFunctions.CSS3Translate = function(item, 
                                                           newLeft, 
                                                           newTop,
@@ -1826,7 +1824,12 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function(
                                                           newWidth,
                                                           newHeight,
                                                           isItemInitializationCall) {
-        // @todo -> if !supporting transitions -> default
+        if(!Dom.isBrowserSupportingTransitions()) {
+            me._coordsChangerFunctions["default"](
+                item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+            );
+            return;
+        }
 
         var isItemInitializationCall = isItemInitializationCall || false;
         if(isItemInitializationCall) {
@@ -1853,13 +1856,31 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function(
             var translateY = (currentTop - newTop) * -1;
         else
             var translateY = 0;
-        
-        Dom.css3.transitionProperty(
-            item, 
-            Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
-        );
-        
-        Dom.css3.transformProperty(item, "translate", translateX + "px," + translateY + "px");
+
+        var translateRegexp = /.*translate\((.*)\).*/;
+        var matches = translateRegexp.exec(item.style[Prefixer.get("transform")]);
+        if(matches == null || typeof matches[1] == "undefined" || matches[1] == null) {
+            var setNewTranslate = true;
+        }
+        else {
+            var translateParts = matches[1].split(",");
+            var lastTranslateX = translateParts[0].gridifierTrim();
+            var lastTranslateY = translateParts[1].gridifierTrim();
+
+            if(lastTranslateX == (translateX + "px") && lastTranslateY == (translateY + "px"))
+                var setNewTranslate = false;
+            else
+                var setNewTranslate = true;
+        }
+
+        if(setNewTranslate) {
+            Dom.css3.transitionProperty(
+                item,
+                Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+            );
+
+            Dom.css3.transformProperty(item, "translate", translateX + "px," + translateY + "px");
+        }
 
         if(emitTransformEvent) {
             setTimeout(function() {
@@ -1870,6 +1891,8 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function(
 }
 
 Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = function() {
+    var me = this;
+
     this._coordsChangerFunctions.CSS3Translate3D = function(item, 
                                                             newLeft, 
                                                             newTop,
@@ -1879,7 +1902,12 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
                                                             newWidth,
                                                             newHeight,
                                                             isItemInitializationCall) {
-        // @todo -> if !supporting transitions -> default
+        if(!Dom.isBrowserSupportingTransitions()) {
+            me._coordsChangerFunctions["default"](
+                item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+            );
+            return;
+        }
 
         var isItemInitializationCall = isItemInitializationCall || false;
         if(isItemInitializationCall) {
@@ -1907,14 +1935,32 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
         else
             var translateY = 0;
 
-        Dom.css3.transitionProperty(
-            item,
-            Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
-        );
+        var translateRegexp = /.*translate3d\((.*)\).*/;
+        var matches = translateRegexp.exec(item.style[Prefixer.get("transform")]);
+        if(matches == null || typeof matches[1] == "undefined" || matches[1] == null) {
+            var setNewTranslate = true;
+        }
+        else {
+            var translateParts = matches[1].split(",");
+            var lastTranslateX = translateParts[0].gridifierTrim();
+            var lastTranslateY = translateParts[1].gridifierTrim();
 
-        Dom.css3.perspective(item, "1000");
-        Dom.css3.backfaceVisibility(item, "hidden");
-        Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px,0px");
+            if(lastTranslateX == (translateX + "px") && lastTranslateY == (translateY + "px"))
+                var setNewTranslate = false;
+            else
+                var setNewTranslate = true;
+        }
+
+        if(setNewTranslate) {
+            Dom.css3.transitionProperty(
+                item,
+                Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+            );
+
+            Dom.css3.perspective(item, "1000");
+            Dom.css3.backfaceVisibility(item, "hidden");
+            Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px,0px");
+        }
 
         if (emitTransformEvent) {
             setTimeout(function () {
@@ -1957,7 +2003,12 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
                                                                   newWidth,
                                                                   newHeight,
                                                                   isItemInitializationCall) {
-        // @todo -> if !supporting transitions -> default
+        if(!Dom.isBrowserSupportingTransitions()) {
+            me._coordsChangerFunctions["default"](
+                item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+            );
+            return;
+        }
 
         // We should preinit item transform property with scale3d(1,1,1) rule.
         // Otherwise animation will break on scale3d applying any later time.
@@ -1974,7 +2025,7 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
             return;
         }
 
-        if(item.hasAttribute(Gridifier.Dragifier.IS_DRAGGABLE_ITEM_DATA_ATTR))
+        if(Dom.hasAttribute(item, Gridifier.Dragifier.IS_DRAGGABLE_ITEM_DATA_ATTR))
             var isDraggableItem = true;
         else
             var isDraggableItem = false;
@@ -1989,41 +2040,186 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
         }
 
         var cc = Gridifier.Api.CoordsChanger;
-        if(!isDraggableItem && !Dom.hasAttribute(itemClone, cc.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR))
-            itemClone.style.visibility = "visible";
+        if(!isDraggableItem && !Dom.hasAttribute(itemClone, cc.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR)) {
+            if(itemClone.style.visibility != "visible")
+                itemClone.style.visibility = "visible";
+        }
 
-        if(Dom.hasAttribute(item, itemShownDataAttr))
-            item.style.visibility = "hidden";
+        if(Dom.hasAttribute(item, itemShownDataAttr)) {
+            if(item.style.visibility != "hidden")
+                item.style.visibility = "hidden";
+        }
 
         if(emitTransformEvent) {
             var sizesChanger = me._settings.getSizesChanger();
             sizesChanger(itemClone, newWidth, newHeight);
 
-            setTimeout(function() {
+            setTimeout(function () {
                 eventEmitter.emitTransformEvent(itemClone, newWidth, newHeight, newLeft, newTop);
             }, animationMsDuration + 20);
         }
 
-        Dom.css.set(item, {
-            left: newLeft,
-            top: newTop
-        });
+        if(newLeft != item.style.left)
+            Dom.css.set(item, {left: newLeft});
+
+        if(newTop != item.style.top)
+            Dom.css.set(item, {top: newTop});
 
         me._coordsChangerFunctions.CSS3Translate3D(
             itemClone, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
         );
 
         if(clonesHideTimeouts[guid] != null) {
-           clearTimeout(clonesHideTimeouts[guid]);
-           clonesHideTimeouts[guid] = null;
+            clearTimeout(clonesHideTimeouts[guid]);
+            clonesHideTimeouts[guid] = null;
         }
 
-        clonesHideTimeouts[guid] = setTimeout(function() {
-            if (Dom.hasAttribute(item, itemShownDataAttr) && !isDraggableItem) {
-                item.style.visibility = "visible";
-                itemClone.style.visibility = "hidden";
+        clonesHideTimeouts[guid] = setTimeout(function () {
+            if(Dom.hasAttribute(item, itemShownDataAttr) && !isDraggableItem) {
+                if(item.style.visibility != "visible")
+                    item.style.visibility = "visible";
+
+                if(itemClone.style.visibility != "hidden")
+                    itemClone.style.visibility = "hidden";
             }
         }, animationMsDuration);
+    };
+}
+
+Gridifier.Api.Dragifier = function() {
+    var me = this;
+
+    this._draggableItemDecoratorFunction = null;
+    this._draggableItemDecoratorFunctions = {};
+
+    this._dragifierUserSelectToggler = null;
+
+    this._css = {
+    };
+
+    this._construct = function() {
+        me._bindEvents();
+
+        me._addCloneCSSDecoratorFunction();
+    };
+
+    this._bindEvents = function() {
+    };
+
+    this._unbindEvents = function() {
+    };
+
+    this.destruct = function() {
+        me._unbindEvents();
+    };
+
+    this._construct();
+    return this;
+}
+
+Gridifier.Api.Dragifier.prototype.setDraggableItemDecoratorFunction = function(draggableItemDecoratorFunctionName) {
+    if(!this._draggableItemDecoratorFunctions.hasOwnProperty(draggableItemDecoratorFunctionName)) {
+        new Gridifier.Error(
+            Gridifier.Error.ERROR_TYPES.SETTINGS.SET_DRAGGABLE_ITEM_DECORATOR_INVALID_PARAM,
+            draggableItemDecoratorFunctionName
+        );
+        return;
+    }
+
+    this._draggableItemDecoratorFunction = this._draggableItemDecoratorFunctions[draggableItemDecoratorFunctionName];
+}
+
+Gridifier.Api.Dragifier.prototype.addDraggableItemDecoratorFunction = function(draggableItemDecoratorFunctionName,
+                                                                               draggableItemDecoratorFunction) {
+    this._draggableItemDecoratorFunctions[draggableItemDecoratorFunctionName] = draggableItemDecoratorFunction;
+}
+
+Gridifier.Api.Dragifier.prototype.getDraggableItemDecoratorFunction = function() {
+    return this._draggableItemDecoratorFunction;
+}
+
+Gridifier.Api.Dragifier.prototype.getDraggableItemCoordsChanger = function() {
+    return function(item, newLeft, newTop) {
+        if(!Dom.isBrowserSupportingTransitions()) {
+            Dom.css.set(item, {
+                left: newLeft,
+                top: newTop
+            });
+            return;
+        }
+
+        var newLeft = parseFloat(newLeft);
+        var newTop = parseFloat(newTop);
+
+        var currentLeft = parseFloat(item.style.left);
+        var currentTop = parseFloat(item.style.top);
+
+        if(newLeft > currentLeft)
+            var translateX = newLeft - currentLeft;
+        else if(newLeft < currentLeft)
+            var translateX = (currentLeft - newLeft) * -1;
+        else
+            var translateX = 0;
+
+        if(newTop > currentTop)
+            var translateY = newTop - currentTop;
+        else if(newTop < currentTop)
+            var translateY = (currentTop - newTop) * -1;
+        else
+            var translateY = 0;
+
+        Dom.css3.transitionProperty(item, "none");
+        Dom.css3.perspective(item, "1000");
+        Dom.css3.backfaceVisibility(item, "hidden");
+        Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px, 0px");
+    };
+}
+
+Gridifier.Api.Dragifier.prototype.getDraggableItemPointerDecorator = function() {
+    return function(draggableItemPointer) {
+        Dom.css.addClass(draggableItemPointer, "gridifier-draggable-item-pointer");
+        draggableItemPointer.style.backgroundColor = "red";
+    };
+}
+
+Gridifier.Api.Dragifier.prototype.getDragifierUserSelectToggler = function() {
+    if(this._dragifierUserSelectToggler != null)
+        return this._dragifierUserSelectToggler;
+
+    this._dragifierUserSelectToggler = {
+        _setToNoneOriginalSelectProps: {},
+
+        _hasSelectProp: function(propName) {
+            return (typeof document.body.style[propName] != "undefined");
+        },
+
+        _selectProps: ["webkitTouchCallout", "webkitUserSelect", "khtmlUserSelect",
+                       "mozUserSelect", "msUserSelect", "userSelect"],
+
+        'disableSelect': function() {
+            for(var i = 0; i < this._selectProps.length; i++) {
+                if(this._hasSelectProp(this._selectProps[i])) {
+                    this._setToNoneOriginalSelectProps[this._selectProps[i]] = document.body.style[this._selectProps[i]];
+                    document.body.style[this._selectProps[i]] = "none";
+                }
+            }
+        },
+
+        'enableSelect': function() {
+            for(var selectPropToRestore in this._setToNoneOriginalSelectProps) {
+                document.body.style[selectPropToRestore] = this._setToNoneOriginalSelectProps[selectPropToRestore];
+            }
+
+            this._setToNoneOriginalSelectProps = {};
+        }
+    };
+
+    return this._dragifierUserSelectToggler;
+}
+
+Gridifier.Api.Dragifier.prototype._addCloneCSSDecoratorFunction = function() {
+    this._draggableItemDecoratorFunctions['cloneCSS'] = function(draggableItemClone, draggableItem, sizesResolverManager) {
+        sizesResolverManager.copyComputedStyle(draggableItem, draggableItemClone);
     };
 }
 
@@ -2156,27 +2352,27 @@ Gridifier.Api.Rotate.prototype._getRotateFunction = function(rotateFunctionType)
     throw new Error("Gridifier error: wrong rotate function type = " + rotateFunctionType);
 }
 
-Gridifier.Api.Rotate.prototype.show3d = function(item, grid, rotateMatrixType, timeouter) {
+Gridifier.Api.Rotate.prototype.show3d = function(item, grid, rotateMatrixType, timeouter, left, top) {
     var rotateProp = "rotate3d";
-    this._rotate(item, grid, rotateProp, false, timeouter, this._getRotateMatrix(rotateMatrixType));
+    this._rotate(item, grid, rotateProp, false, timeouter, this._getRotateMatrix(rotateMatrixType), left, top);
 }
 
-Gridifier.Api.Rotate.prototype.hide3d = function(item, grid, rotateMatrixType, timeouter) {
+Gridifier.Api.Rotate.prototype.hide3d = function(item, grid, rotateMatrixType, timeouter, left, top) {
     var rotateProp = "rotate3d";
-    this._rotate(item, grid, rotateProp, true, timeouter, this._getRotateMatrix(rotateMatrixType));
+    this._rotate(item, grid, rotateProp, true, timeouter, this._getRotateMatrix(rotateMatrixType), left, top);
 }
 
-Gridifier.Api.Rotate.prototype.show = function(item, grid, rotateFunctionType, timeouter) {
+Gridifier.Api.Rotate.prototype.show = function(item, grid, rotateFunctionType, timeouter, left, top) {
     var rotateProp = this._getRotateFunction(rotateFunctionType);
-    this._rotate(item, grid, rotateProp, false, timeouter, "");
+    this._rotate(item, grid, rotateProp, false, timeouter, "", left, top);
 }
 
-Gridifier.Api.Rotate.prototype.hide = function(item, grid, rotateFunctionType, timeouter) {
+Gridifier.Api.Rotate.prototype.hide = function(item, grid, rotateFunctionType, timeouter, left, top) {
     var rotateProp = this._getRotateFunction(rotateFunctionType);
-    this._rotate(item, grid, rotateProp, true, timeouter, "");
+    this._rotate(item, grid, rotateProp, true, timeouter, "", left, top);
 }
 
-Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle, timeouter, rotateMatrix) {
+Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle, timeouter, rotateMatrix, left, top) {
     if(!inverseToggle) {
         var isShowing = true;
         var isHiding = false;
@@ -2186,7 +2382,7 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
         var isHiding = true;
     }
 
-    var scene = this._createScene(item, grid);
+    var scene = this._createScene(item, grid, left, top);
     var frames = this._createFrames(scene);
     var itemClone = this._createItemClone(item);
 
@@ -2250,15 +2446,14 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
     //timeouter.add(item, completeRotateTimeout);
 }
 
-Gridifier.Api.Rotate.prototype._createScene = function(item, grid) {
+Gridifier.Api.Rotate.prototype._createScene = function(item, grid, left, top) {
     var scene = document.createElement("div");
     Dom.css.set(scene, {
-        width: this._sizesResolverManager.outerWidth(item, true) + "px",
-        height: this._sizesResolverManager.outerHeight(item, true) + "px",
+        width: this._sizesResolverManager.outerWidth(item) + "px",
+        height: this._sizesResolverManager.outerHeight(item) + "px",
         position: "absolute",
-        // @todo -> Pass here original left and top values????
-        top: this._sizesResolverManager.positionTop(item) + "px",
-        left: this._sizesResolverManager.positionLeft(item) + "px"
+        left: left,
+        top: top
     });
     Dom.css3.perspective(scene, this._settings.getRotatePerspective()); 
     grid.appendChild(scene);
@@ -2285,8 +2480,8 @@ Gridifier.Api.Rotate.prototype._createItemClone = function(item) {
         left: "0px",
         top: "0px",
         visibility: "visible",
-        width: this._sizesResolverManager.outerWidth(item, true) + "px",
-        height: this._sizesResolverManager.outerHeight(item, true) + "px"
+        width: this._sizesResolverManager.outerWidth(item) + "px",
+        height: this._sizesResolverManager.outerHeight(item) + "px"
     });
 
     return itemClone;
@@ -2387,7 +2582,11 @@ Gridifier.Api.SizesChanger.prototype.getSizesChangerFunction = function() {
 
 Gridifier.Api.SizesChanger.prototype._addDefaultSizesChanger = function() {
     this._sizesChangerFunctions["default"] = function(item, newWidth, newHeight) {
-        Dom.css3.transitionProperty(item, "width 0ms ease, height 0ms ease");
+        if(Dom.isBrowserSupportingTransitions()) {
+            Dom.css3.transitionProperty(item, "width 0ms ease");
+            Dom.css3.transitionProperty(item, "height 0ms ease");
+        }
+
         Dom.css.set(item, {
             width: newWidth,
             height: newHeight
@@ -2397,7 +2596,11 @@ Gridifier.Api.SizesChanger.prototype._addDefaultSizesChanger = function() {
 
 Gridifier.Api.SizesChanger.prototype._addDefaultPaddingBottomSizesChanger = function() {
     this._sizesChangerFunctions["defaultPaddingBottom"] = function(item, newWidth, newPaddingBottom) {
-        Dom.css3.transitionProperty(item, "width 0ms ease, padding-bottom 0ms ease");
+        if(Dom.isBrowserSupportingTransitions()) {
+            Dom.css3.transitionProperty(item, "width 0ms ease");
+            Dom.css3.transitionProperty(item, "padding-bottom 0ms ease");
+        }
+
         Dom.css.set(item, {
             width: newWidth,
             paddingBottom: newPaddingBottom
@@ -2407,10 +2610,11 @@ Gridifier.Api.SizesChanger.prototype._addDefaultPaddingBottomSizesChanger = func
 
 Gridifier.Api.SizesChanger.prototype._addSimultaneousCSS3TransitionSizesChanger = function() {
     this._sizesChangerFunctions.simultaneousCSS3Transition = function(item, newWidth, newHeight) {
-        // @todo -> correctly parse params
-        //var transition = item.style.transition;
+        if(Dom.isBrowserSupportingTransitions()) {
+            Dom.css3.transitionProperty(item, "width 500ms ease");
+            Dom.css3.transitionProperty(item, "height 500ms ease");
+        }
 
-        //Dom.css3.transition(item, "width 300ms ease, height 300ms ease");
         Dom.css.set(item, {
             width: newWidth,
             height: newHeight
@@ -2479,7 +2683,7 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
     }
 
     // Setting translated position after 0ms call requires a little delay
-    // per browsers repaint
+    // per browsers repaint(Also it should be enough to propogate NIS item align(20ms))
     var slideOutTimeout = setTimeout(function() {
         if(!me._gridifier.hasItemBindedClone(item))
             item.style.visibility = "visible";
@@ -2492,14 +2696,23 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
             eventEmitter,
             false
         );
-    }, 0);
+    }, 20);
     timeouter.add(item, slideOutTimeout);
 
     var completeSlideOutTimeout = setTimeout(function() {
-        item.style.visibility = "visible";
         item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
         eventEmitter.emitShowEvent(item);
-    }, animationMsDuration + 20);
+
+        if(me._gridifier.hasItemBindedClone(item)) {
+            coordsChanger(
+                item,
+                item.style.left,
+                item.style.top,
+                0,
+                eventEmitter
+            );
+        }
+    }, animationMsDuration + 40);
     timeouter.add(item, completeSlideOutTimeout);
 }
 
@@ -2523,6 +2736,18 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
         eventEmitter,
         false
     );
+
+    // Hidding item and possibly clone a little before animation def finish(Blink fix)
+    var me = this;
+    var prehideTimeout = setTimeout(function() {
+        item.style.visibility = "hidden";
+
+        if(me._gridifier.hasItemBindedClone(item)) {
+            var itemClone = me._gridifier.getItemClone(item);
+            itemClone.style.visibility = "hidden";
+        }
+    }, animationMsDuration);
+    timeouter.add(item, prehideTimeout);
 
     var slideInTimeout = setTimeout(function() {
         item.style.visibility = "hidden";
@@ -2581,8 +2806,8 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 eventEmitter,
                 coordsChanger,
                 collector,
-                getLeftPos(item, grid),
-                top,
+                getLeftPos(item, grid) + "px",
+                top + "px",
                 connectionLeft,
                 connectionTop
             );
@@ -2620,8 +2845,8 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 eventEmitter,
                 coordsChanger,
                 collector,
-                getLeftPos(item, grid),
-                top,
+                getLeftPos(item, grid) + "px",
+                top + "px",
                 connectionLeft,
                 connectionTop
             );
@@ -2678,8 +2903,8 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
                 eventEmitter,
                 coordsChanger,
                 collector,
-                left,
-                getTopPos(item, grid),
+                left + "px",
+                getTopPos(item, grid) + "px",
                 connectionLeft,
                 connectionTop
             );
@@ -2717,8 +2942,8 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
                 eventEmitter,
                 coordsChanger,
                 collector,
-                left,
-                getTopPos(item, grid),
+                left + "px",
+                getTopPos(item, grid) + "px",
                 connectionLeft,
                 connectionTop
             );
@@ -2827,7 +3052,6 @@ Gridifier.Api.Toggle = function(settings, gridifier, eventEmitter, sizesResolver
         me._addScale();
         me._addFade();
         me._addVisibility();
-        me._addVoid();
     };
 
     this._bindEvents = function() {
@@ -2897,7 +3121,16 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
     var me = this;
 
     this._toggleFunctions[rotatorName] = {
-        "show": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
+        "show": function(item,
+                         grid,
+                         animationMsDuration,
+                         timeouter,
+                         eventEmitter,
+                         sizesResolverManager,
+                         coordsChanger,
+                         collector,
+                         left,
+                         top) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
@@ -2908,15 +3141,24 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
-                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter);
-                me._rotateApi[showRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter);
+                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top);
+                me._rotateApi[showRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter, left, top);
             }
             else {
-                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter);
+                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top);
             }
         },
 
-        "hide": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
+        "hide": function(item,
+                         grid,
+                         animationMsDuration,
+                         timeouter,
+                         eventEmitter,
+                         sizesResolverManager,
+                         coordsChanger,
+                         collector,
+                         left,
+                         top) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "hidden";
@@ -2927,11 +3169,11 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
-                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter);
-                me._rotateApi[hideRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter);
+                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top);
+                me._rotateApi[hideRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter, left, top);
             }
             else {
-                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter);
+                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top);
             }
         }
     };
@@ -2965,12 +3207,13 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
 
             var executeScaleShow = function(item) {
                 if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
+                    Dom.css3.transition(item, "none");
                     Dom.css3.transformProperty(item, "scale3d", "0,0,0");
                     item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
                 }
 
                 var setItemPrescaleVisibility = function(item) {
-                    item.style.visibility = "visible"
+                    item.style.visibility = "visible";
                 }
 
                 // Ie11 blinking fix(:))
@@ -3162,20 +3405,6 @@ Gridifier.Api.Toggle.prototype._addVisibility = function() {
             timeouter.flush(item);
             item.style.visibility = "hidden";
             eventEmitter.emitHideEvent(item);
-        }
-    };
-}
-
-Gridifier.Api.Toggle.prototype._addVoid = function() {
-    var me = this;
-
-    this._toggleFunctions.void = {
-        "show": function(item) {
-            me._eventEmitter.emitShowEvent(item); // @pass event emitter to call
-        },
-
-        "hide": function(item) {
-            me._eventEmitter.emitHideEvent(item); // @pass event emitter to call
         }
     };
 }
@@ -3404,8 +3633,6 @@ Gridifier.Connections.prototype.createItemConnection = function(item, itemConnec
     connection.item = item;
     connection.itemGUID = Dom.toInt(this._guid.getItemGUID(item));
 
-    // @todo -> Move to consts???
-    // Used with noIntersections strategy
     if(!connection.hasOwnProperty("horizontalOffset"))
         connection.horizontalOffset = 0;
     if(!connection.hasOwnProperty("verticalOffset"))
@@ -3565,13 +3792,8 @@ Gridifier.ConnectionsIntersector.prototype.isIntersectingAnyConnection = functio
     for(var i = 0; i < maybeIntersectableConnections.length; i++) {
         var maybeIntersectableConnection = maybeIntersectableConnections[i];
 
-        // @todo -> Move this to rounding normalizer
         var isAbove = (itemCoords.y1 < maybeIntersectableConnection.y1 && itemCoords.y2 < maybeIntersectableConnection.y1);
         var isBelow = (itemCoords.y1 > maybeIntersectableConnection.y2 && itemCoords.y2 > maybeIntersectableConnection.y2);
-        // @todo -> Looks like this is not longer required. This was required because of Math.floor, which were used in SizesResolver
-        //          class.
-        //var isBefore = (itemCoords.x1 < maybeIntersectableConnection.x1 + 1 && itemCoords.x2 < maybeIntersectableConnection.x1 + 1);
-        //var isBehind = (itemCoords.x1 > maybeIntersectableConnection.x2 - 1 && itemCoords.x2 > maybeIntersectableConnection.x2 - 1);
         var isBefore = (itemCoords.x1 < maybeIntersectableConnection.x1 && itemCoords.x2 < maybeIntersectableConnection.x1);
         var isBehind = (itemCoords.x1 > maybeIntersectableConnection.x2 && itemCoords.x2 > maybeIntersectableConnection.x2);
 
@@ -3688,6 +3910,10 @@ Gridifier.Connectors.isTopRightSideConnector = function(connector) {
     return connector.side == Gridifier.Connectors.SIDES.TOP.RIGHT;
 }
 
+Gridifier.Connectors.isInitialConnector = function(connector) {
+    return connector.itemGUID == Gridifier.Connectors.INITIAL_CONNECTOR_ITEM_GUID;
+}
+
 Gridifier.Connectors.prototype._addConnector = function(type, side, x, y, itemGUID) {
     if(typeof itemGUID == "undefined")
         var itemGUID = Gridifier.Connectors.INITIAL_CONNECTOR_ITEM_GUID;
@@ -3791,18 +4017,6 @@ Gridifier.ConnectorsIntersector.prototype.getMostLeftFromIntersectedRightItems =
     var connections = this._connections.get();
     var mostLeftConnection = null;
 
-    // for(var i = 0; i < connections.length; i++) {
-    //     if(connector.y >= connections[i].y1 && connector.y <= connections[i].y2 
-    //         && connector.x < connections[i].x1) {
-    //         if(mostLeftConnection == null)
-    //             mostLeftConnection = connections[i];
-    //         else {
-    //             if(connections[i].x1 < mostLeftConnection.x1)
-    //                 mostLeftConnection = connections[i];
-    //         }
-    //     }
-    // }
-
     var connectionFinder = function(connection) {
         if(connector.y >= connection.y1 && connector.y <= connection.y2 
             && connector.x < connection.x1) {
@@ -3858,18 +4072,6 @@ Gridifier.ConnectorsIntersector.prototype.getMostBottomFromIntersectedTopOrTopLe
         }
     }
 
-    // for(var i = 0; i < connections.length; i++) {
-    //     if(((connector.x >= connections[i].x1 && connector.x <= connections[i].x2) || (connector.x > connections[i].x2))
-    //         && connector.y > connections[i].y2) {
-    //         if(mostBottomConnection == null)
-    //             mostBottomConnection = connections[i];
-    //         else {
-    //             if(connections[i].y2 > mostBottomConnection.y2)
-    //                 mostBottomConnection = connections[i];
-    //         }
-    //     }
-    // }
-
     return mostBottomConnection;
 }
 
@@ -3902,18 +4104,6 @@ Gridifier.ConnectorsIntersector.prototype.getMostBottomFromIntersectedTopOrTopRi
 Gridifier.ConnectorsIntersector.prototype.getMostRightFromIntersectedLeftItems = function(connector) {
     var connections = this._connections.get();
     var mostRightConnection = null;
-
-    // for(var i = 0; i < connections.length; i++) {
-    //     if(connector.y >= connections[i].y1 && connector.y <= connections[i].y2 
-    //        && connector.x > connections[i].x2) {
-    //         if(mostRightConnection == null)
-    //             mostRightConnection = connections[i];
-    //         else {
-    //             if(connections[i].x > mostRightConnection.x2)
-    //                 mostRightConnection = connections[i];
-    //         }
-    //     }
-    // }
 
     var connectionFinder = function(connection) {
         if(connector.y >= connection.y1 && connector.y <= connection.y2
@@ -3948,18 +4138,6 @@ Gridifier.ConnectorsIntersector.prototype.getMostRightFromIntersectedLeftItems =
 Gridifier.ConnectorsIntersector.prototype.getMostTopFromIntersectedBottomOrBottomRightItems = function(connector) {
     var connections = this._connections.get();
     var mostTopConnection = null;
-
-    // for(var i = 0; i < connections.length; i++) {
-    //     if(((connector.x >= connections[i].x1 && connector.x <= connections[i].x2) || (connector.x < connections[i].x1))
-    //         && connector.y < connections[i].y1) {
-    //         if(mostTopConnection == null)
-    //             mostTopConnection = connections[i];
-    //         else {
-    //             if(connections[i].y1 < mostTopConnection.y1)
-    //                 mostTopConnection = connections[i];
-    //         }
-    //     }
-    // }
 
     if(this._settings.isVerticalGrid())
         var intersectedConnectionIndexes = this._connections.getAllHorizontallyIntersectedAndLowerConnections(connector);
@@ -4114,8 +4292,6 @@ Gridifier.ConnectorsShifter.prototype.shiftAllConnectors = function() {
     }
 }
 
-// @todo -> Refactor, remove isIntersecting functions, and keep just getters, check result == null?
-// It's important, because this will boost performance!
 Gridifier.ConnectorsShifter.prototype._shiftLeftTopConnector = function(connector) {
     var mostBottomConnection = this._ci.getMostBottomFromIntersectedTopOrTopLeftItems(connector);
 
@@ -4310,7 +4486,6 @@ Gridifier.TransformerConnectors.prototype.recreateConnectorsPerFirstItemReappend
     }
 }
 
-// @todo -> Change to use firstConnectionToReappend
 Gridifier.TransformerConnectors.prototype._recreateConnectorsPerReversedItemReappend = function(firstItemToReappend,
                                                                                                 firstConnectionToReappend) {
     this._connections.reinitRanges();
@@ -4518,9 +4693,6 @@ Gridifier.Collector.prototype.ensureAllItemsCanBeAttachedToGrid = function(items
     }
 }
 
-// @todo -> pass as parameter append or prepend to collect method
-//               declare as constants
-
 Gridifier.Collector.prototype.collect = function() {
     var items = this._collectorFunction(this._grid);
     return items;
@@ -4618,9 +4790,6 @@ Gridifier.Collector.prototype.sortCollection = function(items) {
     }
 
     return items;
-    // @todo -> check if reverse of the itams is required
-    // if(this.gridifier.isAppending())
-    //      return items.reverse()
 }
 
 Gridifier.Collector.prototype.filterNotRestrictedToCollectItems = function(items) {
@@ -4731,7 +4900,6 @@ Gridifier.Disconnector = function(gridifier,
     return this;
 }
 
-// @todo -> Check if sort and GUIDS swap is required
 Gridifier.Disconnector.prototype.disconnect = function(items) {
     var items = this._collector.toDOMCollection(items);
     this._collector.ensureAllItemsAreConnectedToGrid(items);
@@ -4836,11 +5004,6 @@ Gridifier.EventEmitter.prototype.onGridSizesChange = function(callbackFn) {
 Gridifier.EventEmitter.prototype.onConnectionCreate = function(callbackFn) {
     this._connectionCreateCallbacks.push(callbackFn);
 }
-
-// @todo -> Add off events
-// @todo -> Add once events
-// @todo -> Think about event types 
-//          (Otsilatj eventi -> onDelete, onResize, onAdd, onReady. Event proxy? (backbone, window).)
 
 Gridifier.EventEmitter.prototype.emitShowEvent = function(item) {
     for(var i = 0; i < this._showCallbacks.length; i++) {
@@ -4997,6 +5160,7 @@ Gridifier.GUID = function() {
 
     this._maxItemGUID = 9999;
     this._minItemGUID = 10000;
+    this._firstPrependedItemGUID = null;
 
     this._css = {
     };
@@ -5058,6 +5222,24 @@ Gridifier.GUID.prototype.markNextPrependedItem = function(item) {
     item.setAttribute(Gridifier.GUID.GUID_DATA_ATTR, this._minItemGUID);
 
     return this._minItemGUID;
+}
+
+Gridifier.GUID.prototype.markAsPrependedItem = function(item) {
+    if(this._firstPrependedItemGUID != null)
+        return;
+
+    this._firstPrependedItemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
+}
+
+Gridifier.GUID.prototype.unmarkAllPrependedItems = function() {
+    this._firstPrependedItemGUID = null;
+}
+
+Gridifier.GUID.prototype.wasItemPrepended = function(itemGUID) {
+    if(this._firstPrependedItemGUID == null)
+        return false;
+
+    return Dom.toInt(itemGUID) <= this._firstPrependedItemGUID;
 }
 
 Gridifier.ItemClonesManager = function(grid, collector) {
@@ -5143,7 +5325,8 @@ Gridifier.ItemClonesManager.prototype.getBindedClone = function(item) {
    for(var i = 0; i < this._itemClones.length; i++) {
       if(this._itemClones[i].getAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR)
          == item.getAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR)) {
-         bindedClone = this._itemClones[i];
+          bindedClone = this._itemClones[i];
+          break;
       }
    }
 
@@ -5236,9 +5419,6 @@ Gridifier.Normalizer = function(gridifier, sizesResolverManager) {
     this._gridifier = null;
     this._sizesResolverManager = null;
 
-    // @todo -> Make option to disable/enable this option, and write docs about it.
-    // (How it works, and why it can be disabled on px-valued items)
-    // this._roundingNormalizationValue = 2; // @todo -> Looks like without Math.floor in SR 1 pixel is enough(Per IE)
     // This is required per % w/h support in IE8 and... FF!!!! (omg)
     this._roundingNormalizationValue = 1;
 
@@ -5885,6 +6065,41 @@ Gridifier.SizesResolverManager.prototype.offsetTop = function(DOMElem, substract
     return offsetTop;
 }
 
+Gridifier.SizesResolverManager.prototype.viewportWidth = function() {
+    return document.documentElement.clientWidth;
+}
+
+Gridifier.SizesResolverManager.prototype.viewportHeight = function() {
+    return document.documentElement.clientHeight;
+}
+
+Gridifier.SizesResolverManager.prototype.copyComputedStyle = function(sourceItem, targetItem) {
+    var me = this;
+
+    var copyRecursive = function(sourceItem, targetItem) {
+        SizesResolver.cloneComputedStyle(sourceItem, targetItem);
+
+        for(var i = 0; i < sourceItem.childNodes.length; i++) {
+            if(sourceItem.childNodes[i].nodeType == 1) {
+                copyRecursive(sourceItem.childNodes[i], targetItem.childNodes[i]);
+
+                var childNodeComputedStyle = SizesResolver.getComputedCSS(sourceItem.childNodes[i]);
+
+                // Don't override 'auto' value
+                if(/.*px.*/.test(childNodeComputedStyle.left))
+                    targetItem.childNodes[i].style.left = me.positionLeft(sourceItem.childNodes[i]) + "px";
+                if(/.*px.*/.test(childNodeComputedStyle.top))
+                    targetItem.childNodes[i].style.top = me.positionTop(sourceItem.childNodes[i]) + "px";
+
+                targetItem.childNodes[i].style.width = me.outerWidth(sourceItem.childNodes[i]) + "px";
+                targetItem.childNodes[i].style.height = me.outerHeight(sourceItem.childNodes[i]) + "px";
+            }
+        }
+    }
+
+    copyRecursive(sourceItem, targetItem);
+}
+
 Gridifier.Discretizer = function(gridifier,
                                  connections,
                                  settings,
@@ -5959,8 +6174,6 @@ Gridifier.Discretizer.CELL_CENTER_X = "centerX";
 Gridifier.Discretizer.CELL_CENTER_Y = "centerY";
 
 Gridifier.Discretizer.prototype.discretizeGrid = function() {
-    //var discretizationHorizontalStep = this._connections.getMinConnectionWidth() - 1;
-    //var discretizationVerticalStep = this._connections.getMinConnectionHeight() - 1;
     var discretizationHorizontalStep = this._connections.getMinConnectionWidth();
     var discretizationVerticalStep = this._connections.getMinConnectionHeight();
 
@@ -6117,6 +6330,7 @@ Gridifier.Discretizer.Demonstrator = function(gridifier, settings) {
     this._settings = null;
 
     this._demonstrator = null;
+    this._demonstratorClickHandler = null;
 
     this._css = {
     };
@@ -6163,7 +6377,6 @@ Gridifier.Discretizer.Demonstrator.prototype._createDemonstrator = function() {
     });
 }
 
-// @todo -> Move to user functions??? (Call from function) (Make customizible)
 Gridifier.Discretizer.Demonstrator.prototype._decorateDemonstrator = function() {
     Dom.css.set(this._demonstrator, {
         background: "rgb(235,235,235)",
@@ -6173,12 +6386,13 @@ Gridifier.Discretizer.Demonstrator.prototype._decorateDemonstrator = function() 
 }
 
 Gridifier.Discretizer.Demonstrator.prototype._bindDemonstratorDeleteOnClick = function() {
-    // @todo -> Replace with real event
-   var me = this;
-   $(this._demonstrator).on("click", function() {
-        $(this).off("click");
+    var me = this;
+    this._demonstratorClickHandler = function() {
+        Event.remove(me._demonstrator, "click", me._demonstratorClickHandler);
         me["delete"].call(me);
-    });
+    };
+
+    Event.add(this._demonstrator, "click", this._demonstratorClickHandler);
 }
 
 Gridifier.Discretizer.Demonstrator.prototype.update = function(cells) {
@@ -6267,8 +6481,19 @@ Gridifier.Dragifier = function(gridifier,
     this._settings = null;
     this._sizesResolverManager = null;
 
+    this._connectedItemMarker = null;
+
+    this._touchStartHandler = null;
+    this._touchMoveHandler = null;
+    this._touchEndHandler = null;
+    this._mouseDownHandler = null;
+    this._mouseMoveHandler = null;
+    this._mouseUpHandler = null;
+
     this._draggableItems = [];
     this._isDragging = false;
+
+    this._areDragifierEventsBinded = false;
 
     this._css = {
     };
@@ -6284,46 +6509,49 @@ Gridifier.Dragifier = function(gridifier,
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
 
+        me._connectedItemMarker = new Gridifier.ConnectedItemMarker();
+        me._dragifierApi = new Gridifier.Api.Dragifier();
+
+        me._bindEvents();
         if(me._settings.shouldEnableDragifierOnInit()) {
-            me._bindEvents();
+            me.bindDragifierEvents();
         }
     };
 
     this._bindEvents = function() {
-        // @todo -> Move this to selector, and if child is passed, find closest gridItem(Depending on
-        //          that, which was set up in settings)
-        var draggableItemSelector = me._settings.getDragifierItemSelector();
+        me._touchStartHandler = function(event) {
+            var connectedItem = me._findClosestConnectedItem(event.target);
+            if(connectedItem == null) return;
 
-        // @todo -> Replace with native events
-        $(me._gridifier.getGrid()).on("touchstart", draggableItemSelector, function(event) {
             event.preventDefault();
+            me._disableUserSelect();
             me._sizesResolverManager.startCachingTransaction();
             me._isDragging = true;
 
-            if(me._isAlreadyDraggable($(this).get(0))) {
-                var newTouch = event.originalEvent.changedTouches[0];
-                var alreadyDraggableItem = me._findAlreadyDraggableItem($(this).get(0));
+            if(me._isAlreadyDraggable(connectedItem)) {
+                var newTouch = event.changedTouches[0];
+                var alreadyDraggableItem = me._findAlreadyDraggableItem(connectedItem);
                 alreadyDraggableItem.addDragIdentifier(newTouch.identifier);
                 return;
             }
 
             var draggableItem = me._createDraggableItem();
-            var initialTouch = event.originalEvent.changedTouches[0];
+            var initialTouch = event.changedTouches[0];
 
-            draggableItem.bindDraggableItem($(this).get(0), initialTouch.pageX, initialTouch.pageY);
+            draggableItem.bindDraggableItem(connectedItem, initialTouch.pageX, initialTouch.pageY);
             draggableItem.addDragIdentifier(initialTouch.identifier);
-            
-            me._draggableItems.push(draggableItem);
-        });
 
-        $("body").on("touchend", draggableItemSelector, function(event) {
+            me._draggableItems.push(draggableItem);
+        };
+
+        me._touchEndHandler = function(event) {
             if(!me._isDragging) return;
             event.preventDefault();
 
             setTimeout(function() {
                 if(!me._isDragging) return;
-                
-                var touches = event.originalEvent.changedTouches;
+
+                var touches = event.changedTouches;
                 for(var i = 0; i < touches.length; i++) {
                     var draggableItemData = me._findDraggableItemByIdentifier(touches[i].identifier, true);
                     if(draggableItemData.item == null)
@@ -6337,20 +6565,21 @@ Gridifier.Dragifier = function(gridifier,
                 }
 
                 if(me._draggableItems.length == 0) {
+                    me._enableUserSelect();
                     me._isDragging = false;
                     me._sizesResolverManager.stopCachingTransaction();
                 }
             }, 0);
-        });
+        };
 
-        $("body").on("touchmove", function(event) {
+        me._touchMoveHandler = function(event) {
             if(!me._isDragging) return;
             event.preventDefault();
 
             setTimeout(function() {
                 if(!me._isDragging) return;
 
-                var touches = event.originalEvent.changedTouches;
+                var touches = event.changedTouches;
                 for(var i = 0; i < touches.length; i++) {
                     var draggableItem = me._findDraggableItemByIdentifier(touches[i].identifier);
                     if(draggableItem == null)
@@ -6358,37 +6587,41 @@ Gridifier.Dragifier = function(gridifier,
                     draggableItem.processDragMove(touches[i].pageX, touches[i].pageY);
                 }
            }, 0);
-        });
+        };
 
-        $(me._gridifier.getGrid()).on("mousedown", draggableItemSelector, function(event) {
+        me._mouseDownHandler = function(event) {
+            var connectedItem = me._findClosestConnectedItem(event.target);
+            if(connectedItem == null) return;
+
             event.preventDefault();
+            me._disableUserSelect();
             me._sizesResolverManager.startCachingTransaction();
             me._isDragging = true;
 
             var draggableItem = me._createDraggableItem();
 
-            draggableItem.bindDraggableItem($(this).get(0), event.pageX, event.pageY);
+            draggableItem.bindDraggableItem(connectedItem, event.pageX, event.pageY);
             me._draggableItems.push(draggableItem);
-        });
+        };
 
-        $("body").on("mouseup.gridifier.dragifier", function() {
+        me._mouseUpHandler = function() {
             setTimeout(function() {
                 if(!me._isDragging) return;
-                
+
+                me._enableUserSelect();
                 me._draggableItems[0].unbindDraggableItem();
                 me._draggableItems.splice(0, 1);
                 me._isDragging = false;
                 me._sizesResolverManager.stopCachingTransaction();
             }, 0);
-        });
+        };
 
-        $("body").on("mousemove.gridfier.dragifier", function(event) {
+        me._mouseMoveHandler = function(event) {
             setTimeout(function() {
                 if(!me._isDragging) return;
-
                 me._draggableItems[0].processDragMove(event.pageX, event.pageY);
            }, 0);
-        });
+        };
     };
 
     this._unbindEvents = function() {
@@ -6404,8 +6637,85 @@ Gridifier.Dragifier = function(gridifier,
 
 Gridifier.Dragifier.IS_DRAGGABLE_ITEM_DATA_ATTR = "data-gridifier-is-draggable-item";
 
+Gridifier.Dragifier.prototype.bindDragifierEvents = function() {
+    if(this._areDragifierEventsBinded)
+        return;
+
+    this._areDragifierEventsBinded = true;
+
+    Event.add(this._gridifier.getGrid(), "mousedown", this._mouseDownHandler);
+    Event.add(document.body, "mouseup", this._mouseUpHandler);
+    Event.add(document.body, "mousemove", this._mouseMoveHandler);
+
+    Event.add(this._gridifier.getGrid(), "touchstart", this._touchStartHandler);
+    Event.add(document.body, "touchend", this._touchEndHandler);
+    Event.add(document.body, "touchmove", this._touchMoveHandler);
+}
+
+Gridifier.Dragifier.prototype.unbindDragifierEvents = function() {
+    if(!this._areDragifierEventsBinded)
+        return;
+
+    this._areDragifierEventsBinded = false;
+
+    Event.remove(this._gridifier.getGrid(), "mousedown", this._mouseDownHandler);
+    Event.remove(document.body, "mouseup", this._mouseUpHandler);
+    Event.remove(document.body, "mousemove", this._mouseMoveHandler);
+
+    Event.remove(this._gridifier.getGrid(), "touchstart", this._touchStartHandler);
+    Event.remove(document.body, "touchend", this._touchEndHandler);
+    Event.remove(document.body, "touchmove", this._touchMoveHandler);
+}
+
+Gridifier.Dragifier.prototype._disableUserSelect = function() {
+    var dragifierUserSelectToggler = this._settings.getDragifierUserSelectToggler();
+    dragifierUserSelectToggler.disableSelect();
+}
+
+Gridifier.Dragifier.prototype._enableUserSelect = function() {
+    var dragifierUserSelectToggler = this._settings.getDragifierUserSelectToggler();
+    dragifierUserSelectToggler.enableSelect();
+}
+
+Gridifier.Dragifier.prototype._findClosestConnectedItem = function(maybeConnectedItemChild) {
+    var grid = this._gridifier.getGrid();
+    var draggableItemSelector = this._settings.getDragifierItemSelector();
+
+    if(maybeConnectedItemChild == grid)
+        return null;
+
+    if(typeof draggableItemSelector == "boolean" && !draggableItemSelector)
+        var checkThatAnyBubblePhaseElemHasClass = false;
+    else
+        var checkThatAnyBubblePhaseElemHasClass = true;
+
+    var connectedItem = null;
+    var parentNode = null;
+    var hasAnyBubblePhaseElemClass = false;
+
+    while(connectedItem == null && parentNode != grid) {
+        if(parentNode == null)
+            parentNode = maybeConnectedItemChild;
+        else
+            parentNode = parentNode.parentNode;
+
+        if(checkThatAnyBubblePhaseElemHasClass) {
+            if(Dom.css.hasClass(parentNode, draggableItemSelector))
+                hasAnyBubblePhaseElemClass = true;
+        }
+
+        if(this._connectedItemMarker.isItemConnected(parentNode))
+            connectedItem = parentNode;
+    }
+
+    if(connectedItem == null || (checkThatAnyBubblePhaseElemHasClass && !hasAnyBubblePhaseElemClass)) {
+        return null;
+    }
+
+    return connectedItem;
+}
+
 Gridifier.Dragifier.prototype._createDraggableItem = function() {
-    // @todo -> Add customSD mode
     if(this._settings.isDisabledSortDispersion()) {
         var draggableItem = new Gridifier.Dragifier.ConnectionIntersectionDraggableItem(
             this._gridifier, 
@@ -6419,7 +6729,7 @@ Gridifier.Dragifier.prototype._createDraggableItem = function() {
             this._sizesResolverManager
         );
     }
-    else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+    else if(this._settings.isCustomAllEmptySpaceSortDispersion() || this._settings.isCustomSortDispersion()) {
         var draggableItem = new Gridifier.Dragifier.GridDiscretizationDraggableItem(
             this._gridifier, 
             this._appender,
@@ -6547,9 +6857,13 @@ Gridifier.Dragifier.Core.prototype.determineGridOffsets = function() {
 }
 
 Gridifier.Dragifier.Core.prototype._getDraggableItemOffsetLeft = function(draggableItem, substractMargins) {
-    // @old return this._sizesResolverManager.offsetLeft(draggableItem, substractMargins);
     var substractMargins = substractMargins || false;
     var draggableItemConnection = this._connections.findConnectionByItem(draggableItem);
+
+    if(this._settings.isNoIntersectionsStrategy() && this._settings.isHorizontalGrid())
+        var horizontalOffset = draggableItemConnection.horizontalOffset;
+    else
+        var horizontalOffset = 0;
 
     if(substractMargins) {
         var elemWidth = this._sizesResolverManager.outerWidth(draggableItem);
@@ -6557,17 +6871,21 @@ Gridifier.Dragifier.Core.prototype._getDraggableItemOffsetLeft = function(dragga
         var marginWidth = elemWidthWithMargins - elemWidth;
         var halfOfMarginWidth = marginWidth / 2;
         
-        return this._gridOffsetLeft + draggableItemConnection.x1 - halfOfMarginWidth;
+        return this._gridOffsetLeft + draggableItemConnection.x1 - halfOfMarginWidth + horizontalOffset;
     }
     else {
-        return this._gridOffsetLeft + draggableItemConnection.x1;
+        return this._gridOffsetLeft + draggableItemConnection.x1 + horizontalOffset;
     }
 }
 
 Gridifier.Dragifier.Core.prototype._getDraggableItemOffsetTop = function(draggableItem, substractMargins) {
-    // @old return this._sizesResolverManager.offsetTop(draggableItem, substractMargins);
     var substractMargins = substractMargins || false;
     var draggableItemConnection = this._connections.findConnectionByItem(draggableItem);
+
+    if(this._settings.isNoIntersectionsStrategy() && this._settings.isVerticalGrid())
+        var verticalOffset = draggableItemConnection.verticalOffset;
+    else
+        var verticalOffset = 0;
 
     if(substractMargins) {
         var elemHeight = this._sizesResolverManager.outerHeight(draggableItem);
@@ -6575,10 +6893,10 @@ Gridifier.Dragifier.Core.prototype._getDraggableItemOffsetTop = function(draggab
         var marginHeight = elemHeightWithMargins - elemHeight;
         var halfOfMarginHeight = marginHeight / 2;
 
-        return this._gridOffsetTop + draggableItemConnection.y1 - halfOfMarginHeight;
+        return this._gridOffsetTop + draggableItemConnection.y1 - halfOfMarginHeight + verticalOffset;
     }
     else {
-        return this._gridOffsetTop + draggableItemConnection.y1;
+        return this._gridOffsetTop + draggableItemConnection.y1 + verticalOffset;
     }
 }
 
@@ -6598,16 +6916,35 @@ Gridifier.Dragifier.Core.prototype.determineInitialCursorOffsetsFromDraggableIte
     this._cursorOffsetYFromDraggableItemCenter = draggableItemCenterY - cursorY;
 }
 
+Gridifier.Dragifier.Core.prototype._getMaxConnectionItemZIndex = function() {
+    var maxZIndex = null;
+    var connections = this._connections.get();
+
+    for(var i = 0; i < connections.length; i++) {
+        if(maxZIndex == null) {
+            maxZIndex = Dom.toInt(connections[i].item.style.zIndex);
+        }
+        else {
+            if(Dom.toInt(connections[i].item.style.zIndex) > maxZIndex)
+                maxZIndex = Dom.toInt(connections[i].item.style.zIndex);
+        }
+    }
+
+    return Dom.toInt(maxZIndex);
+}
+
 Gridifier.Dragifier.Core.prototype.createDraggableItemClone = function(draggableItem) {
     var draggableItemClone = draggableItem.cloneNode(true);
     this._collector.markItemAsRestrictedToCollect(draggableItemClone);
 
-    // @todo -> Replace this, tmp solution
-    draggableItemClone.style.setProperty("background", "rgb(235,235,235)", "important");
-    //Dom.css3.transition(draggableItemClone, "All 0ms ease");
-    Dom.css3.transform(draggableItemClone, "");
-    Dom.css3.transition(draggableItemClone, "none");
-    draggableItemClone.style.zIndex = 10; // @endtodo
+    var draggableItemDecorator = this._settings.getDraggableItemDecorator();
+    draggableItemDecorator(draggableItemClone, draggableItem, this._sizesResolverManager);
+
+    if(Dom.isBrowserSupportingTransitions()) {
+        Dom.css3.transform(draggableItemClone, "");
+        Dom.css3.transition(draggableItemClone, "none");
+    }
+    draggableItemClone.style.zIndex = this._getMaxConnectionItemZIndex() + 1;
 
     var cloneWidth = this._sizesResolverManager.outerWidth(draggableItem);
     var cloneHeight = this._sizesResolverManager.outerHeight(draggableItem);
@@ -6636,17 +6973,19 @@ Gridifier.Dragifier.Core.prototype.createDraggableItemPointer = function(draggab
     var draggableItemOffsetLeft = this._getDraggableItemOffsetLeft(draggableItem, true);
     var draggableItemOffsetTop = this._getDraggableItemOffsetTop(draggableItem, true);
 
-    // @todo -> Add mixed options
     var draggableItemPointer = document.createElement("div");
     Dom.css.set(draggableItemPointer, {
         width: this._sizesResolverManager.outerWidth(draggableItem, true) + "px",
         height: this._sizesResolverManager.outerHeight(draggableItem, true) + "px",
         position: "absolute",
         left: (draggableItemOffsetLeft - this._gridOffsetLeft) + "px",
-        top: (draggableItemOffsetTop - this._gridOffsetTop) + "px",
-        background: "red" // @todo -> Replace with real color, add styling
+        top: (draggableItemOffsetTop - this._gridOffsetTop) + "px"
     });
+
     this._gridifier.getGrid().appendChild(draggableItemPointer);
+
+    var draggableItemPointerDecorator = this._settings.getDraggableItemPointerDecorator();
+    draggableItemPointerDecorator(draggableItemPointer);
 
     this._dragifierRenderer.render(
         draggableItemPointer,
@@ -6703,11 +7042,11 @@ Gridifier.Dragifier.Core.prototype.reappendGridItems = function() {
     this._gridifier.retransformAllSizes();
 }
 
-Gridifier.Dragifier.Renderer = function(settings) {
+Gridifier.Dragifier.Renderer = function(settings, dragifierApi) {
     var me = this;
 
     this._settings = null;
-    this._renderFunction = null;
+    this._coordsChanger = null;
 
     this._css = {
     };
@@ -6715,9 +7054,7 @@ Gridifier.Dragifier.Renderer = function(settings) {
     this._construct = function() {
         me._settings = settings;
 
-        // @todo -> Parse settings and implement def func
-        me._setTransitionRenderFunction();
-
+        me._setRenderFunction();
         me._bindEvents();
     };
 
@@ -6736,34 +7073,12 @@ Gridifier.Dragifier.Renderer = function(settings) {
     return this;
 }
 
-Gridifier.Dragifier.Renderer.prototype._setTransitionRenderFunction = function() {
-    this._renderFunction = function(item, newLeft, newTop) {
-        var newLeft = parseFloat(newLeft);
-        var newTop = parseFloat(newTop);
-
-        var currentLeft = parseFloat(item.style.left);
-        var currentTop = parseFloat(item.style.top);
-
-        if(newLeft > currentLeft)
-            var translateX = newLeft - currentLeft;
-        else if(newLeft < currentLeft)
-            var translateX = (currentLeft - newLeft) * -1;
-        else 
-            var translateX = 0;
-
-        if(newTop > currentTop)
-            var translateY = newTop - currentTop;
-        else if(newTop < currentTop)
-            var translateY = (currentTop - newTop) * -1;
-        else
-            var translateY = 0;
-
-        Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px, 0px");
-    };
+Gridifier.Dragifier.Renderer.prototype._setRenderFunction = function() {
+    this._coordsChanger = this._settings.getDraggableItemCoordsChanger();
 }
 
 Gridifier.Dragifier.Renderer.prototype.render = function(item, newLeft, newTop) {
-    this._renderFunction(item, newLeft, newTop);
+    this._coordsChanger(item, newLeft, newTop);
 }
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
@@ -6811,8 +7126,7 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
 
         me._dragIdentifiers = [];
 
-        // @todo -> Check settings, or merge intersections logic
-        me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(
+        me._connectionsIntersector = new Gridifier.ConnectionsIntersector(
             me._connections
         );
 
@@ -6894,8 +7208,8 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.getDragIdentif
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._initDraggableItem = function(item) {
     this._draggableItem = item;
-    // @todo -> Fix this(visibility uses transition timeout, Replace global from all???)
-    Dom.css3.transitionProperty(this._draggableItem, "Visibility 0ms ease");
+    if(Dom.isBrowserSupportingTransitions())
+        Dom.css3.transitionProperty(this._draggableItem, "Visibility 0ms ease");
 }
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._hideDraggableItem = function() {
@@ -6907,9 +7221,6 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._hideDraggable
         var draggableItemRendererClone = itemClonesManager.getBindedClone(this._draggableItem);
         draggableItemRendererClone.style.visibility = "hidden";
     }
-
-    // @todo -> Replace with real hidder
-    Dom.css.addClass(document.body, "disableSelect");
 }
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.processDragMove = function(cursorX, cursorY) {
@@ -6971,9 +7282,6 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.unbindDraggabl
     this._showDraggableItem();
     this._draggableItem = null;
     this._draggableItem = null;
-
-    // @todo -> Replace with real hidder
-    Dom.css.removeClass(document.body, "disableSelect");
 }
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._showDraggableItem = function() {
@@ -7135,6 +7443,7 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem = function(gridifier,
         me._sizesResolverManager = sizesResolverManager;
 
         me._dragIdentifiers = [];
+
         me._dragifierRenderer = new Gridifier.Dragifier.Renderer(
             me._settings
         );
@@ -7229,8 +7538,8 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.getDragIdentifiers
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._initDraggableItem = function(item) {
     this._draggableItem = item;
-    // @todo -> Fix this(visibility uses transition timeout, Replace global from all???)
-    Dom.css3.transitionProperty(this._draggableItem, "Visibility 0ms ease");
+    if(Dom.isBrowserSupportingTransitions())
+        Dom.css3.transitionProperty(this._draggableItem, "Visibility 0ms ease");
 }
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._initDraggableItemConnection = function() {
@@ -7247,9 +7556,6 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._hideDraggableItem
         var draggableItemRendererClone = itemClonesManager.getBindedClone(this._draggableItem);
         draggableItemRendererClone.style.visibility = "hidden";
     }
-
-    // @todo -> Replace with real hidder
-    Dom.css.addClass(document.body, "disableSelect");
 }
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.processDragMove = function(cursorX, cursorY) {
@@ -7344,9 +7650,6 @@ Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype.unbindDraggableIte
     this._showDraggableItem();
     this._draggableItem = null;
     this._discretizer.deleteDemonstrator();
-
-    // @todo -> Replace with real hidder
-    Dom.css.removeClass(document.body, "disableSelect");
 }
 
 Gridifier.Dragifier.GridDiscretizationDraggableItem.prototype._showDraggableItem = function() {
@@ -7405,7 +7708,8 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
     else if(errorType == errors.INVALID_ONE_OF_SORT_FUNCTION_TYPES || 
             errorType == errors.INVALID_ONE_OF_FILTER_FUNCTION_TYPES ||
             errorType == errors.INVALID_ONE_OF_COORDS_CHANGER_FUNCTION_TYPES ||
-            errorType == errors.INVALID_ONE_OF_SIZES_CHANGER_FUNCTION_TYPES) {
+            errorType == errors.INVALID_ONE_OF_SIZES_CHANGER_FUNCTION_TYPES ||
+            errorType == errors.INVALID_ONE_OF_DRAGGABLE_ITEM_DECORATOR_FUNCTION_TYPES) {
         this._markAsApiSettingsError();
 
         if(errorType == errors.INVALID_ONE_OF_SORT_FUNCTION_TYPES) {
@@ -7420,6 +7724,9 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         else if(errorType == errors.INVALID_ONE_OF_SIZES_CHANGER_FUNCTION_TYPES) {
             var paramName = "sizesChanger";
         }
+        else if(errorType == errors.INVALID_ONE_OF_DRAGGABLE_ITEM_DECORATOR_FUNCTION_TYPES) {
+            var paramName = "draggableItemDecorator";
+        }
 
         this._invalidOneOfFunctionTypesError(paramName);
     }
@@ -7427,7 +7734,8 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
             errorType == errors.INVALID_SORT_PARAM_VALUE || 
             errorType == errors.INVALID_FILTER_PARAM_VALUE ||
             errorType == errors.INVALID_COORDS_CHANGER_PARAM_VALUE ||
-            errorType == errors.INVALID_SIZES_CHANGER_PARAM_VALUE) {
+            errorType == errors.INVALID_SIZES_CHANGER_PARAM_VALUE ||
+            errorType == errors.INVALID_DRAGGABLE_ITEM_DECORATOR_PARAM_VALUE) {
         this._markAsApiSettingsError();
 
         if(errorType == errors.INVALID_TOGGLE_PARAM_VALUE) {
@@ -7445,6 +7753,9 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         else if(errorType == errors.INVALID_SIZES_CHANGER_PARAM_VALUE) {
             var paramName = "sizesChanger";
         }
+        else if(errorType == errors.INVALID_DRAGGABLE_ITEM_DECORATOR_PARAM_VALUE) {
+            var paramName = "draggableItemDecorator";
+        }
 
         this._invalidParamValueError(paramName);
     }
@@ -7452,7 +7763,8 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
             errorType == errors.SET_FILTER_INVALID_PARAM ||
             errorType == errors.SET_SORT_INVALID_PARAM ||
             errorType == errors.SET_COORDS_CHANGER_INVALID_PARAM ||
-            errorType == errors.SET_SIZES_CHANGER_INVALID_PARAM) {
+            errorType == errors.SET_SIZES_CHANGER_INVALID_PARAM ||
+            errorType == errors.SET_DRAGGABLE_ITEM_DECORATOR_INVALID_PARAM) {
         this._markAsApiSettingsError();
 
         if(errorType == errors.SET_TOGGLE_INVALID_PARAM) {
@@ -7469,6 +7781,9 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         }
         else if(errorType == errors.SET_SIZES_CHANGER_INVALID_PARAM) {
             var functionName = "sizesChanger";
+        }
+        else if(errorType == errors.SET_DRAGGABLE_ITEM_DECORATOR_INVALID_PARAM) {
+            var functionName = "draggableItemDecorator";
         }
 
         this._invalidSetterParamError(functionName);
@@ -7698,6 +8013,14 @@ Gridifier.CoreErrors.prototype._parseIfIsCoreError = function(errorType) {
         this._markAsCoreError();
         this._wrongInsertAfterTargetItem();
     }
+    else if(errorType == errors.INSERTER.TOO_WIDE_ITEM_ON_VERTICAL_GRID_INSERT) {
+        this._markAsCoreError();
+        this._tooWideItemOnVerticalGridInsert();
+    }
+    else if(errorType == errors.INSERTER.TOO_TALL_ITEM_ON_HORIZONTAL_GRID_INSERT) {
+        this._markAsCoreError();
+        this._tooTallItemOnHorizontalGridInsert();
+    }
 }
 
 Gridifier.CoreErrors.prototype._markAsCoreError = function() {
@@ -7761,6 +8084,32 @@ Gridifier.CoreErrors.prototype._wrongInsertAfterTargetItem = function() {
 
     msg += "Wrong target item passed to the insertAfter function. It must be item, which was processed by gridifier. ";
     msg += "Got: " + error + ".";
+
+    this._errorMsg = msg;
+}
+
+Gridifier.CoreErrors.prototype._tooWideItemOnVerticalGridInsert = function() {
+    var msg = this._error.getErrorMsgPrefix();
+    var error = this._error.getErrorParam();
+
+    msg += "Can't insert item '" + error + "'. Probably it has px based width and it's width is wider than grid width. ";
+    msg += "This can happen in such cases:\n";
+    msg += "    1. Px-width item is wider than grid from start.(Before attaching to gridifier)\n";
+    msg += "    2. Px-width item became wider than grid after grid resize.\n";
+    msg += "    3. Px-width item became wider after applying transform/toggle operation.\n";
+
+    this._errorMsg = msg;
+}
+
+Gridifier.CoreErrors.prototype._tooTallItemOnHorizontalGridInsert = function() {
+    var msg = this._error.getErrorMsgPrefix();
+    var error = this._error.getErrorParam();
+
+    msg += "Can't insert item '" + error + "'. Probably it has px based height and it's height is taller than grid height. ";
+    msg += "This can happend in such cases:\n";
+    msg += "    1. Px-height item is taller than grid from start.(Before attaching to gridifier)\n";
+    msg += "    2. Px-height item became taller than grid after grid resize.\n";
+    msg += "    3. Px-height item became taller after applying transform/toggle operation.\n";
 
     this._errorMsg = msg;
 }
@@ -7989,8 +8338,6 @@ Gridifier.Error = function(errorType, errorParam) {
     return this;
 }
 
-// @todo -> Use api url postfixes as vals instead of numbers
-// @todo -> Prefix error objects with JSON.stringify 
 Gridifier.Error.ERROR_TYPES = {
     EXTRACT_GRID: 0,
     SETTINGS: {
@@ -8020,11 +8367,15 @@ Gridifier.Error.ERROR_TYPES = {
         INVALID_SIZES_CHANGER_PARAM_VALUE: 17,
         INVALID_ONE_OF_SIZES_CHANGER_FUNCTION_TYPES: 18,
 
+        INVALID_DRAGGABLE_ITEM_DECORATOR_PARAM_VALUE: 37,
+        INVALID_ONE_OF_DRAGGABLE_ITEM_DECORATOR_FUNCTION_TYPES: 38,
+
         SET_TOGGLE_INVALID_PARAM: 19,
         SET_FILTER_INVALID_PARAM: 20,
         SET_SORT_INVALID_PARAM: 21,
         SET_COORDS_CHANGER_INVALID_PARAM: 22,
-        SET_SIZES_CHANGER_INVALID_PARAM: 23
+        SET_SIZES_CHANGER_INVALID_PARAM: 23,
+        SET_DRAGGABLE_ITEM_DECORATOR_INVALID_PARAM: 36
     },
     COLLECTOR: {
         NOT_DOM_ELEMENT: 24,
@@ -8043,6 +8394,10 @@ Gridifier.Error.ERROR_TYPES = {
     APPENDER: {
         WRONG_INSERT_BEFORE_TARGET_ITEM: 32,
         WRONG_INSERT_AFTER_TARGET_ITEM: 33
+    },
+    INSERTER: {
+        TOO_WIDE_ITEM_ON_VERTICAL_GRID_INSERT: 34,
+        TOO_TALL_ITEM_ON_HORIZONTAL_GRID_INSERT: 35
     }
 }
 
@@ -8255,19 +8610,19 @@ Gridifier.HorizontalGrid.Appender = function(gridifier,
     this._gridifier = null;
     this._settings = null;
     this._sizesResolverManager = null;
-
+    this._guid = null;
+    this._renderer = null;
+    this._normalizer = null;
+    this._operation = null;
     this._connectors = null;
     this._connections = null;
+
     this._connectorsCleaner = null;
     this._connectorsShifter = null;
     this._connectorsSelector = null;
     this._connectorsSorter = null;
     this._itemCoordsExtractor = null;
     this._connectionsIntersector = null;
-    this._guid = null;
-    this._renderer = null;
-    this._normalizer = null;
-    this._operation = null;
 
     this._css = {
     };
@@ -8276,7 +8631,10 @@ Gridifier.HorizontalGrid.Appender = function(gridifier,
         me._gridifier = gridifier;
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
-
+        me._guid = guid;
+        me._renderer = renderer;
+        me._normalizer = normalizer;
+        me._operation = operation;
         me._connectors = connectors;
         me._connections = connections;
 
@@ -8290,11 +8648,6 @@ Gridifier.HorizontalGrid.Appender = function(gridifier,
         me._connectorsSorter = new Gridifier.HorizontalGrid.ConnectorsSorter();
         me._itemCoordsExtractor = new Gridifier.HorizontalGrid.ItemCoordsExtractor(me._gridifier, me._sizesResolverManager);
         me._connectionsIntersector = new Gridifier.HorizontalGrid.ConnectionsIntersector(me._connections);
-
-        me._guid = guid;
-        me._renderer = renderer;
-        me._normalizer = normalizer;
-        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -8403,6 +8756,10 @@ Gridifier.HorizontalGrid.Appender.prototype._createConnectionPerItem = function(
 Gridifier.HorizontalGrid.Appender.prototype._filterConnectorsPerNextConnection = function() {
     var connectors = this._connectors.getClone();
 
+    this._connectorsSelector.attachConnectors(connectors);
+    this._connectorsSelector.selectOnlySpecifiedSideConnectorsOnPrependedItems(Gridifier.Connectors.SIDES.RIGHT.TOP);
+    connectors = this._connectorsSelector.getSelectedConnectors();
+
     if(this._settings.isDefaultIntersectionStrategy()) {
         this._connectorsShifter.attachConnectors(connectors);
         this._connectorsShifter.shiftAllConnectors();
@@ -8459,6 +8816,11 @@ Gridifier.HorizontalGrid.Appender.prototype._findItemConnectionCoords = function
         if(itemConnectionCoords != null) {
             break;
         }
+    }
+
+    if(itemConnectionCoords == null) {
+        var errorType = Gridifier.Error.ERROR_TYPES.INSERTER.TOO_TALL_ITEM_ON_HORIZONTAL_GRID_INSERT;
+        new Gridifier.Error(errorType, item);
     }
 
     return itemConnectionCoords;
@@ -8679,9 +9041,18 @@ Gridifier.HorizontalGrid.Connections.prototype.isAnyConnectionItemGUIDBiggerThan
 Gridifier.HorizontalGrid.Connections.prototype.getAllConnectionsBehindX = function(x) {
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
-        if(this._connections[i].x1 - 10000 > x) // @todo -> Delete, for testing
-        //if(this._connections[i].x1 > x)
-            connections.push(this._connections[i]);
+        if(this._settings.isDisabledSortDispersion()) {
+            if(this._connections[i].x1 > x)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomSortDispersion()) {
+            var sortDispersionValue = this._settings.getSortDispersionValue();
+            if(this._connections[i].x1 - sortDispersionValue > x)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+            ; // No connections
+        }
     }
 
     return connections;
@@ -8691,8 +9062,18 @@ Gridifier.HorizontalGrid.Connections.prototype.getAllConnectionsBehindX = functi
 Gridifier.HorizontalGrid.Connections.prototype.getAllConnectionsBeforeX = function(x) {
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
-        if(this._connections[i].x2 < x)
-            connections.push(this._connections[i]);
+        if(this._settings.isDisabledSortDispersion()) {
+            if(this._connections[i].x2 < x)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomSortDispersion()) {
+            var sortDispersionValue = this._settings.getSortDispersionValue();
+            if(this._connections[i].x2 + sortDispersionValue < x)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+            ; // No connections
+        }
     }
 
     return connections;
@@ -8842,7 +9223,6 @@ Gridifier.HorizontalGrid.ConnectionsHorizontalIntersector.prototype.getMostWideF
             if(mostWideHorizontallyIntersectedConnection == null)
                 mostWideHorizontallyIntersectedConnection = maybeIntersectableConnection;
             else {
-                // @todo -> Should here add +1 in formulas?
                 var maybeIntersectableConnectionWidth = Math.abs(
                     maybeIntersectableConnection.x2 - maybeIntersectableConnection.x1
                 );
@@ -8883,39 +9263,51 @@ Gridifier.HorizontalGrid.ConnectionsHorizontalIntersector.prototype.expandHorizo
         return;
     
     var colConnectionsToExpand = this.getAllHorizontallyIntersectedConnections(newConnection);
-    this._lastColHorizontallyExpandedConnections = colConnectionsToExpand;
+    var expandedConnectionsWithNewOffsets = [];
 
     for(var i = 0; i < colConnectionsToExpand.length; i++) {
         colConnectionsToExpand[i].x1 = mostWideConnection.x1;
         colConnectionsToExpand[i].x2 = mostWideConnection.x2;
 
-        if(this._settings.isHorizontalGridLeftAlignmentType())
+        if(this._settings.isHorizontalGridLeftAlignmentType()) {
+            if(colConnectionsToExpand[i].horizontalOffset != 0)
+                expandedConnectionsWithNewOffsets.push(colConnectionsToExpand[i]);
+
             colConnectionsToExpand[i].horizontalOffset = 0;
+        }
         else if(this._settings.isHorizontalGridCenterAlignmentType()) {
             var x1 = colConnectionsToExpand[i].x1;
             var x2 = colConnectionsToExpand[i].x2;
 
             var targetSizes = this._itemCoordsExtractor.getItemTargetSizes(colConnectionsToExpand[i].item);
-            // @todo -> Check if (-1) is required
-            var itemWidth = targetSizes.targetWidth - 1;
+            var itemWidth = targetSizes.targetWidth;
 
-            //var itemWidth = colConnectionsToExpand[i].itemWidthWithMargins - 1;
-            // @todo fix to return Math.round(Math.abs(y2 - y1 + 1) / 2) - Math.round(itemHeight / 2);
-            colConnectionsToExpand[i].horizontalOffset = Math.round(Math.abs(x2 - x1) / 2) - Math.round(itemWidth / 2);
+            var newHorizontalOffset = (Math.abs(x2 - x1 + 1) / 2) - (itemWidth / 2);
+
+            if(colConnectionsToExpand[i].horizontalOffset != newHorizontalOffset) {
+                colConnectionsToExpand[i].horizontalOffset = newHorizontalOffset;
+                expandedConnectionsWithNewOffsets.push(colConnectionsToExpand[i]);
+            }
         }
         else if(this._settings.isHorizontalGridRightAlignmentType()) {
             var x1 = colConnectionsToExpand[i].x1;
             var x2 = colConnectionsToExpand[i].x2;
 
             var targetSizes = this._itemCoordsExtractor.getItemTargetSizes(colConnectionsToExpand[i].item);
-            // @todo -> Check if (-1) is required
-            var itemWidth = targetSizes.targetWidth - 1;
-            
-            //var itemWidth = colConnectionsToExpand[i].itemWidthWithMargins - 1;
-            // @todo fix (y2 - y1 + 1) 
-            colConnectionsToExpand[i].horizontalOffset = Math.abs(x2 - x1) - itemWidth;
+            var itemWidth = targetSizes.targetWidth;
+
+            var newHorizontalOffset = Math.abs(x2 - x1 + 1) - itemWidth;
+
+            if(colConnectionsToExpand[i].horizontalOffset != newHorizontalOffset) {
+                colConnectionsToExpand[i].horizontalOffset = newHorizontalOffset;
+                expandedConnectionsWithNewOffsets.push(colConnectionsToExpand[i]);
+            }
         }
     }
+
+    // We should rerender only connections with new horizontal offsets(Otherwise some browsers
+    // will produce noticeable 'freezes' on rerender cycle)
+    this._lastColHorizontallyExpandedConnections = expandedConnectionsWithNewOffsets;
 }
 
 Gridifier.HorizontalGrid.ConnectionsIntersector = function(connections) {
@@ -9017,11 +9409,7 @@ Gridifier.HorizontalGrid.ConnectionsRanges = function(connections) {
     return this;
 }
 
-//@todo -> Xranitj otdelnie srezi dlja appenda/prependa srazu so vsemi elementami(bez perebora nod)???
-
-// @todo -> Should it be so large???(mobiles)
 Gridifier.HorizontalGrid.ConnectionsRanges.RANGE_PX_WIDTH = 500;
-//Gridifier.HorizontalGrid.ConnectionsRanges.RANGE_PX_HEIGHT = 200;
 
 Gridifier.HorizontalGrid.ConnectionsRanges.prototype.init = function() {
     this._ranges = [];
@@ -9468,24 +9856,6 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.deleteAllTooRightConnectors
 }
 
 Gridifier.HorizontalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersectingAnyRightConnectionItem = function(mappedConnector) {
-    //var connections = this._connections.get();
-    //var connections = this._connections.getAllHorizontallyIntersectedAndLowerConnections(connector);
-    //if(time > 0.199)
-      //  console.log("time = " + time);
-    // console.log("CONN COUNT = ", connections.length);
-    // console.log("connector info = ", $.parseJSON(JSON.stringify(connector)));
-
-    // for(var i = 0; i < connections.length; i++) {
-    //     if(this.isConnectorInsideOrBeforeItemIntersectionStrategy()) 
-    //         var verticalIntersectionCond = (connector.y <= connections[i].y2);
-    //     else if(this.isConnectorInsideItemIntersectionStrategy())
-    //         var verticalIntersectionCond = (connector.y <= connections[i].y2 
-    //                                                           && connector.y >= connections[i].y1);
-
-    //     if(connector.x >= connections[i].x1 && connector.x <= connections[i].x2
-    //         && verticalIntersectionCond) 
-    //         return true;
-    // }
     var connections = this._connections.get();
 
     for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
@@ -9508,14 +9878,9 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersect
 }
 
 Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.deleteAllIntersectedFromRightConnectors = function() {
-    //timer.start();
     var connectors = this._connectors.get();
-    //console.log("get connectors = " + timer.get());
-    //timer.start();
     var mappedConnectors = this._connectors.getClone();
-    //console.log("clone connectors = " + timer.get());
 
-    //timer.start();
     mappedConnectors.sort(function(firstConnector, secondConnector) {
         if(firstConnector.x == secondConnector.x)
             return 0;
@@ -9524,38 +9889,24 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.deleteAllIntersectedFromRig
         else 
             return 1;
     });
-    //console.log("sort connectors = " + timer.get());
-    //timer.start();
+
     mappedConnectors = this._connections.mapAllIntersectedAndRightConnectionsPerEachConnector(
         mappedConnectors
     );
-    //console.log("map connectors = " + timer.get());
 
-    //timer.start();
     for(var i = 0; i < mappedConnectors.length; i++) {
         if(this._isMappedConnectorIntersectingAnyRightConnectionItem(mappedConnectors[i])) 
             connectors[mappedConnectors[i].connectorIndex].isIntersected = true;
         else
             connectors[mappedConnectors[i].connectorIndex].isIntersected = false;
     }
-    //console.log("isIntersecting = " + timer.get());
 
-    //timer.start();
     for(var i = 0; i < connectors.length; i++) {
         if(connectors[i].isIntersected) {
             connectors.splice(i, 1);
             i--;
         }
     }
-    //console.log("isIntersecting = " + timer.get());
-    //console.log("");
-
-    // for(var i = 0; i < connectors.length; i++) {
-    //     if(this.isConnectorIntersectingAnyBottomConnectionItem(connectors[i])) {
-    //         connectors.splice(i, 1);
-    //         i--;
-    //     }
-    // }
 }
 
 Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.deleteAllTooLeftConnectorsFromMostRightConnector = function() {
@@ -9615,7 +9966,6 @@ Gridifier.HorizontalGrid.ConnectorsSelector.prototype.getSelectedConnectors = fu
     return this._connectors;
 }
 
-// @todo -> Refactor this 2 methods in 1??? (Dynamic conds)
 Gridifier.HorizontalGrid.ConnectorsSelector.prototype.selectOnlyMostRightConnectorFromSide = function(side) {
     var mostRightConnectorItemGUID = null;
     var mostRightConnectorX = null;
@@ -9661,6 +10011,30 @@ Gridifier.HorizontalGrid.ConnectorsSelector.prototype.selectOnlyMostLeftConnecto
     while(i--) {
         if(this._connectors[i].side == side && this._connectors[i].itemGUID != mostLeftConnectorItemGUID) 
             this._connectors.splice(i, 1);
+    }
+}
+
+Gridifier.HorizontalGrid.ConnectorsSelector.prototype._isInitialConnector = function(connector) {
+    return connector.itemGUID == Gridifier.Connectors.INITIAL_CONNECTOR_ITEM_GUID;
+}
+
+Gridifier.HorizontalGrid.ConnectorsSelector.prototype.selectOnlySpecifiedSideConnectorsOnAppendedItems = function(side) {
+    for(var i = 0; i < this._connectors.length; i++) {
+        if(!this._isInitialConnector(this._connectors[i]) &&
+            !this._guid.wasItemPrepended(this._connectors[i].itemGUID) && side != this._connectors[i].side) {
+            this._connectors.splice(i, 1);
+            i--;
+        }
+    }
+}
+
+Gridifier.HorizontalGrid.ConnectorsSelector.prototype.selectOnlySpecifiedSideConnectorsOnPrependedItems = function(side) {
+    for(var i = 0; i < this._connectors.length; i++) {
+        if(!this._isInitialConnector(this._connectors[i]) &&
+            this._guid.wasItemPrepended(this._connectors[i].itemGUID) && side != this._connectors[i].side) {
+            this._connectors.splice(i, 1);
+            i--;
+        }
     }
 }
 
@@ -9860,19 +10234,19 @@ Gridifier.HorizontalGrid.Prepender = function(gridifier,
     this._gridifier = null;
     this._settings = null;
     this._sizesResolverManager = null;
-
+    this._guid = null;
+    this._renderer = null;
+    this._normalizer = null;
+    this._operation = null;
     this._connectors = null;
     this._connections = null;
+
     this._connectorsCleaner = null;
     this._connectorsShifter = null;
     this._connectorsSelector = null;
     this._connectorsSorter = null;
     this._itemCoordsExtractor = null;
     this._connectionsIntersector = null;
-    this._guid = null;
-    this._renderer = null;
-    this._normalizer = null;
-    this._operation = null;
 
     this._css = {
     };
@@ -9881,7 +10255,10 @@ Gridifier.HorizontalGrid.Prepender = function(gridifier,
         me._gridifier = gridifier;
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
-
+        me._guid = guid;
+        me._renderer = renderer;
+        me._normalizer = normalizer;
+        me._operation = operation;
         me._connectors = connectors;
         me._connections = connections;
 
@@ -9895,11 +10272,6 @@ Gridifier.HorizontalGrid.Prepender = function(gridifier,
         me._connectorsSorter = new Gridifier.HorizontalGrid.ConnectorsSorter();
         me._itemCoordsExtractor = new Gridifier.HorizontalGrid.ItemCoordsExtractor(me._gridifier, me._sizesResolverManager);
         me._connectionsIntersector = new Gridifier.HorizontalGrid.ConnectionsIntersector(me._connections);
-
-        me._guid = guid;
-        me._renderer = renderer;
-        me._normalizer = normalizer;
-        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -10010,12 +10382,17 @@ Gridifier.HorizontalGrid.Prepender.prototype._createConnectionPerItem = function
         this._connections.expandHorizontallyAllColConnectionsToMostWide(connection);
     }
     this._addItemConnectors(itemConnectionCoords, this._guid.getItemGUID(item));
+    this._guid.markAsPrependedItem(item);
 
     return connection;
 }
 
 Gridifier.HorizontalGrid.Prepender.prototype._filterConnectorsPerNextConnection = function() {
     var connectors = this._connectors.getClone();
+
+    this._connectorsSelector.attachConnectors(connectors);
+    this._connectorsSelector.selectOnlySpecifiedSideConnectorsOnAppendedItems(Gridifier.Connectors.SIDES.LEFT.BOTTOM);
+    connectors = this._connectorsSelector.getSelectedConnectors();
    
     if(this._settings.isDefaultIntersectionStrategy()) {
         this._connectorsShifter.attachConnectors(connectors); 
@@ -10072,6 +10449,11 @@ Gridifier.HorizontalGrid.Prepender.prototype._findItemConnectionCoords = functio
         }
     }
 
+    if(itemConnectionCoords == null) {
+        var errorType = Gridifier.Error.ERROR_TYPES.INSERTER.TOO_TALL_ITEM_ON_HORIZONTAL_GRID_INSERT;
+        new Gridifier.Error(errorType, item);
+    }
+
     return itemConnectionCoords;
 }
 
@@ -10089,19 +10471,19 @@ Gridifier.HorizontalGrid.ReversedAppender = function(gridifier,
     this._gridifier = null;
     this._settings = null;
     this._sizesResolverManager = null;
-
+    this._guid = null;
+    this._renderer = null;
+    this._normalizer = null;
+    this._operation = null;
     this._connectors = null;
     this._connections = null;
+
     this._connectorsCleaner = null;
     this._connectorsShifter = null;
     this._connectorsSelector = null;
     this._connectorsSorter = null;
     this._itemCoordsExtractor = null;
     this._connectionsIntersector = null;
-    this._guid = null;
-    this._renderer = null;
-    this._normalizer = null;
-    this._operation = null;
 
     this._css = {
     };
@@ -10110,7 +10492,10 @@ Gridifier.HorizontalGrid.ReversedAppender = function(gridifier,
         me._gridifier = gridifier;
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
-
+        me._guid = guid;
+        me._renderer = renderer;
+        me._normalizer = normalizer;
+        me._operation = operation;
         me._connectors = connectors;
         me._connections = connections;
 
@@ -10124,11 +10509,6 @@ Gridifier.HorizontalGrid.ReversedAppender = function(gridifier,
         me._connectorsSorter = new Gridifier.HorizontalGrid.ConnectorsSorter();
         me._itemCoordsExtractor = new Gridifier.HorizontalGrid.ItemCoordsExtractor(me._gridifier, me._sizesResolverManager);
         me._connectionsIntersector = new Gridifier.HorizontalGrid.ConnectionsIntersector(me._connections);
-
-        me._guid = guid;
-        me._renderer = renderer;
-        me._normalizer = normalizer;
-        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -10239,6 +10619,10 @@ Gridifier.HorizontalGrid.ReversedAppender.prototype._createConnectionPerItem = f
 Gridifier.HorizontalGrid.ReversedAppender.prototype._filterConnectorsPerNextConnection = function() {
     var connectors = this._connectors.getClone();
 
+    this._connectorsSelector.attachConnectors(connectors);
+    this._connectorsSelector.selectOnlySpecifiedSideConnectorsOnPrependedItems(Gridifier.Connectors.SIDES.RIGHT.BOTTOM);
+    connectors = this._connectorsSelector.getSelectedConnectors();
+
     if(this._settings.isDefaultIntersectionStrategy()) {
         this._connectorsShifter.attachConnectors(connectors);
         this._connectorsShifter.shiftAllConnectors();
@@ -10296,6 +10680,11 @@ Gridifier.HorizontalGrid.ReversedAppender.prototype._findItemConnectionCoords = 
             break;
         }
     }
+
+    if(itemConnectionCoords == null) {
+        var errorType = Gridifier.Error.ERROR_TYPES.INSERTER.TOO_TALL_ITEM_ON_HORIZONTAL_GRID_INSERT;
+        new Gridifier.Error(errorType, item);
+    }
     
     return itemConnectionCoords;
 }
@@ -10314,19 +10703,19 @@ Gridifier.HorizontalGrid.ReversedPrepender = function(gridifier,
     this._gridifier = null;
     this._settings = null;
     this._sizesResolverManager = null;
-
+    this._guid = null;
+    this._renderer = null;
+    this._normalizer = null;
+    this._operation = null;
     this._connectors = null;
     this._connections = null;
+
     this._connectorsCleaner = null;
     this._connectorsShifter = null;
     this._connectorsSelector = null;
     this._connectorsSorter = null;
     this._itemCoordsExtractor = null;
     this._connectionsIntersector = null;
-    this._guid = null;
-    this._renderer = null;
-    this._normalizer = null;
-    this._operation = null;
 
     this._css = {
     };
@@ -10335,7 +10724,10 @@ Gridifier.HorizontalGrid.ReversedPrepender = function(gridifier,
         me._gridifier = gridifier;
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
-
+        me._guid = guid;
+        me._renderer = renderer;
+        me._normalizer = normalizer;
+        me._operation = operation;
         me._connectors = connectors;
         me._connections = connections;
 
@@ -10349,11 +10741,6 @@ Gridifier.HorizontalGrid.ReversedPrepender = function(gridifier,
         me._connectorsSorter = new Gridifier.HorizontalGrid.ConnectorsSorter();
         me._itemCoordsExtractor = new Gridifier.HorizontalGrid.ItemCoordsExtractor(me._gridifier, me._sizesResolverManager);
         me._connectionsIntersector = new Gridifier.HorizontalGrid.ConnectionsIntersector(me._connections);
-
-        me._guid = guid;
-        me._renderer = renderer;
-        me._normalizer = normalizer;
-        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -10464,12 +10851,17 @@ Gridifier.HorizontalGrid.ReversedPrepender.prototype._createConnectionPerItem = 
         this._connections.expandHorizontallyAllColConnectionsToMostWide(connection);
     }
     this._addItemConnectors(itemConnectionCoords, this._guid.getItemGUID(item));
+    this._guid.markAsPrependedItem(item);
 
     return connection;
 }
 
 Gridifier.HorizontalGrid.ReversedPrepender.prototype._filterConnectorsPerNextConnection = function() {
     var connectors = this._connectors.getClone();
+
+    this._connectorsSelector.attachConnectors(connectors);
+    this._connectorsSelector.selectOnlySpecifiedSideConnectorsOnAppendedItems(Gridifier.Connectors.SIDES.LEFT.TOP);
+    connectors = this._connectorsSelector.getSelectedConnectors();
 
     if(this._settings.isDefaultIntersectionStrategy()) {
         this._connectorsShifter.attachConnectors(connectors);
@@ -10524,6 +10916,11 @@ Gridifier.HorizontalGrid.ReversedPrepender.prototype._findItemConnectionCoords =
         if(itemConnectionCoords != null) {
             break;
         }
+    }
+
+    if(itemConnectionCoords == null) {
+        var errorType = Gridifier.Error.ERROR_TYPES.INSERTER.TOO_TALL_ITEM_ON_HORIZONTAL_GRID_INSERT;
+        new Gridifier.Error(errorType, item);
     }
     
     return itemConnectionCoords;
@@ -10627,7 +11024,7 @@ Gridifier.Operations.Append.prototype.executeInsertBefore = function(items, befo
     }
     else {
         var beforeItem = (this._collector.toDOMCollection(beforeItem))[0];
-        // This check is required, if afterItem is jQuery find result without DOMElem
+        // This check is required, if beforeItem is jQuery find result without DOMElem
         if(typeof beforeItem == "undefined" || beforeItem == null)
             var beforeItem = connections[0].item;
     }
@@ -10662,12 +11059,12 @@ Gridifier.Operations.Append.prototype.executeInsertBefore = function(items, befo
         this._reversedAppender.recreateConnectorsPerAllConnectedItems();
 
     this.execute(items);
-    // @todo -> Process customSd mode
+
     if(this._settings.isDisabledSortDispersion()) {
         this._connections.restore(connectionsToRetransform);
         this._connections.remapAllItemGUIDSInSortedConnections(connectionsToRetransform);
     }
-    else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+    else if(this._settings.isCustomSortDispersion() || this._settings.isCustomAllEmptySpaceSortDispersion()) {
         this._connections.restoreOnCustomSortDispersionMode(connectionsToRetransform);
         this._connections.remapAllItemGUIDS();
     }
@@ -10725,12 +11122,12 @@ Gridifier.Operations.Append.prototype.executeInsertAfter = function(items, after
         this._reversedAppender.recreateConnectorsPerAllConnectedItems();
 
     this.execute(items);
-    // @todo -> Process custom SD
+
     if(this._settings.isDisabledSortDispersion()) {
         this._connections.restore(connectionsToRetransform);
         this._connections.remapAllItemGUIDSInSortedConnections(connectionsToRetransform);
     }
-    else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+    else if(this._settings.isCustomSortDispersion() || this._settings.isCustomAllEmptySpaceSortDispersion()) {
         this._connections.restoreOnCustomSortDispersionMode(connectionsToRetransform);
         this._connections.remapAllItemGUIDS();
     }
@@ -11147,35 +11544,6 @@ Gridifier.Operations.Queue.prototype._processQueuedOperations = function() {
 
     if(wereAllQueueOperationsExecuted)
         this._isWaitingForTransformerQueueRelease = false;
-
-    // if(this._sizesTransformer.isTransformerQueueEmpty()) {
-    //     for(var i = 0; i < this._queuedOperations.length; i++) {
-    //         if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.APPEND) {
-    //             this._append(this._queuedOperations[i].items);
-    //         }
-    //         else if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.PREPEND) {
-    //             this._prepend(this._queuedOperations[i].items);
-    //         }
-    //         else if(this._queuedOperations[i].queuedOperationType == Gridifier.QUEUED_OPERATION_TYPES.INSERT_BEFORE) {
-    //             this._insertBefore(
-    //                 this._queuedOperations[i].items,
-    //                 this._queuedOperations[i].beforeItem
-    //             );
-    //         }
-    //         else {
-    //             var operationType = this._queuedOperations[i].queuedOperationType;
-    //             throw new Error("Unknown queued operation type = '" + operationType + "'");
-    //         }
-    //     }
-
-    //     this._queuedOperations = [];
-    //     this._isWaitingForTransformerQueueRelease = false;
-    // }
-    // else {
-    //     setTimeout(function() {
-    //         me._processQueuedOperations.call(me);
-    //     }, Gridifier.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
-    // }
 }
 
 Gridifier.Operations.Queue.prototype._executePrependOperation = function(items) {
@@ -11337,6 +11705,7 @@ Gridifier.Renderer.prototype.renderConnections = function(connections, exceptCon
 // (Example: slide show method -> calling 0ms offset translate at start, than this refresh
 // will be called before slideOutTimeout without a delay.(Will move items instantly)
 Gridifier.Renderer.prototype.renderConnectionsAfterDelay = function(connections, delay) {
+    var me = this;
     var delay = delay || 20;
 
     for(var i = 0; i < connections.length; i++) {
@@ -11476,7 +11845,6 @@ Gridifier.Renderer.Schedulator.PROCESS_SCHEDULED_CONNECTIONS_TIMEOUT = 20;
 Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES = {
     SHOW: 0, HIDE: 1, RENDER: 2, RENDER_TRANSFORMED: 3, RENDER_DEPENDED: 4, DELAYED_RENDER: 5
 };
-Gridifier.Renderer.Schedulator.DISABLE_PRETOGGLE_COORDS_CHANGER_CALL_DATA_ATTR = "data-gridifier-renderer-disable-pretoggle-cc-call";
 
 Gridifier.Renderer.Schedulator.prototype.setSilentRendererInstance = function(silentRenderer) {
     this._silentRenderer = silentRenderer;
@@ -11566,11 +11934,6 @@ Gridifier.Renderer.Schedulator.prototype._schedule = function() {
     }, Gridifier.Renderer.Schedulator.PROCESS_SCHEDULED_CONNECTIONS_TIMEOUT);
 }
 
-// @todo -> Solve problem with cache stop inside process scheduled connections
-//setTimeout(function() { renderNextConnection(0); }, 0); // @notice -> Settimeouts here will slow down
-// overall perfomance in legacy browsers(ie8, safari 5.1.7(Win)), because caching will stop before
-// me._gridifier.getGridX2() will be called(because of setTimeout async), and Gridifier will recursively recalculate
-// all DOM nodes up through DOM-Tree, until reaching root node.
 Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function() {
     var me = this;
     var schedulator = Gridifier.Renderer.Schedulator;
@@ -11585,7 +11948,6 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             continue;
 
         if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.SHOW) {
-            // @todo -> maybe add here start/stop caching transaction??? Or it is useless?
             Dom.css.set(connectionToProcess.item, {
                 position: "absolute",
                 left: left,
@@ -11680,7 +12042,6 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.DELAYED_RENDER) {
             var delay = this._scheduledConnectionsToProcessData[i].delay;
             var coordsChanger = this._settings.getCoordsChanger();
-            // @todo -> Or toggleAnimationMsDuration(Per sync???)
             var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
             var eventEmitter = this._settings.getEventEmitter();
 
@@ -11705,11 +12066,11 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER ||
                 processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED) {
-            var rendererCoordsChangerFunction = this._settings.getCoordsChanger();
+            var coordsChanger = this._settings.getCoordsChanger();
             var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
             var eventEmitter = this._settings.getEventEmitter();
 
-            rendererCoordsChangerFunction(
+            coordsChanger(
                 connectionToProcess.item,
                 left,
                 top,
@@ -11722,19 +12083,19 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var targetWidth = this._scheduledConnectionsToProcessData[i].targetWidth;
             var targetHeight = this._scheduledConnectionsToProcessData[i].targetHeight;
 
-            var rendererSizesChangerFunction = this._settings.getSizesChanger();
+            var sizesChanger = this._settings.getSizesChanger();
 
-            rendererSizesChangerFunction(
+            sizesChanger(
                 connectionToProcess.item, 
                 targetWidth, 
                 targetHeight
             );
 
-            var rendererCoordsChangerFunction = this._settings.getCoordsChanger();
+            var coordsChanger = this._settings.getCoordsChanger();
             var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
             var eventEmitter = this._settings.getEventEmitter();
 
-            rendererCoordsChangerFunction(
+            coordsChanger(
                 connectionToProcess.item, 
                 left, 
                 top,
@@ -12062,6 +12423,42 @@ Gridifier.ApiSettingsParser.prototype.parseSizesChangerOptions = function(sizesC
     }
 }
 
+Gridifier.ApiSettingsParser.prototype.parseDraggableItemDecoratorOptions = function(dragifierApi) {
+    if(!this._settings.hasOwnProperty("draggableItemDecorator")) {
+        dragifierApi.setDraggableItemDecoratorFunction("cloneCSS");
+        return;
+    }
+
+    if(typeof this._settings.draggableItemDecorator == "function") {
+        dragifierApi.addDraggableItemDecoratorFunction("clientDefault", this._settings.draggableItemDecorator);
+        dragifierApi.setDraggableItemDecoratorFunction("clientDefault");
+        return;
+    }
+    else if(typeof this._settings.draggableItemDecorator == "object") {
+        for(var draggableItemDecoratorFunctionName in this._settings.draggableItemDecorator) {
+            var draggableItemDecoratorFunction = this._settings.draggableItemDecorator[draggableItemDecoratorFunctionName];
+
+            if(typeof draggableItemDecoratorFunction != "function") {
+                new Gridifier.Error(
+                    Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_ONE_OF_DRAGGABLE_ITEM_DECORATOR_FUNCTION_TYPES,
+                    draggableItemDecoratorFunction
+                );
+            }
+
+            dragifierApi.addDraggableItemDecoratorFunction(draggableItemDecoratorFunctionName, draggableItemDecoratorFunction);
+        }
+
+        dragifierApi.setDraggableItemDecoratorFunction("cloneCSS");
+        return;
+    }
+    else {
+        new Gridifier.Error(
+            Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_DRAGGABLE_ITEM_DECORATOR_PARAM_VALUE,
+            this._settings.draggableItemDecorator
+        );
+    }
+}
+
 Gridifier.CoreSettingsParser = function(settingsCore, settings) {
     var me = this;
 
@@ -12246,6 +12643,13 @@ Gridifier.CoreSettingsParser.prototype.parseSortDispersionValue = function() {
     return sortDispersionValue;
 }
 
+Gridifier.CoreSettingsParser.prototype.parseResizeTimeoutValue = function() {
+    if(!this._settings.hasOwnProperty("resizeTimeout"))
+        return null;
+
+    return Dom.toInt(this._settings.resizeTimeout);
+}
+
 Gridifier.CoreSettingsParser.prototype.parseDisableItemHideOnGridAttachValue = function() {
     if(!this._settings.hasOwnProperty("disableItemHideOnGridAttach"))
         return false;
@@ -12298,6 +12702,20 @@ Gridifier.CoreSettingsParser.prototype.parseGridTransformTimeout = function() {
     return this._settings.gridTransformTimeout;
 }
 
+Gridifier.CoreSettingsParser.prototype.parseRetransformQueueBatchSize = function() {
+    if(!this._settings.hasOwnProperty("retransformQueueBatchSize"))
+        return Gridifier.RETRANSFORM_QUEUE_DEFAULT_BATCH_SIZE;
+
+    return this._settings.retransformQueueBatchSize;
+}
+
+Gridifier.CoreSettingsParser.prototype.parseRetransformQueueBatchTimeout = function() {
+    if(!this._settings.hasOwnProperty("retransformQueueBatchTimeout"))
+        return Gridifier.RETRANSFORM_QUEUE_DEFAULT_BATCH_TIMEOUT;
+
+    return this._settings.retransformQueueBatchTimeout;
+}
+
 Gridifier.CoreSettingsParser.prototype.parseGridItemMarkingStrategy = function() {
     if(!this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_CLASS) 
         && !this._settings.hasOwnProperty(Gridifier.GRID_ITEM_MARKING_STRATEGIES.BY_DATA_ATTR)
@@ -12333,12 +12751,7 @@ Gridifier.CoreSettingsParser.prototype.parseDragifierSettings = function() {
         var shouldEnableDragifierOnInit = true;
 
         if(typeof this._settings.dragifier == "boolean") {
-            if(this._settingsCore.isByClassGridItemMarkingStrategy()) {
-                var dragifierItemSelector = "." + this._settingsCore.getGridItemMarkingValue();
-            }
-            else if(this._settingsCore.isByDataAttrGridItemMarkingStrategy()) {
-                var dragifierItemSelector = "[" + this._settingsCore.getGridItemMarkingValue() + "]";
-            }
+            var dragifierItemSelector = false;
         }
         else {
             var dragifierItemSelector = this._settings.dragifier;
@@ -12351,12 +12764,7 @@ Gridifier.CoreSettingsParser.prototype.parseDragifierSettings = function() {
     }
 
     var shouldEnableDragifierOnInit = false;
-    if(this._settingsCore.isByClassGridItemMarkingStrategy()) {
-        var dragifierItemSelector = "." + this._settingsCore.getGridItemMarkingValue();
-    }
-    else if(this._settingsCore.isByDataAttrGridItemMarkingStrategy()) {
-        var dragifierItemSelector = "[" + this._settingsCore.getGridItemMarkingValue() + "]";
-    }
+    var dragifierItemSelector = false;
 
     return {
         shouldEnableDragifierOnInit: shouldEnableDragifierOnInit,
@@ -12388,17 +12796,15 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
     this._sortDispersionMode = null;
     this._sortDispersionValue = null;
 
-    // @todo -> Pass global param duration to gridifier?(Or render/show duration???) Pass them as params in API calls???
-    // @todo -> Move this functions to separate files to allow easily override them?
-    //               User should have the ability to overide rotateX and rotateY in such manner,
-    //               that they would call for example scale in ie10/ie9 etc....
-    //              User should have control over direction of rotate and perspective size.
     this._toggleApi = null;
     this._toggleTimeouterApi = null;
     this._sortApi = null;
     this._filterApi = null;
     this._coordsChangerApi = null;
     this._sizesChangerApi = null;
+    this._dragifierApi = null;
+
+    this._resizeTimeout = null;
 
     this._gridItemMarkingStrategyType = null;
     this._gridItemMarkingValue = null;
@@ -12415,6 +12821,9 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
 
     this._gridTransformType = null;
     this._gridTransformTimeout = null;
+
+    this._retransformQueueBatchSize = null;
+    this._retransformQueueBatchTimeout = null;
 
     this._css = {
     };
@@ -12435,6 +12844,7 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
         me._filterApi = new Gridifier.Api.Filter(me, me._eventEmitter);
         me._coordsChangerApi = new Gridifier.Api.CoordsChanger(me, me._gridifier, me._eventEmitter);
         me._sizesChangerApi = new Gridifier.Api.SizesChanger(me, me._eventEmitter);
+        me._dragifierApi = new Gridifier.Api.Dragifier();
 
         me._parse();
     };
@@ -12467,6 +12877,7 @@ Gridifier.Settings.prototype._parse = function() {
     this._sortDispersionMode = this._coreSettingsParser.parseSortDispersionMode();
     this._sortDispersionValue = this._coreSettingsParser.parseSortDispersionValue();
 
+    this._resizeTimeout = this._coreSettingsParser.parseResizeTimeoutValue();
     this._shouldDisableItemHideOnGridAttach = this._coreSettingsParser.parseDisableItemHideOnGridAttachValue();
     this._toggleAnimationMsDuration = this._coreSettingsParser.parseToggleAnimationMsDuration();
     this._coordsChangeAnimationMsDuration = this._coreSettingsParser.parseCoordsChangeAnimationMsDuration();
@@ -12474,12 +12885,15 @@ Gridifier.Settings.prototype._parse = function() {
     this._rotateBackface = this._coreSettingsParser.parseRotateBackface();
     this._gridTransformType = this._coreSettingsParser.parseGridTransformType();
     this._gridTransformTimeout = this._coreSettingsParser.parseGridTransformTimeout();
+    this._retransformQueueBatchSize = this._coreSettingsParser.parseRetransformQueueBatchSize();
+    this._retransformQueueBatchTimeout = this._coreSettingsParser.parseRetransformQueueBatchTimeout();
 
     this._apiSettingsParser.parseToggleOptions(this._toggleApi);
     this._apiSettingsParser.parseSortOptions(this._sortApi);
     this._apiSettingsParser.parseFilterOptions(this._filterApi);
     this._apiSettingsParser.parseCoordsChangerOptions(this._coordsChangerApi);
     this._apiSettingsParser.parseSizesChangerOptions(this._sizesChangerApi);
+    this._apiSettingsParser.parseDraggableItemDecoratorOptions(this._dragifierApi);
 
     var gridItemMarkingStrategyData = this._coreSettingsParser.parseGridItemMarkingStrategy();
     this._gridItemMarkingStrategyType = gridItemMarkingStrategyData.gridItemMarkingStrategyType;
@@ -12500,6 +12914,10 @@ Gridifier.Settings.prototype.getEventEmitter = function() {
 
 Gridifier.Settings.prototype.getSizesResolverManager = function() {
     return this._sizesResolverManager;
+}
+
+Gridifier.Settings.prototype.getResizeTimeout = function() {
+    return this._resizeTimeout;
 }
 
 Gridifier.Settings.prototype.getToggleAnimationMsDuration = function() {
@@ -12538,8 +12956,28 @@ Gridifier.Settings.prototype.getGridTransformTimeout = function() {
     return this._gridTransformTimeout;
 }
 
+Gridifier.Settings.prototype.getRetransformQueueBatchSize = function() {
+    return this._retransformQueueBatchSize;
+}
+
+Gridifier.Settings.prototype.getRetransformQueueBatchTimeout = function() {
+    return this._retransformQueueBatchTimeout;
+}
+
 Gridifier.Settings.prototype.getToggleTimeouter = function() {
     return this._toggleTimeouterApi;
+}
+
+Gridifier.Settings.prototype.getDraggableItemCoordsChanger = function() {
+    return this._dragifierApi.getDraggableItemCoordsChanger();
+}
+
+Gridifier.Settings.prototype.getDraggableItemPointerDecorator = function() {
+    return this._dragifierApi.getDraggableItemPointerDecorator();
+}
+
+Gridifier.Settings.prototype.getDragifierUserSelectToggler = function() {
+    return this._dragifierApi.getDragifierUserSelectToggler();
 }
 
 Gridifier.Settings.prototype.isVerticalGrid = function() {
@@ -12654,12 +13092,20 @@ Gridifier.Settings.prototype.setSizesChanger = function(sizesChangerFunctionName
     this._sizesChangerApi.setSizesChangerFunction(sizesChangerFunctionName);
 }
 
+Gridifier.Settings.prototype.setDraggableItemDecorator = function(draggableItemDecoratorFunctionName) {
+    this._dragifierApi.setDraggableItemDecoratorFunction(draggableItemDecoratorFunctionName);
+}
+
 Gridifier.Settings.prototype.getCoordsChanger = function() {
     return this._coordsChangerApi.getCoordsChangerFunction();
 }
 
 Gridifier.Settings.prototype.getSizesChanger = function() {
     return this._sizesChangerApi.getSizesChangerFunction();
+}
+
+Gridifier.Settings.prototype.getDraggableItemDecorator = function() {
+    return this._dragifierApi.getDraggableItemDecoratorFunction();
 }
 
 Gridifier.Settings.prototype.isByClassGridItemMarkingStrategy = function() {
@@ -12720,14 +13166,8 @@ Gridifier.SizesTransformer.EmptySpaceNormalizer = function(connections, connecto
     return this;
 }
 
-    // @TODO -> WARNING!!! THIS SHOULD BE USED WHEN !NO_INTERSECTIONS STRATEGY TO FIX PREPENDED TRANSFORMS
-    //  (FIX THIS!!!!)
-    // @todo -> Check if this fix should be made always
-    // @todo -> Also this should be applied somewhere in the end of the queue
-    // if(this._settings.isNoIntersectionsStrategy()) {
-
-    // }
-
+// Maybe this class will be required to normalize free space after prepended item transforms
+// in the end of the transormation queue.
 Gridifier.SizesTransformer.EmptySpaceNormalizer.prototype.normalizeFreeSpace = function() {
     if(this._settings.isVerticalGrid())
         this._applyNoIntersectionsStrategyTopFreeSpaceFixOnPrependedItemTransform();
@@ -12761,7 +13201,7 @@ Gridifier.SizesTransformer.EmptySpaceNormalizer.prototype._applyNoIntersectionsS
 }
 
 Gridifier.SizesTransformer.EmptySpaceNormalizer.prototype._applyNoIntersectionsStrategyLeftFreeSpaceFixOnPrependedItemTransform = function() {
-    // @todo -> Implement horizontal fix here
+    ;
 }
 
 Gridifier.SizesTransformer.ItemNewPxSizesFinder = function(gridifier,
@@ -13015,7 +13455,9 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
                                                       transformerConnectors,
                                                       settings, 
                                                       guid,
-                                                      transformedItemMarker) {
+                                                      transformedItemMarker,
+                                                      emptySpaceNormalizer,
+                                                      sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
@@ -13029,9 +13471,10 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
     this._settings = null;
     this._guid = null;
     this._transformedItemMarker = null;
+    this._emptySpaceNormalizer = null;
+    this._sizesResolverManager = null;
 
     this._reappendQueue = null;
-    this._batchSize = 12;
     this._reappendNextQueuedItemsBatchTimeout = null;
     this._reappendedQueueData = null;
     this._reappendStartViewportWidth = null;
@@ -13052,6 +13495,8 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
         me._settings = settings;
         me._guid = guid;
         me._transformedItemMarker = transformedItemMarker;
+        me._emptySpaceNormalizer = emptySpaceNormalizer;
+        me._sizesResolverManager = sizesResolverManager;
     };
 
     this._bindEvents = function() {
@@ -13068,21 +13513,7 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
     return this;
 }
 
-// @todo -> Check if horizontal grid works correctly here
 Gridifier.SizesTransformer.ItemsReappender.prototype.isReversedAppendShouldBeUsedPerItemInsert = function(item) {
-    // if(this._guid.wasItemPrepended(this._guid.getItemGUID(item)) 
-    //    && !this._settings.isMirroredPrepend()) {
-    //     if(this._settings.isDefaultPrepend())
-    //         return false;
-    //     else if(this._settings.isReversedPrepend())
-    //         return true;
-    // }
-    // else if(this._guid.wasItemAppended(this._guid.getItemGUID(item))) {
-    //     if(this._settings.isDefaultAppend())
-    //         return false;
-    //     else if(this._settings.isReversedAppend())
-    //         return true;
-    // }
     if(this._settings.isDefaultAppend())
         return false;
     else if(this._settings.isReversedAppend())
@@ -13126,24 +13557,28 @@ Gridifier.SizesTransformer.ItemsReappender.prototype.getQueuedConnectionsPerTran
 }
 
 Gridifier.SizesTransformer.ItemsReappender.prototype.startReappendingQueuedItems = function() {
-    //this._lastReappendedItemGUID = null;
-    // @todo -> Replace with JS events
-    this._reappendStartViewportWidth = $(window).width();
-    this._reappendStartViewportHeight = $(window).height();
+    this._reappendStartViewportWidth = this._sizesResolverManager.viewportWidth();
+    this._reappendStartViewportHeight = this._sizesResolverManager.viewportHeight();
 
     this._reappendNextQueuedItemsBatch();
 }
 
 Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBatch = function() {
-    var batchSize = this._batchSize;
+    var batchSize = this._settings.getRetransformQueueBatchSize();
     if(batchSize > this._reappendQueue.length)
         batchSize = this._reappendQueue.length;
 
+    if(this._settings.isVerticalGrid()) {
+        if(this._sizesResolverManager.viewportWidth() != this._reappendStartViewportWidth)
+            return;
+    }
+    else if(this._settings.isHorizontalGrid()) {
+        if(this._sizesResolverManager.viewportHeight() != this._reappendStartViewportHeight)
+            return;
+    }
+
+    this._sizesResolverManager.startCachingTransaction();
     var reappendedItemGUIDS = [];
-    // @todo -> Replace with JS events
-    // @todo -> Check settings ver.grid/hor.grid
-    if($(window).width() != this._reappendStartViewportWidth)
-        return;
 
     for(var i = 0; i < batchSize; i++) {
         var nextItemToReappend = this._reappendQueue[i].itemToReappend;
@@ -13158,27 +13593,30 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
         if(this._settings.isVerticalGrid())
             this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
         else if(this._settings.isHorizontalGrid())
-            // @todo -> Delete horizontal grid connectors here
-            ;
+            this._connectorsCleaner.deleteAllIntersectedFromRightConnectors();
 
-        //this._lastReappendedItemGUID = this._guid.getItemGUID(nextItemToReappend);
         reappendedItemGUIDS.push(this._guid.getItemGUID(nextItemToReappend));
     }
 
+    this._sizesResolverManager.stopCachingTransaction();
     var reappendedConnections = this._connections.getConnectionsByItemGUIDS(reappendedItemGUIDS);
     this._gridifier.getRenderer().renderTransformedConnections(reappendedConnections);
 
     this._reappendedQueueData = this._reappendedQueueData.concat(this._reappendQueue.splice(0, batchSize));
     if(this._reappendQueue.length == 0) {
+        //if(this._settings.isNoIntersectionsStrategy()) {
+        //    this._emptySpaceNormalizer.normalizeFreeSpace();
+        //}
         this._reappendNextQueuedItemsBatchTimeout = null;
         return;
     }
 
     var me = this;
+    var batchTimeout = this._settings.getRetransformQueueBatchTimeout();
+
     this._reappendNextQueuedItemsBatchTimeout = setTimeout(function() {
         me._reappendNextQueuedItemsBatch.call(me);
-    //}, 25); // Move to const
-    }, 25); 
+    }, batchTimeout);
 }
 
 Gridifier.SizesTransformer.ItemsReappender.prototype._reappendItem = function(reappendType,
@@ -13245,7 +13683,6 @@ Gridifier.SizesTransformer.ItemsToReappendFinder.prototype.findAllOnSizesTransfo
         // transformed item may become smaller).
         // When customSortDispersion is used, element with bigger guid can be above.(Depending 
         // on the dispersion param).
-        // @todo -> custom sort dispersion should have custom y1(VG) and custom x1(HG)
         else if(this._settings.isCustomSortDispersion() || this._settings.isCustomAllEmptySpaceSortDispersion() ||
                 this._settings.isNoIntersectionsStrategy()) {
             if(this._settings.isVerticalGrid()) {
@@ -13373,6 +13810,10 @@ Gridifier.SizesTransformer.Core = function(gridifier,
             me._operation
         );
 
+        me._emptySpaceNormalizer = new Gridifier.SizesTransformer.EmptySpaceNormalizer(
+            me._connections, me._connectors, me._settings
+        );
+
         me._itemsReappender = new Gridifier.SizesTransformer.ItemsReappender(
             me._gridifier,
             me._appender,
@@ -13384,13 +13825,11 @@ Gridifier.SizesTransformer.Core = function(gridifier,
             me._transformerConnectors,
             me._settings, 
             me._guid,
-            me._transformedItemMarker
+            me._transformedItemMarker,
+            me._emptySpaceNormalizer,
+            me._sizesResolverManager
         );
         me._transformerConnectors.setItemsReappenderInstance(me._itemsReappender);
-
-        me._emptySpaceNormalizer = new Gridifier.SizesTransformer.EmptySpaceNormalizer(
-            me._connections, me._connectors, me._settings
-        );
     };
 
     this._bindEvents = function() {
@@ -13428,6 +13867,7 @@ Gridifier.SizesTransformer.Core.prototype.transformConnectionSizes = function(tr
     // Timeout is required here because of DOM-tree changes inside transformed item clones creation.
     // (Optimizing getComputedStyle after reflow performance)
     var applyTransform = function() {
+        this._guid.unmarkAllPrependedItems();
         this._transformedItemMarker.markEachConnectionItemWithTransformData(transformationData);
 
         var connectionsToReappend = [];
@@ -13458,11 +13898,6 @@ Gridifier.SizesTransformer.Core.prototype.transformConnectionSizes = function(tr
 
         this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
         this._itemsReappender.startReappendingQueuedItems();
-
-        // @todo -> Enable this setting
-        //if(me._settings.isNoIntersectionsStrategy()) {
-        //    me._emptySpaceNormalizer.emptySpaceNormalizer.normalizeFreeSpace();
-        //}
     }
 
     var me = this;
@@ -13493,6 +13928,8 @@ Gridifier.SizesTransformer.Core.prototype.stopRetransformAllConnectionsQueue = f
 
 Gridifier.SizesTransformer.Core.prototype.retransformAllConnections = function() {
     this.stopRetransformAllConnectionsQueue();
+
+    var me = this;
     var connections = this._connections.get();
     
     if(connections.length == 0)
@@ -13500,6 +13937,7 @@ Gridifier.SizesTransformer.Core.prototype.retransformAllConnections = function()
 
     var applyRetransform = function() {
         connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
+        this._guid.unmarkAllPrependedItems();
 
         var itemsToReappend = [];
         var connectionsToKeep = [];
@@ -13548,11 +13986,6 @@ Gridifier.SizesTransformer.Core.prototype.retransformAllConnections = function()
 
         this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
         this._itemsReappender.startReappendingQueuedItems();
-
-        // @todo -> Enable this setting (Is it required here?) Move this declaration after queue flush
-        //if(me._settings.isNoIntersectionsStrategy()) {
-        //    me._emptySpaceNormalizer.emptySpaceNormalizer.normalizeFreeSpace();
-        //}
     }
 
     var wereItemSizesSyncs = this._syncAllScheduledToTransformItemSizes(connections);
@@ -13612,6 +14045,7 @@ Gridifier.SizesTransformer.Core.prototype.retransformFrom = function(firstConnec
         }
     }
 
+    this._guid.unmarkAllPrependedItems();
     var itemsToReappendData = this._itemsToReappendFinder.findAllOnSizesTransform(
         connectionsToReappend, firstConnectionToRetransform
     );
@@ -13627,11 +14061,6 @@ Gridifier.SizesTransformer.Core.prototype.retransformFrom = function(firstConnec
 
     this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
     this._itemsReappender.startReappendingQueuedItems();
-
-    // @todo -> Enable this setting
-    //if(me._settings.isNoIntersectionsStrategy()) {
-    //    me._emptySpaceNormalizer.emptySpaceNormalizer.normalizeFreeSpace();
-    //}
 }
 
 Gridifier.SizesTransformer.TransformedConnectionsSorter = function(connectionsSorter) {
@@ -13913,8 +14342,6 @@ Gridifier.TransformerOperations.Toggle = function(collector,
     return this;
 }
 
-// @todo -> Apply check that item is < than grid
-// @todo -> Update grid sizes after toggle and transform
 Gridifier.TransformerOperations.Toggle.prototype.execute = function(maybeItem, 
                                                                     newWidth, 
                                                                     newHeight,
@@ -13925,10 +14352,9 @@ Gridifier.TransformerOperations.Toggle.prototype.execute = function(maybeItem,
         itemsToTransform, sizesToTransform, usePaddingBottomInsteadHeight
     );
 
+    this._sizesResolverManager.startCachingTransaction();
     this._sizesTransformer.transformConnectionSizes(transformationData);
-    // @todo -> will it work(SizesTransfomer has async action inside)
     this._sizesResolverManager.stopCachingTransaction();
-    // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
 }
 
 Gridifier.TransformerOperations.Toggle.prototype._parseTransformationData = function(itemsToTransform,
@@ -14010,8 +14436,6 @@ Gridifier.TransformerOperations.Transform = function(collector,
     return this;
 }
 
-// @todo -> Apply check that item is < than grid
-// @todo -> Update grid sizes after toggle and transform
 Gridifier.TransformerOperations.Transform.prototype.execute = function(maybeItem, 
                                                                        newWidth, 
                                                                        newHeight, 
@@ -14022,10 +14446,9 @@ Gridifier.TransformerOperations.Transform.prototype.execute = function(maybeItem
         itemsToTransform, sizesToTransform, usePaddingBottomInsteadHeight
     );
 
+    this._sizesResolverManager.startCachingTransaction();
     this._sizesTransformer.transformConnectionSizes(transformationData);
-    // @todo -> will it work(SizesTransfomer has async action inside)
     this._sizesResolverManager.stopCachingTransaction();
-    // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
 }
 
 Gridifier.TransformerOperations.Transform.prototype._parseTransformationData = function(itemsToTransform,
@@ -14054,7 +14477,9 @@ Gridifier.TransformerOperations.Transform.prototype._parseTransformationData = f
 }
 
 Gridifier.TransformerOperations.Transform.prototype.executeRetransformAllSizes = function() {
+    this._sizesResolverManager.startCachingTransaction();
     this._sizesTransformer.retransformAllConnections();
+    this._sizesResolverManager.stopCachingTransaction();
 }
 
 Gridifier.VerticalGrid.Appender = function(gridifier, 
@@ -14071,19 +14496,19 @@ Gridifier.VerticalGrid.Appender = function(gridifier,
     this._gridifier = null;
     this._settings = null;
     this._sizesResolverManager = null;
-
+    this._guid = null;
+    this._renderer = null;
+    this._normalizer = null;
+    this._operation = null;
     this._connectors = null;
     this._connections = null;
+
     this._connectorsCleaner = null;
     this._connectorsShifter = null;
     this._connectorsSelector = null;
     this._connectorsSorter = null;
     this._itemCoordsExtractor = null;
     this._connectionsIntersector = null;
-    this._guid = null;
-    this._renderer = null;
-    this._normalizer = null;
-    this._operation = null;
 
     this._css = {
     };
@@ -14092,7 +14517,10 @@ Gridifier.VerticalGrid.Appender = function(gridifier,
         me._gridifier = gridifier;
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
-
+        me._guid = guid;
+        me._renderer = renderer;
+        me._normalizer = normalizer;
+        me._operation = operation;
         me._connectors = connectors;
         me._connections = connections;
 
@@ -14106,11 +14534,6 @@ Gridifier.VerticalGrid.Appender = function(gridifier,
         me._connectorsSorter = new Gridifier.VerticalGrid.ConnectorsSorter();
         me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor(me._gridifier, me._sizesResolverManager);
         me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(me._connections);
-
-        me._guid = guid;
-        me._renderer = renderer;
-        me._normalizer = normalizer;
-        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -14129,22 +14552,10 @@ Gridifier.VerticalGrid.Appender = function(gridifier,
 
 Gridifier.VerticalGrid.Appender.prototype.append = function(item) {
     this._initConnectors();
-    //timer.start();
+
     var connection = this._createConnectionPerItem(item);
-    //console.log("create connection = ", timer.get());
-    // var result = timer.get();
-    // if(typeof window.appendsCount == "undefined") {
-    //     window.appendsCount = 1;
-    //     window.totalTime = result;
-    // }
-    // else {
-    //     window.appendsCount++;
-    //     window.totalTime += result;
-    // }
     this._connections.attachConnectionToRanges(connection);
-    
     this._connectorsCleaner.deleteAllTooHighConnectorsFromMostBottomConnector();
-    //timer.start();
     this._connectorsCleaner.deleteAllIntersectedFromBottomConnectors();
     
     if(this._settings.isDefaultIntersectionStrategy())
@@ -14216,32 +14627,30 @@ Gridifier.VerticalGrid.Appender.prototype._addItemConnectors = function(itemCoor
 }
 
 Gridifier.VerticalGrid.Appender.prototype._createConnectionPerItem = function(item) {
-    //timer.start("filter = ");
     var sortedConnectors = this._filterConnectorsPerNextConnection();
-     //timer.stop();
-     //timer.start("findic = ");
+
     var itemConnectionCoords = this._findItemConnectionCoords(item, sortedConnectors);
-    //timer.stop(); console.log("");
-    //timer.start("add");
     var connection = this._connections.add(item, itemConnectionCoords);
-    //timer.stop();
-    //timer.start("expandVerticallyAllRowConnections");
+
     if(this._settings.isNoIntersectionsStrategy()) {
         this._connections.expandVerticallyAllRowConnectionsToMostTall(connection);
     }
     this._addItemConnectors(itemConnectionCoords, this._guid.getItemGUID(item));
-    // timer.stop();
+
     return connection;
 }
 
 Gridifier.VerticalGrid.Appender.prototype._filterConnectorsPerNextConnection = function() {
     var connectors = this._connectors.getClone();
 
-    if(this._settings.isDefaultIntersectionStrategy()) { //timer.start();
+    this._connectorsSelector.attachConnectors(connectors);
+    this._connectorsSelector.selectOnlySpecifiedSideConnectorsOnPrependedItems(Gridifier.Connectors.SIDES.BOTTOM.RIGHT);
+    connectors = this._connectorsSelector.getSelectedConnectors();
+
+    if(this._settings.isDefaultIntersectionStrategy()) {
         this._connectorsShifter.attachConnectors(connectors);
         this._connectorsShifter.shiftAllConnectors();
         connectors = this._connectorsShifter.getAllConnectors();
-        //console.log("shift all connectors = " + timer.get());
     }
     else if(this._settings.isNoIntersectionsStrategy()) {
         var connectorsSide = Gridifier.Connectors.SIDES.BOTTOM.RIGHT;
@@ -14257,7 +14666,7 @@ Gridifier.VerticalGrid.Appender.prototype._filterConnectorsPerNextConnection = f
     
     this._connectorsSorter.attachConnectors(connectors); 
     this._connectorsSorter.sortConnectorsForAppend(Gridifier.APPEND_TYPES.DEFAULT_APPEND);
-    //console.log("sort connector = " + timer.get()); console.log("");
+
     return this._connectorsSorter.getConnectors();
 }
 
@@ -14294,6 +14703,11 @@ Gridifier.VerticalGrid.Appender.prototype._findItemConnectionCoords = function(i
         if(itemConnectionCoords != null) {
             break;
         }
+    }
+
+    if(itemConnectionCoords == null) {
+        var errorType = Gridifier.Error.ERROR_TYPES.INSERTER.TOO_WIDE_ITEM_ON_VERTICAL_GRID_INSERT;
+        new Gridifier.Error(errorType, item);
     }
     
     return itemConnectionCoords;
@@ -14378,7 +14792,6 @@ Gridifier.VerticalGrid.Connections.prototype.reinitRanges = function() {
 }
 
 Gridifier.VerticalGrid.Connections.prototype.getAllHorizontallyIntersectedAndUpperConnections = function(connector) {
-    //return this._ranges.getAllConnectionsFromIntersectedAndUpperRanges(connector.y);
     return this._ranges.getAllConnectionsFromIntersectedAndUpperRanges(connector.y);
 }
 
@@ -14514,20 +14927,38 @@ Gridifier.VerticalGrid.Connections.prototype.isAnyConnectionItemGUIDBiggerThan =
 Gridifier.VerticalGrid.Connections.prototype.getAllConnectionsBelowY = function(y) {
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
-        if(this._connections[i].y1 - 10000 > y) // @todo -> Delete, for testing
-        //if(this._connections[i].y1 > y)
-            connections.push(this._connections[i]);
+        if(this._settings.isDisabledSortDispersion()) {
+            if(this._connections[i].y1 > y)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomSortDispersion()) {
+            var sortDispersionValue = this._settings.getSortDispersionValue();
+            if(this._connections[i].y1 - sortDispersionValue > y)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+            ; // No connections
+        }
     }
 
     return connections;
 }
 
 Gridifier.VerticalGrid.Connections.prototype.getAllConnectionsAboveY = function(y) {
-    // @todo -> Place CSD here too :)
     var connections = [];
     for(var i = 0; i < this._connections.length; i++) {
-        if(this._connections[i].y2 < y)
-            connections.push(this._connections[i]);
+        if(this._settings.isDisabledSortDispersion()) {
+            if(this._connections[i].y2 < y)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomSortDispersion()) {
+            var sortDispersionValue = this._settings.getSortDispersionValue();
+            if(this._connections[i].y2 + sortDispersionValue < y)
+                connections.push(this._connections[i]);
+        }
+        else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+            ; // No connections
+        }
     }
 
     return connections;
@@ -14684,11 +15115,8 @@ Gridifier.VerticalGrid.ConnectionsRanges = function(connections) {
     return this;
 }
 
-//@todo -> Xranitj otdelnie srezi dlja appenda/prependa srazu so vsemi elementami(bez perebora nod)???
 
-// @todo -> Should it be so large???(mobiles)
 Gridifier.VerticalGrid.ConnectionsRanges.RANGE_PX_HEIGHT = 500;
-//Gridifier.VerticalGrid.ConnectionsRanges.RANGE_PX_HEIGHT = 200;
 
 Gridifier.VerticalGrid.ConnectionsRanges.prototype.init = function() {
     this._ranges = [];
@@ -14816,51 +15244,6 @@ Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersec
     return connectionIndexes;
 }
 
-// Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersectedAndUpperRanges = function(y) {
-//     var connections = this._connections.get();
-//     var rangeConnections = [];
-//     var addedConnectionIndexes = [];
-//     var intersectedRangeIndex = null;
-
-//     var isConnectionAlreadyAdded = function(connectionIndex) {
-//         for(var i = 0; i < addedConnectionIndexes.length; i++) {
-//             if(connectionIndex == addedConnectionIndexes[i])
-//                 return true;
-//         }
-
-//         return false;
-//     }
-
-//     for(var i = 0; i < this._ranges.length; i++) {
-//         if(y >= this._ranges[i].y1 && y <= this._ranges[i].y2) {
-//             for(var j = 0; j < this._ranges[i].connectionIndexes.length; j++) {
-//                 var connectionIndex = this._ranges[i].connectionIndexes[j];
-
-//                 if(!isConnectionAlreadyAdded(connectionIndex)) {
-//                     rangeConnections.push(connections[connectionIndex]);
-//                     addedConnectionIndexes.push(connectionIndex);
-//                 }
-//             }
-
-//             intersectedRangeIndex = i;
-//             break;
-//         }
-//     }
-
-//     for(var i = intersectedRangeIndex; i >= 0; i--) {
-//         for(var j = 0; j < this._ranges[i].connectionIndexes.length; j++) {
-//             var connectionIndex = this._ranges[i].connectionIndexes[j];
-
-//             if(!isConnectionAlreadyAdded(connectionIndex)) {
-//                 rangeConnections.push(connections[connectionIndex]);
-//                 addedConnectionIndexes.push(connectionIndex);
-//             }
-//         }
-//     }
-
-//     return rangeConnections;
-// }
-
 Gridifier.VerticalGrid.ConnectionsRanges.prototype.mapAllIntersectedAndLowerConnectionsPerEachConnector = function(sortedConnectors) {
     var currentConnectorRangeIndex = 0;
     var currentConnectorConnectionIndexes = [];
@@ -14951,111 +15334,6 @@ Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersec
 
     return connectionIndexes;
 }
-
-// Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersectedAndLowerRanges = function(y) {
-//     var connections = this._connections.get();
-//     var rangeConnections = [];
-//     var intersectedRangeIndex = null;
-
-    //timer.start();
-   // timer.start();
-    // for(var i = 0; i < this._ranges.length; i++) {
-    //     if(y >= this._ranges[i].y1 && y <= this._ranges[i].y2) {
-    //         for(var j = 0; j < this._ranges[i].connectionIndexes.length; j++) {
-    //             rangeConnections.push(connections[this._ranges[i].connectionIndexes[j]]);
-    //         }
-
-    //         intersectedRangeIndex = i;
-    //         break;
-    //     }
-    // }
-    // var time = timer.get();
-    // if(time > 0.050) {
-    //     console.log("cycle 1 = " + time);
-    //     console.log("items count = " + this._ranges[intersectedRangeIndex].connectionIndexes.length);
-    //     console.log("");
-    // }
-    
-    // var before = rangeConnections.length;
-    // timer.start();
-    // for(var i = intersectedRangeIndex; i < this._ranges.length; i++) {
-    //     for(var j = 0; j < this._ranges[i].connectionIndexes.length; j++) {
-    //         rangeConnections.push(connections[this._ranges[i].connectionIndexes[j]]);
-    //     }
-    // }
-    // var time = timer.get();
-    // if(time > 0.050) {
-    //     console.log("cycle 2 = " + time);
-    //     console.log("items count = " + (rangeConnections.length - before));
-    //     console.log("");
-    // }
-    // var spentTime = timer.get();
-    // if(spentTime > 0.50) {
-    //     var totalElemsCount = 0;
-    //     for(var i = intersectedRangeIndex; i < this._ranges.length; i++) {
-    //         totalElemsCount += this._ranges[i].connectionIndexes.length;
-    //     }
-
-    //     console.log("total elems count in intersected and bottom ranges = " + totalElemsCount);
-    //     console.log("start index = " + intersectedRangeIndex);
-    //     console.log("ranges count = " + this._ranges.length);
-    //     console.log("total spent time = " + spentTime);
-    // }
-
-//     return rangeConnections;
-// }
-
-// Gridifier.VerticalGrid.ConnectionsRanges.prototype.getAllConnectionsFromIntersectedAndLowerRanges = function(y) {
-//     var connections = this._connections.get();
-//     var rangeConnections = [];
-//     var addedConnectionIndexes = [];
-//     var intersectedRangeIndex = null;
-
-//     var isConnectionAlreadyAdded = function(connectionIndex) {
-//         for(var i = 0; i < addedConnectionIndexes.length; i++) {
-//             if(connectionIndex == addedConnectionIndexes[i])
-//                 return true;
-//         }
-
-//         return false;
-//     }
-//     timer.start();
-//     for(var i = 0; i < this._ranges.length; i++) {
-//         if(y >= this._ranges[i].y1 && y <= this._ranges[i].y2) {
-//             for(var j = 0; j < this._ranges[i].connectionIndexes.length; j++) {
-//                 var connectionIndex = this._ranges[i].connectionIndexes[j];
-
-//                 if(!isConnectionAlreadyAdded(connectionIndex)) {
-//                     rangeConnections.push(connections[connectionIndex]);
-//                     addedConnectionIndexes.push(connectionIndex);
-//                 }
-//             }
-
-//             intersectedRangeIndex = i;
-//             break;
-//         }
-//     }
-//     var time = timer.get();
-//     if(time > 0.100) {
-//         console.log("first cycle = " + time);
-//         console.log("ran len = " + this._ranges.length);
-//     }
-//     timer.start();
-//     for(var i = intersectedRangeIndex; i < this._ranges.length; i++) {
-//         for(var j = 0; j < this._ranges[i].connectionIndexes.length; j++) {
-//             var connectionIndex = this._ranges[i].connectionIndexes[j];
-
-//             if(!isConnectionAlreadyAdded(connectionIndex)) {
-//                 rangeConnections.push(connections[connectionIndex]);
-//                 addedConnectionIndexes.push(connectionIndex);
-//             }
-//         }
-//     }
-//     var time = timer.get();
-//     if(time > 0.100) console.log("second cycle = " + time);
-
-//     return rangeConnections;
-// }
 
 Gridifier.VerticalGrid.ConnectionsSorter = function(connections, settings, guid) {
     var me = this;
@@ -15270,39 +15548,52 @@ Gridifier.VerticalGrid.ConnectionsVerticalIntersector.prototype.expandVertically
         return;
 
     var rowConnectionsToExpand = this.getAllVerticallyIntersectedConnections(newConnection);
-    this._lastRowVerticallyExpandedConnections = rowConnectionsToExpand;
+    var expandedConnectionsWithNewOffsets = [];
 
     for(var i = 0; i < rowConnectionsToExpand.length; i++) {
         rowConnectionsToExpand[i].y1 = mostTallConnection.y1;
         rowConnectionsToExpand[i].y2 = mostTallConnection.y2;
 
-        if(this._settings.isVerticalGridTopAlignmentType())
+        if(this._settings.isVerticalGridTopAlignmentType()) {
+            if(rowConnectionsToExpand[i].verticalOffset != 0)
+                expandedConnectionsWithNewOffsets.push(rowConnectionsToExpand[i]);
+
             rowConnectionsToExpand[i].verticalOffset = 0;
+
+        }
         else if(this._settings.isVerticalGridCenterAlignmentType()) {
             var y1 = rowConnectionsToExpand[i].y1;
             var y2 = rowConnectionsToExpand[i].y2;
 
             var targetSizes = this._itemCoordsExtractor.getItemTargetSizes(rowConnectionsToExpand[i].item);
-            // @todo -> Check if (-1) is required
-            var itemHeight = targetSizes.targetHeight - 1;
+            var itemHeight = targetSizes.targetHeight;
 
-            //var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
-            // @todo fix to return Math.round(Math.abs(y2 - y1 + 1) / 2) - Math.round(itemHeight / 2);
-            rowConnectionsToExpand[i].verticalOffset = Math.round(Math.abs(y2 - y1) / 2) - Math.round(itemHeight / 2);
+            var newVerticalOffset = (Math.abs(y2 - y1 + 1) / 2) - (itemHeight / 2);
+
+            if(rowConnectionsToExpand[i].verticalOffset != newVerticalOffset) {
+                rowConnectionsToExpand[i].verticalOffset = newVerticalOffset;
+                expandedConnectionsWithNewOffsets.push(rowConnectionsToExpand[i]);
+            }
         }
         else if(this._settings.isVerticalGridBottomAlignmentType()) {
             var y1 = rowConnectionsToExpand[i].y1;
             var y2 = rowConnectionsToExpand[i].y2;
 
             var targetSizes = this._itemCoordsExtractor.getItemTargetSizes(rowConnectionsToExpand[i].item);
-            var itemHeight = targetSizes.targetHeight - 1;
+            var itemHeight = targetSizes.targetHeight;
 
-            //var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
-            // @todo fix (y2 - y1 + 1)
-            //rowConnectionsToExpand[i].verticalOffset = Math.abs(y2 - y1) - itemHeight;
-            rowConnectionsToExpand[i].verticalOffset = Math.abs(y2 - y1) - itemHeight;
+            var newVerticalOffset = Math.abs(y2 - y1 + 1) - itemHeight;
+
+            if(rowConnectionsToExpand[i].verticalOffset != newVerticalOffset) {
+                rowConnectionsToExpand[i].verticalOffset = newVerticalOffset;
+                expandedConnectionsWithNewOffsets.push(rowConnectionsToExpand[i]);
+            }
         }
     }
+
+    // We should rerender only connections with new vertical offsets(Otherwise some browsers
+    // will produce noticeable 'freezes' on rerender cycle)
+    this._lastRowVerticallyExpandedConnections = expandedConnectionsWithNewOffsets;
 }
 
 Gridifier.VerticalGrid.ConnectorsCleaner = function(connectors, connections, settings) {
@@ -15377,20 +15668,6 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype.isConnectorInsideOrBeforeItem
 }
 
 Gridifier.VerticalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersectingAnyTopConnectionItem = function(mappedConnector) {
-    // var connections = this._connections.get();
-    // for(var i = 0; i < connections.length; i++) {
-    //     if(this.isConnectorInsideOrBeforeItemIntersectionStrategy()) 
-    //         var verticalIntersectionCond = (connector.y >= connections[i].y1);
-    //     else if(this.isConnectorInsideItemIntersectionStrategy())
-    //         var verticalIntersectionCond = (connector.y >= connections[i].y1 
-    //                                                           && connector.y <= connections[i].y2);
-
-    //     if(connector.x >= connections[i].x1 && connector.x <= connections[i].x2 
-    //         && verticalIntersectionCond)
-    //         return true;
-    // }
-
-    // return false;
     var connections = this._connections.get();
 
     for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
@@ -15441,14 +15718,6 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllIntersectedFromTopCo
             i--;
         }
     }
-
-    // var connectors = this._connectors.get();
-    // for(var i = 0; i < connectors.length; i++) {
-    //     if(this.isConnectorIntersectingAnyTopConnectionItem(connectors[i])) {
-    //         connectors.splice(i, 1);
-    //         i--;
-    //     }
-    // }
 }
 
 Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllTooLowConnectorsFromMostTopConnector = function() {
@@ -15472,24 +15741,6 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllTooLowConnectorsFrom
 }
 
 Gridifier.VerticalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersectingAnyBottomConnectionItem = function(mappedConnector) {
-    //var connections = this._connections.get();
-    //var connections = this._connections.getAllHorizontallyIntersectedAndLowerConnections(connector);
-    //if(time > 0.199)
-      //  console.log("time = " + time);
-    // console.log("CONN COUNT = ", connections.length);
-    // console.log("connector info = ", $.parseJSON(JSON.stringify(connector)));
-
-    // for(var i = 0; i < connections.length; i++) {
-    //     if(this.isConnectorInsideOrBeforeItemIntersectionStrategy()) 
-    //         var verticalIntersectionCond = (connector.y <= connections[i].y2);
-    //     else if(this.isConnectorInsideItemIntersectionStrategy())
-    //         var verticalIntersectionCond = (connector.y <= connections[i].y2 
-    //                                                           && connector.y >= connections[i].y1);
-
-    //     if(connector.x >= connections[i].x1 && connector.x <= connections[i].x2
-    //         && verticalIntersectionCond) 
-    //         return true;
-    // }
     var connections = this._connections.get();
 
     for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
@@ -15512,14 +15763,9 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersectin
 }
 
 Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllIntersectedFromBottomConnectors = function() {
-    //timer.start();
     var connectors = this._connectors.get();
-    //console.log("get connectors = " + timer.get());
-    //timer.start();
     var mappedConnectors = this._connectors.getClone();
-    //console.log("clone connectors = " + timer.get());
 
-    //timer.start();
     mappedConnectors.sort(function(firstConnector, secondConnector) {
         if(firstConnector.y == secondConnector.y)
             return 0;
@@ -15528,38 +15774,24 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllIntersectedFromBotto
         else 
             return 1;
     });
-    //console.log("sort connectors = " + timer.get());
-    //timer.start();
+
     mappedConnectors = this._connections.mapAllIntersectedAndLowerConnectionsPerEachConnector(
         mappedConnectors
     );
-    //console.log("map connectors = " + timer.get());
 
-    //timer.start();
     for(var i = 0; i < mappedConnectors.length; i++) {
         if(this._isMappedConnectorIntersectingAnyBottomConnectionItem(mappedConnectors[i])) 
             connectors[mappedConnectors[i].connectorIndex].isIntersected = true;
         else
             connectors[mappedConnectors[i].connectorIndex].isIntersected = false;
     }
-    //console.log("isIntersecting = " + timer.get());
 
-    //timer.start();
     for(var i = 0; i < connectors.length; i++) {
         if(connectors[i].isIntersected) {
             connectors.splice(i, 1);
             i--;
         }
     }
-    //console.log("isIntersecting = " + timer.get());
-    //console.log("");
-
-    // for(var i = 0; i < connectors.length; i++) {
-    //     if(this.isConnectorIntersectingAnyBottomConnectionItem(connectors[i])) {
-    //         connectors.splice(i, 1);
-    //         i--;
-    //     }
-    // }
 }
 
 Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllTooHighConnectorsFromMostBottomConnector = function() {
@@ -15619,7 +15851,6 @@ Gridifier.VerticalGrid.ConnectorsSelector.prototype.getSelectedConnectors = func
     return this._connectors;
 }
 
-// @todo -> Refactor this 2 methods in 1??? (Dynamic conds)
 Gridifier.VerticalGrid.ConnectorsSelector.prototype.selectOnlyMostBottomConnectorFromSide = function(side) {
     var mostBottomConnectorItemGUID = null;
     var mostBottomConnectorY = null;
@@ -15665,6 +15896,30 @@ Gridifier.VerticalGrid.ConnectorsSelector.prototype.selectOnlyMostTopConnectorFr
     while(i--) {
         if(this._connectors[i].side == side && this._connectors[i].itemGUID != mostTopConnectorItemGUID) 
             this._connectors.splice(i, 1);
+    }
+}
+
+Gridifier.VerticalGrid.ConnectorsSelector.prototype._isInitialConnector = function(connector) {
+    return connector.itemGUID == Gridifier.Connectors.INITIAL_CONNECTOR_ITEM_GUID;
+}
+
+Gridifier.VerticalGrid.ConnectorsSelector.prototype.selectOnlySpecifiedSideConnectorsOnAppendedItems = function(side) {
+    for(var i = 0; i < this._connectors.length; i++) {
+        if(!this._isInitialConnector(this._connectors[i]) &&
+            !this._guid.wasItemPrepended(this._connectors[i].itemGUID) && side != this._connectors[i].side) {
+            this._connectors.splice(i, 1);
+            i--;
+        }
+    }
+}
+
+Gridifier.VerticalGrid.ConnectorsSelector.prototype.selectOnlySpecifiedSideConnectorsOnPrependedItems = function(side) {
+    for(var i = 0; i < this._connectors.length; i++) {
+        if(!this._isInitialConnector(this._connectors[i]) &&
+            this._guid.wasItemPrepended(this._connectors[i].itemGUID) && side != this._connectors[i].side) {
+            this._connectors.splice(i, 1);
+            i--;
+        }
     }
 }
 
@@ -15864,19 +16119,19 @@ Gridifier.VerticalGrid.Prepender = function(gridifier,
     this._gridifier = null;
     this._settings = null;
     this._sizesResolverManager = null;
-
+    this._guid = null;
+    this._renderer = null;
+    this._normalizer = null;
+    this._operation = null;
     this._connectors = null;
     this._connections = null;
+
     this._connectorsCleaner = null;
     this._connectorsShifter = null;
     this._connectorsSelector = null;
     this._connectorsSorter = null;
     this._itemCoordsExtractor = null;
     this._connectionsIntersector = null;
-    this._guid = null;
-    this._renderer = null;
-    this._normalizer = null;
-    this._operation = null;
 
     this._css = {
     };
@@ -15885,7 +16140,10 @@ Gridifier.VerticalGrid.Prepender = function(gridifier,
         me._gridifier = gridifier;
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
-
+        me._guid = guid;
+        me._renderer = renderer;
+        me._normalizer = normalizer;
+        me._operation = operation;
         me._connectors = connectors;
         me._connections = connections;
 
@@ -15899,11 +16157,6 @@ Gridifier.VerticalGrid.Prepender = function(gridifier,
         me._connectorsSorter = new Gridifier.VerticalGrid.ConnectorsSorter();
         me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor(me._gridifier, me._sizesResolverManager);
         me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(me._connections);
-
-        me._guid = guid;
-        me._renderer = renderer;
-        me._normalizer = normalizer;
-        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -16014,12 +16267,17 @@ Gridifier.VerticalGrid.Prepender.prototype._createConnectionPerItem = function(i
         this._connections.expandVerticallyAllRowConnectionsToMostTall(connection);
     }
     this._addItemConnectors(itemConnectionCoords, this._guid.getItemGUID(item));
+    this._guid.markAsPrependedItem(item);
 
     return connection;
 }
 
 Gridifier.VerticalGrid.Prepender.prototype._filterConnectorsPerNextConnection = function() {
     var connectors = this._connectors.getClone();
+
+    this._connectorsSelector.attachConnectors(connectors);
+    this._connectorsSelector.selectOnlySpecifiedSideConnectorsOnAppendedItems(Gridifier.Connectors.SIDES.TOP.LEFT);
+    connectors = this._connectorsSelector.getSelectedConnectors();
 
     if(this._settings.isDefaultIntersectionStrategy()) {
         this._connectorsShifter.attachConnectors(connectors);
@@ -16076,6 +16334,11 @@ Gridifier.VerticalGrid.Prepender.prototype._findItemConnectionCoords = function(
         }
     }
 
+    if(itemConnectionCoords == null) {
+        var errorType = Gridifier.Error.ERROR_TYPES.INSERTER.TOO_WIDE_ITEM_ON_VERTICAL_GRID_INSERT;
+        new Gridifier.Error(errorType, item);
+    }
+
     return itemConnectionCoords;
 }
 
@@ -16093,19 +16356,19 @@ Gridifier.VerticalGrid.ReversedAppender = function(gridifier,
     this._gridifier = null;
     this._settings = null;
     this._sizesResolverManager = null;
-
+    this._guid = null;
+    this._renderer = null;
+    this._normalizer = null;
+    this._operation = null;
     this._connectors = null;
     this._connections = null;
+
     this._connectorsCleaner = null;
     this._connectorsShifter = null;
     this._connectorsSelector = null;
     this._connectorsSorter = null;
     this._itemCoordsExtractor = null;
     this._connectionsIntersector = null;
-    this._guid = null;
-    this._renderer = null;
-    this._normalizer = null;
-    this._operation = null;
 
     this._css = {
     };
@@ -16114,7 +16377,10 @@ Gridifier.VerticalGrid.ReversedAppender = function(gridifier,
         me._gridifier = gridifier;
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
-
+        me._guid = guid;
+        me._renderer = renderer;
+        me._normalizer = normalizer;
+        me._operation = operation;
         me._connectors = connectors;
         me._connections = connections;
 
@@ -16128,11 +16394,6 @@ Gridifier.VerticalGrid.ReversedAppender = function(gridifier,
         me._connectorsSorter = new Gridifier.VerticalGrid.ConnectorsSorter();
         me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor(me._gridifier, me._sizesResolverManager);
         me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(me._connections);
-
-        me._guid = guid;
-        me._renderer = renderer;
-        me._normalizer = normalizer;
-        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -16243,6 +16504,10 @@ Gridifier.VerticalGrid.ReversedAppender.prototype._createConnectionPerItem = fun
 Gridifier.VerticalGrid.ReversedAppender.prototype._filterConnectorsPerNextConnection = function() {
     var connectors = this._connectors.getClone();
 
+    this._connectorsSelector.attachConnectors(connectors);
+    this._connectorsSelector.selectOnlySpecifiedSideConnectorsOnPrependedItems(Gridifier.Connectors.SIDES.BOTTOM.LEFT);
+    connectors = this._connectorsSelector.getSelectedConnectors();
+
     if(this._settings.isDefaultIntersectionStrategy()) {
         this._connectorsShifter.attachConnectors(connectors);
         this._connectorsShifter.shiftAllConnectors();
@@ -16300,6 +16565,11 @@ Gridifier.VerticalGrid.ReversedAppender.prototype._findItemConnectionCoords = fu
             break;
         }
     }
+
+    if(itemConnectionCoords == null) {
+        var errorType = Gridifier.Error.ERROR_TYPES.INSERTER.TOO_WIDE_ITEM_ON_VERTICAL_GRID_INSERT;
+        new Gridifier.Error(errorType, item);
+    }
     
     return itemConnectionCoords;
 }
@@ -16318,19 +16588,19 @@ Gridifier.VerticalGrid.ReversedPrepender = function(gridifier,
     this._gridifier = null;
     this._settings = null;
     this._sizesResolverManager = null;
-
+    this._guid = null;
+    this._renderer = null;
+    this._normalizer = null;
+    this._operation = null;
     this._connectors = null;
     this._connections = null;
+
     this._connectorsCleaner = null;
     this._connectorsShifter = null;
     this._connectorsSelector = null;
     this._connectorsSorter = null;
     this._itemCoordsExtractor = null;
     this._connectionsIntersector = null;
-    this._guid = null;
-    this._renderer = null;
-    this._normalizer = null;
-    this._operation = null;
 
     this._css = {
     };
@@ -16339,7 +16609,10 @@ Gridifier.VerticalGrid.ReversedPrepender = function(gridifier,
         me._gridifier = gridifier;
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
-
+        me._guid = guid;
+        me._renderer = renderer;
+        me._normalizer = normalizer;
+        me._operation = operation;
         me._connectors = connectors;
         me._connections = connections;
 
@@ -16353,11 +16626,6 @@ Gridifier.VerticalGrid.ReversedPrepender = function(gridifier,
         me._connectorsSorter = new Gridifier.VerticalGrid.ConnectorsSorter();
         me._itemCoordsExtractor = new Gridifier.VerticalGrid.ItemCoordsExtractor(me._gridifier, me._sizesResolverManager);
         me._connectionsIntersector = new Gridifier.VerticalGrid.ConnectionsIntersector(me._connections);
-
-        me._guid = guid;
-        me._renderer = renderer;
-        me._normalizer = normalizer;
-        me._operation = operation;
     };
 
     this._bindEvents = function() {
@@ -16468,12 +16736,17 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype._createConnectionPerItem = fu
         this._connections.expandVerticallyAllRowConnectionsToMostTall(connection);
     }
     this._addItemConnectors(itemConnectionCoords, this._guid.getItemGUID(item));
+    this._guid.markAsPrependedItem(item);
 
     return connection;
 }
 
 Gridifier.VerticalGrid.ReversedPrepender.prototype._filterConnectorsPerNextConnection = function() {
     var connectors = this._connectors.getClone();
+
+    this._connectorsSelector.attachConnectors(connectors);
+    this._connectorsSelector.selectOnlySpecifiedSideConnectorsOnAppendedItems(Gridifier.Connectors.SIDES.TOP.RIGHT);
+    connectors = this._connectorsSelector.getSelectedConnectors();
 
     if(this._settings.isDefaultIntersectionStrategy()) {
         this._connectorsShifter.attachConnectors(connectors);
@@ -16528,6 +16801,11 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype._findItemConnectionCoords = f
         if(itemConnectionCoords != null) {
             break;
         }
+    }
+
+    if(itemConnectionCoords == null) {
+        var errorType = Gridifier.Error.ERROR_TYPES.INSERTER.TOO_WIDE_ITEM_ON_VERTICAL_GRID_INSERT;
+        new Gridifier.Error(errorType, item);
     }
 
     return itemConnectionCoords;

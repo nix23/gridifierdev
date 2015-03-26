@@ -129,37 +129,50 @@ Gridifier.VerticalGrid.ConnectionsVerticalIntersector.prototype.expandVertically
         return;
 
     var rowConnectionsToExpand = this.getAllVerticallyIntersectedConnections(newConnection);
-    this._lastRowVerticallyExpandedConnections = rowConnectionsToExpand;
+    var expandedConnectionsWithNewOffsets = [];
 
     for(var i = 0; i < rowConnectionsToExpand.length; i++) {
         rowConnectionsToExpand[i].y1 = mostTallConnection.y1;
         rowConnectionsToExpand[i].y2 = mostTallConnection.y2;
 
-        if(this._settings.isVerticalGridTopAlignmentType())
+        if(this._settings.isVerticalGridTopAlignmentType()) {
+            if(rowConnectionsToExpand[i].verticalOffset != 0)
+                expandedConnectionsWithNewOffsets.push(rowConnectionsToExpand[i]);
+
             rowConnectionsToExpand[i].verticalOffset = 0;
+
+        }
         else if(this._settings.isVerticalGridCenterAlignmentType()) {
             var y1 = rowConnectionsToExpand[i].y1;
             var y2 = rowConnectionsToExpand[i].y2;
 
             var targetSizes = this._itemCoordsExtractor.getItemTargetSizes(rowConnectionsToExpand[i].item);
-            // @todo -> Check if (-1) is required
-            var itemHeight = targetSizes.targetHeight - 1;
+            var itemHeight = targetSizes.targetHeight;
 
-            //var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
-            // @todo fix to return Math.round(Math.abs(y2 - y1 + 1) / 2) - Math.round(itemHeight / 2);
-            rowConnectionsToExpand[i].verticalOffset = Math.round(Math.abs(y2 - y1) / 2) - Math.round(itemHeight / 2);
+            var newVerticalOffset = (Math.abs(y2 - y1 + 1) / 2) - (itemHeight / 2);
+
+            if(rowConnectionsToExpand[i].verticalOffset != newVerticalOffset) {
+                rowConnectionsToExpand[i].verticalOffset = newVerticalOffset;
+                expandedConnectionsWithNewOffsets.push(rowConnectionsToExpand[i]);
+            }
         }
         else if(this._settings.isVerticalGridBottomAlignmentType()) {
             var y1 = rowConnectionsToExpand[i].y1;
             var y2 = rowConnectionsToExpand[i].y2;
 
             var targetSizes = this._itemCoordsExtractor.getItemTargetSizes(rowConnectionsToExpand[i].item);
-            var itemHeight = targetSizes.targetHeight - 1;
+            var itemHeight = targetSizes.targetHeight;
 
-            //var itemHeight = rowConnectionsToExpand[i].itemHeightWithMargins - 1;
-            // @todo fix (y2 - y1 + 1)
-            //rowConnectionsToExpand[i].verticalOffset = Math.abs(y2 - y1) - itemHeight;
-            rowConnectionsToExpand[i].verticalOffset = Math.abs(y2 - y1) - itemHeight;
+            var newVerticalOffset = Math.abs(y2 - y1 + 1) - itemHeight;
+
+            if(rowConnectionsToExpand[i].verticalOffset != newVerticalOffset) {
+                rowConnectionsToExpand[i].verticalOffset = newVerticalOffset;
+                expandedConnectionsWithNewOffsets.push(rowConnectionsToExpand[i]);
+            }
         }
     }
+
+    // We should rerender only connections with new vertical offsets(Otherwise some browsers
+    // will produce noticeable 'freezes' on rerender cycle)
+    this._lastRowVerticallyExpandedConnections = expandedConnectionsWithNewOffsets;
 }

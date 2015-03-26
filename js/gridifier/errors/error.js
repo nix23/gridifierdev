@@ -53,8 +53,6 @@ Gridifier.Error = function(errorType, errorParam) {
     return this;
 }
 
-// @todo -> Use api url postfixes as vals instead of numbers
-// @todo -> Prefix error objects with JSON.stringify 
 Gridifier.Error.ERROR_TYPES = {
     EXTRACT_GRID: 0,
     SETTINGS: {
@@ -84,11 +82,17 @@ Gridifier.Error.ERROR_TYPES = {
         INVALID_SIZES_CHANGER_PARAM_VALUE: 17,
         INVALID_ONE_OF_SIZES_CHANGER_FUNCTION_TYPES: 18,
 
+        INVALID_DRAGGABLE_ITEM_DECORATOR_PARAM_VALUE: 37,
+        INVALID_ONE_OF_DRAGGABLE_ITEM_DECORATOR_FUNCTION_TYPES: 38,
+
         SET_TOGGLE_INVALID_PARAM: 19,
         SET_FILTER_INVALID_PARAM: 20,
         SET_SORT_INVALID_PARAM: 21,
         SET_COORDS_CHANGER_INVALID_PARAM: 22,
-        SET_SIZES_CHANGER_INVALID_PARAM: 23
+        SET_SIZES_CHANGER_INVALID_PARAM: 23,
+        SET_DRAGGABLE_ITEM_DECORATOR_INVALID_PARAM: 36,
+
+        INVALID_DRAGIFIER_DISCRETIZATION_MODE: 40
     },
     COLLECTOR: {
         NOT_DOM_ELEMENT: 24,
@@ -107,6 +111,10 @@ Gridifier.Error.ERROR_TYPES = {
     APPENDER: {
         WRONG_INSERT_BEFORE_TARGET_ITEM: 32,
         WRONG_INSERT_AFTER_TARGET_ITEM: 33
+    },
+    INSERTER: {
+        TOO_WIDE_ITEM_ON_VERTICAL_GRID_INSERT: 34,
+        TOO_TALL_ITEM_ON_HORIZONTAL_GRID_INSERT: 35
     }
 }
 

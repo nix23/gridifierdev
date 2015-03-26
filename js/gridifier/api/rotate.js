@@ -66,27 +66,27 @@ Gridifier.Api.Rotate.prototype._getRotateFunction = function(rotateFunctionType)
     throw new Error("Gridifier error: wrong rotate function type = " + rotateFunctionType);
 }
 
-Gridifier.Api.Rotate.prototype.show3d = function(item, grid, rotateMatrixType, timeouter) {
+Gridifier.Api.Rotate.prototype.show3d = function(item, grid, rotateMatrixType, timeouter, left, top) {
     var rotateProp = "rotate3d";
-    this._rotate(item, grid, rotateProp, false, timeouter, this._getRotateMatrix(rotateMatrixType));
+    this._rotate(item, grid, rotateProp, false, timeouter, this._getRotateMatrix(rotateMatrixType), left, top);
 }
 
-Gridifier.Api.Rotate.prototype.hide3d = function(item, grid, rotateMatrixType, timeouter) {
+Gridifier.Api.Rotate.prototype.hide3d = function(item, grid, rotateMatrixType, timeouter, left, top) {
     var rotateProp = "rotate3d";
-    this._rotate(item, grid, rotateProp, true, timeouter, this._getRotateMatrix(rotateMatrixType));
+    this._rotate(item, grid, rotateProp, true, timeouter, this._getRotateMatrix(rotateMatrixType), left, top);
 }
 
-Gridifier.Api.Rotate.prototype.show = function(item, grid, rotateFunctionType, timeouter) {
+Gridifier.Api.Rotate.prototype.show = function(item, grid, rotateFunctionType, timeouter, left, top) {
     var rotateProp = this._getRotateFunction(rotateFunctionType);
-    this._rotate(item, grid, rotateProp, false, timeouter, "");
+    this._rotate(item, grid, rotateProp, false, timeouter, "", left, top);
 }
 
-Gridifier.Api.Rotate.prototype.hide = function(item, grid, rotateFunctionType, timeouter) {
+Gridifier.Api.Rotate.prototype.hide = function(item, grid, rotateFunctionType, timeouter, left, top) {
     var rotateProp = this._getRotateFunction(rotateFunctionType);
-    this._rotate(item, grid, rotateProp, true, timeouter, "");
+    this._rotate(item, grid, rotateProp, true, timeouter, "", left, top);
 }
 
-Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle, timeouter, rotateMatrix) {
+Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle, timeouter, rotateMatrix, left, top) {
     if(!inverseToggle) {
         var isShowing = true;
         var isHiding = false;
@@ -96,7 +96,7 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
         var isHiding = true;
     }
 
-    var scene = this._createScene(item, grid);
+    var scene = this._createScene(item, grid, left, top);
     var frames = this._createFrames(scene);
     var itemClone = this._createItemClone(item);
 
@@ -160,15 +160,14 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
     //timeouter.add(item, completeRotateTimeout);
 }
 
-Gridifier.Api.Rotate.prototype._createScene = function(item, grid) {
+Gridifier.Api.Rotate.prototype._createScene = function(item, grid, left, top) {
     var scene = document.createElement("div");
     Dom.css.set(scene, {
-        width: this._sizesResolverManager.outerWidth(item, true) + "px",
-        height: this._sizesResolverManager.outerHeight(item, true) + "px",
+        width: this._sizesResolverManager.outerWidth(item) + "px",
+        height: this._sizesResolverManager.outerHeight(item) + "px",
         position: "absolute",
-        // @todo -> Pass here original left and top values????
-        top: this._sizesResolverManager.positionTop(item) + "px",
-        left: this._sizesResolverManager.positionLeft(item) + "px"
+        left: left,
+        top: top
     });
     Dom.css3.perspective(scene, this._settings.getRotatePerspective()); 
     grid.appendChild(scene);
@@ -195,8 +194,8 @@ Gridifier.Api.Rotate.prototype._createItemClone = function(item) {
         left: "0px",
         top: "0px",
         visibility: "visible",
-        width: this._sizesResolverManager.outerWidth(item, true) + "px",
-        height: this._sizesResolverManager.outerHeight(item, true) + "px"
+        width: this._sizesResolverManager.outerWidth(item) + "px",
+        height: this._sizesResolverManager.outerHeight(item) + "px"
     });
 
     return itemClone;

@@ -198,3 +198,39 @@ Gridifier.ApiSettingsParser.prototype.parseSizesChangerOptions = function(sizesC
         );
     }
 }
+
+Gridifier.ApiSettingsParser.prototype.parseDraggableItemDecoratorOptions = function(dragifierApi) {
+    if(!this._settings.hasOwnProperty("draggableItemDecorator")) {
+        dragifierApi.setDraggableItemDecoratorFunction("cloneCSS");
+        return;
+    }
+
+    if(typeof this._settings.draggableItemDecorator == "function") {
+        dragifierApi.addDraggableItemDecoratorFunction("clientDefault", this._settings.draggableItemDecorator);
+        dragifierApi.setDraggableItemDecoratorFunction("clientDefault");
+        return;
+    }
+    else if(typeof this._settings.draggableItemDecorator == "object") {
+        for(var draggableItemDecoratorFunctionName in this._settings.draggableItemDecorator) {
+            var draggableItemDecoratorFunction = this._settings.draggableItemDecorator[draggableItemDecoratorFunctionName];
+
+            if(typeof draggableItemDecoratorFunction != "function") {
+                new Gridifier.Error(
+                    Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_ONE_OF_DRAGGABLE_ITEM_DECORATOR_FUNCTION_TYPES,
+                    draggableItemDecoratorFunction
+                );
+            }
+
+            dragifierApi.addDraggableItemDecoratorFunction(draggableItemDecoratorFunctionName, draggableItemDecoratorFunction);
+        }
+
+        dragifierApi.setDraggableItemDecoratorFunction("cloneCSS");
+        return;
+    }
+    else {
+        new Gridifier.Error(
+            Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_DRAGGABLE_ITEM_DECORATOR_PARAM_VALUE,
+            this._settings.draggableItemDecorator
+        );
+    }
+}

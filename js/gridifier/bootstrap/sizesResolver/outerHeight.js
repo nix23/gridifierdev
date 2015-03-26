@@ -28,7 +28,6 @@ SizesResolver.outerHeight = function(DOMElem, includeMargins, disablePercentageC
     var marginHeight = computedProperties.marginTop + computedProperties.marginBottom;
     var borderHeight = computedProperties.borderTopWidth + computedProperties.borderBottomWidth;
 
-    //var outerHeight = DOMElem.offsetHeight;
     var outerHeight = 0;
     var normalizedComputedHeight = this.normalizeComputedCSSSizeValue(elementComputedCSS.height);
 

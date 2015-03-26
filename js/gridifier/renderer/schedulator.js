@@ -48,7 +48,6 @@ Gridifier.Renderer.Schedulator.PROCESS_SCHEDULED_CONNECTIONS_TIMEOUT = 20;
 Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES = {
     SHOW: 0, HIDE: 1, RENDER: 2, RENDER_TRANSFORMED: 3, RENDER_DEPENDED: 4, DELAYED_RENDER: 5
 };
-Gridifier.Renderer.Schedulator.DISABLE_PRETOGGLE_COORDS_CHANGER_CALL_DATA_ATTR = "data-gridifier-renderer-disable-pretoggle-cc-call";
 
 Gridifier.Renderer.Schedulator.prototype.setSilentRendererInstance = function(silentRenderer) {
     this._silentRenderer = silentRenderer;
@@ -138,11 +137,6 @@ Gridifier.Renderer.Schedulator.prototype._schedule = function() {
     }, Gridifier.Renderer.Schedulator.PROCESS_SCHEDULED_CONNECTIONS_TIMEOUT);
 }
 
-// @todo -> Solve problem with cache stop inside process scheduled connections
-//setTimeout(function() { renderNextConnection(0); }, 0); // @notice -> Settimeouts here will slow down
-// overall perfomance in legacy browsers(ie8, safari 5.1.7(Win)), because caching will stop before
-// me._gridifier.getGridX2() will be called(because of setTimeout async), and Gridifier will recursively recalculate
-// all DOM nodes up through DOM-Tree, until reaching root node.
 Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function() {
     var me = this;
     var schedulator = Gridifier.Renderer.Schedulator;
@@ -157,7 +151,6 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             continue;
 
         if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.SHOW) {
-            // @todo -> maybe add here start/stop caching transaction??? Or it is useless?
             Dom.css.set(connectionToProcess.item, {
                 position: "absolute",
                 left: left,
@@ -252,7 +245,6 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.DELAYED_RENDER) {
             var delay = this._scheduledConnectionsToProcessData[i].delay;
             var coordsChanger = this._settings.getCoordsChanger();
-            // @todo -> Or toggleAnimationMsDuration(Per sync???)
             var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
             var eventEmitter = this._settings.getEventEmitter();
 
@@ -277,11 +269,11 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER ||
                 processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED) {
-            var rendererCoordsChangerFunction = this._settings.getCoordsChanger();
+            var coordsChanger = this._settings.getCoordsChanger();
             var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
             var eventEmitter = this._settings.getEventEmitter();
 
-            rendererCoordsChangerFunction(
+            coordsChanger(
                 connectionToProcess.item,
                 left,
                 top,
@@ -294,19 +286,19 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var targetWidth = this._scheduledConnectionsToProcessData[i].targetWidth;
             var targetHeight = this._scheduledConnectionsToProcessData[i].targetHeight;
 
-            var rendererSizesChangerFunction = this._settings.getSizesChanger();
+            var sizesChanger = this._settings.getSizesChanger();
 
-            rendererSizesChangerFunction(
+            sizesChanger(
                 connectionToProcess.item, 
                 targetWidth, 
                 targetHeight
             );
 
-            var rendererCoordsChangerFunction = this._settings.getCoordsChanger();
+            var coordsChanger = this._settings.getCoordsChanger();
             var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
             var eventEmitter = this._settings.getEventEmitter();
 
-            rendererCoordsChangerFunction(
+            coordsChanger(
                 connectionToProcess.item, 
                 left, 
                 top,

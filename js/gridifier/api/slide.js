@@ -59,7 +59,7 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
     }
 
     // Setting translated position after 0ms call requires a little delay
-    // per browsers repaint
+    // per browsers repaint(Also it should be enough to propogate NIS item align(20ms))
     var slideOutTimeout = setTimeout(function() {
         if(!me._gridifier.hasItemBindedClone(item))
             item.style.visibility = "visible";
@@ -72,14 +72,23 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
             eventEmitter,
             false
         );
-    }, 0);
+    }, 20);
     timeouter.add(item, slideOutTimeout);
 
     var completeSlideOutTimeout = setTimeout(function() {
-        item.style.visibility = "visible";
         item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
         eventEmitter.emitShowEvent(item);
-    }, animationMsDuration + 20);
+
+        if(me._gridifier.hasItemBindedClone(item)) {
+            coordsChanger(
+                item,
+                item.style.left,
+                item.style.top,
+                0,
+                eventEmitter
+            );
+        }
+    }, animationMsDuration + 40);
     timeouter.add(item, completeSlideOutTimeout);
 }
 
@@ -103,6 +112,18 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
         eventEmitter,
         false
     );
+
+    // Hidding item and possibly clone a little before animation def finish(Blink fix)
+    var me = this;
+    var prehideTimeout = setTimeout(function() {
+        item.style.visibility = "hidden";
+
+        if(me._gridifier.hasItemBindedClone(item)) {
+            var itemClone = me._gridifier.getItemClone(item);
+            itemClone.style.visibility = "hidden";
+        }
+    }, animationMsDuration);
+    timeouter.add(item, prehideTimeout);
 
     var slideInTimeout = setTimeout(function() {
         item.style.visibility = "hidden";
@@ -161,8 +182,8 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 eventEmitter,
                 coordsChanger,
                 collector,
-                getLeftPos(item, grid),
-                top,
+                getLeftPos(item, grid) + "px",
+                top + "px",
                 connectionLeft,
                 connectionTop
             );
@@ -200,8 +221,8 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 eventEmitter,
                 coordsChanger,
                 collector,
-                getLeftPos(item, grid),
-                top,
+                getLeftPos(item, grid) + "px",
+                top + "px",
                 connectionLeft,
                 connectionTop
             );
@@ -258,8 +279,8 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
                 eventEmitter,
                 coordsChanger,
                 collector,
-                left,
-                getTopPos(item, grid),
+                left + "px",
+                getTopPos(item, grid) + "px",
                 connectionLeft,
                 connectionTop
             );
@@ -297,8 +318,8 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
                 eventEmitter,
                 coordsChanger,
                 collector,
-                left,
-                getTopPos(item, grid),
+                left + "px",
+                getTopPos(item, grid) + "px",
                 connectionLeft,
                 connectionTop
             );

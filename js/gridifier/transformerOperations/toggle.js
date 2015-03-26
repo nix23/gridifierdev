@@ -46,8 +46,6 @@ Gridifier.TransformerOperations.Toggle = function(collector,
     return this;
 }
 
-// @todo -> Apply check that item is < than grid
-// @todo -> Update grid sizes after toggle and transform
 Gridifier.TransformerOperations.Toggle.prototype.execute = function(maybeItem, 
                                                                     newWidth, 
                                                                     newHeight,
@@ -64,10 +62,9 @@ Gridifier.TransformerOperations.Toggle.prototype.execute = function(maybeItem,
         this._loggerLegend
     );
     /* @system-log-end */
+    this._sizesResolverManager.startCachingTransaction();
     this._sizesTransformer.transformConnectionSizes(transformationData);
-    // @todo -> will it work(SizesTransfomer has async action inside)
     this._sizesResolverManager.stopCachingTransaction();
-    // @todo -> Should update here sizes too? -> Happens in renderTransformedGrid
 }
 
 Gridifier.TransformerOperations.Toggle.prototype._parseTransformationData = function(itemsToTransform,
