@@ -41,6 +41,9 @@ Gridifier = function(grid, settings) {
     };
 
     this._construct = function() {
+        if(typeof settings == "undefined")
+            settings = {};
+
         me._sizesResolverManager = new Gridifier.SizesResolverManager();
         me._grid = new Gridifier.Grid(grid, me._sizesResolverManager);
         me._eventEmitter = new Gridifier.EventEmitter(me);
@@ -138,10 +141,10 @@ Gridifier = function(grid, settings) {
         me._connections.setSizesTransformerInstance(me._sizesTransformer);
 
         me._toggleOperation = new Gridifier.TransformerOperations.Toggle(
-            me._collector, me._connections, me._guid, me._sizesTransformer, me._sizesResolverManager
+            me, me._collector, me._connections, me._guid, me._sizesTransformer, me._sizesResolverManager
         );
         me._transformOperation = new Gridifier.TransformerOperations.Transform(
-            me._collector, me._connections, me._guid, me._sizesTransformer, me._sizesResolverManager
+            me, me._collector, me._connections, me._guid, me._sizesTransformer, me._sizesResolverManager
         );
 
         me._operationsQueue = new Gridifier.Operations.Queue(
@@ -294,17 +297,19 @@ Gridifier.prototype.collect = function() {
 }
 
 Gridifier.prototype.disconnect = function(items) {
-    this._lifecycleCallbacks.executePreDisconnectCallbacks(items);
+    var me = this;
+
+    items = me._itemClonesManager.unfilterClones(items);
+    items = me._collector.filterOnlyConnectedItems(items);
+    me._lifecycleCallbacks.executePreDisconnectCallbacks(items);
 
     var execute = function() {
         this._sizesTransformer.stopRetransformAllConnectionsQueue();
-        this._disconnector.disconnect(items);
+        this._disconnector.disconnect(items, Gridifier.Disconnector.DISCONNECT_TYPES.HARD);
         this.retransformAllSizes();
     }
 
-    var me = this;
     setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
-
     return this;
 }
 
@@ -488,9 +493,13 @@ Gridifier.prototype.setItemClonesManagerLifecycleCallbacks = function() {
     });
 
     this.addPreDisconnectLifecycleCallback(function(items) {
-        for(var i = 0; i < items.length; i++) {
-            me._itemClonesManager.destroyClone(items[i]);
-        }
+        // Clone delete should happen after toggle finish.
+        // (Otherwise it will hide instantly).
+        setTimeout(function() {
+            for(var i = 0; i < items.length; i++) {
+                me._itemClonesManager.destroyClone(items[i]);
+            }
+        }, me._settings.getToggleAnimationMsDuration());
     });
 }
 

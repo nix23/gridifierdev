@@ -144,6 +144,10 @@ Gridifier.Settings.prototype.getSizesResolverManager = function() {
     return this._sizesResolverManager;
 }
 
+Gridifier.Settings.prototype.getCoordsChangerApi = function() {
+    return this._coordsChangerApi;
+}
+
 Gridifier.Settings.prototype.getResizeTimeout = function() {
     return this._resizeTimeout;
 }

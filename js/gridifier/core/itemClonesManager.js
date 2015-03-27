@@ -67,6 +67,20 @@ Gridifier.ItemClonesManager.prototype.createClone = function(item) {
    this._itemClones.push(itemClone);
 }
 
+Gridifier.ItemClonesManager.prototype.unfilterClones = function(maybeItems) {
+    maybeItems = this._collector.toDOMCollection(maybeItems);
+    var items = [];
+
+    for(var i = 0; i < maybeItems.length; i++) {
+        if(this.isItemClone(maybeItems[i]))
+            continue;
+
+        items.push(maybeItems[i]);
+    }
+
+    return items;
+}
+
 Gridifier.ItemClonesManager.prototype.isItemClone = function(maybeItemClone) {
    return Dom.hasAttribute(maybeItemClone, Gridifier.ItemClonesManager.ITEM_CLONE_MARKING_DATA_ATTR);
 }

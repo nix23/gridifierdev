@@ -174,6 +174,8 @@ var Dom = {
         prefixedPerspectiveProps: ["WebkitPerspective", "perspective", "MozPerspective"],
         prefixedTransformStyleProps: ["transformStyle", "WebkitTransformStyle", "MozTransformStyle"],
         prefixedBackfaceVisibilityProps: ["WebkitBackfaceVisibility", "MozBackfaceVisibility", "backfaceVisibility"],
+        prefixedTransformOriginProps: ["webkitTransformOrigin", "mozTransformOrigin", "oTransformOrigin",
+                                       "msTransformOrigin", "transformOrigin"],
 
         transition: function(DOMElem, propertyValue) {
             DOMElem.style[Prefixer.get("transition", DOMElem)] = propertyValue;
@@ -257,6 +259,13 @@ var Dom = {
         backfaceVisibility: function(DOMElem, propertyValue) {
             for(var i = 0; i < this.prefixedBackfaceVisibilityProps.length; i++)
                 DOMElem.style[this.prefixedBackfaceVisibilityProps[i]] = propertyValue;
+        },
+
+        transformOrigin: function(DOMElem, propertyValue) {
+            for(var i = 0; i < this.prefixedTransformOriginProps.length; i++) {
+                if(typeof DOMElem.style[this.prefixedTransformOriginProps[i]] != "undefined")
+                    DOMElem.style[this.prefixedTransformOriginProps[i]] = propertyValue;
+            }
         }
     },
 

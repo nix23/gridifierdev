@@ -68,7 +68,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         //me._gridifierSettings.alignmentType = "center";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
-        me._gridifierSettings.dragifier = true;
+        //me._gridifierSettings.dragifier = true;
         //me._gridifierSettings.dragifier = "testSelector";
         //me._gridifierSettings.sortDispersionMode = "custom";
         //me._gridifierSettings.sortDispersionValue = "200px";
@@ -239,8 +239,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             else {
                 //var width = "50%";
                 //var height = "600px";
-                 var width = "50px";
-                 var height = "100px";
+                var width = "50px";
+                var height = "100px";
                 //var width = "100px";
                 //var height = "100px";
             }
@@ -377,8 +377,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //    console.log("");
         //});
 
-        //me._gridifier.setCoordsChanger("CSS3Translate");
-        //me._gridifier.setSizesChanger("defaultPaddingBottom");
+       //me._gridifier.setCoordsChanger("CSS3Translate");
+       // me._gridifier.setSizesChanger("defaultPaddingBottom");
         window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
         setTimeout(function() {
            // me._gridifier.toggleBy("rotateX");
@@ -518,10 +518,10 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         // @todo -> Replace this.(Tmp for testing)
         me._$view.on("click", ".gridItem", function() { ///console.log("toggle");
-            //me._gridifier.disconnect($(this));
+            //me._gridifier.disconnect($(this)); return;
             //me._gridifier.transformSizes($(this), "*2", "*2");
            //me._gridifier.toggleSizesWithPaddingBottom($(this), "*2", "*2");
-            me._gridifier.toggleSizes($(this), "*2", "*4");
+            me._gridifier.toggleSizes($(this), "*2", "*2");
             return;
             if($(this).hasClass("transformedItem")) {
                 $(this).removeClass("transformedItem");

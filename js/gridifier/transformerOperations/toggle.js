@@ -1,10 +1,12 @@
-Gridifier.TransformerOperations.Toggle = function(collector,
+Gridifier.TransformerOperations.Toggle = function(gridifier,
+                                                  collector,
                                                   connections,
                                                   guid,
                                                   sizesTransformer,
                                                   sizesResolverManager) {
     var me = this;
 
+    this._gridifier = null;
     this._collector = null;
     this._connections = null;
     this._guid = null;
@@ -20,6 +22,7 @@ Gridifier.TransformerOperations.Toggle = function(collector,
     };
 
     this._construct = function() {
+        me._gridifier = gridifier;
         me._collector = collector;
         me._connections = connections;
         me._guid = guid;
@@ -55,6 +58,8 @@ Gridifier.TransformerOperations.Toggle.prototype.execute = function(maybeItem,
     var transformationData = this._parseTransformationData(
         itemsToTransform, sizesToTransform, usePaddingBottomInsteadHeight
     );
+    if(transformationData.length == 0)
+        return;
 
     /* @system-log-start */
     Logger.startLoggingOperation(
@@ -77,6 +82,9 @@ Gridifier.TransformerOperations.Toggle.prototype._parseTransformationData = func
     /* @system-log-end */
 
     for(var i = 0; i < itemsToTransform.length; i++) {
+        if(this._gridifier.isItemClone(itemsToTransform[i]))
+            continue;
+
         var connectionToTransform = this._connections.findConnectionByItem(itemsToTransform[i]);
         var targetSizesToTransform = null;
 

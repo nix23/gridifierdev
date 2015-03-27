@@ -174,6 +174,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var sizesResolverManager = this._settings.getSizesResolverManager();
             var coordsChanger = this._settings.getCoordsChanger();
             var collector = this._settings.getCollector();
+            var coordsChangerApi = this._settings.getCoordsChangerApi();
 
             var showItem = function(item) {
                 toggleFunction.show(
@@ -186,7 +187,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                     coordsChanger,
                     collector,
                     left,
-                    top
+                    top,
+                    coordsChangerApi
                 );
             };
 
@@ -213,6 +215,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var sizesResolverManager = this._settings.getSizesResolverManager();
             var coordsChanger = this._settings.getCoordsChanger();
             var collector = this._settings.getCollector();
+            var coordsChangerApi = this._settings.getCoordsChangerApi();
 
             var hideItem = function(item) {
                 toggleFunction.hide(
@@ -225,7 +228,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                     coordsChanger,
                     collector,
                     left,
-                    top
+                    top,
+                    coordsChangerApi
                 );
             };
 

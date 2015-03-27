@@ -47,9 +47,19 @@ Gridifier.Disconnector = function(gridifier,
     return this;
 }
 
-Gridifier.Disconnector.prototype.disconnect = function(items) {
+// Soft disconnect is used in filters.(After hard disconnect items
+//  shouldn't show on filter show)
+Gridifier.Disconnector.DISCONNECT_TYPES = {SOFT: 0, HARD: 1};
+
+Gridifier.Disconnector.prototype.disconnect = function(items, disconnectType) {
     var items = this._collector.toDOMCollection(items);
     this._collector.ensureAllItemsAreConnectedToGrid(items);
+
+    var disconnectType = disconnectType || Gridifier.Disconnector.DISCONNECT_TYPES.SOFT;
+    if(disconnectType == Gridifier.Disconnector.DISCONNECT_TYPES.HARD) {
+        for(var i = 0; i < items.length; i++)
+            this._collector.markItemAsRestrictedToCollect(items[i]);
+    }
 
     var connectionsToDisconnect = this._findConnectionsToDisconnect(items);
     for(var i = 0; i < connectionsToDisconnect.length; i++) {
@@ -61,6 +71,8 @@ Gridifier.Disconnector.prototype.disconnect = function(items) {
     
     for(var i = 0; i < connectionsToDisconnect.length; i++)
         this._connectedItemMarker.unmarkItemAsConnected(connectionsToDisconnect[i].item);
+
+    this._connections.reinitRanges();
     
     var renderer = this._gridifier.getRenderer();
     renderer.hideConnections(connectionsToDisconnect);

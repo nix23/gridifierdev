@@ -305,11 +305,12 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
     });
 
     this._gridifier.onHide(function(item) {
-        var itemClonesManager = me._gridifier.getItemClonesManager();
-        if(!itemClonesManager.hasBindedClone(item))
-            return;
+        //var itemClonesManager = me._gridifier.getItemClonesManager();
+        //if(!itemClonesManager.hasBindedClone(item))
+        //    return;
 
-        item.removeAttribute(itemShownDataAttr);
+        if(Dom.hasAttribute(item, itemShownDataAttr))
+            item.removeAttribute(itemShownDataAttr);
     });
 
     var clonesHideTimeouts = [];
@@ -404,4 +405,47 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
             }
         }, animationMsDuration);
     };
+}
+
+Gridifier.Api.CoordsChanger.prototype.hasTranslateOrTranslate3DTransformSet = function(DOMElem) {
+    var translateRegexp = /.*translate\((.*)\).*/;
+    var translate3dRegexp = /.*translate3d\((.*)\).*/;
+
+    if(translateRegexp.test(DOMElem.style[Prefixer.get("transform", DOMElem)]) ||
+        translate3dRegexp.test(DOMElem.style[Prefixer.get("transform", DOMElem)]))
+        return true;
+
+    return false;
+}
+
+Gridifier.Api.CoordsChanger.prototype.setTransformOriginAccordingToCurrentTranslate = function(DOMElem,
+                                                                                               connectionLeft,
+                                                                                               connectionTop,
+                                                                                               DOMElemWidth,
+                                                                                               DOMElemHeight) {
+    var newLeft = parseFloat(connectionLeft);
+    var newTop = parseFloat(connectionTop);
+
+    var currentLeft = parseFloat(DOMElem.style.left);
+    var currentTop = parseFloat(DOMElem.style.top);
+
+    if(newLeft > currentLeft)
+        var translateX = newLeft - currentLeft;
+    else if(newLeft < currentLeft)
+        var translateX = (currentLeft - newLeft) * -1;
+    else
+        var translateX = 0;
+
+    if(newTop > currentTop)
+        var translateY = newTop - currentTop;
+    else if(newTop < currentTop)
+        var translateY = (currentTop - newTop) * -1;
+    else
+        var translateY = 0;
+
+    Dom.css3.transformOrigin(DOMElem, (translateX + DOMElemWidth / 2) + "px " + (translateY + DOMElemHeight / 2) + "px");
+}
+
+Gridifier.Api.CoordsChanger.prototype.resetTransformOrigin = function(DOMElem) {
+    Dom.css3.transformOrigin(DOMElem, "50% 50%");
 }

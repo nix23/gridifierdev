@@ -230,7 +230,17 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
             }
         },
 
-        "hide": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
+        "hide": function(item,
+                         grid,
+                         animationMsDuration,
+                         timeouter,
+                         eventEmitter,
+                         sizesResolverManager,
+                         coordsChanger,
+                         collector,
+                         connectionLeft,
+                         connectionTop,
+                         coordsChangerApi) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "hidden";
@@ -238,7 +248,9 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 return;
             }
 
-            var executeScaleHide = function(item) {
+            var executeScaleHide = function(item, shouldResetTransformOrigin) {
+                var resetTransformOrigin = shouldResetTransformOrigin || false;
+
                 Dom.css3.transition(
                     item,
                     Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
@@ -266,6 +278,9 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                     Dom.css3.transition(item, "none");
                     Dom.css3.transformProperty(item, "scale3d", "1,1,1");
 
+                    if(resetTransformOrigin)
+                        coordsChangerApi.resetTransformOrigin(item);
+
                     item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
                     eventEmitter.emitHideEvent(item);
                 }, animationMsDuration + 20);
@@ -279,7 +294,16 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 executeScaleHide(itemClone);
             }
             else {
-                executeScaleHide(item);
+                if(coordsChangerApi.hasTranslateOrTranslate3DTransformSet(item)) {
+                    coordsChangerApi.setTransformOriginAccordingToCurrentTranslate(
+                        item,
+                        connectionLeft,
+                        connectionTop,
+                        sizesResolverManager.outerWidth(item, true),
+                        sizesResolverManager.outerHeight(item, true)
+                    );
+                }
+                executeScaleHide(item, true);
             }
         }
     };

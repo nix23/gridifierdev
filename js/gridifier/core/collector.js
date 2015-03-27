@@ -291,3 +291,18 @@ Gridifier.Collector.prototype.filterNotRestrictedToCollectItems = function(items
 Gridifier.Collector.prototype.markItemAsRestrictedToCollect = function(item) {
     item.setAttribute(Gridifier.Collector.RESTRICT_ITEM_COLLECT_DATA_ATTR, "restricted");
 }
+
+Gridifier.Collector.prototype.unmarkItemAsRestrictedToCollect = function(item) {
+    if(Dom.hasAttribute(item, Gridifier.Collector.RESTRICT_ITEM_COLLECT_DATA_ATTR))
+        item.removeAttribute(Gridifier.Collector.RESTRICT_ITEM_COLLECT_DATA_ATTR);
+}
+
+Gridifier.Collector.prototype.filterOnlyConnectedItems = function(maybeConnectedItems) {
+    var connectedItems = [];
+    for(var i = 0; i < maybeConnectedItems.length; i++) {
+        if(this._connectedItemMarker.isItemConnected(maybeConnectedItems[i]))
+            connectedItems.push(maybeConnectedItems[i]);
+    }
+
+    return connectedItems;
+}
