@@ -6,7 +6,8 @@ Gridifier.Dragifier = function(gridifier,
                                connectors,
                                guid,
                                settings,
-                               sizesResolverManager) {
+                               sizesResolverManager,
+                               eventEmitter) {
     var me = this;
 
     this._gridifier = null;
@@ -18,6 +19,7 @@ Gridifier.Dragifier = function(gridifier,
     this._guid = null;
     this._settings = null;
     this._sizesResolverManager = null;
+    this._eventEmitter = null;
 
     this._connectedItemMarker = null;
 
@@ -46,6 +48,7 @@ Gridifier.Dragifier = function(gridifier,
         me._guid = guid;
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
+        me._eventEmitter = eventEmitter;
 
         me._connectedItemMarker = new Gridifier.ConnectedItemMarker();
         me._dragifierApi = new Gridifier.Api.Dragifier();
@@ -264,7 +267,8 @@ Gridifier.Dragifier.prototype._createDraggableItem = function() {
             this._connectors, 
             this._guid, 
             this._settings,
-            this._sizesResolverManager
+            this._sizesResolverManager,
+            this._eventEmitter
         );
     }
     else if(this._settings.isDiscretizationDragifierMode()) {
@@ -277,7 +281,8 @@ Gridifier.Dragifier.prototype._createDraggableItem = function() {
             this._connectors, 
             this._guid, 
             this._settings,
-            this._sizesResolverManager
+            this._sizesResolverManager,
+            this._eventEmitter
         );
     }
 

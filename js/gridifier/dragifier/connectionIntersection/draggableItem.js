@@ -6,7 +6,8 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
                                                                    connectors,
                                                                    guid,
                                                                    settings,
-                                                                   sizesResolverManager) {
+                                                                   sizesResolverManager,
+                                                                   eventEmitter) {
     var me = this;
 
     this._gridifier = null;
@@ -19,6 +20,7 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
     this._guid = null;
     this._settings = null;
     this._sizesResolverManager = null;
+    this._eventEmitter = null;
 
     this._dragifierCore = null;
     this._dragifierRenderer = null;
@@ -40,6 +42,7 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
         me._guid = guid;
         me._settings = settings;
         me._sizesResolverManager = sizesResolverManager;
+        me._eventEmitter = eventEmitter;
 
         me._dragIdentifiers = [];
 
@@ -57,9 +60,11 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
             me._collector,
             me._connectors, 
             me._connections,
-            me._settings, 
+            me._settings,
+            me._guid,
             me._dragifierRenderer, 
-            me._sizesResolverManager
+            me._sizesResolverManager,
+            me._eventEmitter
         );
 
         me._bindEvents();
@@ -159,11 +164,14 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.processDragMov
     if(newIntersectedConnections.length == 0)
         return;
 
-    //this._swapItemGUIDS(newIntersectedConnections);
-        //this._dragifierCore.reappendGridItems();
-
-    if(this._swapItemPositions(newIntersectedConnections))
+    if(this._settings.isDisabledSortDispersion() || this._settings.isCustomSortDispersion()) {
+        this._swapItemGUIDS(newIntersectedConnections);
         this._dragifierCore.reappendGridItems();
+    }
+    else if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+        if(this._swapItemPositions(newIntersectedConnections))
+            this._dragifierCore.reappendGridItems();
+    }
 }
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._getNewIntersectedConnections = function(draggableItemCloneNewGridPosition) {

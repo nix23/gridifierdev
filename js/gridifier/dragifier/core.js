@@ -5,8 +5,10 @@ Gridifier.Dragifier.Core = function(gridifier,
                                     connectors,
                                     connections,
                                     settings,
+                                    guid,
                                     dragifierRenderer,
-                                    sizesResolverManager) {
+                                    sizesResolverManager,
+                                    eventEmitter) {
     var me = this;
 
     this._gridifier = null;
@@ -16,8 +18,11 @@ Gridifier.Dragifier.Core = function(gridifier,
     this._connectors = null;
     this._connections = null;
     this._settings = null;
+    this._guid = null;
     this._dragifierRenderer = null;
     this._sizesResolverManager = null;
+    this._eventEmitter = null;
+    this._connectionsSorter = null;
 
     this._cursorOffsetXFromDraggableItemCenter = null;
     this._cursorOffsetYFromDraggableItemCenter = null;
@@ -36,8 +41,21 @@ Gridifier.Dragifier.Core = function(gridifier,
         me._connectors = connectors;
         me._connections = connections;
         me._settings = settings;
+        me._guid = guid;
         me._dragifierRenderer = dragifierRenderer;
         me._sizesResolverManager = sizesResolverManager;
+        me._eventEmitter = eventEmitter;
+
+        if(me._settings.isVerticalGrid()) {
+            me._connectionsSorter = new Gridifier.VerticalGrid.ConnectionsSorter(
+                me._connections, me._settings, me._guid
+            );
+        }
+        else if(me._settings.isHorizontalGrid()) {
+            me._connectionsSorter = new Gridifier.HorizontalGrid.ConnectionsSorter(
+                me._connections, me._settings, me._guid
+            );
+        }
 
         me._bindEvents();
     };
@@ -245,5 +263,15 @@ Gridifier.Dragifier.Core.prototype.reappendGridItems = function() {
         });
     }
 
+    this._eventEmitter.onItemsReappendExecutionEndPerDragifier(function() {
+        var sortedConnections = me._connectionsSorter.sortConnectionsPerReappend(me._connections.get());
+        var sortedItems = [];
+
+        for(var i = 0; i < sortedConnections.length; i++) {
+            sortedItems.push(sortedConnections[i].item);
+        }
+
+        me._eventEmitter.emitDragEndEvent(sortedItems);
+    });
     this._gridifier.retransformAllSizes();
 }

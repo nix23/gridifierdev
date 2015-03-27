@@ -132,7 +132,8 @@ Gridifier = function(grid, settings) {
             me._reversedAppender,
             me._normalizer,
             me._operation,
-            me._sizesResolverManager
+            me._sizesResolverManager,
+            me._eventEmitter
         );
         me._connections.setSizesTransformerInstance(me._sizesTransformer);
 
@@ -177,7 +178,8 @@ Gridifier = function(grid, settings) {
             me._connectors, 
             me._guid, 
             me._settings,
-            me._sizesResolverManager
+            me._sizesResolverManager,
+            me._eventEmitter
         );
 
         me._bindEvents();

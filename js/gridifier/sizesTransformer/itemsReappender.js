@@ -10,7 +10,8 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
                                                       guid,
                                                       transformedItemMarker,
                                                       emptySpaceNormalizer,
-                                                      sizesResolverManager) {
+                                                      sizesResolverManager,
+                                                      eventEmitter) {
     var me = this;
 
     this._gridifier = null;
@@ -26,6 +27,7 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
     this._transformedItemMarker = null;
     this._emptySpaceNormalizer = null;
     this._sizesResolverManager = null;
+    this._eventEmitter = null;
 
     this._reappendQueue = null;
     this._reappendNextQueuedItemsBatchTimeout = null;
@@ -50,6 +52,7 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
         me._transformedItemMarker = transformedItemMarker;
         me._emptySpaceNormalizer = emptySpaceNormalizer;
         me._sizesResolverManager = sizesResolverManager;
+        me._eventEmitter = eventEmitter;
     };
 
     this._bindEvents = function() {
@@ -168,6 +171,7 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
         //if(this._settings.isNoIntersectionsStrategy()) {
         //    this._emptySpaceNormalizer.normalizeFreeSpace();
         //}
+        this._eventEmitter.emitItemsReappendExecutionEndPerDragifier();
         this._reappendNextQueuedItemsBatchTimeout = null;
         /* @system-log-start */
         Logger.stopLoggingOperation();

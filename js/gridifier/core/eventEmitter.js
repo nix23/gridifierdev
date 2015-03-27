@@ -9,6 +9,12 @@ Gridifier.EventEmitter = function(gridifier) {
     me._transformCallbacks = [];
     me._connectionCreateCallbacks = [];
 
+    me._dragEndCallbacks = [];
+
+    me._kernelCallbacks = {
+        itemsReappendExecutionEndPerDragifier: null
+    };
+
     this._css = {
     };
 
@@ -38,6 +44,8 @@ Gridifier.EventEmitter.prototype._bindEmitterToGridifier = function() {
     this._gridifier.onGridSizesChange = function(callbackFn) { me.onGridSizesChange.call(me, callbackFn); };
     this._gridifier.onTransform = function(callbackFn) { me.onTransform.call(me, callbackFn); };
     this._gridifier.onConnectionCreate = function(callbackFn) { me.onConnectionCreate.call(me, callbackFn); };
+
+    this._gridifier.onDragEnd = function(callbackFn) { me.onDragEnd.call(me, callbackFn); };
 }
 
 Gridifier.EventEmitter.prototype.onShow = function(callbackFn) {
@@ -58,6 +66,14 @@ Gridifier.EventEmitter.prototype.onGridSizesChange = function(callbackFn) {
 
 Gridifier.EventEmitter.prototype.onConnectionCreate = function(callbackFn) {
     this._connectionCreateCallbacks.push(callbackFn);
+}
+
+Gridifier.EventEmitter.prototype.onDragEnd = function(callbackFn) {
+    this._dragEndCallbacks.push(callbackFn);
+}
+
+Gridifier.EventEmitter.prototype.onItemsReappendExecutionEndPerDragifier = function(callbackFn) {
+    this._kernelCallbacks.itemsReappendExecutionEndPerDragifier = callbackFn;
 }
 
 Gridifier.EventEmitter.prototype.emitShowEvent = function(item) {
@@ -87,5 +103,18 @@ Gridifier.EventEmitter.prototype.emitTransformEvent = function(item, newWidth, n
 Gridifier.EventEmitter.prototype.emitConnectionCreateEvent = function(connections) {
     for(var i = 0; i < this._connectionCreateCallbacks.length; i++) {
         this._connectionCreateCallbacks[i](connections);
+    }
+}
+
+Gridifier.EventEmitter.prototype.emitDragEndEvent = function(sortedItems) {
+    for(var i = 0; i < this._dragEndCallbacks.length; i++) {
+        this._dragEndCallbacks[i](sortedItems);
+    }
+}
+
+Gridifier.EventEmitter.prototype.emitItemsReappendExecutionEndPerDragifier = function() {
+    if(this._kernelCallbacks.itemsReappendExecutionEndPerDragifier != null) {
+        this._kernelCallbacks.itemsReappendExecutionEndPerDragifier();
+        this._kernelCallbacks.itemsReappendExecutionEndPerDragifier = null;
     }
 }

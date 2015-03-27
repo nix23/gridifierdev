@@ -9,7 +9,8 @@ Gridifier.SizesTransformer.Core = function(gridifier,
                                            reversedAppender,
                                            normalizer,
                                            operation,
-                                           sizesResolverManager) {
+                                           sizesResolverManager,
+                                           eventEmitter) {
     var me = this;
 
     this._gridifier = null;
@@ -24,6 +25,7 @@ Gridifier.SizesTransformer.Core = function(gridifier,
     this._normalizer = null;
     this._operation = null;
     this._sizesResolverManager = null;
+    this._eventEmitter = null;
 
     this._connectorsCleaner = null;
     this._connectorsSelector = null;
@@ -52,6 +54,7 @@ Gridifier.SizesTransformer.Core = function(gridifier,
         me._normalizer = normalizer;
         me._operation = operation;
         me._sizesResolverManager = sizesResolverManager;
+        me._eventEmitter = eventEmitter;
 
         if(me._settings.isVerticalGrid()) {
             me._connectorsCleaner = new Gridifier.VerticalGrid.ConnectorsCleaner(
@@ -109,7 +112,8 @@ Gridifier.SizesTransformer.Core = function(gridifier,
             me._guid,
             me._transformedItemMarker,
             me._emptySpaceNormalizer,
-            me._sizesResolverManager
+            me._sizesResolverManager,
+            me._eventEmitter
         );
         me._transformerConnectors.setItemsReappenderInstance(me._itemsReappender);
     };
