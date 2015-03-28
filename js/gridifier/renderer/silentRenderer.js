@@ -103,5 +103,5 @@ Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
         }
     }
 
-    setTimeout(function() { scheduleSilentRendererExecution.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100);
+    setTimeout(function() { scheduleSilentRendererExecution.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 200);
 }

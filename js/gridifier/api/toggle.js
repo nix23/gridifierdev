@@ -209,13 +209,13 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                         Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
                     );
                     Dom.css3.transformProperty(item, "scale3d", "1,1,1");
-                }, 20);
+                }, 40);
                 timeouter.add(item, initScaleTimeout);
 
                 var completeScaleTimeout = setTimeout(function () {
                     item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
                     eventEmitter.emitShowEvent(item);
-                }, animationMsDuration + 40);
+                }, animationMsDuration + 60);
                 timeouter.add(item, completeScaleTimeout);
             }
 
