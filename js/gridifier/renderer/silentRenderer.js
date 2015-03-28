@@ -75,8 +75,11 @@ Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
             "[" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
         );
         var scheduledConnections = [];
-        for (var i = 0; i < scheduledItems.length; i++)
-            scheduledConnections.push(this._connections.findConnectionByItem(scheduledItems[i]));
+        for (var i = 0; i < scheduledItems.length; i++) {
+            var scheduledItemConnection = this._connections.findConnectionByItem(scheduledItems[i], true);
+            if(scheduledItemConnection != null)
+                scheduledConnections.push(scheduledItemConnection);
+        }
 
         var connectionsSorter = this._connections.getConnectionsSorter();
         scheduledConnections = connectionsSorter.sortConnectionsPerReappend(scheduledConnections);
@@ -89,8 +92,8 @@ Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
             return;
         }
 
-        if (typeof batchTimeout == "undefined" || batchTimeout < Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100)
-            var batchTimeout = Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100;
+        if (typeof batchTimeout == "undefined")
+            var batchTimeout = 100;
 
         var itemBatches = this._operationsQueue.splitItemsToBatches(scheduledItems, batchSize);
         var connectionBatches = this._operationsQueue.splitItemsToBatches(scheduledConnections, batchSize);
@@ -103,5 +106,6 @@ Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
         }
     }
 
-    setTimeout(function() { scheduleSilentRendererExecution.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 300);
+    // If 100ms is not enough to silently append all required items, user should call silentRender one more time.
+    setTimeout(function() { scheduleSilentRendererExecution.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100);
 }

@@ -64,6 +64,9 @@ Gridifier.Renderer.Schedulator.prototype.reinit = function() {
 }
 
 Gridifier.Renderer.Schedulator.prototype.scheduleShow = function(connection, left, top) {
+    if(this._silentRenderer.isScheduledForSilentRender(connection.item))
+        return;
+
     this._scheduledConnectionsToProcessData.push({
         connection: connection,
         processingType: Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.SHOW,

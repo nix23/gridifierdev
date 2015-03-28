@@ -12632,7 +12632,7 @@ Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
         }
     }
 
-    setTimeout(function() { scheduleSilentRendererExecution.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 200);
+    setTimeout(function() { scheduleSilentRendererExecution.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 300);
 }
 
 Gridifier.ApiSettingsParser = function(settingsCore, settings) {
