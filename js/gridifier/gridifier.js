@@ -18,6 +18,7 @@ Gridifier = function(grid, settings) {
     this._connectors = null;
     this._connections = null;
     this._connectionsSorter = null;
+    this._iterator = null;
     this._renderer = null;
     this._silentRenderer = null;
     this._sizesTransformer = null;
@@ -76,6 +77,10 @@ Gridifier = function(grid, settings) {
                 me._connections, me._settings, me._guid
             );
         }
+
+        me._iterator = new Gridifier.Iterator(
+            me._settings, me._collector, me._connections, me._connectionsSorter, me._guid
+        );
 
         me._gridSizesUpdater = new Gridifier.GridSizesUpdater(
             me._grid, me._connections, me._settings, me._eventEmitter
@@ -294,6 +299,38 @@ Gridifier.prototype.resort = function() {
 
 Gridifier.prototype.collect = function() {
     return this._collector.collect();
+}
+
+Gridifier.prototype.getFirst = function() {
+    return this._iterator.getFirst();
+}
+
+Gridifier.prototype.getLast = function() {
+    return this._iterator.getLast();
+}
+
+Gridifier.prototype.getNext = function(item) {
+    return this._iterator.getNext(item);
+}
+
+Gridifier.prototype.getPrev = function(item) {
+    return this._iterator.getPrev(item);
+}
+
+Gridifier.prototype.pop = function() {
+    var itemToPop = this._iterator.getFirst();
+    if(itemToPop != null)
+        this.disconnect(itemToPop);
+
+    return itemToPop;
+}
+
+Gridifier.prototype.shift = function() {
+    var itemToShift = this._iterator.getLast();
+    if(itemToShift != null)
+        this.disconnect(itemToShift);
+
+    return itemToShift;
 }
 
 Gridifier.prototype.disconnect = function(items) {

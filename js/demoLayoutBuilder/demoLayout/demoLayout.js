@@ -364,7 +364,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierSettings.toggleAnimationMsDuration = 500;
         me._gridifierSettings.coordsChangeAnimationMsDuration = 500;
         //me._gridifierSettings.toggleAnimationMsDuration = 2500;
-        //me._gridifierSettings.coordsChangeAnimationMsDuration = 2500;
+       // me._gridifierSettings.coordsChangeAnimationMsDuration = 2500;
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
         //
         me._gridifier.setItemClonesManagerLifecycleCallbacks();
