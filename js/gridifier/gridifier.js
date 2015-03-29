@@ -483,42 +483,124 @@ Gridifier.prototype.insertAfter = function(items, afterItem, batchSize, batchTim
 Gridifier.prototype.retransformAllSizes = function() {
     this._normalizer.updateItemAntialiasValues();
     this._transformOperation.executeRetransformAllSizes();
+
+    return this;
 }
 
 Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {
     this._normalizer.updateItemAntialiasValues();
     this._toggleOperation.execute(maybeItem, newWidth, newHeight, false);
+
+    return this;
 }
 
 Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
     this._normalizer.updateItemAntialiasValues();
     this._transformOperation.execute(maybeItem, newWidth, newHeight, false);
+
+    return this;
 }
 
 Gridifier.prototype.toggleSizesWithPaddingBottom = function(maybeItem, newWidth, newPaddingBottom) {
     this._normalizer.updateItemAntialiasValues();
     this._toggleOperation.execute(maybeItem, newWidth, newPaddingBottom, true);
+
+    return this;
 }
 
 Gridifier.prototype.transformSizesWithPaddingBottom = function(maybeItem, newWidth, newPaddingBottom) {
     this._normalizer.updateItemAntialiasValues();
     this._transformOperation.execute(maybeItem, newWidth, newPaddingBottom, true);
+
+    return this;
+}
+
+Gridifier.prototype.toggleResponsiveClasses = function(maybeItem, className) {
+    var items = this._itemClonesManager.unfilterClones(maybeItem);
+    for(var i = 0; i < items.length; i++) {
+        if(this.hasItemBindedClone(items[i]))
+            var itemClone = this.getItemClone(items[i]);
+        else
+            var itemClone = null;
+
+        if(Dom.css.hasClass(items[i], className)) {
+            Dom.css.removeClass(items[i], className);
+            if(itemClone != null)
+                Dom.css.removeClass(itemClone, className);
+        }
+        else {
+            Dom.css.addClass(items[i], className);
+            if(itemClone != null)
+                Dom.css.addClass(itemClone, className);
+        }
+    }
+
+    this._normalizer.updateItemAntialiasValues();
+    this.retransformAllSizes();
+
+    return this;
+}
+
+Gridifier.prototype.addResponsiveClass = function(maybeItem, className) {
+    var items = this._itemClonesManager.unfilterClones(maybeItem);
+    for(var i = 0; i < items.length; i++) {
+        if(this.hasItemBindedClone(items[i]))
+            var itemClone = this.getItemClone(items[i]);
+        else
+            var itemClone = null;
+
+        if(!Dom.css.hasClass(items[i], className)) {
+            Dom.css.addClass(items[i], className);
+            if(itemClone != null)
+                Dom.css.addClass(itemClone, className);
+        }
+    }
+
+    this._normalizer.updateItemAntialiasValues();
+    this.retransformAllSizes();
+
+    return this;
+}
+
+Gridifier.prototype.removeResponsiveClass = function(maybeItem, className) {
+    var items = this._itemClonesManager.unfilterClones(maybeItem);
+    for(var i = 0; i < items.length; i++) {
+        if(this.hasItemBindedClone(items[i]))
+            var itemClone = this.getItemClone(items[i]);
+        else
+            var itemClone = null;
+
+        if(Dom.css.hasClass(items[i], className)) {
+            Dom.css.removeClass(items[i], className);
+            if(itemClone != null)
+                Dom.css.removeClass(itemClone, className);
+        }
+    }
+
+    this._normalizer.updateItemAntialiasValues();
+    this.retransformAllSizes();
+
+    return this;
 }
 
 Gridifier.prototype.bindDragifierEvents = function() {
     this._dragifier.bindDragifierEvents();
+    return this;
 }
 
 Gridifier.prototype.unbindDragifierEvents = function() {
     this._dragifier.unbindDragifierEvents();
+    return this;
 }
 
 Gridifier.prototype.addPreInsertLifecycleCallback = function(callback) {
     this._lifecycleCallbacks.addPreInsertCallback(callback);
+    return this;
 }
 
 Gridifier.prototype.addPreDisconnectLifecycleCallback = function(callback) {
     this._lifecycleCallbacks.addPreDisconnectCallback(callback);
+    return this;
 }
 
 Gridifier.prototype.setItemClonesManagerLifecycleCallbacks = function() {
@@ -538,6 +620,8 @@ Gridifier.prototype.setItemClonesManagerLifecycleCallbacks = function() {
             }
         }, me._settings.getToggleAnimationMsDuration());
     });
+
+    return this;
 }
 
 Gridifier.prototype.getItemClonesManager = function() {

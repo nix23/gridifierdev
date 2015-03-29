@@ -68,7 +68,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         //me._gridifierSettings.alignmentType = "center";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
-        //me._gridifierSettings.dragifier = true;
+        me._gridifierSettings.dragifier = true;
         //me._gridifierSettings.dragifier = "testSelector";
         //me._gridifierSettings.sortDispersionMode = "custom";
         //me._gridifierSettings.sortDispersionValue = "200px";
@@ -231,18 +231,18 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             if(i % 2 == 0) {
                  //var width = "20%";
                  //var height = "200px";
-                 var width = "100px";
-                 var height = "50px";
-                //var width = "200px";
-                //var height = "200px";
+                 //var width = "100px";
+                 //var height = "50px";
+                var width = "200px";
+                var height = "200px";
             }
             else {
                 //var width = "50%";
                 //var height = "600px";
-                var width = "50px";
-                var height = "100px";
-                //var width = "100px";
+                //var width = "50px";
                 //var height = "100px";
+                var width = "100px";
+                var height = "100px";
             }
 
             me._gridifierDynamicSettings._itemSizes[i].width = width;
