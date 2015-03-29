@@ -14,6 +14,7 @@ Gridifier = function(grid, settings) {
     this._sizesResolverManager = null;
     this._lifecycleCallbacks = null;
     this._itemClonesManager = null;
+    this._responsiveClassesManager = null;
 
     this._connectors = null;
     this._connections = null;
@@ -58,6 +59,7 @@ Gridifier = function(grid, settings) {
         me._operation = new Gridifier.Operation();
         me._lifecycleCallbacks = new Gridifier.LifecycleCallbacks(me._collector);
         me._itemClonesManager = new Gridifier.ItemClonesManager(me._grid, me._collector);
+        me._responsiveClassesManager = new Gridifier.ResponsiveClassesManager(me, me._itemClonesManager);
 
         me._grid.setCollectorInstance(me._collector);
 
@@ -515,68 +517,24 @@ Gridifier.prototype.transformSizesWithPaddingBottom = function(maybeItem, newWid
     return this;
 }
 
-Gridifier.prototype.toggleResponsiveClass = function(maybeItem, className) {
-    var items = this._itemClonesManager.unfilterClones(maybeItem);
-    for(var i = 0; i < items.length; i++) {
-        if(this.hasItemBindedClone(items[i]))
-            var itemClone = this.getItemClone(items[i]);
-        else
-            var itemClone = null;
-
-        if(Dom.css.hasClass(items[i], className)) {
-            Dom.css.removeClass(items[i], className);
-            if(itemClone != null)
-                Dom.css.removeClass(itemClone, className);
-        }
-        else {
-            Dom.css.addClass(items[i], className);
-            if(itemClone != null)
-                Dom.css.addClass(itemClone, className);
-        }
-    }
-
+Gridifier.prototype.toggleResponsiveClasses = function(maybeItem, className) {
+    this._responsiveClassesManager.toggleResponsiveClasses(maybeItem, className);
     this._normalizer.updateItemAntialiasValues();
     this.retransformAllSizes();
 
     return this;
 }
 
-Gridifier.prototype.addResponsiveClass = function(maybeItem, className) {
-    var items = this._itemClonesManager.unfilterClones(maybeItem);
-    for(var i = 0; i < items.length; i++) {
-        if(this.hasItemBindedClone(items[i]))
-            var itemClone = this.getItemClone(items[i]);
-        else
-            var itemClone = null;
-
-        if(!Dom.css.hasClass(items[i], className)) {
-            Dom.css.addClass(items[i], className);
-            if(itemClone != null)
-                Dom.css.addClass(itemClone, className);
-        }
-    }
-
+Gridifier.prototype.addResponsiveClasses = function(maybeItem, className) {
+    this._responsiveClassesManager.addResponsiveClasses(maybeItem, className);
     this._normalizer.updateItemAntialiasValues();
     this.retransformAllSizes();
 
     return this;
 }
 
-Gridifier.prototype.removeResponsiveClass = function(maybeItem, className) {
-    var items = this._itemClonesManager.unfilterClones(maybeItem);
-    for(var i = 0; i < items.length; i++) {
-        if(this.hasItemBindedClone(items[i]))
-            var itemClone = this.getItemClone(items[i]);
-        else
-            var itemClone = null;
-
-        if(Dom.css.hasClass(items[i], className)) {
-            Dom.css.removeClass(items[i], className);
-            if(itemClone != null)
-                Dom.css.removeClass(itemClone, className);
-        }
-    }
-
+Gridifier.prototype.removeResponsiveClasses = function(maybeItem, className) {
+    this._responsiveClassesManager.removeResponsiveClasses(maybeItem, className);
     this._normalizer.updateItemAntialiasValues();
     this.retransformAllSizes();
 
