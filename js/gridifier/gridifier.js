@@ -303,6 +303,10 @@ Gridifier.prototype.collect = function() {
     return this._collector.collect();
 }
 
+Gridifier.prototype.collectAllConnectedItems = function() {
+    return this._collector.collectAllConnectedItems();
+}
+
 Gridifier.prototype.getFirst = function() {
     return this._iterator.getFirst();
 }
