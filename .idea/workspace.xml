@@ -2,7 +2,6 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="99a2be20-eb8d-4090-9e0f-2401c1885506" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/demoLayout.js" afterPath="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/demoLayout.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/gridifier.js" afterPath="$PROJECT_DIR$/build/gridifier.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/gridifier.js" afterPath="$PROJECT_DIR$/js/gridifier/gridifier.js" />
     </list>
@@ -42,8 +41,8 @@
       <file leaf-file-name="gridifier.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/gridifier/gridifier.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="1.4753902" vertical-offset="9211" max-vertical-offset="12636">
-              <caret line="580" column="31" selection-start-line="580" selection-start-column="31" selection-end-line="580" selection-end-column="31" />
+            <state vertical-scroll-proportion="0.26530612" vertical-offset="9157" max-vertical-offset="12636">
+              <caret line="521" column="56" selection-start-line="521" selection-start-column="56" selection-end-line="521" selection-end-column="56" />
               <folding />
             </state>
           </provider>
@@ -1281,8 +1280,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/js/gridifier/gridifier.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="1.4753902" vertical-offset="9211" max-vertical-offset="12636">
-          <caret line="580" column="31" selection-start-line="580" selection-start-column="31" selection-end-line="580" selection-end-column="31" />
+        <state vertical-scroll-proportion="0.26530612" vertical-offset="9157" max-vertical-offset="12636">
+          <caret line="521" column="56" selection-start-line="521" selection-start-column="56" selection-end-line="521" selection-end-column="56" />
           <folding />
         </state>
       </provider>

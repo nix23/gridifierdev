@@ -515,7 +515,7 @@ Gridifier.prototype.transformSizesWithPaddingBottom = function(maybeItem, newWid
     return this;
 }
 
-Gridifier.prototype.toggleResponsiveClasses = function(maybeItem, className) {
+Gridifier.prototype.toggleResponsiveClass = function(maybeItem, className) {
     var items = this._itemClonesManager.unfilterClones(maybeItem);
     for(var i = 0; i < items.length; i++) {
         if(this.hasItemBindedClone(items[i]))
