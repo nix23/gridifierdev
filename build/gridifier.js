@@ -3399,8 +3399,10 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                     if(itemClone != null)
                         itemClone.removeAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR);
 
-                    if(resetTransformOrigin)
+                    if(resetTransformOrigin && itemClone == null)
                         coordsChangerApi.resetTransformOrigin(item);
+                    else if(resetTransformOrigin && itemClone != null)
+                        coordsChangerApi.resetTransformOrigin(itemClone);
 
                     item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
                     eventEmitter.emitShowEvent(item);
@@ -3501,7 +3503,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
                 executeScaleHide(item);
-                
+
                 if(coordsChangerApi.hasTranslateOrTranslate3DTransformSet(itemClone)) {
                     coordsChangerApi.setTransformOriginAccordingToCurrentTranslate(
                         itemClone,

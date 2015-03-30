@@ -381,6 +381,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
        // me._gridifier.setSizesChanger("defaultPaddingBottom");
         window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
         setTimeout(function() {
+            me._gridifier.toggleBy("scaleWithFade");
             //me._gridifier.toggleBy("fade");
            // me._gridifier.toggleBy("rotateX");
            // me._gridifier.toggleBy("slideLeft");
