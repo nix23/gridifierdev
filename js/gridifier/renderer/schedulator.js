@@ -104,6 +104,7 @@ Gridifier.Renderer.Schedulator.prototype.scheduleDelayedRender = function(connec
         top: top,
         delay: delay
     });
+    this._schedule();
 }
 
 Gridifier.Renderer.Schedulator.prototype.scheduleRenderTransformed = function(connection, 

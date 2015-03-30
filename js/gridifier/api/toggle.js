@@ -188,22 +188,21 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 return;
             }
 
-            var executeScaleShow = function(item) {
+            var executeScaleShow = function(item, itemClone) {
+                if(itemClone != null)
+                    itemClone.setAttribute(
+                        Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR,
+                        "yes"
+                    );
+
                 if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
                     Dom.css3.transition(item, "none");
                     Dom.css3.transformProperty(item, "scale3d", "0,0,0");
                     item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
                 }
 
-                var setItemPrescaleVisibility = function(item) {
-                    item.style.visibility = "visible";
-                }
-
-                // Ie11 blinking fix(:))
-                setItemPrescaleVisibility(item);
-
                 var initScaleTimeout = setTimeout(function () {
-                    setItemPrescaleVisibility(item);
+                    item.style.visibility = "visible";
                     Dom.css3.transition(
                         item,
                         Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
@@ -213,6 +212,9 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 timeouter.add(item, initScaleTimeout);
 
                 var completeScaleTimeout = setTimeout(function () {
+                    if(itemClone != null)
+                        itemClone.removeAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR);
+
                     item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
                     eventEmitter.emitShowEvent(item);
                 }, animationMsDuration + 60);
@@ -222,12 +224,12 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
-                // Per IE11 clone should be scheduled per show first(Blinking fix)
-                executeScaleShow(itemClone);
-                executeScaleShow(item);
+                executeScaleShow(item, itemClone);
+                // Scaling clone will break timeouts sync in IE11(in some cases)
+                //executeScaleShow(itemClone);
             }
             else {
-                executeScaleShow(item);
+                executeScaleShow(item, null);
             }
         },
 
@@ -278,6 +280,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                     item.style.visibility = "hidden";
                     Dom.css3.transition(item, "none");
                     Dom.css3.transformProperty(item, "scale3d", "1,1,1");
+                    Dom.css3.transition(item, "");
 
                     if(resetTransformOrigin)
                         coordsChangerApi.resetTransformOrigin(item);

@@ -1428,6 +1428,10 @@ Gridifier.prototype.collect = function() {
     return this._collector.collect();
 }
 
+Gridifier.prototype.collectAllConnectedItems = function() {
+    return this._collector.collectAllConnectedItems();
+}
+
 Gridifier.prototype.getFirst = function() {
     return this._iterator.getFirst();
 }
@@ -3384,8 +3388,9 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
-                executeScaleShow(item);
+                // Per IE11 clone should be scheduled per show first(Blinking fix)
                 executeScaleShow(itemClone);
+                executeScaleShow(item);
             }
             else {
                 executeScaleShow(item);

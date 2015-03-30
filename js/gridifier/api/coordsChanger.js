@@ -108,6 +108,9 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
             return;
         }
 
+        newLeft = parseFloat(newLeft) + "px";
+        newTop = parseFloat(newTop) + "px";
+
         var isItemInitializationCall = isItemInitializationCall || false;
         if(isItemInitializationCall) {
             Dom.css3.transform(item, "scale3d(1,1,1)");
@@ -345,6 +348,9 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
             Dom.css3.transform(item, "scale3d(1,1,1) translate3d(0px,0px,0px)");
             return;
         }
+
+        newLeft = parseFloat(newLeft) + "px";
+        newTop = parseFloat(newTop) + "px";
 
         if(Dom.hasAttribute(item, Gridifier.Dragifier.IS_DRAGGABLE_ITEM_DATA_ATTR))
             var isDraggableItem = true;
