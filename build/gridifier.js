@@ -3352,7 +3352,17 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
     var me = this;
 
     this._toggleFunctions.scale = {
-        "show": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
+        "show": function(item,
+                         grid,
+                         animationMsDuration,
+                         timeouter,
+                         eventEmitter,
+                         sizesResolverManager,
+                         coordsChanger,
+                         collector,
+                         connectionLeft,
+                         connectionTop,
+                         coordsChangerApi) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
@@ -3360,7 +3370,9 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 return;
             }
 
-            var executeScaleShow = function(item, itemClone) {
+            var executeScaleShow = function(item, itemClone, shouldResetTransformOrigin) {
+                var resetTransformOrigin = shouldResetTransformOrigin || false;
+
                 if(itemClone != null)
                     itemClone.setAttribute(
                         Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR,
@@ -3387,6 +3399,9 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                     if(itemClone != null)
                         itemClone.removeAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR);
 
+                    if(resetTransformOrigin)
+                        coordsChangerApi.resetTransformOrigin(item);
+
                     item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
                     eventEmitter.emitShowEvent(item);
                 }, animationMsDuration + 60);
@@ -3396,12 +3411,31 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
                 timeouter.flush(itemClone);
-                executeScaleShow(item, itemClone);
+
+                if(coordsChangerApi.hasTranslateOrTranslate3DTransformSet(itemClone)) {
+                    coordsChangerApi.setTransformOriginAccordingToCurrentTranslate(
+                        itemClone,
+                        connectionLeft,
+                        connectionTop,
+                        sizesResolverManager.outerWidth(itemClone, true),
+                        sizesResolverManager.outerHeight(itemClone, true)
+                    );
+                }
+                executeScaleShow(item, itemClone, true);
                 // Scaling clone will break timeouts sync in IE11(in some cases)
                 //executeScaleShow(itemClone);
             }
             else {
-                executeScaleShow(item, null);
+                if(coordsChangerApi.hasTranslateOrTranslate3DTransformSet(item)) {
+                    coordsChangerApi.setTransformOriginAccordingToCurrentTranslate(
+                        item,
+                        connectionLeft,
+                        connectionTop,
+                        sizesResolverManager.outerWidth(item, true),
+                        sizesResolverManager.outerHeight(item, true)
+                    );
+                }
+                executeScaleShow(item, null, true);
             }
         },
 
@@ -3465,9 +3499,19 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
 
             if(me._gridifier.hasItemBindedClone(item)) {
                 var itemClone = me._gridifier.getItemClone(item);
-                timeouter.flush(item);
+                timeouter.flush(itemClone);
                 executeScaleHide(item);
-                executeScaleHide(itemClone);
+                
+                if(coordsChangerApi.hasTranslateOrTranslate3DTransformSet(itemClone)) {
+                    coordsChangerApi.setTransformOriginAccordingToCurrentTranslate(
+                        itemClone,
+                        connectionLeft,
+                        connectionTop,
+                        sizesResolverManager.outerWidth(itemClone, true),
+                        sizesResolverManager.outerHeight(itemClone, true)
+                    );
+                }
+                executeScaleHide(itemClone, true);
             }
             else {
                 if(coordsChangerApi.hasTranslateOrTranslate3DTransformSet(item)) {
