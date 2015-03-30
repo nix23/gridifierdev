@@ -184,7 +184,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                                 beforeScaleHide,
                                 afterScaleHide) {
         return {
-            "show": function (item,
+            "show":  function(item,
                               grid,
                               animationMsDuration,
                               timeouter,
@@ -479,12 +479,18 @@ Gridifier.Api.Toggle.prototype._addVisibility = function() {
             timeouter.flush(item);
             item.style.visibility = "visible";
             eventEmitter.emitShowEvent(item);
+            if(me._gridifier.hasItemBindedClone(item)) {
+                eventEmitter.emitShowEvent(me._gridifier.getItemClone(item));
+            }
         },
 
         "hide": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
             timeouter.flush(item);
             item.style.visibility = "hidden";
             eventEmitter.emitHideEvent(item);
+            if(me._gridifier.hasItemBindedClone(item)) {
+                eventEmitter.emitShowEvent(me._gridifier.getItemClone(item));
+            }
         }
     };
 }
