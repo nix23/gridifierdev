@@ -79,12 +79,22 @@ Gridifier.EventEmitter.prototype.onItemsReappendExecutionEndPerDragifier = funct
 Gridifier.EventEmitter.prototype.emitShowEvent = function(item) {
     for(var i = 0; i < this._showCallbacks.length; i++) {
         this._showCallbacks[i](item);
+
+        if(this._gridifier.hasItemBindedClone(item)) {
+            var itemClone = this._gridifier.getItemClone(item);
+            this._showCallbacks[i](item);
+        }
     }
 }
 
 Gridifier.EventEmitter.prototype.emitHideEvent = function(item) {
     for(var i = 0; i < this._hideCallbacks.length; i++) {
         this._hideCallbacks[i](item);
+
+        if(this._gridifier.hasItemBindedClone(item)) {
+            var itemClone = this._gridifier.getItemClone(item);
+            this._hideCallbacks[i](item);
+        }
     }
 }
 

@@ -179,6 +179,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var coordsChanger = this._settings.getCoordsChanger();
             var collector = this._settings.getCollector();
             var coordsChangerApi = this._settings.getCoordsChangerApi();
+            var itemClonesManager = this._gridifier.getItemClonesManager();
 
             var showItem = function(item) {
                 toggleFunction.show(
@@ -192,7 +193,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                     collector,
                     left,
                     top,
-                    coordsChangerApi
+                    coordsChangerApi,
+                    itemClonesManager
                 );
             };
 
@@ -220,6 +222,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var coordsChanger = this._settings.getCoordsChanger();
             var collector = this._settings.getCollector();
             var coordsChangerApi = this._settings.getCoordsChangerApi();
+            var itemClonesManager = this._gridifier.getItemClonesManager();
 
             var hideItem = function(item) {
                 toggleFunction.hide(
@@ -233,20 +236,10 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                     collector,
                     left,
                     top,
-                    coordsChangerApi
+                    coordsChangerApi,
+                    itemClonesManager
                 );
             };
-
-            // We should update this value on hide, because with translates, last set
-            // translate will be still applyied when we will call next show on filtering.
-            // In ClonesRenderer we will update Dom left and top values at last coordsChanger()
-            // call, and because of that this call will set up translates to 0,0,(0) values.
-            // (Otherwise clones will move from translated positions at last step on next filter show)
-            // (We should not do this on original item.(Can stop hiding animation, like on rotate)
-            if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
-                var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
-                coordsChanger(itemClone, left, top, animationMsDuration, eventEmitter);
-            }
 
             hideItem(connectionToProcess.item);
         }

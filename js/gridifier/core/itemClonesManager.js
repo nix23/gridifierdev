@@ -124,3 +124,39 @@ Gridifier.ItemClonesManager.prototype.destroyClone = function(item) {
    this._grid.getGrid().removeChild(bindedClone);
    item.removeAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR);
 }
+
+Gridifier.ItemClonesManager.prototype.lockCloneOnToggle = function(item) {
+    if(!this.hasBindedClone(item))
+        return this;
+
+    var itemClone = this.getBindedClone(item);
+    itemClone.setAttribute(
+        Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR,
+        "yes"
+    );
+
+    return this;
+}
+
+Gridifier.ItemClonesManager.prototype.unlockCloneOnToggle = function(item) {
+    if(!this.hasBindedClone(item))
+        return this;
+
+    var itemClone = this.getBindedClone(item);
+    itemClone.removeAttribute(
+        Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR
+    );
+
+    return this;
+}
+
+Gridifier.ItemClonesManager.prototype.hideCloneOnToggle = function(item) {
+    if(!this.hasBindedClone(item))
+        return;
+
+    var itemClone = this.getBindedClone(item);
+    if(itemClone.style.visibility == "visible")
+        itemClone.style.visibility = "hidden";
+
+    return this;
+}

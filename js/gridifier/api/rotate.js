@@ -66,27 +66,35 @@ Gridifier.Api.Rotate.prototype._getRotateFunction = function(rotateFunctionType)
     throw new Error("Gridifier error: wrong rotate function type = " + rotateFunctionType);
 }
 
-Gridifier.Api.Rotate.prototype.show3d = function(item, grid, rotateMatrixType, timeouter, left, top) {
+Gridifier.Api.Rotate.prototype.show3d = function(item, grid, rotateMatrixType, timeouter, left, top, itemClonesManager) {
     var rotateProp = "rotate3d";
-    this._rotate(item, grid, rotateProp, false, timeouter, this._getRotateMatrix(rotateMatrixType), left, top);
+    this._rotate(item, grid, rotateProp, false, timeouter, this._getRotateMatrix(rotateMatrixType), left, top, itemClonesManager);
 }
 
-Gridifier.Api.Rotate.prototype.hide3d = function(item, grid, rotateMatrixType, timeouter, left, top) {
+Gridifier.Api.Rotate.prototype.hide3d = function(item, grid, rotateMatrixType, timeouter, left, top, itemClonesManager) {
     var rotateProp = "rotate3d";
-    this._rotate(item, grid, rotateProp, true, timeouter, this._getRotateMatrix(rotateMatrixType), left, top);
+    this._rotate(item, grid, rotateProp, true, timeouter, this._getRotateMatrix(rotateMatrixType), left, top, itemClonesManager);
 }
 
-Gridifier.Api.Rotate.prototype.show = function(item, grid, rotateFunctionType, timeouter, left, top) {
+Gridifier.Api.Rotate.prototype.show = function(item, grid, rotateFunctionType, timeouter, left, top, itemClonesManager) {
     var rotateProp = this._getRotateFunction(rotateFunctionType);
-    this._rotate(item, grid, rotateProp, false, timeouter, "", left, top);
+    this._rotate(item, grid, rotateProp, false, timeouter, "", left, top, itemClonesManager);
 }
 
-Gridifier.Api.Rotate.prototype.hide = function(item, grid, rotateFunctionType, timeouter, left, top) {
+Gridifier.Api.Rotate.prototype.hide = function(item, grid, rotateFunctionType, timeouter, left, top, itemClonesManager) {
     var rotateProp = this._getRotateFunction(rotateFunctionType);
-    this._rotate(item, grid, rotateProp, true, timeouter, "", left, top);
+    this._rotate(item, grid, rotateProp, true, timeouter, "", left, top, itemClonesManager);
 }
 
-Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle, timeouter, rotateMatrix, left, top) {
+Gridifier.Api.Rotate.prototype._rotate = function(item,
+                                                  grid,
+                                                  rotateProp,
+                                                  inverseToggle,
+                                                  timeouter,
+                                                  rotateMatrix,
+                                                  left,
+                                                  top,
+                                                  itemClonesManager) {
     if(!inverseToggle) {
         var isShowing = true;
         var isHiding = false;
@@ -101,7 +109,7 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
     var itemClone = this._createItemClone(item);
 
     item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
-    item.setAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR, "yes");
+    itemClonesManager.lockCloneOnToggle(item);
     var frontFrame = this._createFrontFrame(frames, rotateProp, rotateMatrix);
     var backFrame = this._createBackFrame(frames, rotateProp, rotateMatrix);
 
@@ -129,13 +137,12 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
         Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + "180deg");
         Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + "0deg");
     }, 20);
+    // No sence to sync timeouts here -> Animations are performed on clones
     //timeouter.add(item, initRotateTimeout);
 
     // A little helper to reduce blink effect after animation finish
     if(animationMsDuration > 400) {
        var prehideItemTimeout = setTimeout(function () {
-          item.removeAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR);
-
           if (isShowing)
              item.style.visibility = "visible";
           else if (isHiding)
@@ -149,10 +156,12 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
         item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
 
         if(isShowing) {
+            itemClonesManager.unlockCloneOnToggle(item);
             item.style.visibility = "visible";
             me._eventEmitter.emitShowEvent(item);
         }
         else if(isHiding) {
+            itemClonesManager.unlockCloneOnToggle(item).hideCloneOnToggle(item);
             item.style.visibility = "hidden";
             me._eventEmitter.emitHideEvent(item);
         }

@@ -68,7 +68,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         me._gridifierSettings.alignmentType = "center";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
-        me._gridifierSettings.dragifier = true;
+        //me._gridifierSettings.dragifier = true;
         //me._gridifierSettings.dragifier = "testSelector";
         //me._gridifierSettings.sortDispersionMode = "custom";
         //me._gridifierSettings.sortDispersionValue = "200px";
@@ -361,8 +361,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridDebugger = new DemoLayoutBuilder.DemoLayout.GridDebugger(me, me._grid.getGrid().get(0));
         Logger.setGrid(me._grid.getGrid().get(0));
         
-        me._gridifierSettings.toggleAnimationMsDuration = 5500;
-        me._gridifierSettings.coordsChangeAnimationMsDuration = 5500;
+        me._gridifierSettings.toggleAnimationMsDuration = 500;
+        me._gridifierSettings.coordsChangeAnimationMsDuration = 500;
         //me._gridifierSettings.toggleAnimationMsDuration = 2500;
        // me._gridifierSettings.coordsChangeAnimationMsDuration = 2500;
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
@@ -380,12 +380,12 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
        //me._gridifier.setCoordsChanger("CSS3Translate");
        // me._gridifier.setSizesChanger("defaultPaddingBottom");
         window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
-        setTimeout(function() { //me._gridifier.toggleBy("visibility");
-           // me._gridifier.toggleBy("scaleWithFade");
+        setTimeout(function() {
+           //me._gridifier.toggleBy("scaleWithFade");
             //me._gridifier.toggleBy("scaleWithFade");
             //me._gridifier.toggleBy("fade");
-           // me._gridifier.toggleBy("rotateX");
-           // me._gridifier.toggleBy("slideLeft");
+            //me._gridifier.toggleBy("rotateX");
+           //me._gridifier.toggleBy("rotateX");
             //me._gridifier.setCoordsChanger("CSS3Translate3DClones");
             //me._gridifier.toggleBy("slideLeft");
         }, 500);
@@ -521,7 +521,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         // @todo -> Replace this.(Tmp for testing)
         me._$view.on("click", ".gridItem", function() { ///console.log("toggle");
-            //me._gridifier.disconnect($(this)); return;
+            me._gridifier.disconnect($(this)); return;
             //me._gridifier.transformSizes($(this), "*2", "*2");
            //me._gridifier.toggleSizesWithPaddingBottom($(this), "*2", "*2");
             me._gridifier.toggleSizes($(this), "*2", "*2");
@@ -559,12 +559,12 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             }, 250);
         });
 
-        me._gridifier.onShow(function(item) { console.log("show event");
+        me._gridifier.onShow(function(item) {
             var itemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
             item.innerHTML += itemGUID;
         });
 
-        me._gridifier.onHide(function(item) { console.log("hide event");
+        me._gridifier.onHide(function(item) {
             // var itemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
             // console.log("item = ", item);
             // console.log("Item with GUID = " + itemGUID + " was hiden!");
