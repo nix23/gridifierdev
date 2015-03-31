@@ -372,7 +372,6 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifier.setItemClonesManagerLifecycleCallbacks();
         me._gridifier.setCoordsChanger("CSS3Translate3DClones");
 
-
         //me._gridifier.onDragEnd(function(items) {
         //    for(var i = 0; i < items.length; i++) {
         //        console.log(items[i].getAttribute(DemoLayoutBuilder.DemoLayout.GRID_ITEM_INSERT_NUMBER_DATA_ATTR));
