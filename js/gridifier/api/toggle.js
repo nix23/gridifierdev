@@ -100,7 +100,8 @@ Gridifier.Api.Toggle.prototype._addSlides = function() {
 Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
                                                          showRotateApiFunction,
                                                          hideRotateApiFunction,
-                                                         rotateMatrixType) {
+                                                         rotateMatrixType,
+                                                         rotateFadeType) {
     var me = this;
 
     this._toggleFunctions[rotatorName] = {
@@ -115,7 +116,8 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
                          left,
                          top,
                          coordsChangerApi,
-                         itemClonesManager) {
+                         itemClonesManager,
+                         transitionTiming) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
@@ -123,6 +125,8 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
                 return;
             }
 
+            me._rotateApi.setRotateFadeType(rotateFadeType);
+            me._rotateApi.setTransitionTiming(transitionTiming);
             me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top, itemClonesManager);
         },
 
@@ -137,7 +141,8 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
                          left,
                          top,
                          coordsChangerApi,
-                         itemClonesManager) {
+                         itemClonesManager,
+                         transitionTiming) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "hidden";
@@ -145,23 +150,37 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
                 return;
             }
 
+            me._rotateApi.setRotateFadeType(rotateFadeType);
+            me._rotateApi.setTransitionTiming(transitionTiming);
             me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top, itemClonesManager);
         }
     };
 }
 
 Gridifier.Api.Toggle.prototype._addRotates = function() {
-    this._createRotator("rotate3dX", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.X);
-    this._createRotator("rotate3dY", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Y);
-    this._createRotator("rotate3dZ", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Z);
-    this._createRotator("rotate3dXY", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XY);
-    this._createRotator("rotate3dXZ", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XZ);
-    this._createRotator("rotate3dYZ", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.YZ);
-    this._createRotator("rotate3dXYZ", "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XYZ);
+    var rotatorPostfixes = ["", "WithFade", "WithFadeOut"];
+    var rotatorFadeTypes = [
+        Gridifier.Api.Rotate.ROTATE_FADE_TYPES.NONE,
+        Gridifier.Api.Rotate.ROTATE_FADE_TYPES.FULL,
+        Gridifier.Api.Rotate.ROTATE_FADE_TYPES.ON_HIDE_MIDDLE
+    ];
 
-    this._createRotator("rotateX", "show", "hide", Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.X);
-    this._createRotator("rotateY", "show", "hide", Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.Y);
-    this._createRotator("rotateZ", "show", "hide", Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.Z);
+    for(var i = 0; i < rotatorPostfixes.length; i++) {
+        var postfix = rotatorPostfixes[i];
+        var fadeType = rotatorFadeTypes[i];
+
+        this._createRotator("rotate3dX" + postfix, "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.X, fadeType);
+        this._createRotator("rotate3dY" + postfix, "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Y, fadeType);
+        this._createRotator("rotate3dZ" + postfix, "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.Z, fadeType);
+        this._createRotator("rotate3dXY" + postfix, "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XY, fadeType);
+        this._createRotator("rotate3dXZ" + postfix, "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XZ, fadeType);
+        this._createRotator("rotate3dYZ" + postfix, "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.YZ, fadeType);
+        this._createRotator("rotate3dXYZ" + postfix, "show3d", "hide3d", Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES.XYZ, fadeType);
+
+        this._createRotator("rotateX" + postfix, "show", "hide", Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.X, fadeType);
+        this._createRotator("rotateY" + postfix, "show", "hide", Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.Y, fadeType);
+        this._createRotator("rotateZ" + postfix, "show", "hide", Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES.Z, fadeType);
+    }
 }
 
 Gridifier.Api.Toggle.prototype._addScale = function() {
@@ -183,7 +202,8 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                               connectionLeft,
                               connectionTop,
                               coordsChangerApi,
-                              itemClonesManager) {
+                              itemClonesManager,
+                              transitionTiming) {
                 timeouter.flush(item);
                 if(!Dom.isBrowserSupportingTransitions()) {
                     item.style.visibility = "visible";
@@ -205,7 +225,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
 
                 if(!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
                     Dom.css3.transition(item, "none");
-                    beforeScaleShow(item, animationMsDuration);
+                    beforeScaleShow(item, animationMsDuration, transitionTiming);
                     Dom.css3.transformProperty(item, "scale3d", "0,0,0");
                     item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
                 }
@@ -214,10 +234,10 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                     item.style.visibility = "visible";
                     Dom.css3.transition(
                         item,
-                        Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+                        Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms " + transitionTiming
                     );
                     Dom.css3.transformProperty(item, "scale3d", "1,1,1");
-                    onScaleShow(item, animationMsDuration);
+                    onScaleShow(item, animationMsDuration, transitionTiming);
                 }, 40);
                 timeouter.add(item, initScaleTimeout);
 
@@ -242,7 +262,8 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                               connectionLeft,
                               connectionTop,
                               coordsChangerApi,
-                              itemClonesManager) {
+                              itemClonesManager,
+                              transitionTiming) {
                 timeouter.flush(item);
                 if(!Dom.isBrowserSupportingTransitions()) {
                     item.style.visibility = "hidden";
@@ -264,12 +285,12 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
 
                 Dom.css3.transition(
                     item,
-                    Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+                    Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms " + transitionTiming
                 );
 
                 item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
                 Dom.css3.transformProperty(item, "scale3d", "0,0,0");
-                beforeScaleHide(item, animationMsDuration);
+                beforeScaleHide(item, animationMsDuration, transitionTiming);
 
                 if(animationMsDuration > 200)
                     var hideItemTimeout = animationMsDuration - 100;
@@ -291,7 +312,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                     item.style.visibility = "hidden";
                     Dom.css3.transition(item, "none");
                     Dom.css3.transformProperty(item, "scale3d", "1,1,1");
-                    afterScaleHide(item, animationMsDuration);
+                    afterScaleHide(item, animationMsDuration, transitionTiming);
                     Dom.css3.transition(item, "");
 
                     coordsChangerApi.resetTransformOrigin(item);
@@ -307,24 +328,24 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
     var voidFunction = function(item, animationMsDuration) { ; };
     this._toggleFunctions.scale = createScaler(voidFunction, voidFunction, voidFunction, voidFunction);
     this._toggleFunctions.scaleWithFade = createScaler(
-        function(item, animationMsDuration) {
+        function(item, animationMsDuration, transitionTiming) {
             Dom.css3.opacity(item, "0");
         },
-        function(item, animationMsDuration) {
+        function(item, animationMsDuration, transitionTiming) {
             Dom.css3.transitionProperty(
                 item,
-                Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms ease"
+                Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms " + transitionTiming
             );
             Dom.css3.opacity(item, 1);
         },
-        function(item, animationMsDuration) {
+        function(item, animationMsDuration, transitionTiming) {
             Dom.css3.transitionProperty(
                 item,
-                Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms ease"
+                Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms " + transitionTiming
             );
             Dom.css3.opacity(item, "0");
         },
-        function(item, animationMsDuration) {
+        function(item, animationMsDuration, transitionTiming) {
             Dom.css3.opacity(item, "1");
         }
     );
@@ -345,7 +366,8 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
                          connectionLeft,
                          connectionTop,
                          coordsChangerApi,
-                         itemClonesManager) {
+                         itemClonesManager,
+                         transitionTiming) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
@@ -365,7 +387,7 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
                 item.style.visibility = "visible";
                 Dom.css3.transition(
                     item,
-                    Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms ease"
+                    Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms " + transitionTiming
                 );
                 Dom.css3.opacity(item, 1);
             }, 20);
@@ -390,7 +412,8 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
                          connectionLeft,
                          connectionTop,
                          coordsChangerApi,
-                         itemClonesManager) {
+                         itemClonesManager,
+                         transitionTiming) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "hidden";
@@ -401,7 +424,7 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
             itemClonesManager.lockCloneOnToggle(item);
             Dom.css3.transition(
                 item,
-                Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms ease"
+                Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms " + transitionTiming
             );
 
             item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");

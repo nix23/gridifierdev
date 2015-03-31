@@ -180,6 +180,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var collector = this._settings.getCollector();
             var coordsChangerApi = this._settings.getCoordsChangerApi();
             var itemClonesManager = this._gridifier.getItemClonesManager();
+            var toggleTransitionTiming = this._settings.getToggleTransitionTiming();
 
             var showItem = function(item) {
                 toggleFunction.show(
@@ -194,7 +195,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                     left,
                     top,
                     coordsChangerApi,
-                    itemClonesManager
+                    itemClonesManager,
+                    toggleTransitionTiming
                 );
             };
 
@@ -223,6 +225,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var collector = this._settings.getCollector();
             var coordsChangerApi = this._settings.getCoordsChangerApi();
             var itemClonesManager = this._gridifier.getItemClonesManager();
+            var toggleTransitionTiming = this._settings.getToggleTransitionTiming();
 
             var hideItem = function(item) {
                 toggleFunction.hide(
@@ -237,7 +240,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                     left,
                     top,
                     coordsChangerApi,
-                    itemClonesManager
+                    itemClonesManager,
+                    toggleTransitionTiming
                 );
             };
 
@@ -248,9 +252,10 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var coordsChanger = this._settings.getCoordsChanger();
             var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
             var eventEmitter = this._settings.getEventEmitter();
+            var coordsChangeTransitionTiming = this._settings.getCoordsChangeTransitionTiming();
 
             var me = this;
-            (function(item, animationMsDuration, eventEmitter, delay) {
+            (function(item, animationMsDuration, eventEmitter, transitionTiming, delay) {
                 setTimeout(function() {
                     // Because of using this delayed timeout we should find item connection again.
                     // There could be a bunch of resizes since this delayedRender schedule, so this item connection can point to the
@@ -263,16 +268,21 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                         me._rendererConnections.getCssTopPropertyValuePerConnection(connectionToProcess),
                         animationMsDuration,
                         eventEmitter,
-                        false
+                        false,
+                        false,
+                        false,
+                        false,
+                        transitionTiming
                     );
                 }, delay);
-            })(connectionToProcess.item, animationMsDuration, eventEmitter, delay);
+            })(connectionToProcess.item, animationMsDuration, eventEmitter, coordsChangeTransitionTiming, delay);
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER ||
                 processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED) {
             var coordsChanger = this._settings.getCoordsChanger();
             var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
             var eventEmitter = this._settings.getEventEmitter();
+            var coordsChangeTransitionTiming = this._settings.getCoordsChangeTransitionTiming();
 
             coordsChanger(
                 connectionToProcess.item,
@@ -280,7 +290,11 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 top,
                 animationMsDuration,
                 eventEmitter,
-                false
+                false,
+                false,
+                false,
+                false,
+                coordsChangeTransitionTiming
             );
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_TRANSFORMED) {
@@ -298,6 +312,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var coordsChanger = this._settings.getCoordsChanger();
             var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
             var eventEmitter = this._settings.getEventEmitter();
+            var coordsChangeTransitionTiming = this._settings.getCoordsChangeTransitionTiming();
 
             coordsChanger(
                 connectionToProcess.item, 
@@ -307,7 +322,9 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 eventEmitter,
                 true,
                 targetWidth,
-                targetHeight
+                targetHeight,
+                false,
+                coordsChangeTransitionTiming
             );
         }
     }

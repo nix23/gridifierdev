@@ -181,15 +181,31 @@ var Dom = {
             DOMElem.style[Prefixer.get("transition", DOMElem)] = propertyValue;
         },
 
-        transitionProperty: function(DOMElem, property) { 
+        transitionProperty: function(DOMElem, property) {
             var currentTransition = DOMElem.style[Prefixer.get("transition", DOMElem)];
             if(currentTransition.length == 0) {
                 DOMElem.style[Prefixer.get("transition", DOMElem)] = property;
                 return;
             }
 
-            var newTransition = property;
+            var encodeCubicBezier = function(transition) {
+                return transition.replace(
+                    /cubic-bezier\([^\)]+/g,
+                    function(match) { return match.replace(/,/g, ";"); }
+                );
+            };
+
+            var decodeCubicBezier = function(transition) {
+                return transition.replace(
+                    /cubic-bezier\([^\)]+/g,
+                    function(match) { return match.replace(/;/g, ","); }
+                );
+            }
+
+            var newTransition = encodeCubicBezier(property);
+            currentTransition = encodeCubicBezier(currentTransition);
             var currentTransitionProps = currentTransition.split(",");
+
             for(var i = 0; i < currentTransitionProps.length; i++) {
                 var currentTransitionProp = currentTransitionProps[i].gridifierTrim();
                 if(currentTransitionProp.length == 0)
@@ -203,7 +219,7 @@ var Dom = {
                 }
             }
 
-            DOMElem.style[Prefixer.get("transition", DOMElem)] = newTransition.gridifierTrim();
+            DOMElem.style[Prefixer.get("transition", DOMElem)] = decodeCubicBezier(newTransition).gridifierTrim();
         },
 
         transform: function(DOMElem, propertyValue) {

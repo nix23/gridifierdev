@@ -69,7 +69,8 @@ Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
                                                        emitTransformEvent,
                                                        newWidth,
                                                        newHeight,
-                                                       isItemInitializationCall) {
+                                                       isItemInitializationCall,
+                                                       transitionTiming) {
         var isItemInitializationCall = isItemInitializationCall || false;
         if(isItemInitializationCall) {
             // Custom init logic per coordsChanger sync can be placed here
@@ -100,7 +101,8 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
                                                          emitTransformEvent,
                                                          newWidth,
                                                          newHeight,
-                                                         isItemInitializationCall) {
+                                                         isItemInitializationCall,
+                                                         transitionTiming) {
         if(!Dom.isBrowserSupportingTransitions()) {
             me._coordsChangerFunctions["default"](
                 item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
@@ -118,12 +120,12 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
         }
 
         if(newLeft != item.style.left) {
-            Dom.css3.transitionProperty(item, "left " + animationMsDuration + "ms ease");
+            Dom.css3.transitionProperty(item, "left " + animationMsDuration + "ms " + transitionTiming);
             Dom.css.set(item, {left: newLeft});
         }
 
         if(newTop != item.style.top) {
-            Dom.css3.transitionProperty(item, "top " + animationMsDuration + "ms ease");
+            Dom.css3.transitionProperty(item, "top " + animationMsDuration + "ms " + transitionTiming);
             Dom.css.set(item, {top: newTop});
         }
 
@@ -146,7 +148,8 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function(
                                                           emitTransformEvent,
                                                           newWidth,
                                                           newHeight,
-                                                          isItemInitializationCall) {
+                                                          isItemInitializationCall,
+                                                          transitionTiming) {
         if(!Dom.isBrowserSupportingTransitions()) {
             me._coordsChangerFunctions["default"](
                 item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
@@ -199,7 +202,7 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function(
         if(setNewTranslate) {
             Dom.css3.transitionProperty(
                 item,
-                Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+                Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms " + transitionTiming
             );
 
             Dom.css3.transformProperty(item, "translate", translateX + "px," + translateY + "px");
@@ -224,7 +227,8 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
                                                             emitTransformEvent,
                                                             newWidth,
                                                             newHeight,
-                                                            isItemInitializationCall) {
+                                                            isItemInitializationCall,
+                                                            transitionTiming) {
         if(!Dom.isBrowserSupportingTransitions()) {
             me._coordsChangerFunctions["default"](
                 item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
@@ -277,7 +281,7 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
         if(setNewTranslate) {
             Dom.css3.transitionProperty(
                 item,
-                Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+                Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms " + transitionTiming
             );
 
             Dom.css3.perspective(item, "1000");
@@ -326,7 +330,8 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
                                                                   emitTransformEvent,
                                                                   newWidth,
                                                                   newHeight,
-                                                                  isItemInitializationCall) {
+                                                                  isItemInitializationCall,
+                                                                  transitionTiming) {
         if(!Dom.isBrowserSupportingTransitions()) {
             me._coordsChangerFunctions["default"](
                 item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
@@ -392,8 +397,9 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DClonesCoordsChanger = f
         if(newTop != item.style.top)
             Dom.css.set(item, {top: newTop});
 
+        var tt = transitionTiming;
         me._coordsChangerFunctions.CSS3Translate3D(
-            itemClone, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+            itemClone, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight, false, tt
         );
 
         if(clonesHideTimeouts[guid] != null) {

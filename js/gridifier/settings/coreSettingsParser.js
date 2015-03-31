@@ -210,6 +210,20 @@ Gridifier.CoreSettingsParser.prototype.parseCoordsChangeAnimationMsDuration = fu
     return this._settings.coordsChangeAnimationMsDuration;
 }
 
+Gridifier.CoreSettingsParser.prototype.parseToggleTransitionTiming = function() {
+    if(!this._settings.hasOwnProperty("toggleTransitionTiming"))
+        return Gridifier.DEFAULT_TOGGLE_TRANSITION_TIMING;
+
+    return this._settings.toggleTransitionTiming;
+}
+
+Gridifier.CoreSettingsParser.prototype.parseCoordsChangeTransitionTiming = function() {
+    if(!this._settings.hasOwnProperty("coordsChangeTransitionTiming"))
+        return Gridifier.DEFAULT_COORDS_CHANGE_TRANSITION_TIMING;
+
+    return this._settings.coordsChangeTransitionTiming;
+}
+
 Gridifier.CoreSettingsParser.prototype.parseRotatePerspective = function() {
     if(!this._settings.hasOwnProperty("rotatePerspective"))
         return Gridifier.DEFAULT_ROTATE_PERSPECTIVE;

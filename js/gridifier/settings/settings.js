@@ -43,6 +43,9 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
     this._toggleAnimationMsDuration = null;
     this._coordsChangeAnimationMsDuration = null;
 
+    this._toggleTransitionTiming = null;
+    this._coordsChangeTransitionTiming = null;
+
     this._rotatePerspective = null;
     this._rotateBackface = null;
 
@@ -108,6 +111,8 @@ Gridifier.Settings.prototype._parse = function() {
     this._shouldDisableItemHideOnGridAttach = this._coreSettingsParser.parseDisableItemHideOnGridAttachValue();
     this._toggleAnimationMsDuration = this._coreSettingsParser.parseToggleAnimationMsDuration();
     this._coordsChangeAnimationMsDuration = this._coreSettingsParser.parseCoordsChangeAnimationMsDuration();
+    this._toggleTransitionTiming = this._coreSettingsParser.parseToggleTransitionTiming();
+    this._coordsChangeTransitionTiming = this._coreSettingsParser.parseCoordsChangeTransitionTiming();
     this._rotatePerspective = this._coreSettingsParser.parseRotatePerspective();
     this._rotateBackface = this._coreSettingsParser.parseRotateBackface();
     this._gridTransformType = this._coreSettingsParser.parseGridTransformType();
@@ -158,6 +163,14 @@ Gridifier.Settings.prototype.getToggleAnimationMsDuration = function() {
 
 Gridifier.Settings.prototype.getCoordsChangeAnimationMsDuration = function() {
     return this._coordsChangeAnimationMsDuration;
+}
+
+Gridifier.Settings.prototype.getToggleTransitionTiming = function() {
+    return this._toggleTransitionTiming;
+}
+
+Gridifier.Settings.prototype.getCoordsChangeTransitionTiming = function() {
+    return this._coordsChangeTransitionTiming;
 }
 
 Gridifier.Settings.prototype.setToggleAnimationMsDuration = function(animationMsDuration) {

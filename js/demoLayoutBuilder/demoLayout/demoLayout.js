@@ -363,12 +363,15 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         me._gridifierSettings.toggleAnimationMsDuration = 500;
         me._gridifierSettings.coordsChangeAnimationMsDuration = 500;
+        //me._gridifierSettings.toggleTransitionTiming = "cubic-bezier(0.550, 0.055, 0.675, 0.190)";
+        //me._gridifierSettings.coordsChangeTransitionTiming = "cubic-bezier(0.550, 0.055, 0.675, 0.190)";
         //me._gridifierSettings.toggleAnimationMsDuration = 2500;
        // me._gridifierSettings.coordsChangeAnimationMsDuration = 2500;
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
         //
         me._gridifier.setItemClonesManagerLifecycleCallbacks();
         me._gridifier.setCoordsChanger("CSS3Translate3DClones");
+
 
         //me._gridifier.onDragEnd(function(items) {
         //    for(var i = 0; i < items.length; i++) {
@@ -381,13 +384,13 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
        // me._gridifier.setSizesChanger("defaultPaddingBottom");
         window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
         setTimeout(function() {
-           //me._gridifier.toggleBy("scaleWithFade");
+           me._gridifier.toggleBy("scaleWithFade");
             //me._gridifier.toggleBy("scaleWithFade");
             //me._gridifier.toggleBy("fade");
-            //me._gridifier.toggleBy("rotateX");
+            //me._gridifier.toggleBy("rotateXWithFade");
            //me._gridifier.toggleBy("rotateX");
             //me._gridifier.setCoordsChanger("CSS3Translate3DClones");
-            //me._gridifier.toggleBy("slideLeft");
+            //me._gridifier.toggleBy("slideTop");
         }, 500);
         //me._gridifier.setCoordsChanger("CSS3Position");
         //me._gridifier.setItemWidthPercentageAntialias(0.1);

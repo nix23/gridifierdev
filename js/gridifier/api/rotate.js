@@ -6,6 +6,9 @@ Gridifier.Api.Rotate = function(settings, eventEmitter, sizesResolverManager) {
     this._sizesResolverManager = null;
     this._collector = null;
 
+    this._rotateFadeType = null;
+    this._transitionTiming = null;
+
     this._css = {
     };
 
@@ -31,6 +34,7 @@ Gridifier.Api.Rotate = function(settings, eventEmitter, sizesResolverManager) {
 
 Gridifier.Api.Rotate.ROTATE_MATRIX_TYPES = {X: 0, Y: 1, Z: 2, XY: 3, XZ: 4, YZ: 5, XYZ: 6};
 Gridifier.Api.Rotate.ROTATE_FUNCTION_TYPES = {X: 0, Y: 1, Z: 2};
+Gridifier.Api.Rotate.ROTATE_FADE_TYPES = {NONE: 0, FULL: 1, ON_HIDE_MIDDLE: 2};
 
 Gridifier.Api.Rotate.prototype.setCollectorInstance = function(collector) {
     this._collector = collector;
@@ -64,6 +68,14 @@ Gridifier.Api.Rotate.prototype._getRotateFunction = function(rotateFunctionType)
         return "rotateZ";
 
     throw new Error("Gridifier error: wrong rotate function type = " + rotateFunctionType);
+}
+
+Gridifier.Api.Rotate.prototype.setRotateFadeType = function(fadeType) {
+    this._rotateFadeType = fadeType;
+}
+
+Gridifier.Api.Rotate.prototype.setTransitionTiming = function(transitionTiming) {
+    this._transitionTiming = transitionTiming;
 }
 
 Gridifier.Api.Rotate.prototype.show3d = function(item, grid, rotateMatrixType, timeouter, left, top, itemClonesManager) {
@@ -125,11 +137,11 @@ Gridifier.Api.Rotate.prototype._rotate = function(item,
     var animationMsDuration = this._settings.getToggleAnimationMsDuration();
     Dom.css3.transitionProperty(
         frontFrame, 
-        Prefixer.getForCSS('transform', frontFrame) + " " + animationMsDuration + "ms ease"
+        Prefixer.getForCSS('transform', frontFrame) + " " + animationMsDuration + "ms " + this._transitionTiming
     );
     Dom.css3.transitionProperty(
         backFrame, 
-        Prefixer.getForCSS('transform', backFrame) + " " + animationMsDuration + "ms ease"
+        Prefixer.getForCSS('transform', backFrame) + " " + animationMsDuration + "ms " + this._transitionTiming
     );
 
     var me = this;
@@ -139,6 +151,8 @@ Gridifier.Api.Rotate.prototype._rotate = function(item,
     }, 20);
     // No sence to sync timeouts here -> Animations are performed on clones
     //timeouter.add(item, initRotateTimeout);
+
+    this._initFadeEffect(scene, isShowing, isHiding, animationMsDuration);
 
     // A little helper to reduce blink effect after animation finish
     if(animationMsDuration > 400) {
@@ -228,7 +242,7 @@ Gridifier.Api.Rotate.prototype._createFrontFrame = function(frames, rotateProp, 
     frames.appendChild(frontFrame);
 
     Dom.css.set(frontFrame, {zIndex: 2});
-    Dom.css3.transitionProperty(frontFrame, Prefixer.getForCSS('transform', frontFrame) + " 0ms ease");
+    Dom.css3.transitionProperty(frontFrame, Prefixer.getForCSS('transform', frontFrame) + " 0ms " + this._transitionTiming);
     Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + "0deg");
 
     return frontFrame;
@@ -239,8 +253,47 @@ Gridifier.Api.Rotate.prototype._createBackFrame = function(frames, rotateProp, r
     this._addFrameCss(backFrame);
     frames.appendChild(backFrame);
 
-    Dom.css3.transitionProperty(backFrame, Prefixer.getForCSS('transform', backFrame) + " 0ms ease");
+    Dom.css3.transitionProperty(backFrame, Prefixer.getForCSS('transform', backFrame) + " 0ms " + this._transitionTiming);
     Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + "-180deg");
 
     return backFrame;
+}
+
+Gridifier.Api.Rotate.prototype._initFadeEffect = function(scene, isShowing, isHiding, animationMsDuration) {
+    var me = this;
+
+    if(this._rotateFadeType == Gridifier.Api.Rotate.ROTATE_FADE_TYPES.NONE)
+        return;
+    else if(this._rotateFadeType == Gridifier.Api.Rotate.ROTATE_FADE_TYPES.FULL) {
+        if(isShowing) {
+            Dom.css3.transition(scene, "none");
+            Dom.css3.opacity(scene, 0);
+            var targetOpacity = 1;
+        }
+        else if(isHiding) {
+            Dom.css3.transition(scene, "none");
+            Dom.css3.opacity(scene, 1);
+            var targetOpacity = 0;
+        }
+
+        setTimeout(function() {
+            Dom.css3.transition(
+                scene,
+                Prefixer.getForCSS('opacity', scene) + " " + animationMsDuration + "ms " + me._transitionTiming
+            );
+            Dom.css3.opacity(scene, targetOpacity);
+        }, 0);
+    }
+    else if(this._rotateFadeType == Gridifier.Api.Rotate.ROTATE_FADE_TYPES.ON_HIDE_MIDDLE) {
+        if(!isHiding)
+            return;
+
+        setTimeout(function () {
+            Dom.css3.transition(
+                scene,
+                Prefixer.getForCSS('opacity', scene) + " " + (animationMsDuration / 2) + "ms " + me._transitionTiming
+            );
+            Dom.css3.opacity(scene, 0);
+        }, animationMsDuration / 2);
+    }
 }

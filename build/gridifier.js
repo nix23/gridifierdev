@@ -2507,27 +2507,35 @@ Gridifier.Api.Rotate.prototype._getRotateFunction = function(rotateFunctionType)
     throw new Error("Gridifier error: wrong rotate function type = " + rotateFunctionType);
 }
 
-Gridifier.Api.Rotate.prototype.show3d = function(item, grid, rotateMatrixType, timeouter, left, top) {
+Gridifier.Api.Rotate.prototype.show3d = function(item, grid, rotateMatrixType, timeouter, left, top, itemClonesManager) {
     var rotateProp = "rotate3d";
-    this._rotate(item, grid, rotateProp, false, timeouter, this._getRotateMatrix(rotateMatrixType), left, top);
+    this._rotate(item, grid, rotateProp, false, timeouter, this._getRotateMatrix(rotateMatrixType), left, top, itemClonesManager);
 }
 
-Gridifier.Api.Rotate.prototype.hide3d = function(item, grid, rotateMatrixType, timeouter, left, top) {
+Gridifier.Api.Rotate.prototype.hide3d = function(item, grid, rotateMatrixType, timeouter, left, top, itemClonesManager) {
     var rotateProp = "rotate3d";
-    this._rotate(item, grid, rotateProp, true, timeouter, this._getRotateMatrix(rotateMatrixType), left, top);
+    this._rotate(item, grid, rotateProp, true, timeouter, this._getRotateMatrix(rotateMatrixType), left, top, itemClonesManager);
 }
 
-Gridifier.Api.Rotate.prototype.show = function(item, grid, rotateFunctionType, timeouter, left, top) {
+Gridifier.Api.Rotate.prototype.show = function(item, grid, rotateFunctionType, timeouter, left, top, itemClonesManager) {
     var rotateProp = this._getRotateFunction(rotateFunctionType);
-    this._rotate(item, grid, rotateProp, false, timeouter, "", left, top);
+    this._rotate(item, grid, rotateProp, false, timeouter, "", left, top, itemClonesManager);
 }
 
-Gridifier.Api.Rotate.prototype.hide = function(item, grid, rotateFunctionType, timeouter, left, top) {
+Gridifier.Api.Rotate.prototype.hide = function(item, grid, rotateFunctionType, timeouter, left, top, itemClonesManager) {
     var rotateProp = this._getRotateFunction(rotateFunctionType);
-    this._rotate(item, grid, rotateProp, true, timeouter, "", left, top);
+    this._rotate(item, grid, rotateProp, true, timeouter, "", left, top, itemClonesManager);
 }
 
-Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, inverseToggle, timeouter, rotateMatrix, left, top) {
+Gridifier.Api.Rotate.prototype._rotate = function(item,
+                                                  grid,
+                                                  rotateProp,
+                                                  inverseToggle,
+                                                  timeouter,
+                                                  rotateMatrix,
+                                                  left,
+                                                  top,
+                                                  itemClonesManager) {
     if(!inverseToggle) {
         var isShowing = true;
         var isHiding = false;
@@ -2542,7 +2550,7 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
     var itemClone = this._createItemClone(item);
 
     item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
-    item.setAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR, "yes");
+    itemClonesManager.lockCloneOnToggle(item);
     var frontFrame = this._createFrontFrame(frames, rotateProp, rotateMatrix);
     var backFrame = this._createBackFrame(frames, rotateProp, rotateMatrix);
 
@@ -2570,13 +2578,12 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
         Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + "180deg");
         Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + "0deg");
     }, 20);
+    // No sence to sync timeouts here -> Animations are performed on clones
     //timeouter.add(item, initRotateTimeout);
 
     // A little helper to reduce blink effect after animation finish
     if(animationMsDuration > 400) {
        var prehideItemTimeout = setTimeout(function () {
-          item.removeAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR);
-
           if (isShowing)
              item.style.visibility = "visible";
           else if (isHiding)
@@ -2590,10 +2597,12 @@ Gridifier.Api.Rotate.prototype._rotate = function(item, grid, rotateProp, invers
         item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
 
         if(isShowing) {
+            itemClonesManager.unlockCloneOnToggle(item);
             item.style.visibility = "visible";
             me._eventEmitter.emitShowEvent(item);
         }
         else if(isHiding) {
+            itemClonesManager.unlockCloneOnToggle(item).hideCloneOnToggle(item);
             item.style.visibility = "hidden";
             me._eventEmitter.emitHideEvent(item);
         }
@@ -3285,7 +3294,9 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
                          coordsChanger,
                          collector,
                          left,
-                         top) {
+                         top,
+                         coordsChangerApi,
+                         itemClonesManager) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
@@ -3293,15 +3304,7 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
                 return;
             }
 
-            if(me._gridifier.hasItemBindedClone(item)) {
-                var itemClone = me._gridifier.getItemClone(item);
-                timeouter.flush(itemClone);
-                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top);
-                me._rotateApi[showRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter, left, top);
-            }
-            else {
-                me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top);
-            }
+            me._rotateApi[showRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top, itemClonesManager);
         },
 
         "hide": function(item,
@@ -3313,7 +3316,9 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
                          coordsChanger,
                          collector,
                          left,
-                         top) {
+                         top,
+                         coordsChangerApi,
+                         itemClonesManager) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "hidden";
@@ -3321,15 +3326,7 @@ Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
                 return;
             }
 
-            if(me._gridifier.hasItemBindedClone(item)) {
-                var itemClone = me._gridifier.getItemClone(item);
-                timeouter.flush(itemClone);
-                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top);
-                me._rotateApi[hideRotateApiFunction](itemClone, grid, rotateMatrixType, timeouter, left, top);
-            }
-            else {
-                me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top);
-            }
+            me._rotateApi[hideRotateApiFunction](item, grid, rotateMatrixType, timeouter, left, top, itemClonesManager);
         }
     };
 }
@@ -3356,7 +3353,7 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                                 beforeScaleHide,
                                 afterScaleHide) {
         return {
-            "show": function (item,
+            "show":  function(item,
                               grid,
                               animationMsDuration,
                               timeouter,
@@ -3366,7 +3363,8 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                               collector,
                               connectionLeft,
                               connectionTop,
-                              coordsChangerApi) {
+                              coordsChangerApi,
+                              itemClonesManager) {
                 timeouter.flush(item);
                 if(!Dom.isBrowserSupportingTransitions()) {
                     item.style.visibility = "visible";
@@ -3374,65 +3372,44 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                     return;
                 }
 
-                var executeScaleShow = function (item, itemClone, shouldResetTransformOrigin) {
-                    var resetTransformOrigin = shouldResetTransformOrigin || false;
+                itemClonesManager.lockCloneOnToggle(item);
 
-                    if(itemClone != null)
-                        itemClone.setAttribute(
-                            Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR,
-                            "yes"
-                        );
-
-                    if(!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
-                        Dom.css3.transition(item, "none");
-                        beforeScaleShow(item, animationMsDuration);
-                        Dom.css3.transformProperty(item, "scale3d", "0,0,0");
-                        item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
-                    }
-
-                    var initScaleTimeout = setTimeout(function () {
-                        item.style.visibility = "visible";
-                        Dom.css3.transition(
-                            item,
-                            Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
-                        );
-                        Dom.css3.transformProperty(item, "scale3d", "1,1,1");
-                        onScaleShow(item, animationMsDuration);
-                    }, 40);
-                    timeouter.add(item, initScaleTimeout);
-
-                    var completeScaleTimeout = setTimeout(function () {
-                        if(itemClone != null)
-                            itemClone.removeAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR);
-
-                        if(resetTransformOrigin)
-                            coordsChangerApi.resetTransformOrigin(item);
-
-                        item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
-                        eventEmitter.emitShowEvent(item);
-                    }, animationMsDuration + 60);
-                    timeouter.add(item, completeScaleTimeout);
+                if(coordsChangerApi.hasTranslateOrTranslate3DTransformSet(item)) {
+                    coordsChangerApi.setTransformOriginAccordingToCurrentTranslate(
+                        item,
+                        connectionLeft,
+                        connectionTop,
+                        sizesResolverManager.outerWidth(item, true),
+                        sizesResolverManager.outerHeight(item, true)
+                    );
                 }
 
-                if(me._gridifier.hasItemBindedClone(item)) {
-                    var itemClone = me._gridifier.getItemClone(item);
-                    timeouter.flush(itemClone);
-                    executeScaleShow(item, itemClone, true);
-                    // Scaling clone will break timeouts sync in IE11(in some cases)
-                    //executeScaleShow(itemClone);
+                if(!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
+                    Dom.css3.transition(item, "none");
+                    beforeScaleShow(item, animationMsDuration);
+                    Dom.css3.transformProperty(item, "scale3d", "0,0,0");
+                    item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
                 }
-                else {
-                    if(coordsChangerApi.hasTranslateOrTranslate3DTransformSet(item)) {
-                        coordsChangerApi.setTransformOriginAccordingToCurrentTranslate(
-                            item,
-                            connectionLeft,
-                            connectionTop,
-                            sizesResolverManager.outerWidth(item, true),
-                            sizesResolverManager.outerHeight(item, true)
-                        );
-                    }
-                    executeScaleShow(item, null, true);
-                }
+
+                var initScaleTimeout = setTimeout(function () {
+                    item.style.visibility = "visible";
+                    Dom.css3.transition(
+                        item,
+                        Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+                    );
+                    Dom.css3.transformProperty(item, "scale3d", "1,1,1");
+                    onScaleShow(item, animationMsDuration);
+                }, 40);
+                timeouter.add(item, initScaleTimeout);
+
+                var completeScaleTimeout = setTimeout(function () {
+                    itemClonesManager.unlockCloneOnToggle(item);
+                    coordsChangerApi.resetTransformOrigin(item);
+
+                    item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
+                    eventEmitter.emitShowEvent(item);
+                }, animationMsDuration + 60);
+                timeouter.add(item, completeScaleTimeout);
             },
 
             "hide": function (item,
@@ -3445,7 +3422,8 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                               collector,
                               connectionLeft,
                               connectionTop,
-                              coordsChangerApi) {
+                              coordsChangerApi,
+                              itemClonesManager) {
                 timeouter.flush(item);
                 if(!Dom.isBrowserSupportingTransitions()) {
                     item.style.visibility = "hidden";
@@ -3453,77 +3431,56 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                     return;
                 }
 
-                var executeScaleHide = function (item, itemClone, shouldResetTransformOrigin) {
-                    var resetTransformOrigin = shouldResetTransformOrigin || false;
+                itemClonesManager.lockCloneOnToggle(item);
 
-                    if(itemClone != null)
-                        itemClone.setAttribute(
-                            Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR,
-                            "yes"
-                        );
-
-                    Dom.css3.transition(
+                if(coordsChangerApi.hasTranslateOrTranslate3DTransformSet(item)) {
+                    coordsChangerApi.setTransformOriginAccordingToCurrentTranslate(
                         item,
-                        Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+                        connectionLeft,
+                        connectionTop,
+                        sizesResolverManager.outerWidth(item, true),
+                        sizesResolverManager.outerHeight(item, true)
                     );
-
-                    item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
-                    Dom.css3.transformProperty(item, "scale3d", "0,0,0");
-                    beforeScaleHide(item, animationMsDuration);
-
-                    if(animationMsDuration > 200)
-                        var hideItemTimeout = animationMsDuration - 100;
-                    else
-                        var hideItemTimeout = animationMsDuration - 50;
-
-                    if(hideItemTimeout < 0)
-                        hideItemTimeout = 0;
-
-                    var prehideItemTimeout = setTimeout(function () {
-                        item.style.visibility = "hidden";
-                        // setTimeout should be smaller than animation duration(Flickering bug in Webkit)
-                    }, hideItemTimeout);
-                    timeouter.add(item, prehideItemTimeout);
-
-                    var completeScaleTimeout = setTimeout(function () {
-                        if(itemClone != null)
-                            itemClone.removeAttribute(Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR);
-
-                        item.style.visibility = "hidden";
-                        Dom.css3.transition(item, "none");
-                        Dom.css3.transformProperty(item, "scale3d", "1,1,1");
-                        afterScaleHide(item, animationMsDuration);
-                        Dom.css3.transition(item, "");
-
-                        if(resetTransformOrigin)
-                            coordsChangerApi.resetTransformOrigin(item);
-
-                        item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
-                        eventEmitter.emitHideEvent(item);
-                    }, animationMsDuration + 20);
-                    timeouter.add(item, completeScaleTimeout);
                 }
 
-                if(me._gridifier.hasItemBindedClone(item)) {
-                    var itemClone = me._gridifier.getItemClone(item);
-                    itemClone.style.visibility = "hidden";
-                    timeouter.flush(itemClone);
-                    executeScaleHide(item, itemClone, false);
-                    // No need to hide clone here too
-                    //executeScaleHide(itemClone, true);
-                }
-                else {
-                    if(coordsChangerApi.hasTranslateOrTranslate3DTransformSet(item)) {
-                        coordsChangerApi.setTransformOriginAccordingToCurrentTranslate(
-                            item,
-                            connectionLeft,
-                            connectionTop,
-                            sizesResolverManager.outerWidth(item, true),
-                            sizesResolverManager.outerHeight(item, true)
-                        );
-                    }
-                    executeScaleHide(item, null, true);
-                }
+                Dom.css3.transition(
+                    item,
+                    Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms ease"
+                );
+
+                item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
+                Dom.css3.transformProperty(item, "scale3d", "0,0,0");
+                beforeScaleHide(item, animationMsDuration);
+
+                if(animationMsDuration > 200)
+                    var hideItemTimeout = animationMsDuration - 100;
+                else
+                    var hideItemTimeout = animationMsDuration - 50;
+
+                if(hideItemTimeout < 0)
+                    hideItemTimeout = 0;
+
+                var prehideItemTimeout = setTimeout(function () {
+                    item.style.visibility = "hidden";
+                    // setTimeout should be smaller than animation duration(Flickering bug in Webkit)
+                }, hideItemTimeout);
+                timeouter.add(item, prehideItemTimeout);
+
+                var completeScaleTimeout = setTimeout(function () {
+                    itemClonesManager.unlockCloneOnToggle(item).hideCloneOnToggle(item);
+
+                    item.style.visibility = "hidden";
+                    Dom.css3.transition(item, "none");
+                    Dom.css3.transformProperty(item, "scale3d", "1,1,1");
+                    afterScaleHide(item, animationMsDuration);
+                    Dom.css3.transition(item, "");
+
+                    coordsChangerApi.resetTransformOrigin(item);
+
+                    item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
+                    eventEmitter.emitHideEvent(item);
+                }, animationMsDuration + 20);
+                timeouter.add(item, completeScaleTimeout);
             }
         };
     }
@@ -3558,7 +3515,18 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
     var me = this;
 
     this._toggleFunctions.fade = {
-        "show": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
+        "show": function(item,
+                         grid,
+                         animationMsDuration,
+                         timeouter,
+                         eventEmitter,
+                         sizesResolverManager,
+                         coordsChanger,
+                         collector,
+                         connectionLeft,
+                         connectionTop,
+                         coordsChangerApi,
+                         itemClonesManager) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "visible";
@@ -3566,42 +3534,44 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
                 return;
             }
 
-            var executeFadeShow = function(item) {
-                if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
-                    Dom.css3.transition(item, "none");
-                    Dom.css3.opacity(item, "0");
-                    item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
-                }
+            itemClonesManager.lockCloneOnToggle(item);
 
-                var initFadeTimeout = setTimeout(function () {
-                    item.style.visibility = "visible";
-                    Dom.css3.transition(
-                        item,
-                        Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms ease"
-                    );
-                    Dom.css3.opacity(item, 1);
-                }, 20);
-                timeouter.add(item, initFadeTimeout);
-
-                var completeFadeTimeout = setTimeout(function () {
-                    item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
-                    eventEmitter.emitShowEvent(item);
-                }, animationMsDuration + 40);
-                timeouter.add(item, completeFadeTimeout);
+            if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
+                Dom.css3.transition(item, "none");
+                Dom.css3.opacity(item, "0");
+                item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
             }
 
-            if(me._gridifier.hasItemBindedClone(item)) {
-                var itemClone = me._gridifier.getItemClone(item);
-                timeouter.flush(itemClone);
-                executeFadeShow(item);
-                executeFadeShow(itemClone);
-            }
-            else {
-                executeFadeShow(item);
-            }
+            var initFadeTimeout = setTimeout(function() {
+                item.style.visibility = "visible";
+                Dom.css3.transition(
+                    item,
+                    Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms ease"
+                );
+                Dom.css3.opacity(item, 1);
+            }, 20);
+            timeouter.add(item, initFadeTimeout);
+
+            var completeFadeTimeout = setTimeout(function() {
+                itemClonesManager.unlockCloneOnToggle(item);
+                item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
+                eventEmitter.emitShowEvent(item);
+            }, animationMsDuration + 40);
+            timeouter.add(item, completeFadeTimeout);
         },
 
-        "hide": function(item, grid, animationMsDuration, timeouter, eventEmitter, sizesResolverManager) {
+        "hide": function(item,
+                         grid,
+                         animationMsDuration,
+                         timeouter,
+                         eventEmitter,
+                         sizesResolverManager,
+                         coordsChanger,
+                         collector,
+                         connectionLeft,
+                         connectionTop,
+                         coordsChangerApi,
+                         itemClonesManager) {
             timeouter.flush(item);
             if(!Dom.isBrowserSupportingTransitions()) {
                 item.style.visibility = "hidden";
@@ -3609,36 +3579,27 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
                 return;
             }
 
-            var executeFadeHide = function(item) {
-                Dom.css3.transition(
-                    item,
-                    Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms ease"
-                );
+            itemClonesManager.lockCloneOnToggle(item);
+            Dom.css3.transition(
+                item,
+                Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms ease"
+            );
 
-                item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
-                Dom.css3.opacity(item, "0");
+            item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
+            Dom.css3.opacity(item, "0");
 
-                var executeFadeOutTimeout = setTimeout(function () {
-                    item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
-                    item.style.visibility = "hidden";
+            var executeFadeOutTimeout = setTimeout(function () {
+                itemClonesManager.unlockCloneOnToggle(item).hideCloneOnToggle(item);
+                item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
+                item.style.visibility = "hidden";
 
-                    Dom.css3.transition(item, "none");
-                    Dom.css3.opacity(item, "1");
+                Dom.css3.transition(item, "none");
+                Dom.css3.opacity(item, "1");
+                Dom.css3.transition(item, "");
 
-                    eventEmitter.emitHideEvent(item);
-                }, animationMsDuration + 20);
-                timeouter.add(item, executeFadeOutTimeout);
-            }
-
-            if(me._gridifier.hasItemBindedClone(item)) {
-                var itemClone = me._gridifier.getItemClone(item);
-                timeouter.flush(item);
-                executeFadeHide(item);
-                executeFadeHide(itemClone);
-            }
-            else {
-                executeFadeHide(item);
-            }
+                eventEmitter.emitHideEvent(item);
+            }, animationMsDuration + 20);
+            timeouter.add(item, executeFadeOutTimeout);
         }
     };
 }
@@ -5308,12 +5269,22 @@ Gridifier.EventEmitter.prototype.onItemsReappendExecutionEndPerDragifier = funct
 Gridifier.EventEmitter.prototype.emitShowEvent = function(item) {
     for(var i = 0; i < this._showCallbacks.length; i++) {
         this._showCallbacks[i](item);
+
+        if(this._gridifier.hasItemBindedClone(item)) {
+            var itemClone = this._gridifier.getItemClone(item);
+            this._showCallbacks[i](item);
+        }
     }
 }
 
 Gridifier.EventEmitter.prototype.emitHideEvent = function(item) {
     for(var i = 0; i < this._hideCallbacks.length; i++) {
         this._hideCallbacks[i](item);
+
+        if(this._gridifier.hasItemBindedClone(item)) {
+            var itemClone = this._gridifier.getItemClone(item);
+            this._hideCallbacks[i](item);
+        }
     }
 }
 
@@ -5680,6 +5651,42 @@ Gridifier.ItemClonesManager.prototype.destroyClone = function(item) {
    
    this._grid.getGrid().removeChild(bindedClone);
    item.removeAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR);
+}
+
+Gridifier.ItemClonesManager.prototype.lockCloneOnToggle = function(item) {
+    if(!this.hasBindedClone(item))
+        return this;
+
+    var itemClone = this.getBindedClone(item);
+    itemClone.setAttribute(
+        Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR,
+        "yes"
+    );
+
+    return this;
+}
+
+Gridifier.ItemClonesManager.prototype.unlockCloneOnToggle = function(item) {
+    if(!this.hasBindedClone(item))
+        return this;
+
+    var itemClone = this.getBindedClone(item);
+    itemClone.removeAttribute(
+        Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR
+    );
+
+    return this;
+}
+
+Gridifier.ItemClonesManager.prototype.hideCloneOnToggle = function(item) {
+    if(!this.hasBindedClone(item))
+        return;
+
+    var itemClone = this.getBindedClone(item);
+    if(itemClone.style.visibility == "visible")
+        itemClone.style.visibility = "hidden";
+
+    return this;
 }
 
 Gridifier.Iterator = function(settings, collector, connections, connectionsSorter, guid) {
@@ -12682,6 +12689,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var coordsChanger = this._settings.getCoordsChanger();
             var collector = this._settings.getCollector();
             var coordsChangerApi = this._settings.getCoordsChangerApi();
+            var itemClonesManager = this._gridifier.getItemClonesManager();
 
             var showItem = function(item) {
                 toggleFunction.show(
@@ -12695,7 +12703,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                     collector,
                     left,
                     top,
-                    coordsChangerApi
+                    coordsChangerApi,
+                    itemClonesManager
                 );
             };
 
@@ -12723,6 +12732,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var coordsChanger = this._settings.getCoordsChanger();
             var collector = this._settings.getCollector();
             var coordsChangerApi = this._settings.getCoordsChangerApi();
+            var itemClonesManager = this._gridifier.getItemClonesManager();
 
             var hideItem = function(item) {
                 toggleFunction.hide(
@@ -12736,20 +12746,10 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                     collector,
                     left,
                     top,
-                    coordsChangerApi
+                    coordsChangerApi,
+                    itemClonesManager
                 );
             };
-
-            // We should update this value on hide, because with translates, last set
-            // translate will be still applyied when we will call next show on filtering.
-            // In ClonesRenderer we will update Dom left and top values at last coordsChanger()
-            // call, and because of that this call will set up translates to 0,0,(0) values.
-            // (Otherwise clones will move from translated positions at last step on next filter show)
-            // (We should not do this on original item.(Can stop hiding animation, like on rotate)
-            if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
-                var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
-                coordsChanger(itemClone, left, top, animationMsDuration, eventEmitter);
-            }
 
             hideItem(connectionToProcess.item);
         }
