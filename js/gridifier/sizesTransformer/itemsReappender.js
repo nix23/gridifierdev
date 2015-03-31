@@ -172,6 +172,7 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
         //    this._emptySpaceNormalizer.normalizeFreeSpace();
         //}
         this._eventEmitter.emitItemsReappendExecutionEndPerDragifier();
+        this._eventEmitter.emitGridRetransformEvent();
         this._reappendNextQueuedItemsBatchTimeout = null;
         /* @system-log-start */
         Logger.stopLoggingOperation();

@@ -577,6 +577,10 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             // console.log(" newleft = " + newLeft + ", newTop = " + newTop);
             // console.log('item = ', item);
         });
+
+        me._gridifier.onGridRetransform(function() {
+            console.log("grid retransform event!");
+        });
     }
 
     this._unbindEvents = function() {

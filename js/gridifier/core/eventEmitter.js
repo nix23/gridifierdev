@@ -7,6 +7,7 @@ Gridifier.EventEmitter = function(gridifier) {
     me._hideCallbacks = [];
     me._gridSizesChangeCallbacks = [];
     me._transformCallbacks = [];
+    me._gridRetransformCallbacks = [];
     me._connectionCreateCallbacks = [];
 
     me._dragEndCallbacks = [];
@@ -43,6 +44,7 @@ Gridifier.EventEmitter.prototype._bindEmitterToGridifier = function() {
     this._gridifier.onHide = function(callbackFn) { me.onHide.call(me, callbackFn); };
     this._gridifier.onGridSizesChange = function(callbackFn) { me.onGridSizesChange.call(me, callbackFn); };
     this._gridifier.onTransform = function(callbackFn) { me.onTransform.call(me, callbackFn); };
+    this._gridifier.onGridRetransform = function(callbackFn) { me.onGridRetransform.call(me, callbackFn); };
     this._gridifier.onConnectionCreate = function(callbackFn) { me.onConnectionCreate.call(me, callbackFn); };
 
     this._gridifier.onDragEnd = function(callbackFn) { me.onDragEnd.call(me, callbackFn); };
@@ -58,6 +60,10 @@ Gridifier.EventEmitter.prototype.onHide = function(callbackFn) {
 
 Gridifier.EventEmitter.prototype.onTransform = function(callbackFn) {
     this._transformCallbacks.push(callbackFn);
+}
+
+Gridifier.EventEmitter.prototype.onGridRetransform = function(callbackFn) {
+    this._gridRetransformCallbacks.push(callbackFn);
 }
 
 Gridifier.EventEmitter.prototype.onGridSizesChange = function(callbackFn) {
@@ -107,6 +113,12 @@ Gridifier.EventEmitter.prototype.emitGridSizesChangeEvent = function() {
 Gridifier.EventEmitter.prototype.emitTransformEvent = function(item, newWidth, newHeight, newLeft, newTop) {
     for(var i = 0; i < this._transformCallbacks.length; i++) {
         this._transformCallbacks[i](item, newWidth, newHeight, newLeft, newTop);
+    }
+}
+
+Gridifier.EventEmitter.prototype.emitGridRetransformEvent = function() {
+    for(var i = 0; i < this._gridRetransformCallbacks.length; i++) {
+        this._gridRetransformCallbacks[i]();
     }
 }
 

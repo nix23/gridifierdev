@@ -1943,161 +1943,185 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
 Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function() {
     var me = this;
 
-    this._coordsChangerFunctions.CSS3Translate = function(item, 
-                                                          newLeft, 
-                                                          newTop,
-                                                          animationMsDuration,
-                                                          eventEmitter,
-                                                          emitTransformEvent,
-                                                          newWidth,
-                                                          newHeight,
-                                                          isItemInitializationCall,
-                                                          transitionTiming) {
-        if(!Dom.isBrowserSupportingTransitions()) {
-            me._coordsChangerFunctions["default"](
-                item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
-            );
-            return;
-        }
+    var createCoordsChanger = function(translateXNormalizer, translateYNormalizer) {
+        return function(item,
+                        newLeft,
+                        newTop,
+                        animationMsDuration,
+                        eventEmitter,
+                        emitTransformEvent,
+                        newWidth,
+                        newHeight,
+                        isItemInitializationCall,
+                        transitionTiming) {
+            if(!Dom.isBrowserSupportingTransitions()) {
+                me._coordsChangerFunctions["default"](
+                    item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+                );
+                return;
+            }
 
-        var isItemInitializationCall = isItemInitializationCall || false;
-        if(isItemInitializationCall) {
-            Dom.css3.transform(item, "scale3d(1,1,1) translate(0px,0px)");
-            return;
-        }
+            var isItemInitializationCall = isItemInitializationCall || false;
+            if(isItemInitializationCall) {
+                Dom.css3.transform(item, "scale3d(1,1,1) translate(0px,0px)");
+                return;
+            }
 
-        var newLeft = parseFloat(newLeft);
-        var newTop = parseFloat(newTop);
+            var newLeft = parseFloat(newLeft);
+            var newTop = parseFloat(newTop);
 
-        var currentLeft = parseFloat(item.style.left);
-        var currentTop = parseFloat(item.style.top);
+            var currentLeft = parseFloat(item.style.left);
+            var currentTop = parseFloat(item.style.top);
 
-        if(newLeft > currentLeft)
-            var translateX = newLeft - currentLeft;
-        else if(newLeft < currentLeft)
-            var translateX = (currentLeft - newLeft) * -1;
-        else 
-            var translateX = 0;
-
-        if(newTop > currentTop)
-            var translateY = newTop - currentTop;
-        else if(newTop < currentTop)
-            var translateY = (currentTop - newTop) * -1;
-        else
-            var translateY = 0;
-
-        var translateRegexp = /.*translate\((.*)\).*/;
-        var matches = translateRegexp.exec(item.style[Prefixer.get("transform")]);
-        if(matches == null || typeof matches[1] == "undefined" || matches[1] == null) {
-            var setNewTranslate = true;
-        }
-        else {
-            var translateParts = matches[1].split(",");
-            var lastTranslateX = translateParts[0].gridifierTrim();
-            var lastTranslateY = translateParts[1].gridifierTrim();
-
-            if(lastTranslateX == (translateX + "px") && lastTranslateY == (translateY + "px"))
-                var setNewTranslate = false;
+            if(newLeft > currentLeft)
+                var translateX = newLeft - currentLeft;
+            else if(newLeft < currentLeft)
+                var translateX = (currentLeft - newLeft) * -1;
             else
+                var translateX = 0;
+
+            if(newTop > currentTop)
+                var translateY = newTop - currentTop;
+            else if(newTop < currentTop)
+                var translateY = (currentTop - newTop) * -1;
+            else
+                var translateY = 0;
+
+            var translateRegexp = /.*translate\((.*)\).*/;
+            var matches = translateRegexp.exec(item.style[Prefixer.get("transform")]);
+            if(matches == null || typeof matches[1] == "undefined" || matches[1] == null) {
                 var setNewTranslate = true;
-        }
+            }
+            else {
+                var translateParts = matches[1].split(",");
+                var lastTranslateX = translateParts[0].gridifierTrim();
+                var lastTranslateY = translateParts[1].gridifierTrim();
 
-        if(setNewTranslate) {
-            Dom.css3.transitionProperty(
-                item,
-                Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms " + transitionTiming
-            );
+                if(lastTranslateX == (translateX + "px") && lastTranslateY == (translateY + "px"))
+                    var setNewTranslate = false;
+                else
+                    var setNewTranslate = true;
+            }
 
-            Dom.css3.transformProperty(item, "translate", translateX + "px," + translateY + "px");
-        }
+            if(setNewTranslate) {
+                Dom.css3.transitionProperty(
+                    item,
+                    Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms " + transitionTiming
+                );
 
-        if(emitTransformEvent) {
-            setTimeout(function() {
-                eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
-            }, animationMsDuration + 20);
+                translateX = translateXNormalizer(translateX);
+                translateY = translateYNormalizer(translateY);
+
+                Dom.css3.transformProperty(item, "translate", translateX + "px," + translateY + "px");
+            }
+
+            if(emitTransformEvent) {
+                setTimeout(function () {
+                    eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
+                }, animationMsDuration + 20);
+            }
         }
     };
+
+    var returnOriginalTranslate = function(translate) { return translate; };
+    this._coordsChangerFunctions.CSS3Translate = createCoordsChanger(returnOriginalTranslate, returnOriginalTranslate);
+    this._coordsChangerFunctions.CSS3TranslateWithRounding = createCoordsChanger(
+        function(translateX) { return Math.round(translateX); },
+        function(translateY) { return Math.round(translateY); }
+    );
 }
 
 Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = function() {
     var me = this;
 
-    this._coordsChangerFunctions.CSS3Translate3D = function(item, 
-                                                            newLeft, 
-                                                            newTop,
-                                                            animationMsDuration,
-                                                            eventEmitter,
-                                                            emitTransformEvent,
-                                                            newWidth,
-                                                            newHeight,
-                                                            isItemInitializationCall,
-                                                            transitionTiming) {
-        if(!Dom.isBrowserSupportingTransitions()) {
-            me._coordsChangerFunctions["default"](
-                item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
-            );
-            return;
-        }
+    var createCoordsChanger = function(translateXNormalizer, translateYNormalizer) {
+        return function (item,
+                         newLeft,
+                         newTop,
+                         animationMsDuration,
+                         eventEmitter,
+                         emitTransformEvent,
+                         newWidth,
+                         newHeight,
+                         isItemInitializationCall,
+                         transitionTiming) {
+            if(!Dom.isBrowserSupportingTransitions()) {
+                me._coordsChangerFunctions["default"](
+                    item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+                );
+                return;
+            }
 
-        var isItemInitializationCall = isItemInitializationCall || false;
-        if(isItemInitializationCall) {
-            Dom.css3.transform(item, "scale3d(1,1,1) translate3d(0px,0px,0px)");
-            return;
-        }
+            var isItemInitializationCall = isItemInitializationCall || false;
+            if(isItemInitializationCall) {
+                Dom.css3.transform(item, "scale3d(1,1,1) translate3d(0px,0px,0px)");
+                return;
+            }
 
-        var newLeft = parseFloat(newLeft);
-        var newTop = parseFloat(newTop);
+            var newLeft = parseFloat(newLeft);
+            var newTop = parseFloat(newTop);
 
-        var currentLeft = parseFloat(item.style.left);
-        var currentTop = parseFloat(item.style.top);
+            var currentLeft = parseFloat(item.style.left);
+            var currentTop = parseFloat(item.style.top);
 
-        if (newLeft > currentLeft)
-            var translateX = newLeft - currentLeft;
-        else if (newLeft < currentLeft)
-            var translateX = (currentLeft - newLeft) * -1;
-        else
-            var translateX = 0;
-
-        if (newTop > currentTop)
-            var translateY = newTop - currentTop;
-        else if (newTop < currentTop)
-            var translateY = (currentTop - newTop) * -1;
-        else
-            var translateY = 0;
-
-        var translateRegexp = /.*translate3d\((.*)\).*/;
-        var matches = translateRegexp.exec(item.style[Prefixer.get("transform")]);
-        if(matches == null || typeof matches[1] == "undefined" || matches[1] == null) {
-            var setNewTranslate = true;
-        }
-        else {
-            var translateParts = matches[1].split(",");
-            var lastTranslateX = translateParts[0].gridifierTrim();
-            var lastTranslateY = translateParts[1].gridifierTrim();
-
-            if(lastTranslateX == (translateX + "px") && lastTranslateY == (translateY + "px"))
-                var setNewTranslate = false;
+            if(newLeft > currentLeft)
+                var translateX = newLeft - currentLeft;
+            else if(newLeft < currentLeft)
+                var translateX = (currentLeft - newLeft) * -1;
             else
+                var translateX = 0;
+
+            if(newTop > currentTop)
+                var translateY = newTop - currentTop;
+            else if(newTop < currentTop)
+                var translateY = (currentTop - newTop) * -1;
+            else
+                var translateY = 0;
+
+            var translateRegexp = /.*translate3d\((.*)\).*/;
+            var matches = translateRegexp.exec(item.style[Prefixer.get("transform")]);
+            if(matches == null || typeof matches[1] == "undefined" || matches[1] == null) {
                 var setNewTranslate = true;
-        }
+            }
+            else {
+                var translateParts = matches[1].split(",");
+                var lastTranslateX = translateParts[0].gridifierTrim();
+                var lastTranslateY = translateParts[1].gridifierTrim();
 
-        if(setNewTranslate) {
-            Dom.css3.transitionProperty(
-                item,
-                Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms " + transitionTiming
-            );
+                if(lastTranslateX == (translateX + "px") && lastTranslateY == (translateY + "px"))
+                    var setNewTranslate = false;
+                else
+                    var setNewTranslate = true;
+            }
 
-            Dom.css3.perspective(item, "1000");
-            Dom.css3.backfaceVisibility(item, "hidden");
-            Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px,0px");
-        }
+            if(setNewTranslate) {
+                Dom.css3.transitionProperty(
+                    item,
+                    Prefixer.getForCSS('transform', item) + " " + animationMsDuration + "ms " + transitionTiming
+                );
 
-        if (emitTransformEvent) {
-            setTimeout(function () {
-                eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
-            }, animationMsDuration + 20);
-        }
-    };
+                translateX = translateXNormalizer(translateX);
+                translateY = translateYNormalizer(translateY);
+
+                Dom.css3.perspective(item, "1000");
+                Dom.css3.backfaceVisibility(item, "hidden");
+                Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px,0px");
+            }
+
+            if(emitTransformEvent) {
+                setTimeout(function () {
+                    eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
+                }, animationMsDuration + 20);
+            }
+        };
+    }
+
+    var returnOriginalTranslate = function(translate) { return translate; };
+    this._coordsChangerFunctions.CSS3Translate3D = createCoordsChanger(returnOriginalTranslate, returnOriginalTranslate);
+    this._coordsChangerFunctions.CSS3Translate3DWithRounding = createCoordsChanger(
+        function(translateX) { return Math.round(translateX); },
+        function(translateY) { return Math.round(translateY); }
+    );
 }
 
 Gridifier.Api.CoordsChanger.CSS3_TRANSLATE_3D_CLONES_RESTRICT_CLONE_SHOW_DATA_ATTR = "gridifier-clones-coords-changer-restrict-show";

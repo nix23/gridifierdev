@@ -388,3 +388,8 @@ Gridifier.Settings.prototype.shouldEnableDragifierOnInit = function() {
 Gridifier.Settings.prototype.getDragifierItemSelector = function() {
     return this._dragifierItemSelector;
 }
+
+Gridifier.Settings.prototype.setAlignmentType = function(newAlignmentType) {
+    this._coreSettingsParser.ensureIsValidAlignmentType(newAlignmentType);
+    this._alignmentType = newAlignmentType;
+}

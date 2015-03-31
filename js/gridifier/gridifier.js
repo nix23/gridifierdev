@@ -412,6 +412,11 @@ Gridifier.prototype.setCoordsChangeAnimationMsDuration = function(animationMsDur
     this._settings.setCoordsChangeAnimationMsDuration(animationMsDuration);
 }
 
+Gridifier.prototype.setAlignmentType = function(alignmentType) {
+    this._settings.setAlignmentType(alignmentType);
+    this.retransformAllSizes();
+}
+
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     if(this._settings.isMirroredPrepend()) {
         this.insertBefore(items, null, batchSize, batchTimeout);
