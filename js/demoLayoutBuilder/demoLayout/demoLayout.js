@@ -63,10 +63,10 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierSettings.gridTransformType = "expand";
 
         //me._gridifierSettings.prependType = "mirroredPrepend";
-        //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
+        me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
-        me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
-        me._gridifierSettings.alignmentType = "center";
+        //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
+        //me._gridifierSettings.alignmentType = "center";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
         //me._gridifierSettings.dragifier = true;
         //me._gridifierSettings.dragifier = "testSelector";
@@ -74,6 +74,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.sortDispersionValue = "200px";
         //me._gridifierSettings.dragifierMode = "discretization";
         //me._gridifierSettings.retransformQueueBatchSize = 50;
+
+        //me._gridifierSettings.appendType = "reversedAppend";
 
         // me._gridifierSettings.sort = function(firstItem, secondItem) { 
         //     var firstItemClassParts = firstItem.getAttribute("class").split(" ");
@@ -523,7 +525,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         // @todo -> Replace this.(Tmp for testing)
         me._$view.on("click", ".gridItem", function() { ///console.log("toggle");
-            me._gridifier.disconnect($(this)); return;
+            //me._gridifier.disconnect($(this)); return;
             //me._gridifier.transformSizes($(this), "*2", "*2");
            //me._gridifier.toggleSizesWithPaddingBottom($(this), "*2", "*2");
             me._gridifier.toggleSizes($(this), "*2", "*2");

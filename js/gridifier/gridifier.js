@@ -1,4 +1,4 @@
-Gridifier = function(grid, settings) { 
+Gridifier = function(grid, settings) {
     var me = this;
 
     this._grid = null;
@@ -39,8 +39,7 @@ Gridifier = function(grid, settings) {
 
     this._resizeEventHandler = null;
 
-    this._css = {
-    };
+    this._css = {};
 
     this._construct = function() {
         if(typeof settings == "undefined")
@@ -51,7 +50,7 @@ Gridifier = function(grid, settings) {
         me._eventEmitter = new Gridifier.EventEmitter(me);
         me._guid = new Gridifier.GUID();
         me._settings = new Gridifier.Settings(settings, me, me._guid, me._eventEmitter, me._sizesResolverManager);
-        me._collector = new Gridifier.Collector(me._settings,  me.getGrid(), me._sizesResolverManager);
+        me._collector = new Gridifier.Collector(me._settings, me.getGrid(), me._sizesResolverManager);
 
         me._settings.setCollectorInstance(me._collector);
 
@@ -157,11 +156,11 @@ Gridifier = function(grid, settings) {
 
         me._operationsQueue = new Gridifier.Operations.Queue(
             me._gridSizesUpdater,
-            me._collector, 
+            me._collector,
             me._connections,
             me._connectionsSorter,
-            me._guid, 
-            me._settings, 
+            me._guid,
+            me._settings,
             me._prepender,
             me._reversedPrepender,
             me._appender,
@@ -181,13 +180,13 @@ Gridifier = function(grid, settings) {
         me._renderer.setSilentRendererInstance(me._silentRenderer);
 
         me._dragifier = new Gridifier.Dragifier(
-            me, 
+            me,
             me._appender,
             me._reversedAppender,
             me._collector,
-            me._connections, 
-            me._connectors, 
-            me._guid, 
+            me._connections,
+            me._connectors,
+            me._guid,
             me._settings,
             me._sizesResolverManager,
             me._eventEmitter
@@ -283,7 +282,7 @@ Gridifier.prototype.sortBy = function(sortFunctionName) {
     return this;
 }
 
-Gridifier.prototype.filterBy = function(filterFunctionName) { 
+Gridifier.prototype.filterBy = function(filterFunctionName) {
     this._sizesTransformer.stopRetransformAllConnectionsQueue();
     this._settings.setFilter(filterFunctionName);
     this._filtrator.filter();
@@ -353,7 +352,9 @@ Gridifier.prototype.disconnect = function(items) {
         this.retransformAllSizes();
     }
 
-    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+    setTimeout(function() {
+        execute.call(me);
+    }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
     return this;
 }
 
@@ -430,7 +431,9 @@ Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     }
 
     var me = this;
-    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+    setTimeout(function() {
+        execute.call(me);
+    }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
 
     return this;
 }
@@ -443,14 +446,16 @@ Gridifier.prototype.append = function(items, batchSize, batchTimeout) {
     }
 
     var me = this;
-    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+    setTimeout(function() {
+        execute.call(me);
+    }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
 
     return this;
 }
 
 Gridifier.prototype.silentAppend = function(items, batchSize, batchTimeout) {
     this._silentRenderer.scheduleForSilentRender(
-       this._collector.toDOMCollection(items)
+        this._collector.toDOMCollection(items)
     );
     this.append(items, batchSize, batchTimeout);
 
@@ -472,7 +477,9 @@ Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchT
     }
 
     var me = this;
-    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+    setTimeout(function() {
+        execute.call(me);
+    }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
 
     return this;
 }
@@ -487,7 +494,9 @@ Gridifier.prototype.insertAfter = function(items, afterItem, batchSize, batchTim
     }
 
     var me = this;
-    setTimeout(function() { execute.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+    setTimeout(function() {
+        execute.call(me);
+    }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
 
     return this;
 }
@@ -660,7 +669,11 @@ Gridifier.REFLOW_OPTIMIZATION_TIMEOUT = 0;
 
 Gridifier.GRID_TYPES = {VERTICAL_GRID: "verticalGrid", HORIZONTAL_GRID: "horizontalGrid"};
 
-Gridifier.PREPEND_TYPES = {MIRRORED_PREPEND: "mirroredPrepend", DEFAULT_PREPEND: "defaultPrepend", REVERSED_PREPEND: "reversedPrepend"};
+Gridifier.PREPEND_TYPES = {
+    MIRRORED_PREPEND: "mirroredPrepend",
+    DEFAULT_PREPEND: "defaultPrepend",
+    REVERSED_PREPEND: "reversedPrepend"
+};
 Gridifier.APPEND_TYPES = {DEFAULT_APPEND: "defaultAppend", REVERSED_APPEND: "reversedAppend"};
 
 Gridifier.INTERSECTION_STRATEGIES = {DEFAULT: "default", NO_INTERSECTIONS: "noIntersections"};
@@ -673,10 +686,18 @@ Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES = {
     }
 };
 
-Gridifier.SORT_DISPERSION_MODES = {DISABLED: "disabled", CUSTOM: "custom", CUSTOM_ALL_EMPTY_SPACE: "customAllEmptySpace"};
+Gridifier.SORT_DISPERSION_MODES = {
+    DISABLED: "disabled",
+    CUSTOM: "custom",
+    CUSTOM_ALL_EMPTY_SPACE: "customAllEmptySpace"
+};
 
 Gridifier.GRID_ITEM_MARKING_STRATEGIES = {BY_CLASS: "class", BY_DATA_ATTR: "data", BY_QUERY: "query"};
-Gridifier.GRID_ITEM_MARKING_DEFAULTS = {CLASS: "gridifier-item", DATA_ATTR: "data-gridifier-item", QUERY: "div > div"};
+Gridifier.GRID_ITEM_MARKING_DEFAULTS = {
+    CLASS: "gridifier-item",
+    DATA_ATTR: "data-gridifier-item",
+    QUERY: "div > div"
+};
 
 Gridifier.DRAGIFIER_MODES = {INTERSECTION: "intersection", DISCRETIZATION: "discretization"};
 

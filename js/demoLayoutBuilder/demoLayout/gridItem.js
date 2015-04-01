@@ -93,13 +93,23 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
     else
         var pb = "7.5%";
 
+    if(typeof window.isFirstItem == "undefined") {
+        var isFirst = true;
+        window.isFirstItem = true;
+    }
+    else
+        var isFirst = false;
+
     this._$gridItem.css({
+        width: (isFirst) ? "25%" : "12.5%",
+        height: 0,
+       // "padding-bottom": (isFirst) ? "-webkit-calc(25% + 6px)" : "12.5%",
         width: itemSizes.width,
         height: itemSizes.height,
         //margin: "2em",
         //height: 0,
-        //paddingBottom: pb,
-        //marginBottom: "10px",
+       // paddingBottom: pb,
+       // marginBottom: "10px",
         //height: "30%",
 
         // width: "33.43%",

@@ -69,6 +69,11 @@ Gridifier.SizesTransformer.ItemsToReappendFinder.prototype.findAllOnSizesTransfo
         }
     }
 
+    if(this._settings.isCustomSortDispersion() || this._settings.isCustomAllEmptySpaceSortDispersion() ||
+        this._settings.isNoIntersectionsStrategy()) {
+        this._addAllIntersectedConnectionsBy(connectionsToReappend);
+    }
+
     var sortedConnectionsToReappend = this._connectionsSorter.sortConnectionsPerReappend(
         connectionsToReappend
     );
@@ -83,4 +88,38 @@ Gridifier.SizesTransformer.ItemsToReappendFinder.prototype.findAllOnSizesTransfo
         connectionsToReappend: connectionsToReappend,
         firstConnectionToReappend: sortedConnectionsToReappend[0]
     };
+}
+
+/*
+  Any of connectionsToReappend can be recollected in such way, that after recollection it will produce a gap in
+  such way, that selected reappend algorithm will not create connector in that item position. So, we should
+  reappend also all connections, that are intersected by connectionsToReappend.
+  (In all next level on collisions every connection will have some connection around, at which required connector
+   will be created and shifted. If somehow this 'gap' will appear on some layout, user can call 'triggerResize'
+   to ensure, that all transformed items will be correctly reappended).
+ */
+Gridifier.SizesTransformer.ItemsToReappendFinder.prototype._addAllIntersectedConnectionsBy = function(connectionsToReappend) {
+    var connections = this._connections.get();
+
+    for(var i = 0; i < connections.length; i++) {
+        var isIntersectingCurrentConnection = false;
+
+        for(var j = 0; j < connectionsToReappend.length; j++) {
+            if(this._settings.isVerticalGrid())
+                var intersectionCond = connectionsToReappend[j].y1 <= connections[i].y2;
+            else if(this._settings.isHorizontalGrid())
+                var intersectionCond = connectionsToReappend[j].x1 <= connections[i].x2;
+
+            if(intersectionCond) {
+                connectionsToReappend.push(connections[i]);
+                isIntersectingCurrentConnection = true;
+                break;
+            }
+        }
+
+        if(isIntersectingCurrentConnection) {
+            connections.splice(i, 1);
+            i--;
+        }
+    }
 }

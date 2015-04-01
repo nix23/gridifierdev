@@ -168,8 +168,10 @@ Gridifier.HorizontalGrid.Appender.prototype.createInitialConnector = function() 
     /* @system-log-end */
 }
 
-Gridifier.HorizontalGrid.Appender.prototype.recreateConnectorsPerAllConnectedItems = function() {
-    this._connectors.flush();
+Gridifier.HorizontalGrid.Appender.prototype.recreateConnectorsPerAllConnectedItems = function(disableFlush) {
+    var disableFlush = disableFlush || false;
+    if(!disableFlush)
+        this._connectors.flush();
 
     var connections = this._connections.get();
     for(var i = 0; i < connections.length; i++) {

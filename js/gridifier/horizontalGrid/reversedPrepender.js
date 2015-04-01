@@ -193,8 +193,10 @@ Gridifier.HorizontalGrid.ReversedPrepender.prototype.createInitialConnector = fu
     /* @system-log-end */
 }
 
-Gridifier.HorizontalGrid.ReversedPrepender.prototype.recreateConnectorsPerAllConnectedItems = function() {
-    this._connectors.flush();
+Gridifier.HorizontalGrid.ReversedPrepender.prototype.recreateConnectorsPerAllConnectedItems = function(disableFlush) {
+    var disableFlush = disableFlush || false;
+    if(!disableFlush)
+        this._connectors.flush();
 
     var connections = this._connections.get();
     for(var i = 0; i < connections.length; i++) {
