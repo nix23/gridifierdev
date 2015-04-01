@@ -125,7 +125,7 @@ Gridifier.ConnectorsIntersector.prototype.getMostRightFromIntersectedLeftItems =
             if(mostRightConnection == null)
                 mostRightConnection = connection;
             else {
-                if(connection.x > mostRightConnection.x2)
+                if(connection.x1 > mostRightConnection.x2)
                     mostRightConnection = connection;
             }
         }

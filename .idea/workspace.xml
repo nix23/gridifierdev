@@ -2,23 +2,11 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="99a2be20-eb8d-4090-9e0f-2401c1885506" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/build/gridifier.min.js" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/horizontalGrid/appender.js" afterPath="$PROJECT_DIR$/js/gridifier/horizontalGrid/appender.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/verticalGrid/appender.js" afterPath="$PROJECT_DIR$/js/gridifier/verticalGrid/appender.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/connectors/connectorsIntersector.js" afterPath="$PROJECT_DIR$/js/gridifier/connectors/connectorsIntersector.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/demoLayout.js" afterPath="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/demoLayout.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayoutBuilder.js" afterPath="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayoutBuilder.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/gridItem.js" afterPath="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/gridItem.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/css/gridifier.css" afterPath="$PROJECT_DIR$/css/gridifier.css" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/build/gridifier.js" afterPath="$PROJECT_DIR$/build/gridifier.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/gridifier.js" afterPath="$PROJECT_DIR$/js/gridifier/gridifier.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.html" afterPath="$PROJECT_DIR$/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/sizesTransformer/itemsToReappendFinder.js" afterPath="$PROJECT_DIR$/js/gridifier/sizesTransformer/itemsToReappendFinder.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/horizontalGrid/prepender.js" afterPath="$PROJECT_DIR$/js/gridifier/horizontalGrid/prepender.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/verticalGrid/prepender.js" afterPath="$PROJECT_DIR$/js/gridifier/verticalGrid/prepender.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/horizontalGrid/reversedAppender.js" afterPath="$PROJECT_DIR$/js/gridifier/horizontalGrid/reversedAppender.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/verticalGrid/reversedAppender.js" afterPath="$PROJECT_DIR$/js/gridifier/verticalGrid/reversedAppender.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/horizontalGrid/reversedPrepender.js" afterPath="$PROJECT_DIR$/js/gridifier/horizontalGrid/reversedPrepender.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/verticalGrid/reversedPrepender.js" afterPath="$PROJECT_DIR$/js/gridifier/verticalGrid/reversedPrepender.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="gridifier.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -53,31 +41,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="connectionsSorter.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/js/gridifier/horizontalGrid/connections/connectionsSorter.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="508" max-vertical-offset="1548">
-              <caret line="73" column="32" selection-start-line="73" selection-start-column="32" selection-end-line="73" selection-end-column="32" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
       <file leaf-file-name="demoLayout.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/demoLayout.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.30702835" vertical-offset="957" max-vertical-offset="13050">
-              <caret line="67" column="10" selection-start-line="67" selection-start-column="10" selection-end-line="67" selection-end-column="10" />
+            <state vertical-scroll-proportion="0.81392556" vertical-offset="8898" max-vertical-offset="13068">
+              <caret line="532" column="19" selection-start-line="532" selection-start-column="19" selection-end-line="532" selection-end-column="19" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="itemsToReappendFinder.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/js/gridifier/sizesTransformer/itemsToReappendFinder.js">
+      <file leaf-file-name="gridItem.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/gridItem.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="576" max-vertical-offset="2340">
-              <caret line="74" column="5" selection-start-line="74" selection-start-column="5" selection-end-line="74" selection-end-column="5" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="1620" max-vertical-offset="3654">
+              <caret line="104" column="20" selection-start-line="104" selection-start-column="20" selection-end-line="104" selection-end-column="20" />
               <folding />
             </state>
           </provider>
@@ -86,8 +64,18 @@
       <file leaf-file-name="connectors.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/js/gridifier/connectors/connectors.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="1944" max-vertical-offset="2898">
+            <state vertical-scroll-proportion="0.0" vertical-offset="864" max-vertical-offset="2898">
               <caret line="131" column="1" selection-start-line="131" selection-start-column="1" selection-end-line="131" selection-end-column="1" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="connectionsSorter.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/js/gridifier/horizontalGrid/connections/connectionsSorter.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0" vertical-offset="508" max-vertical-offset="1548">
+              <caret line="73" column="32" selection-start-line="73" selection-start-column="32" selection-end-line="73" selection-end-column="32" />
               <folding />
             </state>
           </provider>
@@ -113,16 +101,6 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="gridItem.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/gridItem.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="1782" max-vertical-offset="3600">
-              <caret line="107" column="8" selection-start-line="107" selection-start-column="8" selection-end-line="107" selection-end-column="8" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
     </leaf>
   </component>
   <component name="FindManager">
@@ -136,8 +114,6 @@
   <component name="IdeDocumentHistory">
     <option name="changedFiles">
       <list>
-        <option value="$PROJECT_DIR$/js/gridifier/connections/connections.js" />
-        <option value="$PROJECT_DIR$/js/gridifier/errors/error.js" />
         <option value="$PROJECT_DIR$/js/gridifier/errors/coreSettings.js" />
         <option value="$PROJECT_DIR$/js/gridifier/dragifier/dragifier.js" />
         <option value="$PROJECT_DIR$/js/gridifier/dragifier/connectionIntersection/draggableItem.js" />
@@ -181,11 +157,13 @@
         <option value="$PROJECT_DIR$/js/gridifier/horizontalGrid/reversedPrepender.js" />
         <option value="$PROJECT_DIR$/js/gridifier/connectors/connectors.js" />
         <option value="$PROJECT_DIR$/js/gridifier/connectors/transformerConnectors.js" />
-        <option value="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/gridItem.js" />
         <option value="$PROJECT_DIR$/js/gridifier/sizesTransformer/itemsToReappendFinder.js" />
-        <option value="$PROJECT_DIR$/css/gridifier.css" />
         <option value="$PROJECT_DIR$/js/gridifier/horizontalGrid/connections/connectionsSorter.js" />
         <option value="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayoutBuilder.js" />
+        <option value="$PROJECT_DIR$/js/gridifier/connectors/connectorsShifter.js" />
+        <option value="$PROJECT_DIR$/js/gridifier/connectors/connectorsIntersector.js" />
+        <option value="$PROJECT_DIR$/css/gridifier.css" />
+        <option value="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/gridItem.js" />
         <option value="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/demoLayout.js" />
       </list>
     </option>
@@ -1214,14 +1192,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/gridifier/connectors/connectorsIntersector.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="3798">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/js/gridifier/verticalGrid/connections/connectionsIntersector.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="-0.5558223" vertical-offset="463" max-vertical-offset="1296">
@@ -1258,14 +1228,6 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="1458">
           <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="30" selection-end-column="1" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/gridifier/gridifier.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="8824" max-vertical-offset="12996">
-          <caret line="496" column="27" selection-start-line="496" selection-start-column="27" selection-end-line="496" selection-end-column="27" />
           <folding />
         </state>
       </provider>
@@ -1334,26 +1296,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/gridifier/connectors/connectorsShifter.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-1.9004854" vertical-offset="1566" max-vertical-offset="3996">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/js/gridifier/verticalGrid/appender.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.19605425" vertical-offset="2973" max-vertical-offset="6570">
           <caret line="174" column="0" selection-start-line="174" selection-start-column="0" selection-end-line="174" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/gridifier/connectors/connectors.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="2052" max-vertical-offset="2898">
-          <caret line="131" column="1" selection-start-line="131" selection-start-column="1" selection-end-line="131" selection-end-column="1" />
           <folding />
         </state>
       </provider>
@@ -1430,33 +1376,17 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/gridItem.js">
+    <entry file="file://$PROJECT_DIR$/js/gridifier/gridifier.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1782" max-vertical-offset="3600">
-          <caret line="107" column="8" selection-start-line="107" selection-start-column="8" selection-end-line="107" selection-end-column="8" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/css/gridifier.css">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.86893207" vertical-offset="3586" max-vertical-offset="4410">
-          <caret line="239" column="0" selection-start-line="239" selection-start-column="0" selection-end-line="239" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/js/gridifier/horizontalGrid/connections/connectionsSorter.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="508" max-vertical-offset="1548">
-          <caret line="73" column="32" selection-start-line="73" selection-start-column="32" selection-end-line="73" selection-end-column="32" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="8824" max-vertical-offset="12996">
+          <caret line="496" column="27" selection-start-line="496" selection-start-column="27" selection-end-line="496" selection-end-column="27" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js/gridifier/sizesTransformer/itemsToReappendFinder.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="576" max-vertical-offset="2340">
+        <state vertical-scroll-proportion="-0.19148937" vertical-offset="1494" max-vertical-offset="2340">
           <caret line="74" column="5" selection-start-line="74" selection-start-column="5" selection-end-line="74" selection-end-column="5" />
           <folding />
         </state>
@@ -1470,10 +1400,58 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/js/gridifier/horizontalGrid/connections/connectionsSorter.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="508" max-vertical-offset="1548">
+          <caret line="73" column="32" selection-start-line="73" selection-start-column="32" selection-end-line="73" selection-end-column="32" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/gridifier/connectors/connectors.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="864" max-vertical-offset="2898">
+          <caret line="131" column="1" selection-start-line="131" selection-start-column="1" selection-end-line="131" selection-end-column="1" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/gridifier/connectors/connectorsIntersector.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.3446602" vertical-offset="2002" max-vertical-offset="3798">
+          <caret line="127" column="32" selection-start-line="127" selection-start-column="32" selection-end-line="127" selection-end-column="32" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/gridifier/connectors/connectorsShifter.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.28398058" vertical-offset="2358" max-vertical-offset="3996">
+          <caret line="144" column="87" selection-start-line="144" selection-start-column="87" selection-end-line="144" selection-end-column="87" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/css/gridifier.css">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.87234044" vertical-offset="3618" max-vertical-offset="4464">
+          <caret line="242" column="0" selection-start-line="242" selection-start-column="0" selection-end-line="242" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/gridItem.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0" vertical-offset="1620" max-vertical-offset="3654">
+          <caret line="104" column="20" selection-start-line="104" selection-start-column="20" selection-end-line="104" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/demoLayout.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.30702835" vertical-offset="957" max-vertical-offset="13050">
-          <caret line="67" column="10" selection-start-line="67" selection-start-column="10" selection-end-line="67" selection-end-column="10" />
+        <state vertical-scroll-proportion="0.81392556" vertical-offset="8898" max-vertical-offset="13068">
+          <caret line="532" column="19" selection-start-line="532" selection-start-column="19" selection-end-line="532" selection-end-column="19" />
           <folding />
         </state>
       </provider>

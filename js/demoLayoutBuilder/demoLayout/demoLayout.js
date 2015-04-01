@@ -529,6 +529,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             //me._gridifier.transformSizes($(this), "*2", "*2");
            //me._gridifier.toggleSizesWithPaddingBottom($(this), "*2", "*2");
             me._gridifier.toggleSizes($(this), "*2", "*2");
+           // me._gridifier.toggleResponsiveClasses($(this), "largeTest");
             return;
             if($(this).hasClass("transformedItem")) {
                 $(this).removeClass("transformedItem");

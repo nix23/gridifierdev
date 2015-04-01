@@ -101,11 +101,14 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         var isFirst = false;
 
     this._$gridItem.css({
-        width: (isFirst) ? "25%" : "12.5%",
-        height: 0,
+        //width: (isFirst) ? "25%" : "12.5%",
+        //height: 0,
        // "padding-bottom": (isFirst) ? "-webkit-calc(25% + 6px)" : "12.5%",
-        width: itemSizes.width,
-        height: itemSizes.height,
+       // width: "12.5%",
+       // height: 0,
+       // "padding-bottom": "12.5%",
+       width: itemSizes.width,
+       height: itemSizes.height,
         //margin: "2em",
         //height: 0,
        // paddingBottom: pb,
