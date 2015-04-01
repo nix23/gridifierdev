@@ -1,8 +1,10 @@
-Gridifier.ItemClonesManager = function(grid, collector) {
+Gridifier.ItemClonesManager = function(grid, collector, connections, sizesResolverManager) {
    var me = this;
 
    this._grid = null;
    this._collector = null;
+   this._connections = null;
+   this._sizesResolverManager = null;
 
    this._itemClones = [];
    this._nextBindingId = 0;
@@ -13,6 +15,8 @@ Gridifier.ItemClonesManager = function(grid, collector) {
    this._construct = function() {
       me._grid = grid;
       me._collector = collector;
+      me._connections = connections;
+      me._sizesResolverManager = sizesResolverManager;
 
       me._itemClones = [];
 
@@ -106,6 +110,17 @@ Gridifier.ItemClonesManager.prototype.getBindedClone = function(item) {
    return bindedClone;
 }
 
+Gridifier.ItemClonesManager.prototype.getOriginalItemFromClone = function(itemClone) {
+    var connections = this._connections.get();
+    for(var i = 0; i < connections.length; i++) {
+        if(connections[i].item.getAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR) ==
+            itemClone.getAttribute(Gridifier.ItemClonesManager.CLONES_MANAGER_BINDING_DATA_ATTR))
+            return connections[i].item;
+    }
+
+    return null;
+}
+
 Gridifier.ItemClonesManager.prototype.destroyClone = function(item) {
    var bindedClone = null;
 
@@ -159,4 +174,18 @@ Gridifier.ItemClonesManager.prototype.hideCloneOnToggle = function(item) {
         itemClone.style.visibility = "hidden";
 
     return this;
+}
+
+Gridifier.ItemClonesManager.prototype.getConnectionItemAtPoint = function(x, y) {
+    x = parseFloat(x) - this._sizesResolverManager.offsetLeft(this._grid.getGrid());
+    y = parseFloat(y) - this._sizesResolverManager.offsetTop(this._grid.getGrid());
+
+    var connections = this._connections.get();
+    for(var i = 0; i < connections.length; i++) {
+        if(x >= connections[i].x1 && x <= connections[i].x2 &&
+            y >= connections[i].y1 && y <= connections[i].y2)
+            return connections[i].item;
+    }
+
+    return null;
 }

@@ -132,11 +132,11 @@ Gridifier.Collector.prototype.ensureAllItemsAreConnectedToGrid = function(items)
 }
 
 Gridifier.Collector.prototype._isItemWiderThanGridWidth = function(item) {
-    return this._sizesResolverManager.outerWidth(item, true) > this._sizesResolverManager.outerWidth(this._grid, false, true);
+    return Math.floor(this._sizesResolverManager.outerWidth(item, true)) > this._sizesResolverManager.outerWidth(this._grid, false, true);
 }
 
 Gridifier.Collector.prototype._isItemTallerThanGridHeight = function(item) {
-    return this._sizesResolverManager.outerHeight(item, true) > this._sizesResolverManager.outerHeight(this._grid, false, true);
+    return Math.floor(this._sizesResolverManager.outerHeight(item, true)) > this._sizesResolverManager.outerHeight(this._grid, false, true);
 }
 
 Gridifier.Collector.prototype.canItemBeAttachedToGrid = function(item) {

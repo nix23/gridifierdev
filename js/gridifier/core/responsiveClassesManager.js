@@ -1,7 +1,8 @@
-Gridifier.ResponsiveClassesManager = function(gridifier, itemClonesManager) {
+Gridifier.ResponsiveClassesManager = function(gridifier, collector, itemClonesManager) {
     var me = this;
 
     this._gridifier = null;
+    this._collector = null;
     this._itemClonesManager = null;
 
     this._css = {
@@ -9,6 +10,7 @@ Gridifier.ResponsiveClassesManager = function(gridifier, itemClonesManager) {
 
     this._construct = function() {
         me._gridifier = gridifier;
+        me._collector = collector;
         me._itemClonesManager = itemClonesManager;
     };
 
@@ -28,6 +30,8 @@ Gridifier.ResponsiveClassesManager = function(gridifier, itemClonesManager) {
 
 Gridifier.ResponsiveClassesManager.prototype.toggleResponsiveClasses = function(maybeItem, className) {
     var items = this._itemClonesManager.unfilterClones(maybeItem);
+    this._collector.ensureAllItemsAreConnectedToGrid(items);
+
     if(!Dom.isArray(className))
         var classNames = [className];
     else
@@ -52,10 +56,14 @@ Gridifier.ResponsiveClassesManager.prototype.toggleResponsiveClasses = function(
             }
         }
     }
+
+    return items;
 }
 
 Gridifier.ResponsiveClassesManager.prototype.addResponsiveClasses = function(maybeItem, className) {
     var items = this._itemClonesManager.unfilterClones(maybeItem);
+    this._collector.ensureAllItemsAreConnectedToGrid(items);
+
     if(!Dom.isArray(className))
         var classNames = [className];
     else
@@ -75,10 +83,14 @@ Gridifier.ResponsiveClassesManager.prototype.addResponsiveClasses = function(may
             }
         }
     }
+
+    return items;
 }
 
 Gridifier.ResponsiveClassesManager.prototype.removeResponsiveClasses = function(maybeItem, className) {
     var items = this._itemClonesManager.unfilterClones(maybeItem);
+    this._collector.ensureAllItemsAreConnectedToGrid(items);
+
     if(!Dom.isArray(className))
         var classNames = [className];
     else
@@ -98,4 +110,6 @@ Gridifier.ResponsiveClassesManager.prototype.removeResponsiveClasses = function(
             }
         }
     }
+
+    return items;
 }

@@ -348,3 +348,63 @@ Gridifier.SizesTransformer.Core.prototype.retransformFrom = function(firstConnec
     this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
     this._itemsReappender.startReappendingQueuedItems();
 }
+
+// SetTimeout is not required here, because this method is used in responsiveClassesChangers.
+// (Changes are made through media queries & CSS styles).
+// Usage of this method after grid DOM-modifications can cause serious performance loses in Chrome
+// on getComputedStyle calls in mobile devices.
+Gridifier.SizesTransformer.Core.prototype.retransformFromFirstSortedConnection = function(itemsToRetransform) {
+    var connectionsToReappend = [];
+    if(!this._itemsReappender.isReappendQueueEmpty()) {
+        var currentQueueState = this._itemsReappender.stopReappendingQueuedItems();
+
+        for(var i = 0; i < currentQueueState.reappendQueue.length; i++) {
+            var queuedConnection = currentQueueState.reappendQueue[i].connectionToReappend;
+            if(queuedConnection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT])
+                continue;
+
+            connectionsToReappend.push(queuedConnection);
+        }
+    }
+
+    var connections = this._connections.get();
+    var itemsToRetransformConnections = [];
+
+    for(var i = 0; i < itemsToRetransform.length; i++) {
+        for(var j = 0; j < connections.length; j++) {
+            if(this._guid.getItemGUID(connections[j].item) == this._guid.getItemGUID(itemsToRetransform[i])) {
+                itemsToRetransformConnections.push(connections[j]);
+                continue;
+            }
+        }
+
+        for(var j = 0; j < connectionsToReappend.length; j++) {
+            if(this._guid.getItemGUID(connectionsToReappend[j].item) == this._guid.getItemGUID(itemsToRetransform[i])) {
+                itemsToRetransformConnections.push(connectionsToReappend[j]);
+                continue;
+            }
+        }
+    }
+
+    var sortedItemsToRetransformConnections = this._connectionsSorter.sortConnectionsPerReappend(
+        itemsToRetransformConnections
+    );
+    var firstConnectionToRetransform = sortedItemsToRetransformConnections[0];
+
+    this._guid.unmarkAllPrependedItems();
+    var itemsToReappendData = this._itemsToReappendFinder.findAllOnSizesTransform(
+        connectionsToReappend, firstConnectionToRetransform
+    );
+
+    var itemsToReappend = itemsToReappendData.itemsToReappend;
+    var connectionsToReappend = itemsToReappendData.connectionsToReappend;
+    var firstConnectionToReappend = itemsToReappendData.firstConnectionToReappend;
+
+    this._transformedItemMarker.markAllTransformDependedItems(itemsToReappend);
+    this._transformerConnectors.recreateConnectorsPerFirstItemReappendOnTransform(
+        itemsToReappend[0], firstConnectionToReappend
+    );
+
+    this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
+    this._itemsReappender.startReappendingQueuedItems();
+}

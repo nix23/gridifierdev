@@ -121,3 +121,15 @@ Gridifier.TransformerOperations.Transform.prototype.executeRetransformAllSizes =
     this._sizesTransformer.retransformAllConnections();
     this._sizesResolverManager.stopCachingTransaction();
 }
+
+Gridifier.TransformerOperations.Transform.prototype.executeRetransformFromFirstSortedConnection = function(items) {
+    /* @system-log-start */
+    Logger.startLoggingOperation(
+        Logger.OPERATION_TYPES.TRANSFORM_SIZES,
+        "retransformFromFirstSortedConnection"
+    );
+    /* @system-log-end */
+    this._sizesResolverManager.startCachingTransaction();
+    this._sizesTransformer.retransformFromFirstSortedConnection(items);
+    this._sizesResolverManager.stopCachingTransaction();
+}
