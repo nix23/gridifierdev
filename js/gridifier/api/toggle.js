@@ -80,21 +80,73 @@ Gridifier.Api.Toggle.prototype.getToggleFunction = function() {
 Gridifier.Api.Toggle.prototype._addSlides = function() {
     var me = this;
 
-    this._toggleFunctions.slideLeft = this._slideApi.createHorizontalSlideToggler(false, false, false);
-    this._toggleFunctions.slideLeftTop = this._slideApi.createHorizontalSlideToggler(true, false, false);
-    this._toggleFunctions.slideLeftBottom = this._slideApi.createHorizontalSlideToggler(false, true, false);
+    var sliderNames = [
+        "slideLeft", "slideLeftTop", "slideLeftBottom",
+        "slideRight", "slideRightTop", "slideRightBottom",
+        "slideTop", "slideTopLeft", "slideTopRight",
+        "slideBottom", "slideBottomLeft", "slideBottomRight"
+    ];
 
-    this._toggleFunctions.slideRight = this._slideApi.createHorizontalSlideToggler(false, false, true);
-    this._toggleFunctions.slideRightTop = this._slideApi.createHorizontalSlideToggler(true, false, true);
-    this._toggleFunctions.slideRightBottom = this._slideApi.createHorizontalSlideToggler(false, true, true);
+    var createSliders = function(sliderNames, fade) {
+        this._toggleFunctions[sliderNames[0]] = this._slideApi.createHorizontalSlideToggler(false, false, false, fade);
+        this._toggleFunctions[sliderNames[1]] = this._slideApi.createHorizontalSlideToggler(true, false, false, fade);
+        this._toggleFunctions[sliderNames[2]] = this._slideApi.createHorizontalSlideToggler(false, true, false, fade);
 
-    this._toggleFunctions.slideTop = this._slideApi.createVerticalSlideToggler(false, false, false);
-    this._toggleFunctions.slideTopLeft = this._slideApi.createVerticalSlideToggler(true, false, false);
-    this._toggleFunctions.slideTopRight = this._slideApi.createVerticalSlideToggler(false, true, false);
+        this._toggleFunctions[sliderNames[3]] = this._slideApi.createHorizontalSlideToggler(false, false, true, fade);
+        this._toggleFunctions[sliderNames[4]] = this._slideApi.createHorizontalSlideToggler(true, false, true, fade);
+        this._toggleFunctions[sliderNames[5]] = this._slideApi.createHorizontalSlideToggler(false, true, true, fade);
 
-    this._toggleFunctions.slideBottom = this._slideApi.createVerticalSlideToggler(false, false, true);
-    this._toggleFunctions.slideBottomLeft = this._slideApi.createVerticalSlideToggler(true, false, true);
-    this._toggleFunctions.slideBottomRight = this._slideApi.createVerticalSlideToggler(false, true, true);
+        this._toggleFunctions[sliderNames[6]] = this._slideApi.createVerticalSlideToggler(false, false, false, fade);
+        this._toggleFunctions[sliderNames[7]] = this._slideApi.createVerticalSlideToggler(true, false, false, fade);
+        this._toggleFunctions[sliderNames[8]] = this._slideApi.createVerticalSlideToggler(false, true, false, fade);
+
+        this._toggleFunctions[sliderNames[9]] = this._slideApi.createVerticalSlideToggler(false, false, true, fade);
+        this._toggleFunctions[sliderNames[10]] = this._slideApi.createVerticalSlideToggler(true, false, true, fade);
+        this._toggleFunctions[sliderNames[11]] = this._slideApi.createVerticalSlideToggler(false, true, true, fade);
+    }
+
+    createSliders.call(this, sliderNames, false);
+    for(var i = 0; i < sliderNames.length; i++)
+        sliderNames[i] += "WithFade";
+    createSliders.call(this, sliderNames, true);
+
+    var sliderPairs = [
+        ["slideLeftThanSlideRight", "slideLeft", "slideRight"],
+        ["slideTopThanSlideBottom", "slideTop", "slideBottom"],
+        ["slideLeftTopThanSlideRightTop", "slideLeftTop", "slideRightTop"],
+        ["slideTopLeftThanSlideBottomLeft", "slideTopLeft", "slideBottomLeft"],
+        ["slideLeftBottomThanSlideRightBottom", "slideLeftBottom", "slideRightBottom"],
+        ["slideTopRightThanSlideBottomRight", "slideTopRight", "slideBottomRight"]
+    ];
+    for(var i = 0; i < sliderPairs.length; i++) {
+        this._toggleFunctions[sliderPairs[i][0]] = this._slideApi.createCycledSlider([
+            this._toggleFunctions[sliderPairs[i][1]], this._toggleFunctions[sliderPairs[i][2]]
+        ]);
+
+        this._toggleFunctions[sliderPairs[i][0] + "WithFade"] = this._slideApi.createCycledSlider([
+            this._toggleFunctions[sliderPairs[i][1] + "WithFade"], this._toggleFunctions[sliderPairs[i][2] + "WithFade"]
+        ]);
+    }
+
+    var customSliders = [
+        ["slideClockwiseFromCenters", "slideLeft", "slideTop", "slideRight", "slideBottom"],
+        ["slideClockwiseFromCorners", "slideLeftTop", "slideRightTop", "slideRightBottom", "slideLeftBottom"]
+    ];
+    for(var i = 0; i < customSliders.length; i++) {
+        this._toggleFunctions[customSliders[i][0]] = this._slideApi.createCycledSlider([
+            this._toggleFunctions[customSliders[i][1]],
+            this._toggleFunctions[customSliders[i][2]],
+            this._toggleFunctions[customSliders[i][3]],
+            this._toggleFunctions[customSliders[i][4]]
+        ]);
+
+        this._toggleFunctions[customSliders[i][0] + "WithFade"] = this._slideApi.createCycledSlider([
+            this._toggleFunctions[customSliders[i][1] + "WithFade"],
+            this._toggleFunctions[customSliders[i][2] + "WithFade"],
+            this._toggleFunctions[customSliders[i][3] + "WithFade"],
+            this._toggleFunctions[customSliders[i][4] + "WithFade"]
+        ]);
+    }
 }
 
 Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,

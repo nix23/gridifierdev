@@ -41,12 +41,21 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
                                                            startTop,
                                                            connectionLeft,
                                                            connectionTop,
-                                                           transitionTiming) {
+                                                           transitionTiming,
+                                                           animateFade) {
     var me = this;
     var targetLeft = connectionLeft;
     var targetTop = connectionTop;
 
+    if(animateFade)
+        var animateFadeTargetItem = (this._gridifier.hasItemBindedClone(item)) ? this._gridifier.getItemClone(item) : item;
+
     if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
+        if(animateFade) {
+            Dom.css3.transition(animateFadeTargetItem, "none");
+            Dom.css3.opacity(animateFadeTargetItem, 0);
+            Dom.css3.transition(animateFadeTargetItem, "");
+        }
         coordsChanger(
             item, startLeft, startTop, 0, eventEmitter, false, false, false, false, transitionTiming
         );
@@ -60,6 +69,13 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
         if(!me._gridifier.hasItemBindedClone(item))
             item.style.visibility = "visible";
 
+        if(animateFade) {
+            Dom.css3.transitionProperty(
+                animateFadeTargetItem,
+                Prefixer.getForCSS('opacity', animateFadeTargetItem) + " " + animationMsDuration + "ms " + transitionTiming
+            );
+            Dom.css3.opacity(animateFadeTargetItem, 1);
+        }
         coordsChanger(
             item, targetLeft, targetTop, animationMsDuration, eventEmitter, false, false, false, false, transitionTiming
         );
@@ -90,8 +106,19 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
                                                            targetTop,
                                                            connectionLeft,
                                                            connectionTop,
-                                                           transitionTiming) {
+                                                           transitionTiming,
+                                                           animateFade) {
     item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
+
+    if(animateFade) {
+        var animateFadeTargetItem = (this._gridifier.hasItemBindedClone(item)) ? this._gridifier.getItemClone(item) : item;
+        Dom.css3.transition(
+            animateFadeTargetItem,
+            Prefixer.getForCSS('opacity', animateFadeTargetItem) + " " + animationMsDuration + "ms " + transitionTiming
+        );
+        Dom.css3.opacity(animateFadeTargetItem, 0);
+    }
+
     coordsChanger(
         item, targetLeft, targetTop, animationMsDuration, eventEmitter, false, false, false, false, transitionTiming
     );
@@ -109,6 +136,12 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
     timeouter.add(item, prehideTimeout);
 
     var slideInTimeout = setTimeout(function() {
+        if(animateFade) {
+            Dom.css3.transition(animateFadeTargetItem, "none");
+            Dom.css3.opacity(animateFadeTargetItem, 1);
+            Dom.css3.transition(animateFadeTargetItem, "");
+        }
+
         item.style.visibility = "hidden";
         item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
         eventEmitter.emitHideEvent(item);
@@ -116,7 +149,7 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
     timeouter.add(item, slideInTimeout);
 }
 
-Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, alignBottom, reverseDirection) {
+Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, alignBottom, reverseDirection, animateFade) {
     var me = this;
 
     var alignTop = alignTop || false;
@@ -172,7 +205,8 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 top + "px",
                 connectionLeft,
                 connectionTop,
-                transitionTiming
+                transitionTiming,
+                animateFade || false
             );
         },
 
@@ -215,13 +249,14 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 top + "px",
                 connectionLeft,
                 connectionTop,
-                transitionTiming
+                transitionTiming,
+                animateFade || false
             );
         }
     };
 }
 
-Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, alignRight, reverseDirection) {
+Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, alignRight, reverseDirection, animateFade) {
     var me = this;
 
     var alignLeft = alignLeft || false;
@@ -277,7 +312,8 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
                 getTopPos(item, grid) + "px",
                 connectionLeft,
                 connectionTop,
-                transitionTiming
+                transitionTiming,
+                animateFade || false
             );
         },
 
@@ -320,7 +356,81 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
                 getTopPos(item, grid) + "px",
                 connectionLeft,
                 connectionTop,
-                transitionTiming
+                transitionTiming,
+                animateFade || false
+            );
+        }
+    };
+}
+
+Gridifier.Api.Slide.prototype.createCycledSlider = function(sliderFunctions) {
+    var slideIndex = 1;
+    return {
+        "show": function(item,
+                         grid,
+                         animationMsDuration,
+                         timeouter,
+                         eventEmitter,
+                         coordsChanger,
+                         collector,
+                         targetLeft,
+                         targetTop,
+                         connectionLeft,
+                         connectionTop,
+                         transitionTiming,
+                         animateFade) {
+            slideIndex++;
+            var nextSlideIndex = slideIndex % sliderFunctions.length;
+            var slider = sliderFunctions[nextSlideIndex];
+
+            slider.show(
+                item,
+                grid,
+                animationMsDuration,
+                timeouter,
+                eventEmitter,
+                coordsChanger,
+                collector,
+                targetLeft,
+                targetTop,
+                connectionLeft,
+                connectionTop,
+                transitionTiming,
+                animateFade
+            );
+        },
+
+        "hide": function(item,
+                         grid,
+                         animationMsDuration,
+                         timeouter,
+                         eventEmitter,
+                         coordsChanger,
+                         collector,
+                         targetLeft,
+                         targetTop,
+                         connectionLeft,
+                         connectionTop,
+                         transitionTiming,
+                         animateFade) {
+            slideIndex++;
+            var nextSlideIndex = slideIndex % sliderFunctions.length;
+            var slider = sliderFunctions[nextSlideIndex];
+
+            slider.hide(
+                item,
+                grid,
+                animationMsDuration,
+                timeouter,
+                eventEmitter,
+                coordsChanger,
+                collector,
+                targetLeft,
+                targetTop,
+                connectionLeft,
+                connectionTop,
+                transitionTiming,
+                animateFade
             );
         }
     };
