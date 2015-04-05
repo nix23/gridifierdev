@@ -240,6 +240,29 @@ Gridifier.CoreSettingsParser.prototype.parseRotateBackface = function() {
     return this._settings.rotateBackface;
 }
 
+Gridifier.CoreSettingsParser.prototype.parseRotateAngles = function() {
+    if(!this._settings.hasOwnProperty("rotateAngles") ||
+        !Dom.isArray(this._settings.rotateAngles)) {
+        return [
+            Gridifier.DEFAULT_ROTATE_ANGLES.FRONT_FRAME_INIT,
+            Gridifier.DEFAULT_ROTATE_ANGLES.BACK_FRAME_INIT,
+            Gridifier.DEFAULT_ROTATE_ANGLES.FRONT_FRAME_TARGET,
+            Gridifier.DEFAULT_ROTATE_ANGLES.BACK_FRAME_TARGET
+        ];
+    }
+
+    return this.parseRotateAnglesArray(this._settings.rotateAngles);
+}
+
+Gridifier.CoreSettingsParser.prototype.parseRotateAnglesArray = function(rotateAnglesArray) {
+    return [
+        (typeof rotateAnglesArray[0] != "undefined") ? rotateAnglesArray[0] : Gridifier.DEFAULT_ROTATE_ANGLES.FRONT_FRAME_INIT,
+        (typeof rotateAnglesArray[1] != "undefined") ? rotateAnglesArray[1] : Gridifier.DEFAULT_ROTATE_ANGLES.BACK_FRAME_INIT,
+        (typeof rotateAnglesArray[2] != "undefined") ? rotateAnglesArray[2] : Gridifier.DEFAULT_ROTATE_ANGLES.FRONT_FRAME_TARGET,
+        (typeof rotateAnglesArray[3] != "undefined") ? rotateAnglesArray[3] : Gridifier.DEFAULT_ROTATE_ANGLES.BACK_FRAME_TARGET
+    ];
+}
+
 Gridifier.CoreSettingsParser.prototype.parseGridTransformType = function() {
     if(!this._settings.hasOwnProperty("gridTransformType"))
         return Gridifier.GRID_TRANSFORM_TYPES.FIT;

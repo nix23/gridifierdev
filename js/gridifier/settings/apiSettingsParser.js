@@ -93,6 +93,49 @@ Gridifier.ApiSettingsParser.prototype.parseSortOptions = function(sortApi) {
     }
 }
 
+Gridifier.ApiSettingsParser.prototype.parseRetransformSortOptions = function(sortApi) {
+    if(!this._settings.hasOwnProperty("retransformSort")) {
+        sortApi.setRetransformSortFunction("default");
+        return;
+    }
+
+    if(!this._settingsCore.isCustomAllEmptySpaceSortDispersion()) {
+        var errorMsg = "Gridifier error: retransformSort option is supported only with ";
+        errorMsg += "'customAllEmptySpace' sortDispersion param.";
+
+        throw new Error(errorMsg);
+    }
+
+    if(typeof this._settings.retransformSort == "function") {
+        sortApi.addRetransformSortFunction("clientDefault", this._settings.retransformSort);
+        sortApi.setRetransformSortFunction("clientDefault");
+        return;
+    }
+    else if(typeof this._settings.retransformSort == "object") {
+        for(var sortFunctionName in this._settings.retransformSort) {
+            var sortFunction = this._settings.retransformSort[sortFunctionName];
+
+            if(typeof sortFunction != "function") {
+                new Gridifier.Error(
+                    Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_ONE_OF_RETRANSFORM_SORT_FUNCTION_TYPES,
+                    sortFunction
+                );
+            }
+
+            sortApi.addRetransformSortFunction(sortFunctionName, sortFunction);
+        }
+
+        sortApi.setRetransformSortFunction("default");
+        return;
+    }
+    else {
+        new Gridifier.Error(
+            Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_RETRANSFORM_SORT_PARAM_VALUE,
+            this._settings.retransformSort
+        );
+    }
+}
+
 Gridifier.ApiSettingsParser.prototype.parseFilterOptions = function(filterApi) {
     if(!this._settings.hasOwnProperty("filter")) {
         filterApi.setFilterFunction("all");

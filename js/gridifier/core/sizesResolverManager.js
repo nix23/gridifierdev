@@ -389,6 +389,23 @@ Gridifier.SizesResolverManager.prototype.viewportHeight = function() {
     return document.documentElement.clientHeight;
 }
 
+Gridifier.SizesResolverManager.prototype.viewportScrollLeft = function() {
+    return window.pageXOffset || document.documentElement.scrollLeft;
+}
+
+Gridifier.SizesResolverManager.prototype.viewportScrollTop = function() {
+    return window.pageYOffset || document.documentElement.scrollTop;
+}
+
+Gridifier.SizesResolverManager.prototype.viewportDocumentCoords = function() {
+    return {
+        x1: this.viewportScrollLeft(),
+        x2: this.viewportScrollLeft() + this.viewportWidth() - 1,
+        y1: this.viewportScrollTop(),
+        y2: this.viewportScrollTop() + this.viewportHeight() - 1
+    };
+}
+
 Gridifier.SizesResolverManager.prototype.copyComputedStyle = function(sourceItem, targetItem) {
     var me = this;
 

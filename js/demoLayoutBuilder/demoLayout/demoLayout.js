@@ -62,7 +62,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         me._gridifierSettings.gridTransformType = "expand";
 
-        //me._gridifierSettings.prependType = "mirroredPrepend";
+        me._gridifierSettings.prependType = "mirroredPrepend";
         me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
@@ -74,6 +74,13 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.sortDispersionValue = "200px";
         //me._gridifierSettings.dragifierMode = "discretization";
         //me._gridifierSettings.retransformQueueBatchSize = 50;
+        //me._gridifierSettings.rotateAngles = [-180, -360, -80, -80];
+
+        setTimeout(function() {
+          // me._gridifier.setRetransformSort("areaDesc");
+            //me._gridifier.setToggle("rotateX");
+            //me._gridifier.setRotateAngles([-180, -360]);
+        }, 500);
 
         //me._gridifierSettings.appendType = "reversedAppend";
 
@@ -233,18 +240,18 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             if(i % 2 == 0) {
                  //var width = "20%";
                  //var height = "200px";
-                 var width = "100px";
-                 var height = "50px";
-                //var width = "200px";
-                //var height = "200px";
+                 //var width = "100px";
+                 //var height = "50px";
+                var width = "200px";
+                var height = "200px";
             }
             else {
                 //var width = "50%";
                 //var height = "600px";
-                var width = "50px";
-                var height = "100px";
-                //var width = "100px";
+                //var width = "50px";
                 //var height = "100px";
+                var width = "100px";
+                var height = "100px";
             }
 
             me._gridifierDynamicSettings._itemSizes[i].width = width;
@@ -364,7 +371,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         Logger.setGrid(me._grid.getGrid().get(0));
         
         me._gridifierSettings.toggleAnimationMsDuration = 500;
-        me._gridifierSettings.coordsChangeAnimationMsDuration = 500;
+        me._gridifierSettings.coordsChangeAnimationMsDuration = 300;
         //me._gridifierSettings.toggleTransitionTiming = "cubic-bezier(0.550, 0.055, 0.675, 0.190)";
         //me._gridifierSettings.coordsChangeTransitionTiming = "cubic-bezier(0.550, 0.055, 0.675, 0.190)";
         //me._gridifierSettings.toggleAnimationMsDuration = 2500;
@@ -385,7 +392,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
        // me._gridifier.setSizesChanger("defaultPaddingBottom");
         window.gridifier = me._gridifier; // @todo -> Delete, tmp solution
         setTimeout(function() {
-           me._gridifier.toggleBy("scaleWithFade");
+           //me._gridifier.toggleBy("scaleWithFade");
             //me._gridifier.toggleBy("scaleWithFade");
             //me._gridifier.toggleBy("fade");
             //me._gridifier.toggleBy("rotateXWithFade");
@@ -529,7 +536,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             //me._gridifier.transformSizes($(this), "*2", "*2");
            //me._gridifier.toggleSizesWithPaddingBottom($(this), "*2", "*2");
             me._gridifier.toggleSizes($(this), "*2", "*2");
-           // me._gridifier.toggleResponsiveClasses($(this), "largeTest");
+           //me._gridifier.toggleResponsiveClasses($(this), "largeTest");
             return;
             if($(this).hasClass("transformedItem")) {
                 $(this).removeClass("transformedItem");
@@ -566,7 +573,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
         me._gridifier.onShow(function(item) {
             var itemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
-            item.innerHTML += itemGUID;
+            item.innerHTML = itemGUID;
         });
 
         me._gridifier.onHide(function(item) {

@@ -92,3 +92,16 @@ Gridifier.Iterator.prototype.getPrev = function(item) {
 
     return null;
 }
+
+Gridifier.Iterator.prototype.getAll = function() {
+    var connections = this._connections.get();
+    if(connections.length == 0)
+        return [];
+
+    var sortedConnections = this._connectionsSorter.sortConnectionsPerReappend(connections);
+    var items = [];
+    for(var i = 0; i < sortedConnections.length; i++)
+        items.push(sortedConnections[i].item);
+
+    return items;
+}

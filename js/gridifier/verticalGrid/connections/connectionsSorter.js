@@ -77,5 +77,10 @@ Gridifier.VerticalGrid.ConnectionsSorter.prototype.sortConnectionsPerReappend = 
         }
     }
 
+    if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+        var retransformSorter = this._settings.getRetransformSort();
+        connections = retransformSorter(connections);
+    }
+
     return connections;
 }

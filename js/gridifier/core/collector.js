@@ -39,7 +39,7 @@ Gridifier.Collector = function(settings, grid, sizesResolverManager) {
     return this;
 }
 
-Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR = "data-gridifier-item-sorting-index";
+Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR = "data-gridifier-original-item-sorting-index";
 Gridifier.Collector.RESTRICT_ITEM_COLLECT_DATA_ATTR = "data-gridifier-item-restrict-collect";
 
 Gridifier.Collector.prototype._createCollectorFunction = function() {
@@ -251,27 +251,52 @@ Gridifier.Collector.prototype.toDOMCollection = function(items) {
 }
 
 Gridifier.Collector.prototype.filterCollection = function(items) {
-    var filter = this._settings.getFilter();
+    var filters = this._settings.getFilter();
     var filteredItems = [];
 
-    for(var i = 0; i < items.length; i++) {
-        if(filter(items[i]))
-            filteredItems.push(items[i]);
+    var filteredItemDataAttr = "data-gridifier-filtered-item";
+    var markAsFiltered = function(item) {
+        item.setAttribute(filteredItemDataAttr, "yes");
     }
+
+    var unmarkAsFiltered = function(item) {
+        item.removeAttribute(filteredItemDataAttr);
+    }
+
+    var isAlreadyFiltered = function(item) {
+        return Dom.hasAttribute(item, filteredItemDataAttr);
+    }
+
+    for(var i = 0; i < filters.length; i++) {
+        for(var j = 0; j < items.length; j++) {
+            if(filters[i](items[j])) {
+                if(!isAlreadyFiltered(items[j])) {
+                    filteredItems.push(items[j]);
+                    markAsFiltered(items[j]);
+                }
+            }
+        }
+    }
+
+    for(var i = 0; i < items.length; i++)
+        unmarkAsFiltered(items[i]);
 
     return filteredItems;
 }
 
 Gridifier.Collector.prototype.sortCollection = function(items) {
-    for(var i = 0; i < items.length; i++) {
-        items[i].setAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR, i);
-    }
+    var sortComparatorTools = this._settings.getSortApi().getSortComparatorTools();
+    var sortFunction = this._settings.getSort();
 
-    items.sort(this._settings.getSort());
+    sortComparatorTools.saveOriginalOrder(items);
 
-    for(var i = 0; i < items.length; i++) {
-        items[i].removeAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR);
-    }
+    items.sort(
+        function(firstItem, secondItem) {
+            return sortFunction(firstItem, secondItem, sortComparatorTools);
+        }
+    );
+
+    sortComparatorTools.flushOriginalOrder(items);
 
     return items;
 }

@@ -1316,7 +1316,8 @@ Gridifier = function(grid, settings) {
             me._connections,
             me._operationsQueue,
             me._renderer,
-            me._renderer.getRendererConnections()
+            me._renderer.getRendererConnections(),
+            me._sizesResolverManager
         );
         me._renderer.setSilentRendererInstance(me._silentRenderer);
 
@@ -1423,6 +1424,11 @@ Gridifier.prototype.sortBy = function(sortFunctionName) {
     return this;
 }
 
+Gridifier.prototype.setRetransformSort = function(retransformSortFn) {
+    this._settings.setRetransformSort(retransformSortFn);
+    return this;
+}
+
 Gridifier.prototype.filterBy = function(filterFunctionName) {
     this._sizesTransformer.stopRetransformAllConnectionsQueue();
     this._settings.setFilter(filterFunctionName);
@@ -1462,6 +1468,10 @@ Gridifier.prototype.getNext = function(item) {
 
 Gridifier.prototype.getPrev = function(item) {
     return this._iterator.getPrev(item);
+}
+
+Gridifier.prototype.getAll = function() {
+    return this._iterator.getAll();
 }
 
 Gridifier.prototype.pop = function() {
@@ -1560,6 +1570,21 @@ Gridifier.prototype.setAlignmentType = function(alignmentType) {
     this.retransformAllSizes();
 }
 
+Gridifier.prototype.setRotatePerspective = function(newRotatePerspective) {
+    this._settings.setRotatePerspective(newRotatePerspective);
+    return this;
+}
+
+Gridifier.prototype.setRotateBackface = function(newRotateBackface) {
+    this._settings.setRotateBackface(newRotateBackface);
+    return this;
+}
+
+Gridifier.prototype.setRotateAngles = function(newRotateAngles) {
+    this._settings.setRotateAngles(newRotateAngles);
+    return this;
+}
+
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     if(this._settings.isMirroredPrepend()) {
         this.insertBefore(items, null, batchSize, batchTimeout);
@@ -1603,8 +1628,29 @@ Gridifier.prototype.silentAppend = function(items, batchSize, batchTimeout) {
     return this;
 }
 
-Gridifier.prototype.silentRender = function(batchSize, batchTimeout) {
-    this._silentRenderer.execute(batchSize, batchTimeout);
+Gridifier.prototype.silentRender = function(items, batchSize, batchTimeout) {
+    this._silentRenderer.execute(items, batchSize, batchTimeout);
+    return this;
+}
+
+Gridifier.prototype.getScheduledForSilentRenderItems = function(onlyInsideViewport) {
+    return this._silentRenderer.getScheduledForSilentRenderItems(onlyInsideViewport);
+}
+
+Gridifier.prototype.triggerRotate = function(items, rotateTogglerType, batchSize, batchTimeout) {
+    var me = this;
+
+    this.setToggle(rotateTogglerType);
+    var itemsToRotate = this._collector.toDOMCollection(items);
+
+    if(typeof batchSize == "undefined") {
+        this._renderer.rotateItems(itemsToRotate);
+        return this;
+    }
+
+    this._operationsQueue.scheduleAsyncFnExecutionByBatches(
+        itemsToRotate, batchSize, batchTimeout, function(itemBatch) { me._renderer.rotateItems(itemBatch); }
+    );
     return this;
 }
 
@@ -1799,6 +1845,10 @@ Gridifier.prototype.getConnectedItemAtPoint = function(x, y) {
     return this._itemClonesManager.getConnectionItemAtPoint(x, y);
 }
 
+Gridifier.prototype.setToggle = Gridifier.prototype.toggleBy;
+Gridifier.prototype.setSort = Gridifier.prototype.sortBy;
+Gridifier.prototype.setFilter = Gridifier.prototype.filterBy;
+
 Gridifier.Api = {};
 Gridifier.HorizontalGrid = {};
 Gridifier.VerticalGrid = {};
@@ -1850,6 +1900,10 @@ Gridifier.DEFAULT_COORDS_CHANGE_TRANSITION_TIMING = "ease";
 
 Gridifier.DEFAULT_ROTATE_PERSPECTIVE = "200px";
 Gridifier.DEFAULT_ROTATE_BACKFACE = true;
+Gridifier.DEFAULT_ROTATE_ANGLES = {
+    FRONT_FRAME_INIT: 0, BACK_FRAME_INIT: -180,
+    FRONT_FRAME_TARGET: 180, BACK_FRAME_TARGET: 0
+};
 
 Gridifier.GRID_TRANSFORM_TYPES = {EXPAND: "expand", FIT: "fit"};
 Gridifier.DEFAULT_GRID_TRANSFORM_TIMEOUT = 100;
@@ -2488,7 +2542,7 @@ Gridifier.Api.Filter = function(settings, eventEmitter) {
     this._settings = null;
     this._eventEmitter = null;
 
-    this._filterFunction = null;
+    this._filters = null;
     this._filterFunctions = {};
 
     this._css = {
@@ -2518,15 +2572,23 @@ Gridifier.Api.Filter = function(settings, eventEmitter) {
 }
 
 Gridifier.Api.Filter.prototype.setFilterFunction = function(filterFunctionName) {
-    if(!this._filterFunctions.hasOwnProperty(filterFunctionName)) {
-        new Gridifier.Error(
-            Gridifier.Error.ERROR_TYPES.SETTINGS.SET_FILTER_INVALID_PARAM,
-            filterFunctionName
-        );
-        return;
-    }
+    if(!Dom.isArray(filterFunctionName))
+        var filterFunctionNames = [filterFunctionName];
+    else
+        var filterFunctionNames = filterFunctionName;
 
-    this._filterFunction = this._filterFunctions[filterFunctionName];
+    this._filters = [];
+    for(var i = 0; i < filterFunctionNames.length; i++) {
+        if(!this._filterFunctions.hasOwnProperty(filterFunctionNames[i])) {
+            new Gridifier.Error(
+                Gridifier.Error.ERROR_TYPES.SETTINGS.SET_FILTER_INVALID_PARAM,
+                filterFunctionNames[i]
+            );
+            return;
+        }
+
+        this._filters.push(this._filterFunctions[filterFunctionNames[i]]);
+    }
 }
 
 Gridifier.Api.Filter.prototype.addFilterFunction = function(filterFunctionName, filterFunction) {
@@ -2534,7 +2596,7 @@ Gridifier.Api.Filter.prototype.addFilterFunction = function(filterFunctionName, 
 }
 
 Gridifier.Api.Filter.prototype.getFilterFunction = function() {
-    return this._filterFunction;
+    return this._filters;
 }
 
 Gridifier.Api.Filter.prototype._addAllFilter = function() {
@@ -2690,9 +2752,10 @@ Gridifier.Api.Rotate.prototype._rotate = function(item,
     );
 
     var me = this;
+    var rotateAngles = this._settings.getRotateAngles();
     var initRotateTimeout = setTimeout(function() {
-        Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + "180deg");
-        Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + "0deg");
+        Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + rotateAngles[2] + "deg");
+        Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + rotateAngles[3] + "deg");
     }, 20);
     // No sence to sync timeouts here -> Animations are performed on clones
     //timeouter.add(item, initRotateTimeout);
@@ -2788,7 +2851,7 @@ Gridifier.Api.Rotate.prototype._createFrontFrame = function(frames, rotateProp, 
 
     Dom.css.set(frontFrame, {zIndex: 2});
     Dom.css3.transitionProperty(frontFrame, Prefixer.getForCSS('transform', frontFrame) + " 0ms " + this._transitionTiming);
-    Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + "0deg");
+    Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + this._settings.getRotateAngles()[0] + "deg");
 
     return frontFrame;
 }
@@ -2799,7 +2862,7 @@ Gridifier.Api.Rotate.prototype._createBackFrame = function(frames, rotateProp, r
     frames.appendChild(backFrame);
 
     Dom.css3.transitionProperty(backFrame, Prefixer.getForCSS('transform', backFrame) + " 0ms " + this._transitionTiming);
-    Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + "-180deg");
+    Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + this._settings.getRotateAngles()[1] + "deg");
 
     return backFrame;
 }
@@ -3277,8 +3340,13 @@ Gridifier.Api.Sort = function(settings, eventEmitter) {
     this._settings = null;
     this._eventEmitter = null;
 
+    this._sortComparatorTools = null;
+
     this._sortFunction = null;
     this._sortFunctions = {};
+
+    this._retransformSortFunction = null;
+    this._retransformSortFunctions = {};
 
     this._css = {
     };
@@ -3290,6 +3358,8 @@ Gridifier.Api.Sort = function(settings, eventEmitter) {
         me._sortFunctions = {};
 
         me._addDefaultSort();
+        me._addDefaultRetransformSort();
+        me._addBySizesRetransformSort();
     };
 
     this._bindEvents = function() {
@@ -3304,6 +3374,193 @@ Gridifier.Api.Sort = function(settings, eventEmitter) {
 
     this._construct();
     return this;
+}
+
+Gridifier.Api.Sort.prototype.getSortComparatorTools = function() {
+    if(this._sortComparatorTools == null) {
+        var applyReplacers = function(value, replacers) {
+            for(var i = 0; i < replacers.length; i++)
+                value = value.replace(replacers[i][0], replacers[i][1]);
+
+            return value;
+        }
+
+        this._sortComparatorTools = {
+            comparatorFns: {
+                byData: function(item, comparatorParam, replacers) {
+                    var value = item.getAttribute(comparatorParam);
+                    return (!replacers) ? value : applyReplacers(value, replacers);
+                },
+                byDataInt: function(item, comparatorParam, replacers) {
+                    var value = item.getAttribute(comparatorParam);
+                    return (!replacers) ? Dom.toInt(value) : Dom.toInt(applyReplacers(value, replacers));
+                },
+                byDataFloat: function(item, comparatorParam, replacers) {
+                    var value = item.getAttribute(comparatorParam);
+                    return (!replacers) ? parseFloat(value) : parseFloat(applyReplacers(value, replacers));
+                },
+                byContent: function(item, comparatorParam, replacers) {
+                    var value = item.innerHTML;
+                    return (!replacers) ? value : applyReplacers(value, replacers);
+                },
+                byContentInt: function(item, comparatorParam, replacers) {
+                    var value = item.innerHTML;
+                    return (!replacers) ? Dom.toInt(value) : Dom.toInt(applyReplacers(value, replacers));
+                },
+                byContentFloat: function(item, comparatorParam, replacers) {
+                    var value = item.innerHTML;
+                    return (!replacers) ? parseFloat(value) : parseFloat(applyReplacers(value, replacers));
+                },
+                byQuery: function(item, comparatorParam, replacers) {
+                    var value = Dom.get.byQuery(item, comparatorParam)[0].innerHTML;
+                    return (!replacers) ? value : applyReplacers(value, replacers);
+                },
+                byQueryInt: function(item, comparatorParam, replacers) {
+                    var value = Dom.get.byQuery(item, comparatorParam)[0].innerHTML;
+                    return (!replacers) ? Dom.toInt(value) : Dom.toInt(applyReplacers(value, replacers));
+                },
+                byQueryFloat: function(item, comparatorParam, replacers) {
+                    var value = Dom.get.byQuery(item, comparatorParam)[0].innerHTML;
+                    return (!replacers) ? parseFloat(value) : parseFloat(applyReplacers(value, replacers));
+                }
+            },
+
+            saveOriginalOrder: function(items) {
+                for(var i = 0; i < items.length; i++) {
+                    items[i].setAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR, i + 1);
+                }
+            },
+
+            flushOriginalOrder: function(items) {
+                for(var i = 0; i < items.length; i++) {
+                    items[i].removeAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR);
+                }
+            },
+
+            byOriginalPos: function(firstItem, secondItem) {
+                var firstItemOriginalPos = firstItem.getAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR);
+                var secondItemOriginalPos = secondItem.getAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR);
+
+                if(Dom.toInt(firstItemOriginalPos) > Dom.toInt(secondItemOriginalPos))
+                    return 1;
+                else if(Dom.toInt(firstItemOriginalPos) < Dom.toInt(secondItemOriginalPos))
+                    return -1;
+            },
+
+            byComparator: function(firstItemComparator, secondItemComparator, reverseOrder) {
+                var orderReverser = (reverseOrder) ? -1 : 1;
+
+                if(firstItemComparator > secondItemComparator)
+                    return 1 * orderReverser;
+                else if(firstItemComparator < secondItemComparator)
+                    return -1 * orderReverser;
+
+                return 0;
+            },
+
+            byMultipleComparators: function(firstItem, secondItem, comparators, reverseOrder) {
+                for(var i = 0; i < comparators.length; i++) {
+                    var result = this.byComparator(
+                        comparators[i].forFirstItem, comparators[i].forSecondItem, reverseOrder
+                    );
+                    if(result == 0) {
+                        if(i == comparators.length - 1)
+                            return this.byOriginalPos(firstItem, secondItem);
+
+                        continue;
+                    }
+
+                    return result;
+                }
+            },
+
+            buildComparators: function(firstItem,
+                                       secondItem,
+                                       comparatorGetterFn,
+                                       comparatorParam,
+                                       comparatorParamReplacers) {
+                if(typeof comparatorParam == "undefined")
+                    throw new Error("Gridifier error: sort comparator param is undefined.");
+
+                if(!Dom.isArray(comparatorParam))
+                    var comparatorParams = [comparatorParam];
+                else
+                    var comparatorParams = comparatorParam;
+
+                var comparators = [];
+                for(var i = 0; i < comparatorParams.length; i++) {
+                    comparators.push({
+                        forFirstItem: comparatorGetterFn(
+                            firstItem, comparatorParams[i], comparatorParamReplacers
+                        ),
+                        forSecondItem: comparatorGetterFn(
+                            secondItem, comparatorParams[i], comparatorParamReplacers
+                        )
+                    });
+                }
+
+                return comparators;
+            },
+
+            sortBy: function(firstItem,
+                             secondItem,
+                             comparatorGetterFn,
+                             comparatorParam,
+                             reverseOrder,
+                             comparatorParamReplacers) {
+                return this.byMultipleComparators(
+                    firstItem,
+                    secondItem,
+                    this.buildComparators(
+                        firstItem,
+                        secondItem,
+                        comparatorGetterFn,
+                        comparatorParam,
+                        comparatorParamReplacers || false
+                    ),
+                    reverseOrder || false
+                );
+            },
+
+            byData: function(firstItem, secondItem, dataAttr, reverseOrder, replacers) {
+                return this.sortBy(firstItem, secondItem, this.comparatorFns.byData, dataAttr, reverseOrder, replacers);
+            },
+
+            byDataInt: function(firstItem, secondItem, dataAttr, reverseOrder, replacers) {
+                return this.sortBy(firstItem, secondItem, this.comparatorFns.byDataInt, dataAttr, reverseOrder, replacers);
+            },
+
+            byDataFloat: function(firstItem, secondItem, dataAttr, reverseOrder, replacers) {
+                return this.sortBy(firstItem, secondItem, this.comparatorFns.byDataFloat, dataAttr, reverseOrder, replacers);
+            },
+
+            byContent: function(firstItem, secondItem, reverseOrder, replacers) {
+                return this.sortBy(firstItem, secondItem, this.comparatorFns.byContent, null, reverseOrder, replacers);
+            },
+
+            byContentInt: function(firstItem, secondItem, reverseOrder, replacers) {
+                return this.sortBy(firstItem, secondItem, this.comparatorFns.byContentInt, null, reverseOrder, replacers);
+            },
+
+            byContentFloat: function(firstItem, secondItem, reverseOrder, replacers) {
+                return this.sortBy(firstItem, secondItem, this.comparatorFns.byContentFloat, null, reverseOrder, replacers);
+            },
+
+            byQuery: function(firstItem, secondItem, selector, reverseOrder, replacers) {
+                return this.sortBy(firstItem, secondItem, this.comparatorFns.byQuery, selector, reverseOrder, replacers);
+            },
+
+            byQueryInt: function(firstItem, secondItem, selector, reverseOrder, replacers) {
+                return this.sortBy(firstItem, secondItem, this.comparatorFns.byQueryInt, selector, reverseOrder, replacers);
+            },
+
+            byQueryFloat: function(firstItem, secondItem, selector, reverseOrder, replacers) {
+                return this.sortBy(firstItem, secondItem, this.comparatorFns.byQueryFloat, selector, reverseOrder, replacers);
+            }
+        };
+    }
+
+    return this._sortComparatorTools;
 }
 
 Gridifier.Api.Sort.prototype.setSortFunction = function(sortFunctionName) {
@@ -3333,6 +3590,158 @@ Gridifier.Api.Sort.prototype._addDefaultSort = function() {
 
         return parseInt(firstItemSortNumber, 10) - parseInt(secondItemSortNumber, 10);
     };
+}
+
+Gridifier.Api.Sort.prototype.setRetransformSortFunction = function(retransformSortFunctionName) {
+    if(!this._retransformSortFunctions.hasOwnProperty(retransformSortFunctionName)) {
+        new Gridifier.Error(
+            Gridifier.Error.ERROR_TYPES.SETTINGS.SET_RETRANSFORM_SORT_INVALID_PARAM,
+            retransformSortFunctionName
+        );
+        return;
+    }
+
+    this._retransformSortFunction = this._retransformSortFunctions[retransformSortFunctionName];
+}
+
+Gridifier.Api.Sort.prototype.addRetransformSortFunction = function(retransformSortFunctionName, retransformSortFunction) {
+    this._retransformSortFunctions[retransformSortFunctionName] = retransformSortFunction;
+}
+
+Gridifier.Api.Sort.prototype.getRetransformSortFunction = function() {
+    return this._retransformSortFunction;
+}
+
+Gridifier.Api.Sort.prototype._addDefaultRetransformSort = function() {
+    this._retransformSortFunctions["default"] = function(connections) { console.log("called default");
+        return connections;
+    };
+}
+
+Gridifier.Api.Sort.prototype._addBySizesRetransformSort = function() {
+    var me = this;
+
+    //setTimeout(function() {
+    //setTimeout(function() {
+    //    me._eventEmitter.onBeforeShow(function() {
+    //        me._eventEmitter._gridifier.triggerResize();
+    //    });
+    //}, 0);
+    //}, 500);
+
+    var calculateAreaPerEachConnection = function(connections) {
+        for(var i = 0; i < connections.length; i++) {
+            var connectionWidth = Math.abs(connections[i].x2 - connections[i].x1) + 1;
+            var connectionHeight = Math.abs(connections[i].y2 - connections[i].y1) + 1;
+            var connectionArea = connectionWidth * connectionHeight;
+            connections[i].area = connectionArea;
+        }
+    }
+
+    var packConnectionsByAreas = function(connections) {
+        var areasWithConnections = [];
+        for(var i = 0; i < connections.length; i++) {
+            var connectionArea = connections[i].area;
+
+            var wasAddedToExistingArea = false;
+            for(var j = 0; j < areasWithConnections.length; j++) {
+                if(areasWithConnections[j].area == connectionArea) {
+                    areasWithConnections[j].connections.push(connections[i]);
+                    wasAddedToExistingArea = true;
+                    break;
+                }
+            }
+
+            if(!wasAddedToExistingArea) {
+                areasWithConnections.push({
+                    area: connectionArea,
+                    connections: [connections[i]]
+                });
+            }
+        }
+
+        return areasWithConnections;
+    }
+
+    var sortLinear = function(connections) {
+        var areasWithConnections = packConnectionsByAreas(connections);
+        areasWithConnections.sort(function(firstConnection, secondConnection) {
+            return parseFloat(firstConnection.area) - parseFloat(secondConnection).area;
+        });
+
+        var sortedConnections = [];
+        var allEmpty = false;
+        while(!allEmpty) {
+            var noChanges = true;
+            for(var i = 0; i < areasWithConnections.length; i++) {
+                if(areasWithConnections[i].connections.length != 0) {
+                    if(i == 0) {
+                        // @todo -> Pass, how many elements from most big group could be taken
+                        sortedConnections.push(areasWithConnections[i].connections.shift());
+                        if(areasWithConnections[i].connections.length != 0)
+                            sortedConnections.push(areasWithConnections[i].connections.shift());
+                    }
+                    else {
+                        sortedConnections.push(areasWithConnections[i].connections.shift());
+                    }
+                    noChanges = false;
+                }
+            }
+
+            if(noChanges)
+                allEmpty = true;
+        }
+
+        return sortedConnections;
+    }
+
+    // Split connections to batches and call repack per each batch???
+    // Splicer should be separate object, which will be called to 'splice' connection to groups
+    this._retransformSortFunctions["areaDesc"] = function(connections) { console.log("conn orig count = " + connections.length);
+        calculateAreaPerEachConnection(connections);
+        var nextPosition = 0;
+        for(var i = 0; i < connections.length; i++) {
+            nextPosition++;
+            connections[i].retransformSortPosition = nextPosition;
+        }
+
+        var connectionBatches = [];
+        var connectionIndex = 0;
+        var nextBatch = [];
+        for(var i = 0; i < connections.length; i++) {
+            connectionIndex++;
+            nextBatch.push(connections[i]);
+            if(connectionIndex % 320 == 0) {
+                connectionBatches.push(nextBatch);
+                nextBatch = [];
+            }
+
+
+        }
+        if(nextBatch.length != 0)
+            connectionBatches.push(nextBatch);
+        console.log("count = " + connectionBatches.length);
+        for(var i = 0; i < connectionBatches.length; i++) {
+            connectionBatches[i] = sortLinear(connectionBatches[i]);
+            //connectionBatches[i].sort(function(firstConnection, secondConnection) {
+            //    if(firstConnection.area > secondConnection.area)
+            //        return -1;
+            //    else if(firstConnection.area < secondConnection.area)
+            //        return 1;
+            //    else
+            //        return firstConnection.retransformSortPosition - secondConnection.retransformSortPosition;
+            //});
+        }
+
+        connections.splice(0, connections.length);
+        for(var i = 0; i < connectionBatches.length; i++) {
+            for(var j = 0; j < connectionBatches[i].length; j++) {
+                connections.push(connectionBatches[i][j]);
+            }
+        }
+        console.log("conn modified count = " + connections.length);
+        return connections;
+    }
 }
 
 Gridifier.Api.Toggle = function(settings, gridifier, eventEmitter, sizesResolverManager) {
@@ -4496,6 +4905,8 @@ Gridifier.ConnectorsIntersector.prototype.getMostBottomFromIntersectedTopOrTopRi
             }
         }
     }
+
+    return mostBottomConnection;
 }
 
 Gridifier.ConnectorsIntersector.prototype.getMostRightFromIntersectedLeftItems = function(connector) {
@@ -4508,7 +4919,7 @@ Gridifier.ConnectorsIntersector.prototype.getMostRightFromIntersectedLeftItems =
             if(mostRightConnection == null)
                 mostRightConnection = connection;
             else {
-                if(connection.x > mostRightConnection.x2)
+                if(connection.x1 > mostRightConnection.x2)
                     mostRightConnection = connection;
             }
         }
@@ -4952,7 +5363,7 @@ Gridifier.Collector = function(settings, grid, sizesResolverManager) {
     return this;
 }
 
-Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR = "data-gridifier-item-sorting-index";
+Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR = "data-gridifier-original-item-sorting-index";
 Gridifier.Collector.RESTRICT_ITEM_COLLECT_DATA_ATTR = "data-gridifier-item-restrict-collect";
 
 Gridifier.Collector.prototype._createCollectorFunction = function() {
@@ -5164,27 +5575,52 @@ Gridifier.Collector.prototype.toDOMCollection = function(items) {
 }
 
 Gridifier.Collector.prototype.filterCollection = function(items) {
-    var filter = this._settings.getFilter();
+    var filters = this._settings.getFilter();
     var filteredItems = [];
 
-    for(var i = 0; i < items.length; i++) {
-        if(filter(items[i]))
-            filteredItems.push(items[i]);
+    var filteredItemDataAttr = "data-gridifier-filtered-item";
+    var markAsFiltered = function(item) {
+        item.setAttribute(filteredItemDataAttr, "yes");
     }
+
+    var unmarkAsFiltered = function(item) {
+        item.removeAttribute(filteredItemDataAttr);
+    }
+
+    var isAlreadyFiltered = function(item) {
+        return Dom.hasAttribute(item, filteredItemDataAttr);
+    }
+
+    for(var i = 0; i < filters.length; i++) {
+        for(var j = 0; j < items.length; j++) {
+            if(filters[i](items[j])) {
+                if(!isAlreadyFiltered(items[j])) {
+                    filteredItems.push(items[j]);
+                    markAsFiltered(items[j]);
+                }
+            }
+        }
+    }
+
+    for(var i = 0; i < items.length; i++)
+        unmarkAsFiltered(items[i]);
 
     return filteredItems;
 }
 
 Gridifier.Collector.prototype.sortCollection = function(items) {
-    for(var i = 0; i < items.length; i++) {
-        items[i].setAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR, i);
-    }
+    var sortComparatorTools = this._settings.getSortApi().getSortComparatorTools();
+    var sortFunction = this._settings.getSort();
 
-    items.sort(this._settings.getSort());
+    sortComparatorTools.saveOriginalOrder(items);
 
-    for(var i = 0; i < items.length; i++) {
-        items[i].removeAttribute(Gridifier.Collector.ITEM_SORTING_INDEX_DATA_ATTR);
-    }
+    items.sort(
+        function(firstItem, secondItem) {
+            return sortFunction(firstItem, secondItem, sortComparatorTools);
+        }
+    );
+
+    sortComparatorTools.flushOriginalOrder(items);
 
     return items;
 }
@@ -5449,6 +5885,14 @@ Gridifier.EventEmitter.prototype.onDragEnd = function(callbackFn) {
 
 Gridifier.EventEmitter.prototype.onItemsReappendExecutionEndPerDragifier = function(callbackFn) {
     this._kernelCallbacks.itemsReappendExecutionEndPerDragifier = callbackFn;
+}
+
+Gridifier.EventEmitter.prototype.onBeforeShow = function(callbackFn) {
+    this._onBeforeShow = callbackFn;
+}
+
+Gridifier.EventEmitter.prototype.emitBeforeShowEvent = function() {
+    this._onBeforeShow();
 }
 
 Gridifier.EventEmitter.prototype.emitShowEvent = function(item) {
@@ -6004,6 +6448,19 @@ Gridifier.Iterator.prototype.getPrev = function(item) {
     return null;
 }
 
+Gridifier.Iterator.prototype.getAll = function() {
+    var connections = this._connections.get();
+    if(connections.length == 0)
+        return [];
+
+    var sortedConnections = this._connectionsSorter.sortConnectionsPerReappend(connections);
+    var items = [];
+    for(var i = 0; i < sortedConnections.length; i++)
+        items.push(sortedConnections[i].item);
+
+    return items;
+}
+
 Gridifier.LifecycleCallbacks = function(collector) {
    var me = this;
 
@@ -6194,7 +6651,9 @@ Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
                 }
             }
 
-            var sortByAreasAsc = function (firstConnection, secondConnection) {
+            // Sort stability is not important here - each group will be resorted
+            // with stable sort in connectionsSorter.sortConnectionsPerReappend function
+            var sortByAreasDesc = function (firstConnection, secondConnection) {
                 if(firstConnection.tmpArea > secondConnection.tmpArea)
                     return -1;
                 else if(firstConnection.tmpArea < secondConnection.tmpArea)
@@ -6218,7 +6677,7 @@ Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
 
             var connections = connectionsObj.get();
             calculateSizes(connections);
-            connections.sort(sortByAreasAsc);
+            connections.sort(sortByAreasDesc);
             var packedByAreasConnections = packConnectionsByAreas(connections);
 
             var connectionsSorter = connectionsObj.getConnectionsSorter();
@@ -6230,6 +6689,8 @@ Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
                 areaProps.push(areaProp);
             }
 
+            // This sort will never return 0, because two arrays entries
+            // with same area cannot be created.(So, this sort is stable too)
             areaProps.sort(function (firstArea, secondArea) {
                 if(Dom.toInt(firstArea) > Dom.toInt(secondArea))
                     return -1;
@@ -6906,6 +7367,23 @@ Gridifier.SizesResolverManager.prototype.viewportWidth = function() {
 
 Gridifier.SizesResolverManager.prototype.viewportHeight = function() {
     return document.documentElement.clientHeight;
+}
+
+Gridifier.SizesResolverManager.prototype.viewportScrollLeft = function() {
+    return window.pageXOffset || document.documentElement.scrollLeft;
+}
+
+Gridifier.SizesResolverManager.prototype.viewportScrollTop = function() {
+    return window.pageYOffset || document.documentElement.scrollTop;
+}
+
+Gridifier.SizesResolverManager.prototype.viewportDocumentCoords = function() {
+    return {
+        x1: this.viewportScrollLeft(),
+        x2: this.viewportScrollLeft() + this.viewportWidth() - 1,
+        y1: this.viewportScrollTop(),
+        y2: this.viewportScrollTop() + this.viewportHeight() - 1
+    };
 }
 
 Gridifier.SizesResolverManager.prototype.copyComputedStyle = function(sourceItem, targetItem) {
@@ -8632,7 +9110,8 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         this._markAsApiSettingsError();
         this._invalidOneOfToggleParamsError();
     }
-    else if(errorType == errors.INVALID_ONE_OF_SORT_FUNCTION_TYPES || 
+    else if(errorType == errors.INVALID_ONE_OF_SORT_FUNCTION_TYPES ||
+            errorType == errors.INVALID_ONE_OF_RETRANSFORM_SORT_FUNCTION_TYPES ||
             errorType == errors.INVALID_ONE_OF_FILTER_FUNCTION_TYPES ||
             errorType == errors.INVALID_ONE_OF_COORDS_CHANGER_FUNCTION_TYPES ||
             errorType == errors.INVALID_ONE_OF_SIZES_CHANGER_FUNCTION_TYPES ||
@@ -8641,6 +9120,9 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
 
         if(errorType == errors.INVALID_ONE_OF_SORT_FUNCTION_TYPES) {
             var paramName = "sort";
+        }
+        else if(errorType == errors.INVALID_ONE_OF_RETRANSFORM_SORT_FUNCTION_TYPES) {
+            var paramName = "retransformSort";
         }
         else if(errorType == errors.INVALID_ONE_OF_FILTER_FUNCTION_TYPES) {
             var paramName = "filter";
@@ -8658,7 +9140,8 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         this._invalidOneOfFunctionTypesError(paramName);
     }
     else if(errorType == errors.INVALID_TOGGLE_PARAM_VALUE || 
-            errorType == errors.INVALID_SORT_PARAM_VALUE || 
+            errorType == errors.INVALID_SORT_PARAM_VALUE ||
+            errorType == errors.INVALID_RETRANSFORM_SORT_PARAM_VALUE ||
             errorType == errors.INVALID_FILTER_PARAM_VALUE ||
             errorType == errors.INVALID_COORDS_CHANGER_PARAM_VALUE ||
             errorType == errors.INVALID_SIZES_CHANGER_PARAM_VALUE ||
@@ -8670,6 +9153,9 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         }
         else if(errorType == errors.INVALID_SORT_PARAM_VALUE) {
             var paramName = "sort";
+        }
+        else if(errorType == errors.INVALID_RETRANSFORM_SORT_PARAM_VALUE) {
+            var paramName = "retransformSort";
         }
         else if(errorType == errors.INVALID_FILTER_PARAM_VALUE) {
             var paramName = "filter";
@@ -8689,6 +9175,7 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
     else if(errorType == errors.SET_TOGGLE_INVALID_PARAM || 
             errorType == errors.SET_FILTER_INVALID_PARAM ||
             errorType == errors.SET_SORT_INVALID_PARAM ||
+            errorType == errors.SET_RETRANSFORM_SORT_INVALID_PARAM ||
             errorType == errors.SET_COORDS_CHANGER_INVALID_PARAM ||
             errorType == errors.SET_SIZES_CHANGER_INVALID_PARAM ||
             errorType == errors.SET_DRAGGABLE_ITEM_DECORATOR_INVALID_PARAM) {
@@ -8702,6 +9189,9 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         }
         else if(errorType == errors.SET_SORT_INVALID_PARAM) {
             var functionName = "sort";
+        }
+        else if(errorType == errors.SET_RETRANSFORM_SORT_INVALID_PARAM) {
+            var functionName = "retransformSort";
         }
         else if(errorType == errors.SET_COORDS_CHANGER_INVALID_PARAM) {
             var functionName = "coordsChanger";
@@ -9297,6 +9787,9 @@ Gridifier.Error.ERROR_TYPES = {
         INVALID_SORT_PARAM_VALUE: 9,
         INVALID_ONE_OF_SORT_FUNCTION_TYPES: 10,
 
+        INVALID_RETRANSFORM_SORT_PARAM_VALUE: 41,
+        INVALID_ONE_OF_RETRANSFORM_SORT_FUNCTION_TYPES: 42,
+
         INVALID_FILTER_PARAM_VALUE: 11,
         INVALID_ONE_OF_FILTER_FUNCTION_TYPES: 12,
 
@@ -9315,6 +9808,7 @@ Gridifier.Error.ERROR_TYPES = {
         SET_TOGGLE_INVALID_PARAM: 19,
         SET_FILTER_INVALID_PARAM: 20,
         SET_SORT_INVALID_PARAM: 21,
+        SET_RETRANSFORM_SORT_INVALID_PARAM: 43,
         SET_COORDS_CHANGER_INVALID_PARAM: 22,
         SET_SIZES_CHANGER_INVALID_PARAM: 23,
         SET_DRAGGABLE_ITEM_DECORATOR_INVALID_PARAM: 36,
@@ -10653,6 +11147,11 @@ Gridifier.HorizontalGrid.ConnectionsSorter.prototype.sortConnectionsPerReappend 
                 }
             });
         }
+    }
+
+    if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+        var retransformSorter = this._settings.getRetransformSort();
+        connections = retransformSorter(connections);
     }
 
     return connections;
@@ -12517,6 +13016,17 @@ Gridifier.Operations.Queue.prototype._executeInsertAfterOperation = function(ite
     this._appendOperation.executeInsertAfter(items, afterItem);
 }
 
+Gridifier.Operations.Queue.prototype.scheduleAsyncFnExecutionByBatches = function(itemsToSplit, batchSize, batchTimeout, asyncFn) {
+    var itemBatches = this.splitItemsToBatches(itemsToSplit, batchSize);
+    batchTimeout = (typeof batchTimeout != "undefined") ? batchTimeout : Gridifier.Operations.Queue.DEFAULT_BATCH_TIMEOUT;
+
+    for(var i = 0; i < itemBatches.length; i++) {
+        (function(itemBatch, i) {
+            setTimeout(function() { asyncFn(itemBatch); }, batchTimeout * i);
+        })(itemBatches[i], i);
+    }
+}
+
 Gridifier.Renderer = function(gridifier, connections, settings, normalizer) {
     var me = this;
 
@@ -12667,6 +13177,23 @@ Gridifier.Renderer.prototype.renderConnectionsAfterDelay = function(connections,
         this._rendererSchedulator.reinit();
         this._rendererSchedulator.scheduleDelayedRender(connections[i], null, null, delay);
     }
+}
+
+Gridifier.Renderer.prototype.rotateItems = function(itemsToRotate) {
+    var itemsToRotateConnections = [];
+
+    for(var i = 0; i < itemsToRotate.length; i++) {
+        if(this._gridifier.hasItemBindedClone(itemsToRotate[i])) {
+            var itemClone = this._gridifier.getItemClone(itemsToRotate[i]);
+            itemClone.style.visibility = "hidden";
+        }
+
+        var itemToRotateConnection = this._connections.findConnectionByItem(itemsToRotate[i]);
+        this._rendererConnections.unmarkConnectionItemAsRendered(itemToRotateConnection);
+        itemsToRotateConnections.push(itemToRotateConnection);
+    }
+
+    this.showConnections(itemsToRotateConnections);
 }
 
 Gridifier.Renderer.Connections = function(settings) {
@@ -12965,6 +13492,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter, false, false, false, true);
             }
 
+           // eventEmitter.emitBeforeShowEvent();
             showItem(connectionToProcess.item);
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
@@ -13092,7 +13620,8 @@ Gridifier.SilentRenderer = function(gridifier,
                                     connections,
                                     operationsQueue,
                                     renderer,
-                                    rendererConnections) {
+                                    rendererConnections,
+                                    sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
@@ -13101,6 +13630,7 @@ Gridifier.SilentRenderer = function(gridifier,
     this._operationsQueue = null;
     this._renderer = null;
     this._rendererConnections = null;
+    this._sizesResolverManager = null;
 
     this._css = {
     };
@@ -13112,6 +13642,7 @@ Gridifier.SilentRenderer = function(gridifier,
         me._operationsQueue = operationsQueue;
         me._renderer = renderer;
         me._rendererConnections = rendererConnections;
+        me._sizesResolverManager = sizesResolverManager;
     };
 
     this._bindEvents = function() {
@@ -13151,7 +13682,48 @@ Gridifier.SilentRenderer.prototype.isScheduledForSilentRender = function(item) {
     return Dom.hasAttribute(item, Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR);
 }
 
-Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
+Gridifier.SilentRenderer.prototype.getScheduledForSilentRenderItems = function(onlyInsideViewport) {
+    var filterItemsOnlyInsideViewport = onlyInsideViewport || false;
+
+    var scheduledItems = this._collector.collectByQuery(
+        "[" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
+    );
+
+    if(!filterItemsOnlyInsideViewport)
+        return scheduledItems;
+
+    var gridOffsetLeft = this._sizesResolverManager.offsetLeft(this._gridifier.getGrid());
+    var gridOffsetTop = this._sizesResolverManager.offsetTop(this._gridifier.getGrid());
+    var viewportDocumentCoords = this._sizesResolverManager.viewportDocumentCoords();
+
+    var itemsInsideViewport = [];
+    for(var i = 0; i < scheduledItems.length; i++) {
+        var scheduledItemConnection = this._connections.findConnectionByItem(scheduledItems[i], true);
+        if(scheduledItemConnection == null)
+            continue;
+
+        var isItemOutsideViewport = false;
+        var itemX1 = gridOffsetLeft + scheduledItemConnection.x1;
+        var itemX2 = gridOffsetLeft + scheduledItemConnection.x2;
+        var itemY1 = gridOffsetTop + scheduledItemConnection.y1;
+        var itemY2 = gridOffsetTop + scheduledItemConnection.y2;
+
+        var isAbove = (itemY1 < viewportDocumentCoords.y1 && itemY2 < viewportDocumentCoords.y1);
+        var isBelow = (itemY1 > viewportDocumentCoords.y2 && itemY2 > viewportDocumentCoords.y2);
+        var isBefore = (itemX1 < viewportDocumentCoords.x1 && itemX2 < viewportDocumentCoords.x1);
+        var isBehind = (itemX1 > viewportDocumentCoords.x2 && itemX2 > viewportDocumentCoords.x2);
+
+        if(isAbove || isBelow || isBefore || isBehind)
+            isItemOutsideViewport = true;
+
+        if(!isItemOutsideViewport)
+            itemsInsideViewport.push(scheduledItems[i]);
+    }
+
+    return itemsInsideViewport;
+}
+
+Gridifier.SilentRenderer.prototype.execute = function(items, batchSize, batchTimeout) {
     var executeSilentRender = function(scheduledItems, scheduledConnections) {
         this.unscheduleForSilentRender(scheduledItems, scheduledConnections);
         this._renderer.showConnections(scheduledConnections);
@@ -13160,9 +13732,21 @@ Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
     var me = this;
 
     var scheduleSilentRendererExecution = function() {
-        var scheduledItems = this._collector.collectByQuery(
-            "[" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
-        );
+        if(typeof items == "undefined" || items == null || !items) {
+            var scheduledItems = this.getScheduledForSilentRenderItems();
+        }
+        else {
+            items = this._collector.toDOMCollection(items);
+            var scheduledItems = [];
+            for(var i = 0; i < items.length; i++) {
+                if(this.isScheduledForSilentRender(items[i]))
+                    scheduledItems.push(items[i]);
+            }
+        }
+
+        if(scheduledItems.length == 0)
+            return;
+
         var scheduledConnections = [];
         for (var i = 0; i < scheduledItems.length; i++) {
             var scheduledItemConnection = this._connections.findConnectionByItem(scheduledItems[i], true);
@@ -13290,6 +13874,49 @@ Gridifier.ApiSettingsParser.prototype.parseSortOptions = function(sortApi) {
         new Gridifier.Error(
             Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_SORT_PARAM_VALUE,
             this._settings.sort
+        );
+    }
+}
+
+Gridifier.ApiSettingsParser.prototype.parseRetransformSortOptions = function(sortApi) {
+    if(!this._settings.hasOwnProperty("retransformSort")) {
+        sortApi.setRetransformSortFunction("default");
+        return;
+    }
+
+    if(!this._settingsCore.isCustomAllEmptySpaceSortDispersion()) {
+        var errorMsg = "Gridifier error: retransformSort option is supported only with ";
+        errorMsg += "'customAllEmptySpace' sortDispersion param.";
+
+        throw new Error(errorMsg);
+    }
+
+    if(typeof this._settings.retransformSort == "function") {
+        sortApi.addRetransformSortFunction("clientDefault", this._settings.retransformSort);
+        sortApi.setRetransformSortFunction("clientDefault");
+        return;
+    }
+    else if(typeof this._settings.retransformSort == "object") {
+        for(var sortFunctionName in this._settings.retransformSort) {
+            var sortFunction = this._settings.retransformSort[sortFunctionName];
+
+            if(typeof sortFunction != "function") {
+                new Gridifier.Error(
+                    Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_ONE_OF_RETRANSFORM_SORT_FUNCTION_TYPES,
+                    sortFunction
+                );
+            }
+
+            sortApi.addRetransformSortFunction(sortFunctionName, sortFunction);
+        }
+
+        sortApi.setRetransformSortFunction("default");
+        return;
+    }
+    else {
+        new Gridifier.Error(
+            Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_RETRANSFORM_SORT_PARAM_VALUE,
+            this._settings.retransformSort
         );
     }
 }
@@ -13678,6 +14305,29 @@ Gridifier.CoreSettingsParser.prototype.parseRotateBackface = function() {
     return this._settings.rotateBackface;
 }
 
+Gridifier.CoreSettingsParser.prototype.parseRotateAngles = function() {
+    if(!this._settings.hasOwnProperty("rotateAngles") ||
+        !Dom.isArray(this._settings.rotateAngles)) {
+        return [
+            Gridifier.DEFAULT_ROTATE_ANGLES.FRONT_FRAME_INIT,
+            Gridifier.DEFAULT_ROTATE_ANGLES.BACK_FRAME_INIT,
+            Gridifier.DEFAULT_ROTATE_ANGLES.FRONT_FRAME_TARGET,
+            Gridifier.DEFAULT_ROTATE_ANGLES.BACK_FRAME_TARGET
+        ];
+    }
+
+    return this.parseRotateAnglesArray(this._settings.rotateAngles);
+}
+
+Gridifier.CoreSettingsParser.prototype.parseRotateAnglesArray = function(rotateAnglesArray) {
+    return [
+        (typeof rotateAnglesArray[0] != "undefined") ? rotateAnglesArray[0] : Gridifier.DEFAULT_ROTATE_ANGLES.FRONT_FRAME_INIT,
+        (typeof rotateAnglesArray[1] != "undefined") ? rotateAnglesArray[1] : Gridifier.DEFAULT_ROTATE_ANGLES.BACK_FRAME_INIT,
+        (typeof rotateAnglesArray[2] != "undefined") ? rotateAnglesArray[2] : Gridifier.DEFAULT_ROTATE_ANGLES.FRONT_FRAME_TARGET,
+        (typeof rotateAnglesArray[3] != "undefined") ? rotateAnglesArray[3] : Gridifier.DEFAULT_ROTATE_ANGLES.BACK_FRAME_TARGET
+    ];
+}
+
 Gridifier.CoreSettingsParser.prototype.parseGridTransformType = function() {
     if(!this._settings.hasOwnProperty("gridTransformType"))
         return Gridifier.GRID_TRANSFORM_TYPES.FIT;
@@ -13833,6 +14483,7 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
 
     this._rotatePerspective = null;
     this._rotateBackface = null;
+    this._rotateAngles = null;
 
     this._gridTransformType = null;
     this._gridTransformTimeout = null;
@@ -13900,6 +14551,7 @@ Gridifier.Settings.prototype._parse = function() {
     this._coordsChangeTransitionTiming = this._coreSettingsParser.parseCoordsChangeTransitionTiming();
     this._rotatePerspective = this._coreSettingsParser.parseRotatePerspective();
     this._rotateBackface = this._coreSettingsParser.parseRotateBackface();
+    this._rotateAngles = this._coreSettingsParser.parseRotateAngles();
     this._gridTransformType = this._coreSettingsParser.parseGridTransformType();
     this._gridTransformTimeout = this._coreSettingsParser.parseGridTransformTimeout();
     this._retransformQueueBatchSize = this._coreSettingsParser.parseRetransformQueueBatchSize();
@@ -13907,6 +14559,7 @@ Gridifier.Settings.prototype._parse = function() {
 
     this._apiSettingsParser.parseToggleOptions(this._toggleApi);
     this._apiSettingsParser.parseSortOptions(this._sortApi);
+    this._apiSettingsParser.parseRetransformSortOptions(this._sortApi);
     this._apiSettingsParser.parseFilterOptions(this._filterApi);
     this._apiSettingsParser.parseCoordsChangerOptions(this._coordsChangerApi);
     this._apiSettingsParser.parseSizesChangerOptions(this._sizesChangerApi);
@@ -13936,6 +14589,10 @@ Gridifier.Settings.prototype.getSizesResolverManager = function() {
 
 Gridifier.Settings.prototype.getCoordsChangerApi = function() {
     return this._coordsChangerApi;
+}
+
+Gridifier.Settings.prototype.getSortApi = function() {
+    return this._sortApi;
 }
 
 Gridifier.Settings.prototype.getResizeTimeout = function() {
@@ -13972,6 +14629,22 @@ Gridifier.Settings.prototype.getRotatePerspective = function() {
 
 Gridifier.Settings.prototype.getRotateBackface = function() {
     return this._rotateBackface;
+}
+
+Gridifier.Settings.prototype.getRotateAngles = function() {
+    return this._rotateAngles;
+}
+
+Gridifier.Settings.prototype.setRotatePerspective = function(rotatePerspective) {
+    this._rotatePerspective = rotatePerspective;
+}
+
+Gridifier.Settings.prototype.setRotateAngles = function(rotateAnglesArray) {
+    this._rotateAngles = this._coreSettingsParser.parseRotateAnglesArray(rotateAnglesArray);
+}
+
+Gridifier.Settings.prototype.setRotateBackface = function(rotateBackface) {
+    this._rotateBackface = rotateBackface;
 }
 
 Gridifier.Settings.prototype.isExpandGridTransformType = function() {
@@ -14102,12 +14775,20 @@ Gridifier.Settings.prototype.setSort = function(sortFunctionName) {
     this._sortApi.setSortFunction(sortFunctionName);
 }
 
+Gridifier.Settings.prototype.setRetransformSort = function(retransformSortFunctionName) {
+    this._sortApi.setRetransformSortFunction(retransformSortFunctionName);
+}
+
 Gridifier.Settings.prototype.getToggle = function() {
     return this._toggleApi.getToggleFunction();
 }
 
 Gridifier.Settings.prototype.getSort = function() {
     return this._sortApi.getSortFunction();
+}
+
+Gridifier.Settings.prototype.getRetransformSort = function() {
+    return this._sortApi.getRetransformSortFunction();
 }
 
 Gridifier.Settings.prototype.getFilter = function() {
@@ -14727,12 +15408,9 @@ Gridifier.SizesTransformer.ItemsToReappendFinder.prototype.findAllOnSizesTransfo
                 i--;
             }
         }
-        // When noIntersection strategy is use, we should reappend all row items.(Height of 
+        // When noIntersection strategy is use, we should reappend all row/col items.(Height/Width of
         // transformed item may become smaller).
-        // When customSortDispersion is used, element with bigger guid can be above.(Depending 
-        // on the dispersion param).
-        else if(this._settings.isCustomSortDispersion() || this._settings.isCustomAllEmptySpaceSortDispersion() ||
-                this._settings.isNoIntersectionsStrategy()) {
+        else if(this._settings.isNoIntersectionsStrategy()) {
             if(this._settings.isVerticalGrid()) {
                 var condition = connections[i].y2 >= firstTransformedConnection.y1;
             }
@@ -14746,11 +15424,38 @@ Gridifier.SizesTransformer.ItemsToReappendFinder.prototype.findAllOnSizesTransfo
                 i--;
             }
         }
-    }
+        else if(this._settings.isCustomSortDispersion() || this._settings.isCustomAllEmptySpaceSortDispersion()) {
+            if(this._settings.isVerticalGrid()) {
+                if(this._settings.isDefaultAppend()) {
+                    var condition = (connections[i].y1 > firstTransformedConnection.y1 ||
+                                     (connections[i].y1 == firstTransformedConnection.y1 &&
+                                      connections[i].x1 <= firstTransformedConnection.x2));
+                }
+                else if(this._settings.isReversedAppend()) {
+                    var condition = (connections[i].y1 > firstTransformedConnection.y1 ||
+                                     (connections[i].y1 == firstTransformedConnection.y1 &&
+                                      connections[i].x1 >= firstTransformedConnection.x1));
+                }
+            }
+            else if(this._settings.isHorizontalGrid()) {
+                if(this._settings.isDefaultAppend()) {
+                    var condition = (connections[i].x1 > firstTransformedConnection.x1 ||
+                                     (connections[i].x1 == firstTransformedConnection.x1 &&
+                                      connections[i].y1 >= firstTransformedConnection.y1));
+                }
+                else if(this._settings.isReversedAppend()) {
+                    var condition = (connections[i].x1 > firstTransformedConnection.x1 ||
+                                     (connections[i].x1 == firstTransformedConnection.x1 &&
+                                      connections[i].y1 <= firstTransformedConnection.y2));
+                }
+            }
 
-    if(this._settings.isCustomSortDispersion() || this._settings.isCustomAllEmptySpaceSortDispersion() ||
-        this._settings.isNoIntersectionsStrategy()) {
-        this._addAllIntersectedConnectionsBy(connectionsToReappend);
+            if(condition) {
+                connectionsToReappend.push(connections[i]);
+                connections.splice(i, 1);
+                i--;
+            }
+        }
     }
 
     var sortedConnectionsToReappend = this._connectionsSorter.sortConnectionsPerReappend(
@@ -14767,40 +15472,6 @@ Gridifier.SizesTransformer.ItemsToReappendFinder.prototype.findAllOnSizesTransfo
         connectionsToReappend: connectionsToReappend,
         firstConnectionToReappend: sortedConnectionsToReappend[0]
     };
-}
-
-/*
-  Any of connectionsToReappend can be recollected in such way, that after recollection it will produce a gap in
-  such way, that selected reappend algorithm will not create connector in that item position. So, we should
-  reappend also all connections, that are intersected by connectionsToReappend.
-  (In all next level on collisions every connection will have some connection around, at which required connector
-   will be created and shifted. If somehow this 'gap' will appear on some layout, user can call 'triggerResize'
-   to ensure, that all transformed items will be correctly reappended).
- */
-Gridifier.SizesTransformer.ItemsToReappendFinder.prototype._addAllIntersectedConnectionsBy = function(connectionsToReappend) {
-    var connections = this._connections.get();
-
-    for(var i = 0; i < connections.length; i++) {
-        var isIntersectingCurrentConnection = false;
-
-        for(var j = 0; j < connectionsToReappend.length; j++) {
-            if(this._settings.isVerticalGrid())
-                var intersectionCond = connectionsToReappend[j].y1 <= connections[i].y2;
-            else if(this._settings.isHorizontalGrid())
-                var intersectionCond = connectionsToReappend[j].x1 <= connections[i].x2;
-
-            if(intersectionCond) {
-                connectionsToReappend.push(connections[i]);
-                isIntersectingCurrentConnection = true;
-                break;
-            }
-        }
-
-        if(isIntersectingCurrentConnection) {
-            connections.splice(i, 1);
-            i--;
-        }
-    }
 }
 
 Gridifier.SizesTransformer.Core = function(gridifier,
@@ -16588,6 +17259,11 @@ Gridifier.VerticalGrid.ConnectionsSorter.prototype.sortConnectionsPerReappend = 
                 }
             });
         }
+    }
+
+    if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
+        var retransformSorter = this._settings.getRetransformSort();
+        connections = retransformSorter(connections);
     }
 
     return connections;

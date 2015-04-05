@@ -4,7 +4,7 @@ Gridifier.Api.Filter = function(settings, eventEmitter) {
     this._settings = null;
     this._eventEmitter = null;
 
-    this._filterFunction = null;
+    this._filters = null;
     this._filterFunctions = {};
 
     this._css = {
@@ -34,15 +34,23 @@ Gridifier.Api.Filter = function(settings, eventEmitter) {
 }
 
 Gridifier.Api.Filter.prototype.setFilterFunction = function(filterFunctionName) {
-    if(!this._filterFunctions.hasOwnProperty(filterFunctionName)) {
-        new Gridifier.Error(
-            Gridifier.Error.ERROR_TYPES.SETTINGS.SET_FILTER_INVALID_PARAM,
-            filterFunctionName
-        );
-        return;
-    }
+    if(!Dom.isArray(filterFunctionName))
+        var filterFunctionNames = [filterFunctionName];
+    else
+        var filterFunctionNames = filterFunctionName;
 
-    this._filterFunction = this._filterFunctions[filterFunctionName];
+    this._filters = [];
+    for(var i = 0; i < filterFunctionNames.length; i++) {
+        if(!this._filterFunctions.hasOwnProperty(filterFunctionNames[i])) {
+            new Gridifier.Error(
+                Gridifier.Error.ERROR_TYPES.SETTINGS.SET_FILTER_INVALID_PARAM,
+                filterFunctionNames[i]
+            );
+            return;
+        }
+
+        this._filters.push(this._filterFunctions[filterFunctionNames[i]]);
+    }
 }
 
 Gridifier.Api.Filter.prototype.addFilterFunction = function(filterFunctionName, filterFunction) {
@@ -50,7 +58,7 @@ Gridifier.Api.Filter.prototype.addFilterFunction = function(filterFunctionName, 
 }
 
 Gridifier.Api.Filter.prototype.getFilterFunction = function() {
-    return this._filterFunction;
+    return this._filters;
 }
 
 Gridifier.Api.Filter.prototype._addAllFilter = function() {

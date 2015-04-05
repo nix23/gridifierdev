@@ -48,6 +48,7 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
 
     this._rotatePerspective = null;
     this._rotateBackface = null;
+    this._rotateAngles = null;
 
     this._gridTransformType = null;
     this._gridTransformTimeout = null;
@@ -115,6 +116,7 @@ Gridifier.Settings.prototype._parse = function() {
     this._coordsChangeTransitionTiming = this._coreSettingsParser.parseCoordsChangeTransitionTiming();
     this._rotatePerspective = this._coreSettingsParser.parseRotatePerspective();
     this._rotateBackface = this._coreSettingsParser.parseRotateBackface();
+    this._rotateAngles = this._coreSettingsParser.parseRotateAngles();
     this._gridTransformType = this._coreSettingsParser.parseGridTransformType();
     this._gridTransformTimeout = this._coreSettingsParser.parseGridTransformTimeout();
     this._retransformQueueBatchSize = this._coreSettingsParser.parseRetransformQueueBatchSize();
@@ -122,6 +124,7 @@ Gridifier.Settings.prototype._parse = function() {
 
     this._apiSettingsParser.parseToggleOptions(this._toggleApi);
     this._apiSettingsParser.parseSortOptions(this._sortApi);
+    this._apiSettingsParser.parseRetransformSortOptions(this._sortApi);
     this._apiSettingsParser.parseFilterOptions(this._filterApi);
     this._apiSettingsParser.parseCoordsChangerOptions(this._coordsChangerApi);
     this._apiSettingsParser.parseSizesChangerOptions(this._sizesChangerApi);
@@ -151,6 +154,10 @@ Gridifier.Settings.prototype.getSizesResolverManager = function() {
 
 Gridifier.Settings.prototype.getCoordsChangerApi = function() {
     return this._coordsChangerApi;
+}
+
+Gridifier.Settings.prototype.getSortApi = function() {
+    return this._sortApi;
 }
 
 Gridifier.Settings.prototype.getResizeTimeout = function() {
@@ -187,6 +194,22 @@ Gridifier.Settings.prototype.getRotatePerspective = function() {
 
 Gridifier.Settings.prototype.getRotateBackface = function() {
     return this._rotateBackface;
+}
+
+Gridifier.Settings.prototype.getRotateAngles = function() {
+    return this._rotateAngles;
+}
+
+Gridifier.Settings.prototype.setRotatePerspective = function(rotatePerspective) {
+    this._rotatePerspective = rotatePerspective;
+}
+
+Gridifier.Settings.prototype.setRotateAngles = function(rotateAnglesArray) {
+    this._rotateAngles = this._coreSettingsParser.parseRotateAnglesArray(rotateAnglesArray);
+}
+
+Gridifier.Settings.prototype.setRotateBackface = function(rotateBackface) {
+    this._rotateBackface = rotateBackface;
 }
 
 Gridifier.Settings.prototype.isExpandGridTransformType = function() {
@@ -317,12 +340,20 @@ Gridifier.Settings.prototype.setSort = function(sortFunctionName) {
     this._sortApi.setSortFunction(sortFunctionName);
 }
 
+Gridifier.Settings.prototype.setRetransformSort = function(retransformSortFunctionName) {
+    this._sortApi.setRetransformSortFunction(retransformSortFunctionName);
+}
+
 Gridifier.Settings.prototype.getToggle = function() {
     return this._toggleApi.getToggleFunction();
 }
 
 Gridifier.Settings.prototype.getSort = function() {
     return this._sortApi.getSortFunction();
+}
+
+Gridifier.Settings.prototype.getRetransformSort = function() {
+    return this._sortApi.getRetransformSortFunction();
 }
 
 Gridifier.Settings.prototype.getFilter = function() {

@@ -145,9 +145,10 @@ Gridifier.Api.Rotate.prototype._rotate = function(item,
     );
 
     var me = this;
+    var rotateAngles = this._settings.getRotateAngles();
     var initRotateTimeout = setTimeout(function() {
-        Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + "180deg");
-        Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + "0deg");
+        Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + rotateAngles[2] + "deg");
+        Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + rotateAngles[3] + "deg");
     }, 20);
     // No sence to sync timeouts here -> Animations are performed on clones
     //timeouter.add(item, initRotateTimeout);
@@ -243,7 +244,7 @@ Gridifier.Api.Rotate.prototype._createFrontFrame = function(frames, rotateProp, 
 
     Dom.css.set(frontFrame, {zIndex: 2});
     Dom.css3.transitionProperty(frontFrame, Prefixer.getForCSS('transform', frontFrame) + " 0ms " + this._transitionTiming);
-    Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + "0deg");
+    Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + this._settings.getRotateAngles()[0] + "deg");
 
     return frontFrame;
 }
@@ -254,7 +255,7 @@ Gridifier.Api.Rotate.prototype._createBackFrame = function(frames, rotateProp, r
     frames.appendChild(backFrame);
 
     Dom.css3.transitionProperty(backFrame, Prefixer.getForCSS('transform', backFrame) + " 0ms " + this._transitionTiming);
-    Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + "-180deg");
+    Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + this._settings.getRotateAngles()[1] + "deg");
 
     return backFrame;
 }

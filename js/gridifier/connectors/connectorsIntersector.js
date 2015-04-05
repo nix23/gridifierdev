@@ -113,6 +113,8 @@ Gridifier.ConnectorsIntersector.prototype.getMostBottomFromIntersectedTopOrTopRi
             }
         }
     }
+
+    return mostBottomConnection;
 }
 
 Gridifier.ConnectorsIntersector.prototype.getMostRightFromIntersectedLeftItems = function(connector) {

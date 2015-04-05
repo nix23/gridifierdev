@@ -349,3 +349,14 @@ Gridifier.Operations.Queue.prototype._executeInsertBeforeOperation = function(it
 Gridifier.Operations.Queue.prototype._executeInsertAfterOperation = function(items, afterItem) { 
     this._appendOperation.executeInsertAfter(items, afterItem);
 }
+
+Gridifier.Operations.Queue.prototype.scheduleAsyncFnExecutionByBatches = function(itemsToSplit, batchSize, batchTimeout, asyncFn) {
+    var itemBatches = this.splitItemsToBatches(itemsToSplit, batchSize);
+    batchTimeout = (typeof batchTimeout != "undefined") ? batchTimeout : Gridifier.Operations.Queue.DEFAULT_BATCH_TIMEOUT;
+
+    for(var i = 0; i < itemBatches.length; i++) {
+        (function(itemBatch, i) {
+            setTimeout(function() { asyncFn(itemBatch); }, batchTimeout * i);
+        })(itemBatches[i], i);
+    }
+}

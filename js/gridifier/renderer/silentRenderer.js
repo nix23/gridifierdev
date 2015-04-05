@@ -3,7 +3,8 @@ Gridifier.SilentRenderer = function(gridifier,
                                     connections,
                                     operationsQueue,
                                     renderer,
-                                    rendererConnections) {
+                                    rendererConnections,
+                                    sizesResolverManager) {
     var me = this;
 
     this._gridifier = null;
@@ -12,6 +13,7 @@ Gridifier.SilentRenderer = function(gridifier,
     this._operationsQueue = null;
     this._renderer = null;
     this._rendererConnections = null;
+    this._sizesResolverManager = null;
 
     this._css = {
     };
@@ -23,6 +25,7 @@ Gridifier.SilentRenderer = function(gridifier,
         me._operationsQueue = operationsQueue;
         me._renderer = renderer;
         me._rendererConnections = rendererConnections;
+        me._sizesResolverManager = sizesResolverManager;
     };
 
     this._bindEvents = function() {
@@ -62,7 +65,48 @@ Gridifier.SilentRenderer.prototype.isScheduledForSilentRender = function(item) {
     return Dom.hasAttribute(item, Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR);
 }
 
-Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
+Gridifier.SilentRenderer.prototype.getScheduledForSilentRenderItems = function(onlyInsideViewport) {
+    var filterItemsOnlyInsideViewport = onlyInsideViewport || false;
+
+    var scheduledItems = this._collector.collectByQuery(
+        "[" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
+    );
+
+    if(!filterItemsOnlyInsideViewport)
+        return scheduledItems;
+
+    var gridOffsetLeft = this._sizesResolverManager.offsetLeft(this._gridifier.getGrid());
+    var gridOffsetTop = this._sizesResolverManager.offsetTop(this._gridifier.getGrid());
+    var viewportDocumentCoords = this._sizesResolverManager.viewportDocumentCoords();
+
+    var itemsInsideViewport = [];
+    for(var i = 0; i < scheduledItems.length; i++) {
+        var scheduledItemConnection = this._connections.findConnectionByItem(scheduledItems[i], true);
+        if(scheduledItemConnection == null)
+            continue;
+
+        var isItemOutsideViewport = false;
+        var itemX1 = gridOffsetLeft + scheduledItemConnection.x1;
+        var itemX2 = gridOffsetLeft + scheduledItemConnection.x2;
+        var itemY1 = gridOffsetTop + scheduledItemConnection.y1;
+        var itemY2 = gridOffsetTop + scheduledItemConnection.y2;
+
+        var isAbove = (itemY1 < viewportDocumentCoords.y1 && itemY2 < viewportDocumentCoords.y1);
+        var isBelow = (itemY1 > viewportDocumentCoords.y2 && itemY2 > viewportDocumentCoords.y2);
+        var isBefore = (itemX1 < viewportDocumentCoords.x1 && itemX2 < viewportDocumentCoords.x1);
+        var isBehind = (itemX1 > viewportDocumentCoords.x2 && itemX2 > viewportDocumentCoords.x2);
+
+        if(isAbove || isBelow || isBefore || isBehind)
+            isItemOutsideViewport = true;
+
+        if(!isItemOutsideViewport)
+            itemsInsideViewport.push(scheduledItems[i]);
+    }
+
+    return itemsInsideViewport;
+}
+
+Gridifier.SilentRenderer.prototype.execute = function(items, batchSize, batchTimeout) {
     var executeSilentRender = function(scheduledItems, scheduledConnections) {
         this.unscheduleForSilentRender(scheduledItems, scheduledConnections);
         this._renderer.showConnections(scheduledConnections);
@@ -71,9 +115,21 @@ Gridifier.SilentRenderer.prototype.execute = function(batchSize, batchTimeout) {
     var me = this;
 
     var scheduleSilentRendererExecution = function() {
-        var scheduledItems = this._collector.collectByQuery(
-            "[" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
-        );
+        if(typeof items == "undefined" || items == null || !items) {
+            var scheduledItems = this.getScheduledForSilentRenderItems();
+        }
+        else {
+            items = this._collector.toDOMCollection(items);
+            var scheduledItems = [];
+            for(var i = 0; i < items.length; i++) {
+                if(this.isScheduledForSilentRender(items[i]))
+                    scheduledItems.push(items[i]);
+            }
+        }
+
+        if(scheduledItems.length == 0)
+            return;
+
         var scheduledConnections = [];
         for (var i = 0; i < scheduledItems.length; i++) {
             var scheduledItemConnection = this._connections.findConnectionByItem(scheduledItems[i], true);

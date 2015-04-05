@@ -149,3 +149,20 @@ Gridifier.Renderer.prototype.renderConnectionsAfterDelay = function(connections,
         this._rendererSchedulator.scheduleDelayedRender(connections[i], null, null, delay);
     }
 }
+
+Gridifier.Renderer.prototype.rotateItems = function(itemsToRotate) {
+    var itemsToRotateConnections = [];
+
+    for(var i = 0; i < itemsToRotate.length; i++) {
+        if(this._gridifier.hasItemBindedClone(itemsToRotate[i])) {
+            var itemClone = this._gridifier.getItemClone(itemsToRotate[i]);
+            itemClone.style.visibility = "hidden";
+        }
+
+        var itemToRotateConnection = this._connections.findConnectionByItem(itemsToRotate[i]);
+        this._rendererConnections.unmarkConnectionItemAsRendered(itemToRotateConnection);
+        itemsToRotateConnections.push(itemToRotateConnection);
+    }
+
+    this.showConnections(itemsToRotateConnections);
+}

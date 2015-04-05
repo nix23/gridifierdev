@@ -175,7 +175,8 @@ Gridifier = function(grid, settings) {
             me._connections,
             me._operationsQueue,
             me._renderer,
-            me._renderer.getRendererConnections()
+            me._renderer.getRendererConnections(),
+            me._sizesResolverManager
         );
         me._renderer.setSilentRendererInstance(me._silentRenderer);
 
@@ -282,6 +283,11 @@ Gridifier.prototype.sortBy = function(sortFunctionName) {
     return this;
 }
 
+Gridifier.prototype.setRetransformSort = function(retransformSortFn) {
+    this._settings.setRetransformSort(retransformSortFn);
+    return this;
+}
+
 Gridifier.prototype.filterBy = function(filterFunctionName) {
     this._sizesTransformer.stopRetransformAllConnectionsQueue();
     this._settings.setFilter(filterFunctionName);
@@ -321,6 +327,10 @@ Gridifier.prototype.getNext = function(item) {
 
 Gridifier.prototype.getPrev = function(item) {
     return this._iterator.getPrev(item);
+}
+
+Gridifier.prototype.getAll = function() {
+    return this._iterator.getAll();
 }
 
 Gridifier.prototype.pop = function() {
@@ -419,6 +429,21 @@ Gridifier.prototype.setAlignmentType = function(alignmentType) {
     this.retransformAllSizes();
 }
 
+Gridifier.prototype.setRotatePerspective = function(newRotatePerspective) {
+    this._settings.setRotatePerspective(newRotatePerspective);
+    return this;
+}
+
+Gridifier.prototype.setRotateBackface = function(newRotateBackface) {
+    this._settings.setRotateBackface(newRotateBackface);
+    return this;
+}
+
+Gridifier.prototype.setRotateAngles = function(newRotateAngles) {
+    this._settings.setRotateAngles(newRotateAngles);
+    return this;
+}
+
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     if(this._settings.isMirroredPrepend()) {
         this.insertBefore(items, null, batchSize, batchTimeout);
@@ -462,8 +487,29 @@ Gridifier.prototype.silentAppend = function(items, batchSize, batchTimeout) {
     return this;
 }
 
-Gridifier.prototype.silentRender = function(batchSize, batchTimeout) {
-    this._silentRenderer.execute(batchSize, batchTimeout);
+Gridifier.prototype.silentRender = function(items, batchSize, batchTimeout) {
+    this._silentRenderer.execute(items, batchSize, batchTimeout);
+    return this;
+}
+
+Gridifier.prototype.getScheduledForSilentRenderItems = function(onlyInsideViewport) {
+    return this._silentRenderer.getScheduledForSilentRenderItems(onlyInsideViewport);
+}
+
+Gridifier.prototype.triggerRotate = function(items, rotateTogglerType, batchSize, batchTimeout) {
+    var me = this;
+
+    this.setToggle(rotateTogglerType);
+    var itemsToRotate = this._collector.toDOMCollection(items);
+
+    if(typeof batchSize == "undefined") {
+        this._renderer.rotateItems(itemsToRotate);
+        return this;
+    }
+
+    this._operationsQueue.scheduleAsyncFnExecutionByBatches(
+        itemsToRotate, batchSize, batchTimeout, function(itemBatch) { me._renderer.rotateItems(itemBatch); }
+    );
     return this;
 }
 
@@ -658,6 +704,10 @@ Gridifier.prototype.getConnectedItemAtPoint = function(x, y) {
     return this._itemClonesManager.getConnectionItemAtPoint(x, y);
 }
 
+Gridifier.prototype.setToggle = Gridifier.prototype.toggleBy;
+Gridifier.prototype.setSort = Gridifier.prototype.sortBy;
+Gridifier.prototype.setFilter = Gridifier.prototype.filterBy;
+
 Gridifier.Api = {};
 Gridifier.HorizontalGrid = {};
 Gridifier.VerticalGrid = {};
@@ -709,6 +759,10 @@ Gridifier.DEFAULT_COORDS_CHANGE_TRANSITION_TIMING = "ease";
 
 Gridifier.DEFAULT_ROTATE_PERSPECTIVE = "200px";
 Gridifier.DEFAULT_ROTATE_BACKFACE = true;
+Gridifier.DEFAULT_ROTATE_ANGLES = {
+    FRONT_FRAME_INIT: 0, BACK_FRAME_INIT: -180,
+    FRONT_FRAME_TARGET: 180, BACK_FRAME_TARGET: 0
+};
 
 Gridifier.GRID_TRANSFORM_TYPES = {EXPAND: "expand", FIT: "fit"};
 Gridifier.DEFAULT_GRID_TRANSFORM_TIMEOUT = 100;

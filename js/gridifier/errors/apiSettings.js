@@ -46,7 +46,8 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         this._markAsApiSettingsError();
         this._invalidOneOfToggleParamsError();
     }
-    else if(errorType == errors.INVALID_ONE_OF_SORT_FUNCTION_TYPES || 
+    else if(errorType == errors.INVALID_ONE_OF_SORT_FUNCTION_TYPES ||
+            errorType == errors.INVALID_ONE_OF_RETRANSFORM_SORT_FUNCTION_TYPES ||
             errorType == errors.INVALID_ONE_OF_FILTER_FUNCTION_TYPES ||
             errorType == errors.INVALID_ONE_OF_COORDS_CHANGER_FUNCTION_TYPES ||
             errorType == errors.INVALID_ONE_OF_SIZES_CHANGER_FUNCTION_TYPES ||
@@ -55,6 +56,9 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
 
         if(errorType == errors.INVALID_ONE_OF_SORT_FUNCTION_TYPES) {
             var paramName = "sort";
+        }
+        else if(errorType == errors.INVALID_ONE_OF_RETRANSFORM_SORT_FUNCTION_TYPES) {
+            var paramName = "retransformSort";
         }
         else if(errorType == errors.INVALID_ONE_OF_FILTER_FUNCTION_TYPES) {
             var paramName = "filter";
@@ -72,7 +76,8 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         this._invalidOneOfFunctionTypesError(paramName);
     }
     else if(errorType == errors.INVALID_TOGGLE_PARAM_VALUE || 
-            errorType == errors.INVALID_SORT_PARAM_VALUE || 
+            errorType == errors.INVALID_SORT_PARAM_VALUE ||
+            errorType == errors.INVALID_RETRANSFORM_SORT_PARAM_VALUE ||
             errorType == errors.INVALID_FILTER_PARAM_VALUE ||
             errorType == errors.INVALID_COORDS_CHANGER_PARAM_VALUE ||
             errorType == errors.INVALID_SIZES_CHANGER_PARAM_VALUE ||
@@ -84,6 +89,9 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         }
         else if(errorType == errors.INVALID_SORT_PARAM_VALUE) {
             var paramName = "sort";
+        }
+        else if(errorType == errors.INVALID_RETRANSFORM_SORT_PARAM_VALUE) {
+            var paramName = "retransformSort";
         }
         else if(errorType == errors.INVALID_FILTER_PARAM_VALUE) {
             var paramName = "filter";
@@ -103,6 +111,7 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
     else if(errorType == errors.SET_TOGGLE_INVALID_PARAM || 
             errorType == errors.SET_FILTER_INVALID_PARAM ||
             errorType == errors.SET_SORT_INVALID_PARAM ||
+            errorType == errors.SET_RETRANSFORM_SORT_INVALID_PARAM ||
             errorType == errors.SET_COORDS_CHANGER_INVALID_PARAM ||
             errorType == errors.SET_SIZES_CHANGER_INVALID_PARAM ||
             errorType == errors.SET_DRAGGABLE_ITEM_DECORATOR_INVALID_PARAM) {
@@ -116,6 +125,9 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         }
         else if(errorType == errors.SET_SORT_INVALID_PARAM) {
             var functionName = "sort";
+        }
+        else if(errorType == errors.SET_RETRANSFORM_SORT_INVALID_PARAM) {
+            var functionName = "retransformSort";
         }
         else if(errorType == errors.SET_COORDS_CHANGER_INVALID_PARAM) {
             var functionName = "coordsChanger";

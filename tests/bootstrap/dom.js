@@ -99,6 +99,8 @@ $(document).ready(function() {
             test("CSS3transitionProperty", function(assert) {
                 me._before.call(me);
 
+                // Notes -> Ie can hide ease and 0ms parts, Firefox can add 0s substr
+                // in the end of the transition string
                 me._testCallOnAddingNewParamToEmptyTransitionString.call(me);
                 me._testCallOnAddingNewParamToNotEmptyTransitionString.call(me);
                 me._testCallOnReplacingParamOnTransitionStringOnlyWithThatParam.call(me);
@@ -112,10 +114,11 @@ $(document).ready(function() {
         _testCallOnAddingNewParamToEmptyTransitionString: function() {
             var fakeDOMElem = document.createElement("div");
             fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] = "";
-            Dom.css3.transitionProperty(fakeDOMElem, "width 0ms ease");
+            Dom.css3.transitionProperty(fakeDOMElem, "width 0ms ease", true);
 
             ok(
-                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] == "width 0ms ease",
+                //fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("width 0ms ease") != -1,
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("width") != -1,
                 "call with 'width 0ms ease' param on empty transition string"
             );
         },
@@ -126,7 +129,12 @@ $(document).ready(function() {
             Dom.css3.transitionProperty(fakeDOMElem, "width 0ms ease");
 
             ok(
-                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] == "width 0ms ease, height 0ms ease, transform 0ms ease",
+                //fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("width 0ms ease") != -1 &&
+                //fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("height 0ms ease") != -1 &&
+                //fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("transform 0ms ease") != - 1,
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("width") != -1 &&
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("height") != -1 &&
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("transform") != - 1,
                 "call with 'width 0ms ease' param on 'height 0ms ease, transform 0ms ease' string"
             );
         },
@@ -137,7 +145,8 @@ $(document).ready(function() {
             Dom.css3.transitionProperty(fakeDOMElem, "transform 10ms ease");
 
             ok(
-                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] == "transform 10ms ease",
+                //fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("transform 10ms ease") != -1,
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("transform 10ms") != -1,
                 "call with 'transform 10ms ease' param on 'transform 0ms ease' string"
             );
         },
@@ -148,7 +157,10 @@ $(document).ready(function() {
             Dom.css3.transitionProperty(fakeDOMElem, "width 10ms ease");
 
             ok(
-                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] == "width 10ms ease, height 0ms ease",
+                //fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("width 10ms ease") != -1 &&
+                // fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("height 0ms ease") != -1,
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("width 10ms") != -1 &&
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("height") != -1,
                 "call with 'width 10ms ease' param on 'width 0ms ease, height 0ms ease' string"
             );
         },
@@ -159,7 +171,12 @@ $(document).ready(function() {
             Dom.css3.transitionProperty(fakeDOMElem, "transform 10ms ease, height 20ms ease");
 
             ok(
-                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)] == "transform 10ms ease, height 20ms ease, width 0ms ease",
+                //fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("transform 10ms ease") != -1 &&
+                //fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("height 20ms ease") != -1 &&
+                //fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("width 0ms ease") != -1,
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("transform 10ms") != -1 &&
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("height 20ms") != -1 &&
+                fakeDOMElem.style[Prefixer.get('transition', fakeDOMElem)].search("width") != -1,
                 "call with 'transform 10ms ease, height 20ms ease' param on 'width 0ms ease, height 0ms ease' string"
             );
         }

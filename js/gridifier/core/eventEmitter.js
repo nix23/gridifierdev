@@ -82,6 +82,14 @@ Gridifier.EventEmitter.prototype.onItemsReappendExecutionEndPerDragifier = funct
     this._kernelCallbacks.itemsReappendExecutionEndPerDragifier = callbackFn;
 }
 
+Gridifier.EventEmitter.prototype.onBeforeShow = function(callbackFn) {
+    this._onBeforeShow = callbackFn;
+}
+
+Gridifier.EventEmitter.prototype.emitBeforeShowEvent = function() {
+    this._onBeforeShow();
+}
+
 Gridifier.EventEmitter.prototype.emitShowEvent = function(item) {
     for(var i = 0; i < this._showCallbacks.length; i++) {
         this._showCallbacks[i](item);

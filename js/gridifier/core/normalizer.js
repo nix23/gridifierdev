@@ -130,7 +130,9 @@ Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
                 }
             }
 
-            var sortByAreasAsc = function (firstConnection, secondConnection) {
+            // Sort stability is not important here - each group will be resorted
+            // with stable sort in connectionsSorter.sortConnectionsPerReappend function
+            var sortByAreasDesc = function (firstConnection, secondConnection) {
                 if(firstConnection.tmpArea > secondConnection.tmpArea)
                     return -1;
                 else if(firstConnection.tmpArea < secondConnection.tmpArea)
@@ -154,7 +156,7 @@ Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
 
             var connections = connectionsObj.get();
             calculateSizes(connections);
-            connections.sort(sortByAreasAsc);
+            connections.sort(sortByAreasDesc);
             var packedByAreasConnections = packConnectionsByAreas(connections);
 
             var connectionsSorter = connectionsObj.getConnectionsSorter();
@@ -166,6 +168,8 @@ Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
                 areaProps.push(areaProp);
             }
 
+            // This sort will never return 0, because two arrays entries
+            // with same area cannot be created.(So, this sort is stable too)
             areaProps.sort(function (firstArea, secondArea) {
                 if(Dom.toInt(firstArea) > Dom.toInt(secondArea))
                     return -1;
