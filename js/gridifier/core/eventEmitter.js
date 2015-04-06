@@ -13,7 +13,8 @@ Gridifier.EventEmitter = function(gridifier) {
     me._dragEndCallbacks = [];
 
     me._kernelCallbacks = {
-        itemsReappendExecutionEndPerDragifier: null
+        itemsReappendExecutionEndPerDragifier: null,
+        beforeItemShowPerRetransformSorter: null
     };
 
     this._css = {
@@ -82,12 +83,8 @@ Gridifier.EventEmitter.prototype.onItemsReappendExecutionEndPerDragifier = funct
     this._kernelCallbacks.itemsReappendExecutionEndPerDragifier = callbackFn;
 }
 
-Gridifier.EventEmitter.prototype.onBeforeShow = function(callbackFn) {
-    this._onBeforeShow = callbackFn;
-}
-
-Gridifier.EventEmitter.prototype.emitBeforeShowEvent = function() {
-    this._onBeforeShow();
+Gridifier.EventEmitter.prototype.onBeforeShowPerRetransformSorter = function(callbackFn) {
+    this._kernelCallbacks.beforeItemShowPerRetransformSorter = callbackFn;
 }
 
 Gridifier.EventEmitter.prototype.emitShowEvent = function(item) {
@@ -147,4 +144,9 @@ Gridifier.EventEmitter.prototype.emitItemsReappendExecutionEndPerDragifier = fun
         this._kernelCallbacks.itemsReappendExecutionEndPerDragifier();
         this._kernelCallbacks.itemsReappendExecutionEndPerDragifier = null;
     }
+}
+
+Gridifier.EventEmitter.prototype.emitBeforeShowPerRetransformSortEvent = function() {
+    if(this._kernelCallbacks.beforeItemShowPerRetransformSorter != null)
+        this._kernelCallbacks.beforeItemShowPerRetransformSorter();
 }

@@ -241,3 +241,11 @@ body {
   .gridItem { width: 100% !important; }
 }
 */
+
+.disableSelect {
+    -webkit-user-select: none;  /* Chrome all / Safari all */
+    -moz-user-select: none;     /* Firefox all */
+    -ms-user-select: none;      /* IE 10+ */
+    -o-user-select: none;
+    user-select: none;
+}

@@ -71,7 +71,7 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
 
         me._toggleApi = new Gridifier.Api.Toggle(me, me._gridifier,  me._eventEmitter, me._sizesResolverManager);
         me._toggleTimeouterApi = new Gridifier.Api.ToggleTimeouter();
-        me._sortApi = new Gridifier.Api.Sort(me, me._eventEmitter);
+        me._sortApi = new Gridifier.Api.Sort(me, me._gridifier, me._eventEmitter);
         me._filterApi = new Gridifier.Api.Filter(me, me._eventEmitter);
         me._coordsChangerApi = new Gridifier.Api.CoordsChanger(me, me._gridifier, me._eventEmitter);
         me._sizesChangerApi = new Gridifier.Api.SizesChanger(me, me._eventEmitter);

@@ -213,7 +213,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter, false, false, false, true);
             }
 
-           // eventEmitter.emitBeforeShowEvent();
+            eventEmitter.emitBeforeShowPerRetransformSortEvent();
             showItem(connectionToProcess.item);
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {

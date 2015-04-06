@@ -1,13 +1,16 @@
-Gridifier.Api.Sort = function(settings, eventEmitter) {
+Gridifier.Api.Sort = function(settings, gridifier, eventEmitter) {
     var me = this;
 
     this._settings = null;
+    this._gridifier = null;
     this._eventEmitter = null;
 
     this._sortComparatorTools = null;
 
     this._sortFunction = null;
     this._sortFunctions = {};
+
+    this._areRetransformFunctionsCreated = false;
 
     this._retransformSortFunction = null;
     this._retransformSortFunctions = {};
@@ -17,13 +20,13 @@ Gridifier.Api.Sort = function(settings, eventEmitter) {
 
     this._construct = function() {
         me._settings = settings;
+        me._gridifier = gridifier;
         me._eventEmitter = eventEmitter;
 
         me._sortFunctions = {};
 
         me._addDefaultSort();
         me._addDefaultRetransformSort();
-        me._addBySizesRetransformSort();
     };
 
     this._bindEvents = function() {
@@ -256,7 +259,15 @@ Gridifier.Api.Sort.prototype._addDefaultSort = function() {
     };
 }
 
+Gridifier.Api.Sort.RETRANSFORM_SORT_GRID_REFRESH_TIMEOUT = 20;
+
 Gridifier.Api.Sort.prototype.setRetransformSortFunction = function(retransformSortFunctionName) {
+    var me = this;
+
+    if(retransformSortFunctionName != "default") {
+        this._createRetransformSortFunctions();
+    }
+
     if(!this._retransformSortFunctions.hasOwnProperty(retransformSortFunctionName)) {
         new Gridifier.Error(
             Gridifier.Error.ERROR_TYPES.SETTINGS.SET_RETRANSFORM_SORT_INVALID_PARAM,
@@ -265,7 +276,28 @@ Gridifier.Api.Sort.prototype.setRetransformSortFunction = function(retransformSo
         return;
     }
 
+    // Don't change default retransform sorter. Otherwise unnecessary
+    // grid retransforms will be triggered
+    if(retransformSortFunctionName == "default") {
+        this._eventEmitter.onBeforeShowPerRetransformSorter(null);
+    }
+    else {
+        this._eventEmitter.onBeforeShowPerRetransformSorter(function() {
+            setTimeout(function() {
+                me._gridifier.triggerResize();
+            }, Gridifier.Api.Sort.RETRANSFORM_SORT_GRID_REFRESH_TIMEOUT);
+        });
+    }
+
     this._retransformSortFunction = this._retransformSortFunctions[retransformSortFunctionName];
+}
+
+Gridifier.Api.Sort.prototype._createRetransformSortFunctions = function() {
+    if(this._areRetransformSortFunctionsCreated)
+        return;
+
+    this._areRetransformSortFunctionsCreated = true;
+    this._addBySizesRetransformSort();
 }
 
 Gridifier.Api.Sort.prototype.addRetransformSortFunction = function(retransformSortFunctionName, retransformSortFunction) {
@@ -277,21 +309,15 @@ Gridifier.Api.Sort.prototype.getRetransformSortFunction = function() {
 }
 
 Gridifier.Api.Sort.prototype._addDefaultRetransformSort = function() {
-    this._retransformSortFunctions["default"] = function(connections) { console.log("called default");
+    this._retransformSortFunctions["default"] = function(connections) {
         return connections;
     };
 }
 
+Gridifier.Api.Sort.RETRANSFORM_SORT_SINGLE_BATCH_MARKER = 100000;
+
 Gridifier.Api.Sort.prototype._addBySizesRetransformSort = function() {
     var me = this;
-
-    //setTimeout(function() {
-    //setTimeout(function() {
-    //    me._eventEmitter.onBeforeShow(function() {
-    //        me._eventEmitter._gridifier.triggerResize();
-    //    });
-    //}, 0);
-    //}, 500);
 
     var calculateAreaPerEachConnection = function(connections) {
         for(var i = 0; i < connections.length; i++) {
@@ -299,6 +325,11 @@ Gridifier.Api.Sort.prototype._addBySizesRetransformSort = function() {
             var connectionHeight = Math.abs(connections[i].y2 - connections[i].y1) + 1;
             var connectionArea = connectionWidth * connectionHeight;
             connections[i].area = connectionArea;
+
+            if(connectionWidth >= connectionHeight)
+                connections[i].isLandscape = true;
+            else
+                connections[i].isLandscape = false;
         }
     }
 
@@ -327,11 +358,34 @@ Gridifier.Api.Sort.prototype._addBySizesRetransformSort = function() {
         return areasWithConnections;
     }
 
-    var sortLinear = function(connections) {
-        var areasWithConnections = packConnectionsByAreas(connections);
-        areasWithConnections.sort(function(firstConnection, secondConnection) {
-            return parseFloat(firstConnection.area) - parseFloat(secondConnection).area;
-        });
+    var packConnectionsByOrientation = function(connections) {
+        var areasWithConnections = [
+            {area: "landscape", connections: []},
+            {area: "portrait", connections: []}
+        ];
+        for(var i = 0; i < connections.length; i++) {
+            if(connections[i].isLandscape)
+                areasWithConnections[0].connections.push(connections[i]);
+            else if(!connections[i].isLandscape)
+                areasWithConnections[1].connections.push(connections[i]);
+        }
+
+        return areasWithConnections;
+    }
+
+    var sortEvenly = function(connections, itemsCountFromFirstGroup, packByOrientation) {
+        packByOrientation = packByOrientation || false;
+
+        if(!packByOrientation) {
+            var areasWithConnections = packConnectionsByAreas(connections);
+            // Stable sort here(All areas are unique). (Desc)
+            areasWithConnections.sort(function(firstConnection, secondConnection) {
+                return parseFloat(firstConnection.area) - parseFloat(secondConnection).area;
+            });
+        }
+        else {
+            var areasWithConnections = packConnectionsByOrientation(connections);
+        }
 
         var sortedConnections = [];
         var allEmpty = false;
@@ -340,10 +394,10 @@ Gridifier.Api.Sort.prototype._addBySizesRetransformSort = function() {
             for(var i = 0; i < areasWithConnections.length; i++) {
                 if(areasWithConnections[i].connections.length != 0) {
                     if(i == 0) {
-                        // @todo -> Pass, how many elements from most big group could be taken
-                        sortedConnections.push(areasWithConnections[i].connections.shift());
-                        if(areasWithConnections[i].connections.length != 0)
-                            sortedConnections.push(areasWithConnections[i].connections.shift());
+                        for(var j = 0; j < itemsCountFromFirstGroup; j++) {
+                            if(areasWithConnections[i].connections.length != 0)
+                                sortedConnections.push(areasWithConnections[i].connections.shift());
+                        }
                     }
                     else {
                         sortedConnections.push(areasWithConnections[i].connections.shift());
@@ -359,51 +413,115 @@ Gridifier.Api.Sort.prototype._addBySizesRetransformSort = function() {
         return sortedConnections;
     }
 
-    // Split connections to batches and call repack per each batch???
-    // Splicer should be separate object, which will be called to 'splice' connection to groups
-    this._retransformSortFunctions["areaDesc"] = function(connections) { console.log("conn orig count = " + connections.length);
-        calculateAreaPerEachConnection(connections);
+    var markConnectionPositions = function(connections) {
         var nextPosition = 0;
         for(var i = 0; i < connections.length; i++) {
             nextPosition++;
             connections[i].retransformSortPosition = nextPosition;
         }
+    }
 
+    var packConnectionsToBatches = function(connections, itemsCountInBatch) {
         var connectionBatches = [];
-        var connectionIndex = 0;
         var nextBatch = [];
         for(var i = 0; i < connections.length; i++) {
-            connectionIndex++;
             nextBatch.push(connections[i]);
-            if(connectionIndex % 320 == 0) {
+            if((i + 1) % itemsCountInBatch == 0) {
                 connectionBatches.push(nextBatch);
                 nextBatch = [];
             }
-
-
         }
         if(nextBatch.length != 0)
             connectionBatches.push(nextBatch);
-        console.log("count = " + connectionBatches.length);
-        for(var i = 0; i < connectionBatches.length; i++) {
-            connectionBatches[i] = sortLinear(connectionBatches[i]);
-            //connectionBatches[i].sort(function(firstConnection, secondConnection) {
-            //    if(firstConnection.area > secondConnection.area)
-            //        return -1;
-            //    else if(firstConnection.area < secondConnection.area)
-            //        return 1;
-            //    else
-            //        return firstConnection.retransformSortPosition - secondConnection.retransformSortPosition;
-            //});
-        }
 
+        return connectionBatches;
+    }
+
+    var batchesToConnections = function(connections, connectionBatches) {
         connections.splice(0, connections.length);
         for(var i = 0; i < connectionBatches.length; i++) {
             for(var j = 0; j < connectionBatches[i].length; j++) {
                 connections.push(connectionBatches[i][j]);
             }
         }
-        console.log("conn modified count = " + connections.length);
+
         return connections;
+    }
+
+    var createByAreaEvenlyRetransformSort = function(batchSize, itemsCountInFirstGroup) {
+        return function(connections) {
+            calculateAreaPerEachConnection(connections);
+            markConnectionPositions(connections);
+            var connectionBatches = packConnectionsToBatches(connections, batchSize);
+
+            for(var i = 0; i < connectionBatches.length; i++)
+                connectionBatches[i] = sortEvenly(connectionBatches[i], itemsCountInFirstGroup);
+
+            return batchesToConnections(connections, connectionBatches);
+        }
+    }
+
+    this._retransformSortFunctions["areaEvenly"] = createByAreaEvenlyRetransformSort(
+        Gridifier.Api.Sort.RETRANSFORM_SORT_SINGLE_BATCH_MARKER, 1
+    );
+
+    var singleBatchMarker = Gridifier.Api.Sort.RETRANSFORM_SORT_SINGLE_BATCH_MARKER;
+    var evenlySorts = [
+        ["areaEvenlyAll-2", singleBatchMarker, 2],
+        ["areaEvenlyAll-3", singleBatchMarker, 3],
+        ["areaEvenlyAll-4", singleBatchMarker, 4],
+        ["areaEvenlyAll-5", singleBatchMarker, 5]
+    ];
+
+    for(var i = 5; i <= 50; i += 5) {
+        for(var j = 1; j <= 5; j++) {
+            evenlySorts.push(["areaEvenly" + i + "-" + j, i, j]);
+        }
+    }
+
+    for(var i = 0; i < evenlySorts.length; i++) {
+        this._retransformSortFunctions[evenlySorts[i][0]] = createByAreaEvenlyRetransformSort(
+            evenlySorts[i][1], evenlySorts[i][2]
+        );
+    }
+
+    var createByAreaOrderedRetransformSort = function(reverseOrder) {
+        if(reverseOrder)
+            var reversor = -1;
+        else
+            var reversor = 1;
+
+        return function(connections) {
+            calculateAreaPerEachConnection(connections);
+            markConnectionPositions(connections);
+            var connectionBatches = packConnectionsToBatches(connections, Gridifier.Api.Sort.RETRANSFORM_SORT_SINGLE_BATCH_MARKER);
+
+            for(var i = 0; i < connectionBatches.length; i++) {
+                connectionBatches[i].sort(function(firstConnection, secondConnection) {
+                    if(firstConnection.area > secondConnection.area)
+                        return -1 * reversor;
+                    else if(firstConnection.area < secondConnection.area)
+                        return 1 * reversor;
+                    else
+                        return firstConnection.retransformSortPosition - secondConnection.retransformSortPosition;
+                });
+            }
+
+            return batchesToConnections(connections, connectionBatches);
+        }
+    }
+
+    this._retransformSortFunctions["areaDesc"] = createByAreaOrderedRetransformSort(false);
+    this._retransformSortFunctions["areaAsc"] = createByAreaOrderedRetransformSort(true);
+
+    this._retransformSortFunctions["orientationEvenly"] = function(connections) {
+        calculateAreaPerEachConnection(connections);
+        markConnectionPositions(connections);
+        var connectionBatches = packConnectionsToBatches(connections, Gridifier.Api.Sort.RETRANSFORM_SORT_SINGLE_BATCH_MARKER);
+
+        for(var i = 0; i < connectionBatches.length; i++)
+            connectionBatches[i] = sortEvenly(connectionBatches[i], 1, true);
+
+        return batchesToConnections(connections, connectionBatches);
     }
 }

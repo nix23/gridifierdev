@@ -3049,12 +3049,21 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
                                                            startTop,
                                                            connectionLeft,
                                                            connectionTop,
-                                                           transitionTiming) {
+                                                           transitionTiming,
+                                                           animateFade) {
     var me = this;
     var targetLeft = connectionLeft;
     var targetTop = connectionTop;
 
+    if(animateFade)
+        var animateFadeTargetItem = (this._gridifier.hasItemBindedClone(item)) ? this._gridifier.getItemClone(item) : item;
+
     if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
+        if(animateFade) {
+            Dom.css3.transition(animateFadeTargetItem, "none");
+            Dom.css3.opacity(animateFadeTargetItem, 0);
+            Dom.css3.transition(animateFadeTargetItem, "");
+        }
         coordsChanger(
             item, startLeft, startTop, 0, eventEmitter, false, false, false, false, transitionTiming
         );
@@ -3068,6 +3077,13 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
         if(!me._gridifier.hasItemBindedClone(item))
             item.style.visibility = "visible";
 
+        if(animateFade) {
+            Dom.css3.transitionProperty(
+                animateFadeTargetItem,
+                Prefixer.getForCSS('opacity', animateFadeTargetItem) + " " + animationMsDuration + "ms " + transitionTiming
+            );
+            Dom.css3.opacity(animateFadeTargetItem, 1);
+        }
         coordsChanger(
             item, targetLeft, targetTop, animationMsDuration, eventEmitter, false, false, false, false, transitionTiming
         );
@@ -3098,8 +3114,19 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
                                                            targetTop,
                                                            connectionLeft,
                                                            connectionTop,
-                                                           transitionTiming) {
+                                                           transitionTiming,
+                                                           animateFade) {
     item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
+
+    if(animateFade) {
+        var animateFadeTargetItem = (this._gridifier.hasItemBindedClone(item)) ? this._gridifier.getItemClone(item) : item;
+        Dom.css3.transition(
+            animateFadeTargetItem,
+            Prefixer.getForCSS('opacity', animateFadeTargetItem) + " " + animationMsDuration + "ms " + transitionTiming
+        );
+        Dom.css3.opacity(animateFadeTargetItem, 0);
+    }
+
     coordsChanger(
         item, targetLeft, targetTop, animationMsDuration, eventEmitter, false, false, false, false, transitionTiming
     );
@@ -3117,6 +3144,12 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
     timeouter.add(item, prehideTimeout);
 
     var slideInTimeout = setTimeout(function() {
+        if(animateFade) {
+            Dom.css3.transition(animateFadeTargetItem, "none");
+            Dom.css3.opacity(animateFadeTargetItem, 1);
+            Dom.css3.transition(animateFadeTargetItem, "");
+        }
+
         item.style.visibility = "hidden";
         item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
         eventEmitter.emitHideEvent(item);
@@ -3124,7 +3157,7 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
     timeouter.add(item, slideInTimeout);
 }
 
-Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, alignBottom, reverseDirection) {
+Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, alignBottom, reverseDirection, animateFade) {
     var me = this;
 
     var alignTop = alignTop || false;
@@ -3180,7 +3213,8 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 top + "px",
                 connectionLeft,
                 connectionTop,
-                transitionTiming
+                transitionTiming,
+                animateFade || false
             );
         },
 
@@ -3223,13 +3257,14 @@ Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, 
                 top + "px",
                 connectionLeft,
                 connectionTop,
-                transitionTiming
+                transitionTiming,
+                animateFade || false
             );
         }
     };
 }
 
-Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, alignRight, reverseDirection) {
+Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, alignRight, reverseDirection, animateFade) {
     var me = this;
 
     var alignLeft = alignLeft || false;
@@ -3285,7 +3320,8 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
                 getTopPos(item, grid) + "px",
                 connectionLeft,
                 connectionTop,
-                transitionTiming
+                transitionTiming,
+                animateFade || false
             );
         },
 
@@ -3328,22 +3364,99 @@ Gridifier.Api.Slide.prototype.createVerticalSlideToggler = function(alignLeft, a
                 getTopPos(item, grid) + "px",
                 connectionLeft,
                 connectionTop,
-                transitionTiming
+                transitionTiming,
+                animateFade || false
             );
         }
     };
 }
 
-Gridifier.Api.Sort = function(settings, eventEmitter) {
+Gridifier.Api.Slide.prototype.createCycledSlider = function(sliderFunctions) {
+    var slideIndex = 1;
+    return {
+        "show": function(item,
+                         grid,
+                         animationMsDuration,
+                         timeouter,
+                         eventEmitter,
+                         coordsChanger,
+                         collector,
+                         targetLeft,
+                         targetTop,
+                         connectionLeft,
+                         connectionTop,
+                         transitionTiming,
+                         animateFade) {
+            slideIndex++;
+            var nextSlideIndex = slideIndex % sliderFunctions.length;
+            var slider = sliderFunctions[nextSlideIndex];
+
+            slider.show(
+                item,
+                grid,
+                animationMsDuration,
+                timeouter,
+                eventEmitter,
+                coordsChanger,
+                collector,
+                targetLeft,
+                targetTop,
+                connectionLeft,
+                connectionTop,
+                transitionTiming,
+                animateFade
+            );
+        },
+
+        "hide": function(item,
+                         grid,
+                         animationMsDuration,
+                         timeouter,
+                         eventEmitter,
+                         coordsChanger,
+                         collector,
+                         targetLeft,
+                         targetTop,
+                         connectionLeft,
+                         connectionTop,
+                         transitionTiming,
+                         animateFade) {
+            slideIndex++;
+            var nextSlideIndex = slideIndex % sliderFunctions.length;
+            var slider = sliderFunctions[nextSlideIndex];
+
+            slider.hide(
+                item,
+                grid,
+                animationMsDuration,
+                timeouter,
+                eventEmitter,
+                coordsChanger,
+                collector,
+                targetLeft,
+                targetTop,
+                connectionLeft,
+                connectionTop,
+                transitionTiming,
+                animateFade
+            );
+        }
+    };
+}
+
+Gridifier.Api.Sort = function(settings, gridifier, eventEmitter) {
     var me = this;
 
     this._settings = null;
+    this._gridifier = null;
     this._eventEmitter = null;
 
     this._sortComparatorTools = null;
 
     this._sortFunction = null;
     this._sortFunctions = {};
+
+    this._areRetransformFunctionsCreated = false;
 
     this._retransformSortFunction = null;
     this._retransformSortFunctions = {};
@@ -3353,13 +3466,13 @@ Gridifier.Api.Sort = function(settings, eventEmitter) {
 
     this._construct = function() {
         me._settings = settings;
+        me._gridifier = gridifier;
         me._eventEmitter = eventEmitter;
 
         me._sortFunctions = {};
 
         me._addDefaultSort();
         me._addDefaultRetransformSort();
-        me._addBySizesRetransformSort();
     };
 
     this._bindEvents = function() {
@@ -3592,7 +3705,15 @@ Gridifier.Api.Sort.prototype._addDefaultSort = function() {
     };
 }
 
+Gridifier.Api.Sort.RETRANSFORM_SORT_GRID_REFRESH_TIMEOUT = 20;
+
 Gridifier.Api.Sort.prototype.setRetransformSortFunction = function(retransformSortFunctionName) {
+    var me = this;
+
+    if(retransformSortFunctionName != "default") {
+        this._createRetransformSortFunctions();
+    }
+
     if(!this._retransformSortFunctions.hasOwnProperty(retransformSortFunctionName)) {
         new Gridifier.Error(
             Gridifier.Error.ERROR_TYPES.SETTINGS.SET_RETRANSFORM_SORT_INVALID_PARAM,
@@ -3601,7 +3722,28 @@ Gridifier.Api.Sort.prototype.setRetransformSortFunction = function(retransformSo
         return;
     }
 
+    // Don't change default retransform sorter. Otherwise unnecessary
+    // grid retransforms will be triggered
+    if(retransformSortFunctionName == "default") {
+        this._eventEmitter.onBeforeShowPerRetransformSorter(null);
+    }
+    else {
+        this._eventEmitter.onBeforeShowPerRetransformSorter(function() {
+            setTimeout(function() {
+                me._gridifier.triggerResize();
+            }, Gridifier.Api.Sort.RETRANSFORM_SORT_GRID_REFRESH_TIMEOUT);
+        });
+    }
+
     this._retransformSortFunction = this._retransformSortFunctions[retransformSortFunctionName];
+}
+
+Gridifier.Api.Sort.prototype._createRetransformSortFunctions = function() {
+    if(this._areRetransformSortFunctionsCreated)
+        return;
+    
+    this._areRetransformSortFunctionsCreated = true;
+    this._addBySizesRetransformSort();
 }
 
 Gridifier.Api.Sort.prototype.addRetransformSortFunction = function(retransformSortFunctionName, retransformSortFunction) {
@@ -3613,21 +3755,15 @@ Gridifier.Api.Sort.prototype.getRetransformSortFunction = function() {
 }
 
 Gridifier.Api.Sort.prototype._addDefaultRetransformSort = function() {
-    this._retransformSortFunctions["default"] = function(connections) { console.log("called default");
+    this._retransformSortFunctions["default"] = function(connections) {
         return connections;
     };
 }
 
+Gridifier.Api.Sort.RETRANSFORM_SORT_SINGLE_BATCH_MARKER = 100000;
+
 Gridifier.Api.Sort.prototype._addBySizesRetransformSort = function() {
     var me = this;
-
-    //setTimeout(function() {
-    //setTimeout(function() {
-    //    me._eventEmitter.onBeforeShow(function() {
-    //        me._eventEmitter._gridifier.triggerResize();
-    //    });
-    //}, 0);
-    //}, 500);
 
     var calculateAreaPerEachConnection = function(connections) {
         for(var i = 0; i < connections.length; i++) {
@@ -3663,8 +3799,9 @@ Gridifier.Api.Sort.prototype._addBySizesRetransformSort = function() {
         return areasWithConnections;
     }
 
-    var sortLinear = function(connections) {
+    var sortEvenly = function(connections, itemsCountFromFirstGroup) {
         var areasWithConnections = packConnectionsByAreas(connections);
+        // Stable sort here(All areas are unique). (Desc)
         areasWithConnections.sort(function(firstConnection, secondConnection) {
             return parseFloat(firstConnection.area) - parseFloat(secondConnection).area;
         });
@@ -3676,10 +3813,10 @@ Gridifier.Api.Sort.prototype._addBySizesRetransformSort = function() {
             for(var i = 0; i < areasWithConnections.length; i++) {
                 if(areasWithConnections[i].connections.length != 0) {
                     if(i == 0) {
-                        // @todo -> Pass, how many elements from most big group could be taken
-                        sortedConnections.push(areasWithConnections[i].connections.shift());
-                        if(areasWithConnections[i].connections.length != 0)
-                            sortedConnections.push(areasWithConnections[i].connections.shift());
+                        for(var j = 0; j < itemsCountFromFirstGroup; j++) {
+                            if(areasWithConnections[i].connections.length != 0)
+                                sortedConnections.push(areasWithConnections[i].connections.shift());
+                        }
                     }
                     else {
                         sortedConnections.push(areasWithConnections[i].connections.shift());
@@ -3695,53 +3832,106 @@ Gridifier.Api.Sort.prototype._addBySizesRetransformSort = function() {
         return sortedConnections;
     }
 
-    // Split connections to batches and call repack per each batch???
-    // Splicer should be separate object, which will be called to 'splice' connection to groups
-    this._retransformSortFunctions["areaDesc"] = function(connections) { console.log("conn orig count = " + connections.length);
-        calculateAreaPerEachConnection(connections);
+    var markConnectionPositions = function(connections) {
         var nextPosition = 0;
         for(var i = 0; i < connections.length; i++) {
             nextPosition++;
             connections[i].retransformSortPosition = nextPosition;
         }
+    }
 
+    var packConnectionsToBatches = function(connections, itemsCountInBatch) {
         var connectionBatches = [];
-        var connectionIndex = 0;
         var nextBatch = [];
         for(var i = 0; i < connections.length; i++) {
-            connectionIndex++;
             nextBatch.push(connections[i]);
-            if(connectionIndex % 320 == 0) {
+            if((i + 1) % itemsCountInBatch == 0) {
                 connectionBatches.push(nextBatch);
                 nextBatch = [];
             }
-
-
         }
         if(nextBatch.length != 0)
             connectionBatches.push(nextBatch);
-        console.log("count = " + connectionBatches.length);
-        for(var i = 0; i < connectionBatches.length; i++) {
-            connectionBatches[i] = sortLinear(connectionBatches[i]);
-            //connectionBatches[i].sort(function(firstConnection, secondConnection) {
-            //    if(firstConnection.area > secondConnection.area)
-            //        return -1;
-            //    else if(firstConnection.area < secondConnection.area)
-            //        return 1;
-            //    else
-            //        return firstConnection.retransformSortPosition - secondConnection.retransformSortPosition;
-            //});
-        }
 
+        return connectionBatches;
+    }
+
+    var batchesToConnections = function(connections, connectionBatches) {
         connections.splice(0, connections.length);
         for(var i = 0; i < connectionBatches.length; i++) {
             for(var j = 0; j < connectionBatches[i].length; j++) {
                 connections.push(connectionBatches[i][j]);
             }
         }
-        console.log("conn modified count = " + connections.length);
+
         return connections;
     }
+
+    var createByAreaEvenlyRetransformSort = function(batchSize, itemsCountInFirstGroup) {
+        return function(connections) {
+            calculateAreaPerEachConnection(connections);
+            markConnectionPositions(connections);
+            var connectionBatches = packConnectionsToBatches(connections, batchSize);
+
+            for(var i = 0; i < connectionBatches.length; i++)
+                connectionBatches[i] = sortEvenly(connectionBatches[i], itemsCountInFirstGroup);
+
+            return batchesToConnections(connections, connectionBatches);
+        }
+    }
+
+    this._retransformSortFunctions["areaEvenly"] = createByAreaEvenlyRetransformSort(
+        Gridifier.Api.Sort.RETRANSFORM_SORT_SINGLE_BATCH_MARKER, 1
+    );
+
+    var singleBatchMarker = Gridifier.Api.Sort.RETRANSFORM_SORT_SINGLE_BATCH_MARKER;
+    var evenlySorts = [
+        ["areaEvenlyAll-2", singleBatchMarker, 2],
+        ["areaEvenlyAll-3", singleBatchMarker, 3],
+        ["areaEvenlyAll-4", singleBatchMarker, 4],
+        ["areaEvenlyAll-5", singleBatchMarker, 5]
+    ];
+
+    for(var i = 5; i <= 50; i += 5) {
+        for(var j = 1; j <= 5; j++) {
+            evenlySorts.push(["areaEvenly" + i + "-" + j, i, j]);
+        }
+    }
+
+    for(var i = 0; i < evenlySorts.length; i++) {
+        this._retransformSortFunctions[evenlySorts[i][0]] = createByAreaEvenlyRetransformSort(
+            evenlySorts[i][1], evenlySorts[i][2]
+        );
+    }
+
+    var createByAreaOrderedRetransformSort = function(reverseOrder) {
+        if(reverseOrder)
+            var reversor = -1;
+        else
+            var reversor = 1;
+
+        return function(connections) {
+            calculateAreaPerEachConnection(connections);
+            markConnectionPositions(connections);
+            var connectionBatches = packConnectionsToBatches(connections, Gridifier.Api.Sort.RETRANSFORM_SORT_SINGLE_BATCH_MARKER);
+
+            for(var i = 0; i < connectionBatches.length; i++) {
+                connectionBatches[i].sort(function(firstConnection, secondConnection) {
+                    if(firstConnection.area > secondConnection.area)
+                        return -1 * reversor;
+                    else if(firstConnection.area < secondConnection.area)
+                        return 1 * reversor;
+                    else
+                        return firstConnection.retransformSortPosition - secondConnection.retransformSortPosition;
+                });
+            }
+
+            return batchesToConnections(connections, connectionBatches);
+        }
+    }
+
+    this._retransformSortFunctions["areaDesc"] = createByAreaOrderedRetransformSort(false);
+    this._retransformSortFunctions["areaAsc"] = createByAreaOrderedRetransformSort(true);
 }
 
 Gridifier.Api.Toggle = function(settings, gridifier, eventEmitter, sizesResolverManager) {
@@ -3826,21 +4016,73 @@ Gridifier.Api.Toggle.prototype.getToggleFunction = function() {
 Gridifier.Api.Toggle.prototype._addSlides = function() {
     var me = this;
 
-    this._toggleFunctions.slideLeft = this._slideApi.createHorizontalSlideToggler(false, false, false);
-    this._toggleFunctions.slideLeftTop = this._slideApi.createHorizontalSlideToggler(true, false, false);
-    this._toggleFunctions.slideLeftBottom = this._slideApi.createHorizontalSlideToggler(false, true, false);
+    var sliderNames = [
+        "slideLeft", "slideLeftTop", "slideLeftBottom",
+        "slideRight", "slideRightTop", "slideRightBottom",
+        "slideTop", "slideTopLeft", "slideTopRight",
+        "slideBottom", "slideBottomLeft", "slideBottomRight"
+    ];
 
-    this._toggleFunctions.slideRight = this._slideApi.createHorizontalSlideToggler(false, false, true);
-    this._toggleFunctions.slideRightTop = this._slideApi.createHorizontalSlideToggler(true, false, true);
-    this._toggleFunctions.slideRightBottom = this._slideApi.createHorizontalSlideToggler(false, true, true);
+    var createSliders = function(sliderNames, fade) {
+        this._toggleFunctions[sliderNames[0]] = this._slideApi.createHorizontalSlideToggler(false, false, false, fade);
+        this._toggleFunctions[sliderNames[1]] = this._slideApi.createHorizontalSlideToggler(true, false, false, fade);
+        this._toggleFunctions[sliderNames[2]] = this._slideApi.createHorizontalSlideToggler(false, true, false, fade);
 
-    this._toggleFunctions.slideTop = this._slideApi.createVerticalSlideToggler(false, false, false);
-    this._toggleFunctions.slideTopLeft = this._slideApi.createVerticalSlideToggler(true, false, false);
-    this._toggleFunctions.slideTopRight = this._slideApi.createVerticalSlideToggler(false, true, false);
+        this._toggleFunctions[sliderNames[3]] = this._slideApi.createHorizontalSlideToggler(false, false, true, fade);
+        this._toggleFunctions[sliderNames[4]] = this._slideApi.createHorizontalSlideToggler(true, false, true, fade);
+        this._toggleFunctions[sliderNames[5]] = this._slideApi.createHorizontalSlideToggler(false, true, true, fade);
 
-    this._toggleFunctions.slideBottom = this._slideApi.createVerticalSlideToggler(false, false, true);
-    this._toggleFunctions.slideBottomLeft = this._slideApi.createVerticalSlideToggler(true, false, true);
-    this._toggleFunctions.slideBottomRight = this._slideApi.createVerticalSlideToggler(false, true, true);
+        this._toggleFunctions[sliderNames[6]] = this._slideApi.createVerticalSlideToggler(false, false, false, fade);
+        this._toggleFunctions[sliderNames[7]] = this._slideApi.createVerticalSlideToggler(true, false, false, fade);
+        this._toggleFunctions[sliderNames[8]] = this._slideApi.createVerticalSlideToggler(false, true, false, fade);
+
+        this._toggleFunctions[sliderNames[9]] = this._slideApi.createVerticalSlideToggler(false, false, true, fade);
+        this._toggleFunctions[sliderNames[10]] = this._slideApi.createVerticalSlideToggler(true, false, true, fade);
+        this._toggleFunctions[sliderNames[11]] = this._slideApi.createVerticalSlideToggler(false, true, true, fade);
+    }
+
+    createSliders.call(this, sliderNames, false);
+    for(var i = 0; i < sliderNames.length; i++)
+        sliderNames[i] += "WithFade";
+    createSliders.call(this, sliderNames, true);
+
+    var sliderPairs = [
+        ["slideLeftThanSlideRight", "slideLeft", "slideRight"],
+        ["slideTopThanSlideBottom", "slideTop", "slideBottom"],
+        ["slideLeftTopThanSlideRightTop", "slideLeftTop", "slideRightTop"],
+        ["slideTopLeftThanSlideBottomLeft", "slideTopLeft", "slideBottomLeft"],
+        ["slideLeftBottomThanSlideRightBottom", "slideLeftBottom", "slideRightBottom"],
+        ["slideTopRightThanSlideBottomRight", "slideTopRight", "slideBottomRight"]
+    ];
+    for(var i = 0; i < sliderPairs.length; i++) {
+        this._toggleFunctions[sliderPairs[i][0]] = this._slideApi.createCycledSlider([
+            this._toggleFunctions[sliderPairs[i][1]], this._toggleFunctions[sliderPairs[i][2]]
+        ]);
+
+        this._toggleFunctions[sliderPairs[i][0] + "WithFade"] = this._slideApi.createCycledSlider([
+            this._toggleFunctions[sliderPairs[i][1] + "WithFade"], this._toggleFunctions[sliderPairs[i][2] + "WithFade"]
+        ]);
+    }
+
+    var customSliders = [
+        ["slideClockwiseFromCenters", "slideLeft", "slideTop", "slideRight", "slideBottom"],
+        ["slideClockwiseFromCorners", "slideLeftTop", "slideRightTop", "slideRightBottom", "slideLeftBottom"]
+    ];
+    for(var i = 0; i < customSliders.length; i++) {
+        this._toggleFunctions[customSliders[i][0]] = this._slideApi.createCycledSlider([
+            this._toggleFunctions[customSliders[i][1]],
+            this._toggleFunctions[customSliders[i][2]],
+            this._toggleFunctions[customSliders[i][3]],
+            this._toggleFunctions[customSliders[i][4]]
+        ]);
+
+        this._toggleFunctions[customSliders[i][0] + "WithFade"] = this._slideApi.createCycledSlider([
+            this._toggleFunctions[customSliders[i][1] + "WithFade"],
+            this._toggleFunctions[customSliders[i][2] + "WithFade"],
+            this._toggleFunctions[customSliders[i][3] + "WithFade"],
+            this._toggleFunctions[customSliders[i][4] + "WithFade"]
+        ]);
+    }
 }
 
 Gridifier.Api.Toggle.prototype._createRotator = function(rotatorName,
@@ -5818,7 +6060,8 @@ Gridifier.EventEmitter = function(gridifier) {
     me._dragEndCallbacks = [];
 
     me._kernelCallbacks = {
-        itemsReappendExecutionEndPerDragifier: null
+        itemsReappendExecutionEndPerDragifier: null,
+        beforeItemShowPerRetransformSorter: null
     };
 
     this._css = {
@@ -5887,12 +6130,8 @@ Gridifier.EventEmitter.prototype.onItemsReappendExecutionEndPerDragifier = funct
     this._kernelCallbacks.itemsReappendExecutionEndPerDragifier = callbackFn;
 }
 
-Gridifier.EventEmitter.prototype.onBeforeShow = function(callbackFn) {
-    this._onBeforeShow = callbackFn;
-}
-
-Gridifier.EventEmitter.prototype.emitBeforeShowEvent = function() {
-    this._onBeforeShow();
+Gridifier.EventEmitter.prototype.onBeforeShowPerRetransformSorter = function(callbackFn) {
+    this._kernelCallbacks.beforeItemShowPerRetransformSorter = callbackFn;
 }
 
 Gridifier.EventEmitter.prototype.emitShowEvent = function(item) {
@@ -5952,6 +6191,11 @@ Gridifier.EventEmitter.prototype.emitItemsReappendExecutionEndPerDragifier = fun
         this._kernelCallbacks.itemsReappendExecutionEndPerDragifier();
         this._kernelCallbacks.itemsReappendExecutionEndPerDragifier = null;
     }
+}
+
+Gridifier.EventEmitter.prototype.emitBeforeShowPerRetransformSortEvent = function() {
+    if(this._kernelCallbacks.beforeItemShowPerRetransformSorter != null)
+        this._kernelCallbacks.beforeItemShowPerRetransformSorter();
 }
 
 Gridifier.Filtrator = function(gridifier,
@@ -13492,7 +13736,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter, false, false, false, true);
             }
 
-           // eventEmitter.emitBeforeShowEvent();
+            eventEmitter.emitBeforeShowPerRetransformSortEvent();
             showItem(connectionToProcess.item);
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
@@ -14506,7 +14750,7 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
 
         me._toggleApi = new Gridifier.Api.Toggle(me, me._gridifier,  me._eventEmitter, me._sizesResolverManager);
         me._toggleTimeouterApi = new Gridifier.Api.ToggleTimeouter();
-        me._sortApi = new Gridifier.Api.Sort(me, me._eventEmitter);
+        me._sortApi = new Gridifier.Api.Sort(me, me._gridifier, me._eventEmitter);
         me._filterApi = new Gridifier.Api.Filter(me, me._eventEmitter);
         me._coordsChangerApi = new Gridifier.Api.CoordsChanger(me, me._gridifier, me._eventEmitter);
         me._sizesChangerApi = new Gridifier.Api.SizesChanger(me, me._eventEmitter);
