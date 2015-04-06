@@ -29,6 +29,8 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
     this._draggableItem = null;
     this._draggableItemClone = null;
 
+    this._connectionsSorter = null;
+
     this._css = {
     };
 
@@ -66,6 +68,17 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem = function(gridifier,
             me._sizesResolverManager,
             me._eventEmitter
         );
+
+        if(me._settings.isVerticalGrid()) {
+            me._connectionsSorter = new Gridifier.VerticalGrid.ConnectionsSorter(
+                me._connections, me._settings, me._guid
+            );
+        }
+        else if(me._settings.isHorizontalGrid()) {
+            me._connectionsSorter = new Gridifier.HorizontalGrid.ConnectionsSorter(
+                me._connections, me._settings, me._guid
+            );
+        }
 
         me._bindEvents();
     };
@@ -215,16 +228,10 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._swapItemPosit
         return false;
 
     if(this._settings.isVerticalGrid()) {
-        var connectionsSorter = new Gridifier.VerticalGrid.ConnectionsSorter(
-            this._connections, this._settings, this._guid
-        );
-        newIntersectedConnections = connectionsSorter.sortConnectionsPerReappend(newIntersectedConnections);
+        newIntersectedConnections = this._connectionsSorter.sortConnectionsPerReappend(newIntersectedConnections);
     }
     else if(this._settings.isHorizontalGrid()) {
-        var connectionsSorter = new Gridifier.HorizontalGrid.ConnectionsSorter(
-           this._connections, this._settings, this._guid
-        );
-        newIntersectedConnections = connectionsSorter.sortConnectionsPerReappend(newIntersectedConnections);
+        newIntersectedConnections = this._connectionsSorter.sortConnectionsPerReappend(newIntersectedConnections);
     }
 
     var intersectedConnectionWithSmallestPosition = newIntersectedConnections[0];

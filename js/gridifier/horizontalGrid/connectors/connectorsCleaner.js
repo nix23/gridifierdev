@@ -133,7 +133,7 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.deleteAllTooRightConnectors
     }
 
     var cc = Gridifier.HorizontalGrid.ConnectorsCleaner;
-    var maxValidX = mostLeftConnector.x + cc.MAX_VALID_HORIZONTAL_DISTANCE.FROM_MOST_LEFT_CONNECTOR;
+    var maxValidX = mostLeftConnector.x + this._settings.getMaxInsertionRange();
     for(var i = 0; i < connectors.length; i++) {
         if(connectors[i].x > maxValidX) {
             connectors.splice(i, 1);
@@ -207,7 +207,7 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.deleteAllTooLeftConnectorsF
     }
 
     var cc = Gridifier.HorizontalGrid.ConnectorsCleaner;
-    var minValidX = mostRightConnector.x - cc.MAX_VALID_HORIZONTAL_DISTANCE.FROM_MOST_RIGHT_CONNECTOR;
+    var minValidX = mostRightConnector.x - this._settings.getMaxInsertionRange();
     for(var i = 0; i < connectors.length; i++) {
         if(connectors[i].x < minValidX) {
             connectors.splice(i, 1);

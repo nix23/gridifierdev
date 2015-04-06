@@ -22,6 +22,8 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
     this._sortDispersionMode = null;
     this._sortDispersionValue = null;
 
+    this._maxInsertionRange = null;
+
     this._toggleApi = null;
     this._toggleTimeouterApi = null;
     this._sortApi = null;
@@ -55,6 +57,7 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
 
     this._retransformQueueBatchSize = null;
     this._retransformQueueBatchTimeout = null;
+    this._disableRetransformQueueOnDrags = false;
 
     this._css = {
     };
@@ -107,6 +110,7 @@ Gridifier.Settings.prototype._parse = function() {
     this._alignmentType = this._coreSettingsParser.parseIntersectionStrategyAlignmentType();
     this._sortDispersionMode = this._coreSettingsParser.parseSortDispersionMode();
     this._sortDispersionValue = this._coreSettingsParser.parseSortDispersionValue();
+    this._maxInsertionRange = this._coreSettingsParser.parseMaxInsertionRange();
 
     this._resizeTimeout = this._coreSettingsParser.parseResizeTimeoutValue();
     this._shouldDisableItemHideOnGridAttach = this._coreSettingsParser.parseDisableItemHideOnGridAttachValue();
@@ -138,6 +142,7 @@ Gridifier.Settings.prototype._parse = function() {
     var dragifierData = this._coreSettingsParser.parseDragifierSettings();
     this._shouldEnableDragifierOnInit = dragifierData.shouldEnableDragifierOnInit;
     this._dragifierItemSelector = dragifierData.dragifierItemSelector;
+    this._disableRetransformQueueOnDrags = this._coreSettingsParser.parseDisableRetransformQueueOnDrags();
 }
 
 Gridifier.Settings.prototype.getCollector = function() {
@@ -212,6 +217,14 @@ Gridifier.Settings.prototype.setRotateBackface = function(rotateBackface) {
     this._rotateBackface = rotateBackface;
 }
 
+Gridifier.Settings.prototype.setSortDispersionValue = function(newSortDispersionValue) {
+    this._sortDispersionValue = newSortDispersionValue;
+}
+
+Gridifier.Settings.prototype.getMaxInsertionRange = function() {
+    return this._maxInsertionRange;
+}
+
 Gridifier.Settings.prototype.isExpandGridTransformType = function() {
     return this._gridTransformType == Gridifier.GRID_TRANSFORM_TYPES.EXPAND;
 }
@@ -230,6 +243,18 @@ Gridifier.Settings.prototype.getRetransformQueueBatchSize = function() {
 
 Gridifier.Settings.prototype.getRetransformQueueBatchTimeout = function() {
     return this._retransformQueueBatchTimeout;
+}
+
+Gridifier.Settings.prototype.setRetransformQueueBatchSize = function(batchSize) {
+    this._retransformQueueBatchSize = batchSize;
+}
+
+Gridifier.Settings.prototype.setRetransformQueueTimeout = function(timeout) {
+    this._retransformQueueTimeout = timeout;
+}
+
+Gridifier.Settings.prototype.shouldDisableRetransformQueueOnDrags = function() {
+    return this._disableRetransformQueueOnDrags;
 }
 
 Gridifier.Settings.prototype.getToggleTimeouter = function() {
@@ -418,6 +443,18 @@ Gridifier.Settings.prototype.shouldEnableDragifierOnInit = function() {
 
 Gridifier.Settings.prototype.getDragifierItemSelector = function() {
     return this._dragifierItemSelector;
+}
+
+Gridifier.Settings.prototype.setNoIntersectionStrategy = function() {
+    if(this._dragifierMode == Gridifier.DRAGIFIER_MODES.DISCRETIZATION) {
+        throw new Error("Gridifier error: discretization dragifier is not compatible with no insersections strategy");
+        return;
+    }
+    this._intersectionStrategy = Gridifier.INTERSECTION_STRATEGIES.NO_INTERSECTIONS;
+}
+
+Gridifier.Settings.prototype.setDefaultIntersectionStrategy = function() {
+    this._intersectionStrategy = Gridifier.INTERSECTION_STRATEGIES.DEFAULT;
 }
 
 Gridifier.Settings.prototype.setAlignmentType = function(newAlignmentType) {

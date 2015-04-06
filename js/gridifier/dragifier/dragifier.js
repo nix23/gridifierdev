@@ -34,6 +34,7 @@ Gridifier.Dragifier = function(gridifier,
     this._isDragging = false;
 
     this._areDragifierEventsBinded = false;
+    this._originalRetransformQueueBatchSize = null;
 
     this._css = {
     };
@@ -64,6 +65,7 @@ Gridifier.Dragifier = function(gridifier,
             var connectedItem = me._findClosestConnectedItem(event.target);
             if(connectedItem == null) return;
 
+            me._disableRetransformQueue();
             event.preventDefault();
             me._disableUserSelect();
             me._sizesResolverManager.startCachingTransaction();
@@ -107,6 +109,7 @@ Gridifier.Dragifier = function(gridifier,
 
                 if(me._draggableItems.length == 0) {
                     me._enableUserSelect();
+                    me._enableRetransformQueue();
                     me._isDragging = false;
                     me._sizesResolverManager.stopCachingTransaction();
                 }
@@ -119,7 +122,8 @@ Gridifier.Dragifier = function(gridifier,
 
             setTimeout(function() {
                 if(!me._isDragging) return;
-
+                me._syncRetransformQueueSizeIfDisabled();
+                
                 var touches = event.changedTouches;
                 for(var i = 0; i < touches.length; i++) {
                     var draggableItem = me._findDraggableItemByIdentifier(touches[i].identifier);
@@ -133,6 +137,7 @@ Gridifier.Dragifier = function(gridifier,
         me._mouseDownHandler = function(event) {
             var connectedItem = me._findClosestConnectedItem(event.target);
             if(connectedItem == null) return;
+            me._disableRetransformQueue();
 
             event.preventDefault();
             me._disableUserSelect();
@@ -149,6 +154,7 @@ Gridifier.Dragifier = function(gridifier,
             setTimeout(function() {
                 if(!me._isDragging) return;
 
+                me._enableRetransformQueue();
                 me._enableUserSelect();
                 me._draggableItems[0].unbindDraggableItem();
                 me._draggableItems.splice(0, 1);
@@ -160,8 +166,9 @@ Gridifier.Dragifier = function(gridifier,
         me._mouseMoveHandler = function(event) {
             setTimeout(function() {
                 if(!me._isDragging) return;
+                me._syncRetransformQueueSizeIfDisabled();
                 me._draggableItems[0].processDragMove(event.pageX, event.pageY);
-           }, 0);
+            }, 0);
         };
     };
 
@@ -206,6 +213,28 @@ Gridifier.Dragifier.prototype.unbindDragifierEvents = function() {
     Event.remove(this._gridifier.getGrid(), "touchstart", this._touchStartHandler);
     Event.remove(document.body, "touchend", this._touchEndHandler);
     Event.remove(document.body, "touchmove", this._touchMoveHandler);
+}
+
+Gridifier.Dragifier.prototype._disableRetransformQueue = function() {
+    if(!this._settings.shouldDisableRetransformQueueOnDrags())
+        return;
+
+    this._originalRetransformQueueBatchSize = this._settings.getRetransformQueueBatchSize();
+    this._syncRetransformQueueSizeIfDisabled();
+}
+
+Gridifier.Dragifier.prototype._syncRetransformQueueSizeIfDisabled = function() {
+    if(!this._settings.shouldDisableRetransformQueueOnDrags())
+        return;
+
+    this._settings.setRetransformQueueBatchSize(this._gridifier.getAll().length);
+}
+
+Gridifier.Dragifier.prototype._enableRetransformQueue = function() {
+    if(!this._settings.shouldDisableRetransformQueueOnDrags())
+        return;
+
+    this._settings.setRetransformQueueBatchSize(this._originalRetransformQueueBatchSize);
 }
 
 Gridifier.Dragifier.prototype._disableUserSelect = function() {

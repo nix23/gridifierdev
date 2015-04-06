@@ -133,7 +133,7 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllTooLowConnectorsFrom
     }
 
     var cc = Gridifier.VerticalGrid.ConnectorsCleaner;
-    var maxValidY = mostTopConnector.y + cc.MAX_VALID_VERTICAL_DISTANCE.FROM_MOST_TOP_CONNECTOR;
+    var maxValidY = mostTopConnector.y + this._settings.getMaxInsertionRange();
     for(var i = 0; i < connectors.length; i++) {
         if(connectors[i].y > maxValidY) {
             connectors.splice(i, 1);
@@ -207,7 +207,7 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype.deleteAllTooHighConnectorsFro
     }
 
     var cc = Gridifier.VerticalGrid.ConnectorsCleaner;
-    var minValidY = mostBottomConnector.y - cc.MAX_VALID_VERTICAL_DISTANCE.FROM_MOST_BOTTOM_CONNECTOR;
+    var minValidY = mostBottomConnector.y - this._settings.getMaxInsertionRange();
     for(var i = 0; i < connectors.length; i++) {
         if(connectors[i].y < minValidY) {
             connectors.splice(i, 1);

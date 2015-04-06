@@ -261,7 +261,9 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                     // Because of using this delayed timeout we should find item connection again.
                     // There could be a bunch of resizes since this delayedRender schedule, so this item connection can point to the
                     // old version of the connection.
-                    var connectionToProcess = me._connections.findConnectionByItem(item);
+                    var connectionToProcess = me._connections.findConnectionByItem(item, true);
+                    if(connectionToProcess == null)
+                        return;
 
                     coordsChanger(
                         item,

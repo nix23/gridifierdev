@@ -273,5 +273,6 @@ Gridifier.Dragifier.Core.prototype.reappendGridItems = function() {
 
         me._eventEmitter.emitDragEndEvent(sortedItems);
     });
+
     this._gridifier.retransformAllSizes();
 }

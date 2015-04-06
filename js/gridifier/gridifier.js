@@ -444,6 +444,23 @@ Gridifier.prototype.setRotateAngles = function(newRotateAngles) {
     return this;
 }
 
+Gridifier.prototype.setSortDispersionValue = function(newSortDispersionValue) {
+    this._settings.setSortDispersionValue(newSortDispersionValue);
+    return this;
+}
+
+Gridifier.prototype.setDefaultIntersectionStrategy = function() {
+    this._settings.setDefaultIntersectionStrategy();
+    this.retransformAllSizes();
+    return this;
+}
+
+Gridifier.prototype.setNoIntersectionStrategy = function() {
+    this._settings.setNoIntersectionStrategy();
+    this.retransformAllSizes();
+    return this;
+}
+
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     if(this._settings.isMirroredPrepend()) {
         this.insertBefore(items, null, batchSize, batchTimeout);

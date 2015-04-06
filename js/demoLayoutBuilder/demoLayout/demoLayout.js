@@ -65,10 +65,10 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierSettings.prependType = "mirroredPrepend";
         me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
-        //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
-       // me._gridifierSettings.alignmentType = "center";
+        me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
+        me._gridifierSettings.alignmentType = "center";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
-        //me._gridifierSettings.dragifier = true;
+        me._gridifierSettings.dragifier = true;
         //me._gridifierSettings.dragifier = "testSelector";
         //me._gridifierSettings.sortDispersionMode = "custom";
         //me._gridifierSettings.sortDispersionValue = "200px";
@@ -76,13 +76,17 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.retransformQueueBatchSize = 50;
         //me._gridifierSettings.rotateAngles = [-180, -360, -80, -80];
 
+        //me._gridifierSettings.retransformQueueBatchSize = 50;
+        //me._gridifierSettings.disableRetransformQueueOnDrags = false;
+
         setTimeout(function() {
-           me._gridifier.setRetransformSort("orientationEvenly");
+            //me._gridifier.setRetransformQueueBatchSize(50);
+           //me._gridifier.setRetransformSort("orientationEvenly");
             //me._gridifier.setToggle("rotateX");
             //me._gridifier.setRotateAngles([-180, -360]);
             //me._gridifier.setToggleAnimationMsDuration(1000);
             //me._gridifier.setCoordsChangeAnimationMsDuration(1000);
-            me._gridifier.setToggle("slideClockwiseFromCornersWithFade");
+            //me._gridifier.setToggle("slideClockwiseFromCornersWithFade");
         }, 500);
 
         //me._gridifierSettings.appendType = "reversedAppend";
@@ -243,16 +247,16 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             if(i % 2 == 0) {
                  //var width = "20%";
                  //var height = "200px";
-                 var width = "100px";
-                 var height = "50px";
+                 var width = "200px";
+                 var height = "100px";
                 //var width = "200px";
                 //var height = "200px";
             }
             else {
                 //var width = "50%";
                 //var height = "600px";
-                var width = "50px";
-                var height = "100px";
+                var width = "100px";
+                var height = "200px";
                 //var width = "100px";
                 //var height = "100px";
             }
