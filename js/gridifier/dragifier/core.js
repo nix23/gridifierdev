@@ -30,6 +30,8 @@ Gridifier.Dragifier.Core = function(gridifier,
     this._gridOffsetLeft = null;
     this._gridOffsetTop = null;
 
+    this._executeGridRetransformTimeout = null;
+
     this._css = {
     };
 
@@ -274,5 +276,25 @@ Gridifier.Dragifier.Core.prototype.reappendGridItems = function() {
         me._eventEmitter.emitDragEndEvent(sortedItems);
     });
 
-    this._gridifier.retransformAllSizes();
+    this._executeGridRetransform();
+}
+
+Gridifier.Dragifier.Core.EXECUTE_GRID_RETRANSFORM_MS_TIMEOUT = 20;
+
+Gridifier.Dragifier.Core.prototype._executeGridRetransform = function() {
+    var me = this;
+
+    if(!Dom.browsers.isAndroidFirefox() && !Dom.browsers.isAndroidUCBrowser()) {
+        this._gridifier.retransformAllSizes();
+        return;
+    }
+
+    if(typeof this._executeGridRetransformTimeout != null) {
+        clearTimeout(this._executeGridRetransformTimeout);
+        this._executeGridRetransformTimeout = null;
+    }
+
+    this._executeGridRetransformTimeout = setTimeout(function() {
+        me._gridifier.retransformAllSizes();
+    }, Gridifier.Dragifier.Core.EXECUTE_GRID_RETRANSFORM_MS_TIMEOUT);
 }

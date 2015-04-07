@@ -123,7 +123,7 @@ Gridifier.Dragifier = function(gridifier,
             setTimeout(function() {
                 if(!me._isDragging) return;
                 me._syncRetransformQueueSizeIfDisabled();
-                
+
                 var touches = event.changedTouches;
                 for(var i = 0; i < touches.length; i++) {
                     var draggableItem = me._findDraggableItemByIdentifier(touches[i].identifier);
@@ -136,7 +136,8 @@ Gridifier.Dragifier = function(gridifier,
 
         me._mouseDownHandler = function(event) {
             var connectedItem = me._findClosestConnectedItem(event.target);
-            if(connectedItem == null) return;
+            // UCBrowser will fire and process mouse handlers first
+            if(connectedItem == null || Dom.browsers.isAndroidUCBrowser()) return;
             me._disableRetransformQueue();
 
             event.preventDefault();
@@ -152,7 +153,7 @@ Gridifier.Dragifier = function(gridifier,
 
         me._mouseUpHandler = function() {
             setTimeout(function() {
-                if(!me._isDragging) return;
+                if(!me._isDragging || Dom.browsers.isAndroidUCBrowser()) return;
 
                 me._enableRetransformQueue();
                 me._enableUserSelect();
@@ -165,7 +166,7 @@ Gridifier.Dragifier = function(gridifier,
 
         me._mouseMoveHandler = function(event) {
             setTimeout(function() {
-                if(!me._isDragging) return;
+                if(!me._isDragging || Dom.browsers.isAndroidUCBrowser()) return;
                 me._syncRetransformQueueSizeIfDisabled();
                 me._draggableItems[0].processDragMove(event.pageX, event.pageY);
             }, 0);

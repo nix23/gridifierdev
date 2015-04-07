@@ -7,6 +7,7 @@ var Dom = {
         this.createTrimFunction();
         this.createHasDOMElemOwnPropertyFunction();
         this._determineIfBrowserIsSupportingTransitions();
+        this.browsers.init();
     },
 
     createTrimFunction: function() {
@@ -114,6 +115,32 @@ var Dom = {
 
     hasDOMElemOwnProperty: function(DOMElem, propertyToMatch) {
         return this.hasDOMElemOwnPropertyFunction(DOMElem, propertyToMatch);
+    },
+
+    browsers: {
+        _navigator: null,
+
+        init: function() {
+            this._navigator = (typeof navigator != "undefined") ? navigator.userAgent : '';
+        },
+
+        isAndroid: function() {
+            return /android/i.test(this._navigator);
+        },
+
+        isAndroidFirefox: function() {
+            if(!this.isAndroid())
+                return false;
+
+            return /firefox|iceweasel/i.test(this._navigator);
+        },
+
+        isAndroidUCBrowser: function() {
+            if(!this.isAndroid())
+                return false;
+
+            return /UCBrowser/i.test(this._navigator);
+        }
     },
 
     css: {

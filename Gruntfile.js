@@ -28,8 +28,8 @@ module.exports = function(grunt) {
           'js/gridifier/core/**/*.js',
           
           'js/gridifier/discretizer/discretizer.js',
-          'js/gridifier/discretizer/horizontalGrid.js',
-          'js/gridifier/discretizer/verticalGrid.js',
+          'js/gridifier/discretizer/horizontalCore.js',
+          'js/gridifier/discretizer/verticalCore.js',
           // @todo -> Exclude discretizer demonstrator???
           'js/gridifier/discretizer/demonstrator.js',
 
