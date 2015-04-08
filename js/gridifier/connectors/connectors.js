@@ -92,8 +92,8 @@ Gridifier.Connectors.prototype._addConnector = function(type, side, x, y, itemGU
     this._connectors.push({
         type: type,
         side: side,
-        x: x,
-        y: y,
+        x: parseFloat(parseFloat(x).toFixed(1)),
+        y: parseFloat(parseFloat(y).toFixed(1)),
         itemGUID: itemGUID
     });
 }

@@ -1801,6 +1801,10 @@ Gridifier.prototype.unbindDragifierEvents = function() {
     return this;
 }
 
+Gridifier.prototype.isDragifierEnabled = function() {
+    return this._dragifier.isDragifierEnabled();
+}
+
 Gridifier.prototype.addPreInsertLifecycleCallback = function(callback) {
     this._lifecycleCallbacks.addPreInsertCallback(callback);
     return this;
@@ -8719,6 +8723,10 @@ Gridifier.Dragifier.prototype.unbindDragifierEvents = function() {
     Event.remove(this._gridifier.getGrid(), "touchstart", this._touchStartHandler);
     Event.remove(document.body, "touchend", this._touchEndHandler);
     Event.remove(document.body, "touchmove", this._touchMoveHandler);
+}
+
+Gridifier.Dragifier.prototype.isDragifierEnabled = function() {
+    return this._areDragifierEventsBinded;
 }
 
 Gridifier.Dragifier.prototype._disableRetransformQueue = function() {

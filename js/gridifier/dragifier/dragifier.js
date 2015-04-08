@@ -216,6 +216,10 @@ Gridifier.Dragifier.prototype.unbindDragifierEvents = function() {
     Event.remove(document.body, "touchmove", this._touchMoveHandler);
 }
 
+Gridifier.Dragifier.prototype.isDragifierEnabled = function() {
+    return this._areDragifierEventsBinded;
+}
+
 Gridifier.Dragifier.prototype._disableRetransformQueue = function() {
     if(!this._settings.shouldDisableRetransformQueueOnDrags())
         return;

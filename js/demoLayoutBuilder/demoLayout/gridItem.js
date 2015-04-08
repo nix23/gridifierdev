@@ -109,6 +109,8 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
        //"padding-bottom": "12.5%",
        width: itemSizes.width,
        height: itemSizes.height,
+      //  height: 0,
+      //  "padding-bottom": parseFloat(itemSizes.height) + "%",
         //margin: "2em",
         //height: 0,
        // paddingBottom: pb,

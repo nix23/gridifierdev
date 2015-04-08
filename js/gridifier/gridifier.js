@@ -633,6 +633,10 @@ Gridifier.prototype.unbindDragifierEvents = function() {
     return this;
 }
 
+Gridifier.prototype.isDragifierEnabled = function() {
+    return this._dragifier.isDragifierEnabled();
+}
+
 Gridifier.prototype.addPreInsertLifecycleCallback = function(callback) {
     this._lifecycleCallbacks.addPreInsertCallback(callback);
     return this;
