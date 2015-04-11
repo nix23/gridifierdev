@@ -35,7 +35,7 @@ Gridifier.HorizontalGrid.ConnectorsSorter.prototype.getConnectors = function() {
 Gridifier.HorizontalGrid.ConnectorsSorter.prototype.sortConnectorsForPrepend = function(prependType) {
     var me = this;
     this._connectors.sort(function(firstConnector, secondConnector) {
-        if(firstConnector.x == secondConnector.x) {
+        if(Dom.areRoundedOrCeiledValuesEqual(firstConnector.x, secondConnector.x)) {
             if(prependType == Gridifier.PREPEND_TYPES.DEFAULT_PREPEND) {
                 if(firstConnector.y < secondConnector.y)
                     return 1;
@@ -61,7 +61,7 @@ Gridifier.HorizontalGrid.ConnectorsSorter.prototype.sortConnectorsForPrepend = f
 Gridifier.HorizontalGrid.ConnectorsSorter.prototype.sortConnectorsForAppend = function(appendType) {
     var me = this;
     this._connectors.sort(function(firstConnector, secondConnector) {
-        if(firstConnector.x == secondConnector.x) {
+        if(Dom.areRoundedOrFlooredValuesEqual(firstConnector.x, secondConnector.x)) {
             if(appendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND) {
                 if(firstConnector.y < secondConnector.y)
                     return -1;

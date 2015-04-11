@@ -136,6 +136,10 @@ Gridifier.ConnectorsShifter.prototype._shiftBottomRightConnector = function(conn
             this._createShiftedConnector(mostLeftConnection.x1 - 1, connector.y, connector);
     }
     else {
+        // We shouldn't align prepended HG items to right corner(Layout will break)
+        if(this._settings.isHorizontalGrid() && connector.type == Gridifier.Connectors.TYPES.PREPEND.DEFAULT)
+            return;
+
         if(connector.x != this._gridifier.getGridX2())
             this._createShiftedConnector(this._gridifier.getGridX2(), connector.y, connector);
     }

@@ -15,6 +15,10 @@ Gridifier.HorizontalGrid.ConnectorsCleaner = function(connectors, connections, s
         me._connections = connections;
         me._settings = settings;
 
+        me._connectorsNormalizer = new Gridifier.ConnectorsNormalizer(
+            me._connections, me._connectors, me._settings
+        );
+
         if(me._settings.isDisabledSortDispersion()) {
             me.setConnectorInsideOrBeforeItemIntersectionStrategy();
         }
@@ -75,16 +79,21 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersect
     for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
         for(var j = 0; j < mappedConnector.connectionIndexes[i].length; j++) {
             var connection = connections[mappedConnector.connectionIndexes[i][j]];
+            this._connectorsNormalizer.applyConnectionRoundingPerConnector(connection, mappedConnector);
 
             if(this.isConnectorInsideOrBeforeItemIntersectionStrategy())
-                var horizontalIntersectionCond = (mappedConnector.x >= connection.x1);
+                var horizontalIntersectionCond = mappedConnector.x >= connection.x1;
             else if(this.isConnectorInsideItemIntersectionStrategy())
-                var horizontalIntersectionCond = (mappedConnector.x >= connection.x1 
-                                                  && mappedConnector.x <= connection.x2);
+                var horizontalIntersectionCond = mappedConnector.x >= connection.x1
+                                                  && mappedConnector.x <= connection.x2;
 
             if(mappedConnector.y >= connection.y1 && mappedConnector.y <= connection.y2
-                && horizontalIntersectionCond)
+                && horizontalIntersectionCond) {
+                this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
                 return true;
+            }
+
+            this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
         }
     }
 
@@ -148,16 +157,21 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersect
     for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
         for(var j = 0; j < mappedConnector.connectionIndexes[i].length; j++) {
             var connection = connections[mappedConnector.connectionIndexes[i][j]];
+            this._connectorsNormalizer.applyConnectionRoundingPerConnector(connection, mappedConnector);
 
             if(this.isConnectorInsideOrBeforeItemIntersectionStrategy())
-                var horizontalIntersectionCond = (mappedConnector.x <= connection.x2);
+                var horizontalIntersectionCond = mappedConnector.x <= connection.x2;
             else if(this.isConnectorInsideItemIntersectionStrategy())
-                var horizontalIntersectionCond = (mappedConnector.x <= connection.x2
-                                                  && mappedConnector.x >= connection.x1);
+                var horizontalIntersectionCond = mappedConnector.x <= connection.x2
+                                                  && mappedConnector.x >= connection.x1;
 
             if(mappedConnector.y >= connection.y1 && mappedConnector.y <= connection.y2
-                && horizontalIntersectionCond)
+                && horizontalIntersectionCond) {
+                this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
                 return true;
+            }
+
+            this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
         }
     }
     

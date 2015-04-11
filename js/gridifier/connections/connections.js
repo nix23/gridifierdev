@@ -147,10 +147,10 @@ Gridifier.Connections.prototype.getConnectionsByItemGUIDS = function(itemGUIDS) 
 Gridifier.Connections.prototype.createItemConnection = function(item, itemConnectionCoords) {
     var connection = itemConnectionCoords;
 
-    itemConnectionCoords.x1 = parseFloat(parseFloat(itemConnectionCoords.x1).toFixed(1));
-    itemConnectionCoords.x2 = parseFloat(parseFloat(itemConnectionCoords.x2).toFixed(1));
-    itemConnectionCoords.y1 = parseFloat(parseFloat(itemConnectionCoords.y1).toFixed(1));
-    itemConnectionCoords.y2 = parseFloat(parseFloat(itemConnectionCoords.y2).toFixed(1));
+    itemConnectionCoords.x1 = Dom.toFixed(itemConnectionCoords.x1, 2);
+    itemConnectionCoords.x2 = Dom.toFixed(itemConnectionCoords.x2, 2);
+    itemConnectionCoords.y1 = Dom.toFixed(itemConnectionCoords.y1, 2);
+    itemConnectionCoords.y2 = Dom.toFixed(itemConnectionCoords.y2, 2);
 
     connection.item = item;
     connection.itemGUID = Dom.toInt(this._guid.getItemGUID(item));

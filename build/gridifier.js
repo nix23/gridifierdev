@@ -4764,6 +4764,12 @@ Gridifier.Connections.prototype.getConnectionsByItemGUIDS = function(itemGUIDS) 
 
 Gridifier.Connections.prototype.createItemConnection = function(item, itemConnectionCoords) {
     var connection = itemConnectionCoords;
+
+    itemConnectionCoords.x1 = parseFloat(parseFloat(itemConnectionCoords.x1).toFixed(1));
+    itemConnectionCoords.x2 = parseFloat(parseFloat(itemConnectionCoords.x2).toFixed(1));
+    itemConnectionCoords.y1 = parseFloat(parseFloat(itemConnectionCoords.y1).toFixed(1));
+    itemConnectionCoords.y2 = parseFloat(parseFloat(itemConnectionCoords.y2).toFixed(1));
+
     connection.item = item;
     connection.itemGUID = Dom.toInt(this._guid.getItemGUID(item));
 
@@ -5055,8 +5061,8 @@ Gridifier.Connectors.prototype._addConnector = function(type, side, x, y, itemGU
     this._connectors.push({
         type: type,
         side: side,
-        x: x,
-        y: y,
+        x: parseFloat(parseFloat(x).toFixed(1)),
+        y: parseFloat(parseFloat(y).toFixed(1)),
         itemGUID: itemGUID
     });
 }

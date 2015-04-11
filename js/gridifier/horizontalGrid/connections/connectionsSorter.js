@@ -45,7 +45,7 @@ Gridifier.HorizontalGrid.ConnectionsSorter.prototype.sortConnectionsPerReappend 
             this._settings.isCustomAllEmptySpaceSortDispersion()) {
         if(this._settings.isDefaultAppend()) {
             connections.sort(function(firstConnection, secondConnection) {
-                if(firstConnection.x1 == secondConnection.x1) {
+                if(Dom.areRoundedOrFlooredValuesEqual(firstConnection.x1, secondConnection.x1)) {
                     if(firstConnection.y2 < secondConnection.y2)
                         return -1;
                     else 
@@ -61,7 +61,7 @@ Gridifier.HorizontalGrid.ConnectionsSorter.prototype.sortConnectionsPerReappend 
         }
         else if(this._settings.isReversedAppend()) {
             connections.sort(function(firstConnection, secondConnection) {
-                if(firstConnection.x1 == secondConnection.x1) {
+                if(Dom.areRoundedOrFlooredValuesEqual(firstConnection.x1, secondConnection.x1)) {
                     if(firstConnection.y1 > secondConnection.y1)
                         return -1;
                     else

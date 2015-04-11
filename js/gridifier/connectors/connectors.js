@@ -92,8 +92,8 @@ Gridifier.Connectors.prototype._addConnector = function(type, side, x, y, itemGU
     this._connectors.push({
         type: type,
         side: side,
-        x: parseFloat(parseFloat(x).toFixed(1)),
-        y: parseFloat(parseFloat(y).toFixed(1)),
+        x: Dom.toFixed(x, 2),
+        y: Dom.toFixed(y, 2),
         itemGUID: itemGUID
     });
 }
@@ -141,6 +141,7 @@ Gridifier.Connectors.prototype.set = function(connectors) {
 
 Gridifier.Connectors.prototype.getClone = function() {
     var connectorsClone = [];
+
     for(var i = 0; i < this._connectors.length; i++) {
         connectorsClone.push({
             type: this._connectors[i].type,

@@ -52,7 +52,7 @@ Gridifier.VerticalGrid.ItemCoordsExtractor.prototype.getItemTargetSizes = functi
 
 Gridifier.VerticalGrid.ItemCoordsExtractor.prototype.connectorToAppendedItemCoords = function(item, connector) {
     var targetSizes = this._getItemSizesPerAppend(item);
-    
+
     return {
         x1: parseFloat(connector.x - targetSizes.targetWidth + 1),
         x2: parseFloat(connector.x),

@@ -5,6 +5,8 @@ Gridifier.VerticalGrid.ConnectorsCleaner = function(connectors, connections, set
     this._connections = null;
     this._settings = null;
 
+    this._connectorsNormalizer = null;
+
     this._connectionItemIntersectionStrategy = null;
 
     this._css = {
@@ -14,6 +16,10 @@ Gridifier.VerticalGrid.ConnectorsCleaner = function(connectors, connections, set
         me._connectors = connectors;
         me._connections = connections;
         me._settings = settings;
+
+        me._connectorsNormalizer = new Gridifier.ConnectorsNormalizer(
+            me._connections, me._connectors, me._settings
+        );
 
         if(me._settings.isDisabledSortDispersion()) {
             me.setConnectorInsideOrBeforeItemIntersectionStrategy();
@@ -75,16 +81,21 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersectin
     for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
         for(var j = 0; j < mappedConnector.connectionIndexes[i].length; j++) {
             var connection = connections[mappedConnector.connectionIndexes[i][j]];
+            this._connectorsNormalizer.applyConnectionRoundingPerConnector(connection, mappedConnector);
 
             if(this.isConnectorInsideOrBeforeItemIntersectionStrategy())
-                var verticalIntersectionCond = (mappedConnector.y >= connection.y1);
+                var verticalIntersectionCond = mappedConnector.y >= connection.y1;
             else if(this.isConnectorInsideItemIntersectionStrategy())
-                var verticalIntersectionCond = (mappedConnector.y >= connection.y1 
-                                                && mappedConnector.y <= connection.y2);
+                var verticalIntersectionCond = mappedConnector.y >= connection.y1
+                                                && mappedConnector.y <= connection.y2;
 
             if(mappedConnector.x >= connection.x1 && mappedConnector.x <= connection.x2
-                && verticalIntersectionCond)
+                && verticalIntersectionCond) {
+                this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
                 return true;
+            }
+
+            this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
         }
     }
 
@@ -148,19 +159,24 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersectin
     for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
         for(var j = 0; j < mappedConnector.connectionIndexes[i].length; j++) {
             var connection = connections[mappedConnector.connectionIndexes[i][j]];
+            this._connectorsNormalizer.applyConnectionRoundingPerConnector(connection, mappedConnector);
 
             if(this.isConnectorInsideOrBeforeItemIntersectionStrategy())
-                var verticalIntersectionCond = (mappedConnector.y <= connection.y2);
+                var verticalIntersectionCond = ((mappedConnector.y) <= (connection.y2));
             else if(this.isConnectorInsideItemIntersectionStrategy())
-                var verticalIntersectionCond = (mappedConnector.y <= connection.y2
-                                                && mappedConnector.y >= connection.y1);
+                var verticalIntersectionCond = ((mappedConnector.y) <= (connection.y2)
+                && (mappedConnector.y) >= connection.y1);
 
             if(mappedConnector.x >= connection.x1 && mappedConnector.x <= connection.x2
-                && verticalIntersectionCond)
+                && verticalIntersectionCond) {
+                this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
                 return true;
+            }
+
+            this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
         }
     }
-    
+
     return false;
 }
 

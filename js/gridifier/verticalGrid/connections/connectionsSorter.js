@@ -45,8 +45,8 @@ Gridifier.VerticalGrid.ConnectionsSorter.prototype.sortConnectionsPerReappend = 
             this._settings.isCustomAllEmptySpaceSortDispersion()) {
         if(this._settings.isDefaultAppend()) {
             connections.sort(function(firstConnection, secondConnection) {
-                if(firstConnection.y1 == secondConnection.y1) {
-                    if(firstConnection.x2 > secondConnection.x2)
+                if(Dom.areRoundedOrFlooredValuesEqual(firstConnection.y1, secondConnection.y1)) {
+                    if(firstConnection.x2 >secondConnection.x2)
                         return -1;
                     else 
                         return 1;
@@ -61,7 +61,7 @@ Gridifier.VerticalGrid.ConnectionsSorter.prototype.sortConnectionsPerReappend = 
         }
         else if(this._settings.isReversedAppend()) {
             connections.sort(function(firstConnection, secondConnection) {
-                if(firstConnection.y1 == secondConnection.y1) {
+                if(Dom.areRoundedOrFlooredValuesEqual(firstConnection.y1, secondConnection.y1)) {
                     if(firstConnection.x1 < secondConnection.x1)
                         return -1;
                     else

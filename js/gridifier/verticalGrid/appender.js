@@ -202,7 +202,6 @@ Gridifier.VerticalGrid.Appender.prototype._addItemConnectors = function(itemCoor
 
 Gridifier.VerticalGrid.Appender.prototype._createConnectionPerItem = function(item) {
     var sortedConnectors = this._filterConnectorsPerNextConnection();
-
     var itemConnectionCoords = this._findItemConnectionCoords(item, sortedConnectors);
     var connection = this._connections.add(item, itemConnectionCoords);
 
@@ -289,7 +288,7 @@ Gridifier.VerticalGrid.Appender.prototype._findItemConnectionCoords = function(i
     /* @system-log-start */
     Logger.startLoggingFindItemConnectionCoords();
     /* @system-log-end */
-    
+
     for(var i = 0; i < sortedConnectors.length; i++) {
         /* @system-log-start */
         Logger.logFindItemConnectionCoordsInspectConnector(sortedConnectors[i], this._connections.get());

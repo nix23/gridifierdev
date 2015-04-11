@@ -179,7 +179,7 @@ Gridifier.HorizontalGrid.ReversedPrepender.prototype._initConnectors = function(
 
 Gridifier.HorizontalGrid.ReversedPrepender.prototype.createInitialConnector = function() {
     this._connectors.addPrependConnector(
-        Gridifier.Connectors.SIDES.BOTTOM.RIGHT,
+        Gridifier.Connectors.SIDES.LEFT.TOP,
         0,
         0
     );

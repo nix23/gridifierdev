@@ -117,6 +117,18 @@ var Dom = {
         return this.hasDOMElemOwnPropertyFunction(DOMElem, propertyToMatch);
     },
 
+    toFixed: function(value, precision) {
+        return parseFloat(+(Math.round(+(value.toString() + 'e' + precision)).toString() + 'e' + -precision));
+    },
+
+    areRoundedOrFlooredValuesEqual: function(firstValue, secondValue) {
+        return (Math.round(firstValue) == Math.round(secondValue) || Math.floor(firstValue) == Math.floor(secondValue));
+    },
+
+    areRoundedOrCeiledValuesEqual: function(firstValue, secondValue) {
+        return (Math.round(firstValue) == Math.round(secondValue) || Math.ceil(firstValue) == Math.ceil(secondValue));
+    },
+
     browsers: {
         _navigator: null,
 
