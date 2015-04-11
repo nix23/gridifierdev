@@ -942,6 +942,18 @@ var Dom = {
         return this.hasDOMElemOwnPropertyFunction(DOMElem, propertyToMatch);
     },
 
+    toFixed: function(value, precision) {
+        return parseFloat(+(Math.round(+(value.toString() + 'e' + precision)).toString() + 'e' + -precision));
+    },
+
+    areRoundedOrFlooredValuesEqual: function(firstValue, secondValue) {
+        return (Math.round(firstValue) == Math.round(secondValue) || Math.floor(firstValue) == Math.floor(secondValue));
+    },
+
+    areRoundedOrCeiledValuesEqual: function(firstValue, secondValue) {
+        return (Math.round(firstValue) == Math.round(secondValue) || Math.ceil(firstValue) == Math.ceil(secondValue));
+    },
+
     browsers: {
         _navigator: null,
 
@@ -4765,10 +4777,10 @@ Gridifier.Connections.prototype.getConnectionsByItemGUIDS = function(itemGUIDS) 
 Gridifier.Connections.prototype.createItemConnection = function(item, itemConnectionCoords) {
     var connection = itemConnectionCoords;
 
-    itemConnectionCoords.x1 = parseFloat(parseFloat(itemConnectionCoords.x1).toFixed(1));
-    itemConnectionCoords.x2 = parseFloat(parseFloat(itemConnectionCoords.x2).toFixed(1));
-    itemConnectionCoords.y1 = parseFloat(parseFloat(itemConnectionCoords.y1).toFixed(1));
-    itemConnectionCoords.y2 = parseFloat(parseFloat(itemConnectionCoords.y2).toFixed(1));
+    itemConnectionCoords.x1 = Dom.toFixed(itemConnectionCoords.x1, 2);
+    itemConnectionCoords.x2 = Dom.toFixed(itemConnectionCoords.x2, 2);
+    itemConnectionCoords.y1 = Dom.toFixed(itemConnectionCoords.y1, 2);
+    itemConnectionCoords.y2 = Dom.toFixed(itemConnectionCoords.y2, 2);
 
     connection.item = item;
     connection.itemGUID = Dom.toInt(this._guid.getItemGUID(item));
@@ -5061,8 +5073,8 @@ Gridifier.Connectors.prototype._addConnector = function(type, side, x, y, itemGU
     this._connectors.push({
         type: type,
         side: side,
-        x: parseFloat(parseFloat(x).toFixed(1)),
-        y: parseFloat(parseFloat(y).toFixed(1)),
+        x: Dom.toFixed(x, 2),
+        y: Dom.toFixed(y, 2),
         itemGUID: itemGUID
     });
 }
@@ -5110,6 +5122,7 @@ Gridifier.Connectors.prototype.set = function(connectors) {
 
 Gridifier.Connectors.prototype.getClone = function() {
     var connectorsClone = [];
+
     for(var i = 0; i < this._connectors.length; i++) {
         connectorsClone.push({
             type: this._connectors[i].type,
@@ -5333,6 +5346,68 @@ Gridifier.ConnectorsIntersector.prototype.getMostTopFromIntersectedBottomOrBotto
     return mostTopConnection;
 }
 
+Gridifier.ConnectorsNormalizer = function(connections, connectors, settings) {
+    var me = this;
+
+    this._connections = null;
+    this._connectors = null;
+    this._settings = null;
+
+    this._css = {
+    };
+
+    this._construct = function() {
+        me._connections = connections;
+        me._connectors = connectors;
+        me._settings = settings;
+    };
+
+    this._bindEvents = function() {
+
+    };
+
+    this._unbindEvents = function() {
+    };
+
+    this.destruct = function() {
+        me._unbindEvents();
+    };
+
+    this._construct();
+    return this;
+}
+
+Gridifier.ConnectorsNormalizer.prototype.applyConnectionRoundingPerConnector = function(connection, connector) {
+    connection.originalX1 = connection.x1;
+    connection.originalX2 = connection.x2;
+    connection.originalY1 = connection.y1;
+    connection.originalY2 = connection.y2;
+
+    if(Gridifier.Connectors.isBottomLeftSideConnector(connector) || Gridifier.Connectors.isRightTopSideConnector(connector)) {
+        connection.x1 = Math.floor(connection.x1);
+        connection.y1 = Math.floor(connection.y1);
+    }
+    else if(Gridifier.Connectors.isLeftTopSideConnector(connector) || Gridifier.Connectors.isBottomRightSideConnector(connector)) {
+        connection.x2 = Math.ceil(connection.x2);
+        connection.y1 = Math.floor(connection.y1);
+    }
+    else if(Gridifier.Connectors.isLeftBottomSideConnector(connector) || Gridifier.Connectors.isTopRightSideConnector(connector)) {
+        connection.x2 = Math.ceil(connection.x2);
+        connection.y2 = Math.ceil(connection.y2);
+    }
+    else if(Gridifier.Connectors.isTopLeftSideConnector(connector) || Gridifier.Connectors.isRightBottomSideConnector(connector)) {
+        connection.x1 = Math.floor(connection.x1);
+        connection.y2 = Math.ceil(connection.y2);
+    }
+}
+
+Gridifier.ConnectorsNormalizer.prototype.unapplyConnectionRoundingPerConnector = function(connection, connector) {
+    connection.x1 = connection.originalX1;
+    connection.y1 = connection.originalY1;
+    connection.x2 = connection.originalX2;
+    connection.y2 = connection.originalY2;
+}
+
 Gridifier.ConnectorsShifter = function(gridifier, connections, settings) {
     var me = this;
 
@@ -5471,6 +5546,10 @@ Gridifier.ConnectorsShifter.prototype._shiftBottomRightConnector = function(conn
             this._createShiftedConnector(mostLeftConnection.x1 - 1, connector.y, connector);
     }
     else {
+        // We shouldn't align prepended HG items to right corner(Layout will break)
+        if(this._settings.isHorizontalGrid() && connector.type == Gridifier.Connectors.TYPES.PREPEND.DEFAULT)
+            return;
+
         if(connector.x != this._gridifier.getGridX2())
             this._createShiftedConnector(this._gridifier.getGridX2(), connector.y, connector);
     }
@@ -6986,14 +7065,15 @@ Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
                     connections[i].tmpArea = Math.round(connections[i].tmpWidth * connections[i].tmpHeight);
                 }
             }
+            var reversor = -1;
 
             // Sort stability is not important here - each group will be resorted
             // with stable sort in connectionsSorter.sortConnectionsPerReappend function
             var sortByAreasDesc = function (firstConnection, secondConnection) {
                 if(firstConnection.tmpArea > secondConnection.tmpArea)
-                    return -1;
+                    return -1 * reversor;
                 else if(firstConnection.tmpArea < secondConnection.tmpArea)
-                    return 1;
+                    return 1 * reversor;
                 else if(firstConnection.tmpArea == secondConnection.tmpArea)
                     return 0;
             }
@@ -7029,9 +7109,9 @@ Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
             // with same area cannot be created.(So, this sort is stable too)
             areaProps.sort(function (firstArea, secondArea) {
                 if(Dom.toInt(firstArea) > Dom.toInt(secondArea))
-                    return -1;
+                    return -1 * reversor;
                 else if(Dom.toInt(firstArea) < Dom.toInt(secondArea))
-                    return 1;
+                    return 1 * reversor;
                 else if(Dom.toInt(firstArea) == Dom.toInt(secondArea))
                     return 0;
             });
@@ -11921,7 +12001,7 @@ Gridifier.HorizontalGrid.ConnectionsSorter.prototype.sortConnectionsPerReappend 
             this._settings.isCustomAllEmptySpaceSortDispersion()) {
         if(this._settings.isDefaultAppend()) {
             connections.sort(function(firstConnection, secondConnection) {
-                if(firstConnection.x1 == secondConnection.x1) {
+                if(Dom.areRoundedOrFlooredValuesEqual(firstConnection.x1, secondConnection.x1)) {
                     if(firstConnection.y2 < secondConnection.y2)
                         return -1;
                     else 
@@ -11937,7 +12017,7 @@ Gridifier.HorizontalGrid.ConnectionsSorter.prototype.sortConnectionsPerReappend 
         }
         else if(this._settings.isReversedAppend()) {
             connections.sort(function(firstConnection, secondConnection) {
-                if(firstConnection.x1 == secondConnection.x1) {
+                if(Dom.areRoundedOrFlooredValuesEqual(firstConnection.x1, secondConnection.x1)) {
                     if(firstConnection.y1 > secondConnection.y1)
                         return -1;
                     else
@@ -11977,6 +12057,10 @@ Gridifier.HorizontalGrid.ConnectorsCleaner = function(connectors, connections, s
         me._connectors = connectors;
         me._connections = connections;
         me._settings = settings;
+
+        me._connectorsNormalizer = new Gridifier.ConnectorsNormalizer(
+            me._connections, me._connectors, me._settings
+        );
 
         if(me._settings.isDisabledSortDispersion()) {
             me.setConnectorInsideOrBeforeItemIntersectionStrategy();
@@ -12038,16 +12122,21 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersect
     for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
         for(var j = 0; j < mappedConnector.connectionIndexes[i].length; j++) {
             var connection = connections[mappedConnector.connectionIndexes[i][j]];
+            this._connectorsNormalizer.applyConnectionRoundingPerConnector(connection, mappedConnector);
 
             if(this.isConnectorInsideOrBeforeItemIntersectionStrategy())
-                var horizontalIntersectionCond = (mappedConnector.x >= connection.x1);
+                var horizontalIntersectionCond = mappedConnector.x >= connection.x1;
             else if(this.isConnectorInsideItemIntersectionStrategy())
-                var horizontalIntersectionCond = (mappedConnector.x >= connection.x1 
-                                                  && mappedConnector.x <= connection.x2);
+                var horizontalIntersectionCond = mappedConnector.x >= connection.x1
+                                                  && mappedConnector.x <= connection.x2;
 
             if(mappedConnector.y >= connection.y1 && mappedConnector.y <= connection.y2
-                && horizontalIntersectionCond)
+                && horizontalIntersectionCond) {
+                this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
                 return true;
+            }
+
+            this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
         }
     }
 
@@ -12111,16 +12200,21 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersect
     for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
         for(var j = 0; j < mappedConnector.connectionIndexes[i].length; j++) {
             var connection = connections[mappedConnector.connectionIndexes[i][j]];
+            this._connectorsNormalizer.applyConnectionRoundingPerConnector(connection, mappedConnector);
 
             if(this.isConnectorInsideOrBeforeItemIntersectionStrategy())
-                var horizontalIntersectionCond = (mappedConnector.x <= connection.x2);
+                var horizontalIntersectionCond = mappedConnector.x <= connection.x2;
             else if(this.isConnectorInsideItemIntersectionStrategy())
-                var horizontalIntersectionCond = (mappedConnector.x <= connection.x2
-                                                  && mappedConnector.x >= connection.x1);
+                var horizontalIntersectionCond = mappedConnector.x <= connection.x2
+                                                  && mappedConnector.x >= connection.x1;
 
             if(mappedConnector.y >= connection.y1 && mappedConnector.y <= connection.y2
-                && horizontalIntersectionCond)
+                && horizontalIntersectionCond) {
+                this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
                 return true;
+            }
+
+            this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
         }
     }
     
@@ -12325,7 +12419,7 @@ Gridifier.HorizontalGrid.ConnectorsSorter.prototype.getConnectors = function() {
 Gridifier.HorizontalGrid.ConnectorsSorter.prototype.sortConnectorsForPrepend = function(prependType) {
     var me = this;
     this._connectors.sort(function(firstConnector, secondConnector) {
-        if(firstConnector.x == secondConnector.x) {
+        if(Dom.areRoundedOrCeiledValuesEqual(firstConnector.x, secondConnector.x)) {
             if(prependType == Gridifier.PREPEND_TYPES.DEFAULT_PREPEND) {
                 if(firstConnector.y < secondConnector.y)
                     return 1;
@@ -12351,7 +12445,7 @@ Gridifier.HorizontalGrid.ConnectorsSorter.prototype.sortConnectorsForPrepend = f
 Gridifier.HorizontalGrid.ConnectorsSorter.prototype.sortConnectorsForAppend = function(appendType) {
     var me = this;
     this._connectors.sort(function(firstConnector, secondConnector) {
-        if(firstConnector.x == secondConnector.x) {
+        if(Dom.areRoundedOrFlooredValuesEqual(firstConnector.x, secondConnector.x)) {
             if(appendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND) {
                 if(firstConnector.y < secondConnector.y)
                     return -1;
@@ -13060,7 +13154,7 @@ Gridifier.HorizontalGrid.ReversedPrepender.prototype._initConnectors = function(
 
 Gridifier.HorizontalGrid.ReversedPrepender.prototype.createInitialConnector = function() {
     this._connectors.addPrependConnector(
-        Gridifier.Connectors.SIDES.BOTTOM.RIGHT,
+        Gridifier.Connectors.SIDES.LEFT.TOP,
         0,
         0
     );
@@ -17344,7 +17438,6 @@ Gridifier.VerticalGrid.Appender.prototype._addItemConnectors = function(itemCoor
 
 Gridifier.VerticalGrid.Appender.prototype._createConnectionPerItem = function(item) {
     var sortedConnectors = this._filterConnectorsPerNextConnection();
-
     var itemConnectionCoords = this._findItemConnectionCoords(item, sortedConnectors);
     var connection = this._connections.add(item, itemConnectionCoords);
 
@@ -17388,7 +17481,7 @@ Gridifier.VerticalGrid.Appender.prototype._filterConnectorsPerNextConnection = f
 
 Gridifier.VerticalGrid.Appender.prototype._findItemConnectionCoords = function(item, sortedConnectors) {
     var itemConnectionCoords = null;
-    
+
     for(var i = 0; i < sortedConnectors.length; i++) {
         var itemCoords = this._itemCoordsExtractor.connectorToAppendedItemCoords(item, sortedConnectors[i]);
 
@@ -18099,8 +18192,8 @@ Gridifier.VerticalGrid.ConnectionsSorter.prototype.sortConnectionsPerReappend = 
             this._settings.isCustomAllEmptySpaceSortDispersion()) {
         if(this._settings.isDefaultAppend()) {
             connections.sort(function(firstConnection, secondConnection) {
-                if(firstConnection.y1 == secondConnection.y1) {
-                    if(firstConnection.x2 > secondConnection.x2)
+                if(Dom.areRoundedOrFlooredValuesEqual(firstConnection.y1, secondConnection.y1)) {
+                    if(firstConnection.x2 >secondConnection.x2)
                         return -1;
                     else 
                         return 1;
@@ -18115,7 +18208,7 @@ Gridifier.VerticalGrid.ConnectionsSorter.prototype.sortConnectionsPerReappend = 
         }
         else if(this._settings.isReversedAppend()) {
             connections.sort(function(firstConnection, secondConnection) {
-                if(firstConnection.y1 == secondConnection.y1) {
+                if(Dom.areRoundedOrFlooredValuesEqual(firstConnection.y1, secondConnection.y1)) {
                     if(firstConnection.x1 < secondConnection.x1)
                         return -1;
                     else
@@ -18325,6 +18418,8 @@ Gridifier.VerticalGrid.ConnectorsCleaner = function(connectors, connections, set
     this._connections = null;
     this._settings = null;
 
+    this._connectorsNormalizer = null;
+
     this._connectionItemIntersectionStrategy = null;
 
     this._css = {
@@ -18334,6 +18429,10 @@ Gridifier.VerticalGrid.ConnectorsCleaner = function(connectors, connections, set
         me._connectors = connectors;
         me._connections = connections;
         me._settings = settings;
+
+        me._connectorsNormalizer = new Gridifier.ConnectorsNormalizer(
+            me._connections, me._connectors, me._settings
+        );
 
         if(me._settings.isDisabledSortDispersion()) {
             me.setConnectorInsideOrBeforeItemIntersectionStrategy();
@@ -18395,16 +18494,21 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersectin
     for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
         for(var j = 0; j < mappedConnector.connectionIndexes[i].length; j++) {
             var connection = connections[mappedConnector.connectionIndexes[i][j]];
+            this._connectorsNormalizer.applyConnectionRoundingPerConnector(connection, mappedConnector);
 
             if(this.isConnectorInsideOrBeforeItemIntersectionStrategy())
-                var verticalIntersectionCond = (mappedConnector.y >= connection.y1);
+                var verticalIntersectionCond = mappedConnector.y >= connection.y1;
             else if(this.isConnectorInsideItemIntersectionStrategy())
-                var verticalIntersectionCond = (mappedConnector.y >= connection.y1 
-                                                && mappedConnector.y <= connection.y2);
+                var verticalIntersectionCond = mappedConnector.y >= connection.y1
+                                                && mappedConnector.y <= connection.y2;
 
             if(mappedConnector.x >= connection.x1 && mappedConnector.x <= connection.x2
-                && verticalIntersectionCond)
+                && verticalIntersectionCond) {
+                this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
                 return true;
+            }
+
+            this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
         }
     }
 
@@ -18468,19 +18572,24 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype._isMappedConnectorIntersectin
     for(var i = 0; i < mappedConnector.connectionIndexes.length; i++) {
         for(var j = 0; j < mappedConnector.connectionIndexes[i].length; j++) {
             var connection = connections[mappedConnector.connectionIndexes[i][j]];
+            this._connectorsNormalizer.applyConnectionRoundingPerConnector(connection, mappedConnector);
 
             if(this.isConnectorInsideOrBeforeItemIntersectionStrategy())
-                var verticalIntersectionCond = (mappedConnector.y <= connection.y2);
+                var verticalIntersectionCond = ((mappedConnector.y) <= (connection.y2));
             else if(this.isConnectorInsideItemIntersectionStrategy())
-                var verticalIntersectionCond = (mappedConnector.y <= connection.y2
-                                                && mappedConnector.y >= connection.y1);
+                var verticalIntersectionCond = ((mappedConnector.y) <= (connection.y2)
+                && (mappedConnector.y) >= connection.y1);
 
             if(mappedConnector.x >= connection.x1 && mappedConnector.x <= connection.x2
-                && verticalIntersectionCond)
+                && verticalIntersectionCond) {
+                this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
                 return true;
+            }
+
+            this._connectorsNormalizer.unapplyConnectionRoundingPerConnector(connection, mappedConnector);
         }
     }
-    
+
     return false;
 }
 
@@ -18682,7 +18791,7 @@ Gridifier.VerticalGrid.ConnectorsSorter.prototype.getConnectors = function() {
 Gridifier.VerticalGrid.ConnectorsSorter.prototype.sortConnectorsForPrepend = function(prependType) {
     var me = this;
     this._connectors.sort(function(firstConnector, secondConnector) {
-        if(firstConnector.y == secondConnector.y) {
+         if(Dom.areRoundedOrCeiledValuesEqual(firstConnector.y, secondConnector.y)) {
             if(prependType == Gridifier.PREPEND_TYPES.DEFAULT_PREPEND) {
                 if(firstConnector.x > secondConnector.x)
                     return 1;
@@ -18707,8 +18816,9 @@ Gridifier.VerticalGrid.ConnectorsSorter.prototype.sortConnectorsForPrepend = fun
 
 Gridifier.VerticalGrid.ConnectorsSorter.prototype.sortConnectorsForAppend = function(appendType) {
     var me = this;
+
     this._connectors.sort(function(firstConnector, secondConnector) {
-        if(firstConnector.y == secondConnector.y) {
+        if(Dom.areRoundedOrFlooredValuesEqual(firstConnector.y, secondConnector.y)) {
             if(appendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND) {
                 if(firstConnector.x > secondConnector.x)
                     return -1;
@@ -18785,7 +18895,7 @@ Gridifier.VerticalGrid.ItemCoordsExtractor.prototype.getItemTargetSizes = functi
 
 Gridifier.VerticalGrid.ItemCoordsExtractor.prototype.connectorToAppendedItemCoords = function(item, connector) {
     var targetSizes = this._getItemSizesPerAppend(item);
-    
+
     return {
         x1: parseFloat(connector.x - targetSizes.targetWidth + 1),
         x2: parseFloat(connector.x),
