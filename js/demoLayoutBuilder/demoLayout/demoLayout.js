@@ -63,7 +63,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierSettings.gridTransformType = "expand";
 
         //me._gridifierSettings.prependType = "mirroredPrepend";
-        //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
+       // me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         //me._gridifierSettings.alignmentType = "center";
@@ -87,6 +87,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             //me._gridifier.setToggleAnimationMsDuration(1000);
             //me._gridifier.setCoordsChangeAnimationMsDuration(1000);
             //me._gridifier.setToggle("slideClockwiseFromCornersWithFade");
+            //me._gridifier.setCoordsChanger("CSS3Translate3D");
         }, 500);
 
         //me._gridifierSettings.appendType = "reversedAppend";
@@ -455,7 +456,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             //me._gridifier.toggleBy("rotateXWithFade");
            //me._gridifier.toggleBy("rotateX");
             //me._gridifier.setCoordsChanger("CSS3Translate3DClones");
-            //me._gridifier.toggleBy("slideTop");
+            me._gridifier.toggleBy("slideClockwiseFromCornersWithFade");
+            //me._gridifier.toggleBy("scale");
         }, 500);
         //me._gridifier.setCoordsChanger("CSS3Position");
         //me._gridifier.setItemWidthPercentageAntialias(0.1);

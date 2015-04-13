@@ -77,7 +77,15 @@ Gridifier.CoreSettingsParser.prototype.parseAppendType = function() {
         );
     }
 
-    var appendType = this._settings.appendType;
+    if(this._settingsCore.isHorizontalGrid())
+        var appendType = this._settings.appendType;
+    else if(this._settingsCore.isVerticalGrid()) {
+        if(this._settings.appendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND)
+            appendType = Gridifier.APPEND_TYPES.REVERSED_APPEND;
+        else if(this._settings.appendType == Gridifier.APPEND_TYPES.REVERSED_APPEND)
+            appendType = Gridifier.APPEND_TYPES.DEFAULT_APPEND;
+    }
+
     return appendType;
 }
 

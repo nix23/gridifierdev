@@ -418,10 +418,22 @@ Gridifier.prototype.disableZIndexesUpdates = function() {
 
 Gridifier.prototype.setToggleAnimationMsDuration = function(animationMsDuration) {
     this._settings.setToggleAnimationMsDuration(animationMsDuration);
+    return this;
 }
 
 Gridifier.prototype.setCoordsChangeAnimationMsDuration = function(animationMsDuration) {
     this._settings.setCoordsChangeAnimationMsDuration(animationMsDuration);
+    return this;
+}
+
+Gridifier.prototype.setToggleTransitionTiming = function(transitionTiming) {
+    this._settings.setToggleTransitionTiming(transitionTiming);
+    return this;
+}
+
+Gridifier.prototype.setCoordsChangeTransitionTiming = function(transitionTiming) {
+    this._settings.setCoordsChangeTransitionTiming(transitionTiming);
+    return this;
 }
 
 Gridifier.prototype.setAlignmentType = function(alignmentType) {
@@ -774,7 +786,7 @@ Gridifier.DRAGIFIER_MODES = {INTERSECTION: "intersection", DISCRETIZATION: "disc
 
 Gridifier.OPERATIONS = {PREPEND: 0, REVERSED_PREPEND: 1, APPEND: 2, REVERSED_APPEND: 3, MIRRORED_PREPEND: 4};
 Gridifier.DEFAULT_TOGGLE_ANIMATION_MS_DURATION = 500;
-Gridifier.DEFAULT_COORDS_CHANGE_ANIMATION_MS_DURATION = 500;
+Gridifier.DEFAULT_COORDS_CHANGE_ANIMATION_MS_DURATION = 300;
 Gridifier.DEFAULT_TOGGLE_TRANSITION_TIMING = "ease";
 Gridifier.DEFAULT_COORDS_CHANGE_TRANSITION_TIMING = "ease";
 

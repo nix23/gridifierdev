@@ -251,9 +251,16 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.DELAYED_RENDER) {
             var delay = this._scheduledConnectionsToProcessData[i].delay;
             var coordsChanger = this._settings.getCoordsChanger();
-            var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
             var eventEmitter = this._settings.getEventEmitter();
-            var coordsChangeTransitionTiming = this._settings.getCoordsChangeTransitionTiming();
+
+            if(Dom.hasAttribute(connectionToProcess.item, Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_WITH_COORDS_CHANGE_RUNNING)) {
+                var animationMsDuration = this._settings.getToggleAnimationMsDuration();
+                var coordsChangeTransitionTiming = this._settings.getToggleTransitionTiming();
+            }
+            else {
+                var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
+                var coordsChangeTransitionTiming = this._settings.getCoordsChangeTransitionTiming();
+            }
 
             var me = this;
             (function(item, animationMsDuration, eventEmitter, transitionTiming, delay) {
@@ -283,9 +290,16 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER ||
                 processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED) {
             var coordsChanger = this._settings.getCoordsChanger();
-            var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
             var eventEmitter = this._settings.getEventEmitter();
-            var coordsChangeTransitionTiming = this._settings.getCoordsChangeTransitionTiming();
+
+            if(Dom.hasAttribute(connectionToProcess.item, Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_WITH_COORDS_CHANGE_RUNNING)) {
+                var animationMsDuration = this._settings.getToggleAnimationMsDuration();
+                var coordsChangeTransitionTiming = this._settings.getToggleTransitionTiming();
+            }
+            else {
+                var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
+                var coordsChangeTransitionTiming = this._settings.getCoordsChangeTransitionTiming();
+            }
 
             coordsChanger(
                 connectionToProcess.item,

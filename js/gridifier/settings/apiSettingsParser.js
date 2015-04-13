@@ -174,7 +174,7 @@ Gridifier.ApiSettingsParser.prototype.parseFilterOptions = function(filterApi) {
 
 Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coordsChangerApi) {
     if(!this._settings.hasOwnProperty("coordsChanger")) {
-        coordsChangerApi.setCoordsChangerFunction("CSS3Translate3D");
+        coordsChangerApi.setCoordsChangerFunction("CSS3Translate3DWithRounding");
         return;
     }
 
@@ -196,7 +196,7 @@ Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coord
             coordsChangerApi.addCoordsChangerFunction(coordsChangerFunctionName, coordsChangerFunction);
         }
         
-        coordsChangerApi.setCoordsChangerFunction("CSS3Translate3D");
+        coordsChangerApi.setCoordsChangerFunction("CSS3Translate3DWithRounding");
     }
     else {
         new Gridifier.Error(

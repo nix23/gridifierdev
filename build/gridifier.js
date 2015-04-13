@@ -2113,7 +2113,7 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
 Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function() {
     var me = this;
 
-    var createCoordsChanger = function(translateXNormalizer, translateYNormalizer) {
+    var createCoordsChanger = function(translateXNormalizer, translateYNormalizer, beforeInit) {
         return function(item,
                         newLeft,
                         newTop,
@@ -2133,6 +2133,7 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function(
 
             var isItemInitializationCall = isItemInitializationCall || false;
             if(isItemInitializationCall) {
+                beforeInit(item, newLeft, newTop);
                 Dom.css3.transform(item, "scale3d(1,1,1) translate(0px,0px)");
                 return;
             }
@@ -2194,17 +2195,24 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function(
     };
 
     var returnOriginalTranslate = function(translate) { return translate; };
-    this._coordsChangerFunctions.CSS3Translate = createCoordsChanger(returnOriginalTranslate, returnOriginalTranslate);
+    var returnVoid = function(item, initLeft, initTop) { return; };
+    this._coordsChangerFunctions.CSS3Translate = createCoordsChanger(returnOriginalTranslate, returnOriginalTranslate, returnVoid);
     this._coordsChangerFunctions.CSS3TranslateWithRounding = createCoordsChanger(
         function(translateX) { return Math.round(translateX); },
-        function(translateY) { return Math.round(translateY); }
+        function(translateY) { return Math.round(translateY); },
+        function(item, initLeft, initTop) {
+            Dom.css.set(item, {
+                left: Math.round(parseFloat(initLeft)) + "px",
+                top: Math.round(parseFloat(initTop)) + "px"
+            });
+        }
     );
 }
 
 Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = function() {
     var me = this;
 
-    var createCoordsChanger = function(translateXNormalizer, translateYNormalizer) {
+    var createCoordsChanger = function(translateXNormalizer, translateYNormalizer, beforeInit) {
         return function (item,
                          newLeft,
                          newTop,
@@ -2224,6 +2232,7 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
 
             var isItemInitializationCall = isItemInitializationCall || false;
             if(isItemInitializationCall) {
+                beforeInit(item, newLeft, newTop);
                 Dom.css3.transform(item, "scale3d(1,1,1) translate3d(0px,0px,0px)");
                 return;
             }
@@ -2287,10 +2296,17 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
     }
 
     var returnOriginalTranslate = function(translate) { return translate; };
-    this._coordsChangerFunctions.CSS3Translate3D = createCoordsChanger(returnOriginalTranslate, returnOriginalTranslate);
+    var returnVoid = function(item, initLeft, initTop) { return; };
+    this._coordsChangerFunctions.CSS3Translate3D = createCoordsChanger(returnOriginalTranslate, returnOriginalTranslate, returnVoid);
     this._coordsChangerFunctions.CSS3Translate3DWithRounding = createCoordsChanger(
         function(translateX) { return Math.round(translateX); },
-        function(translateY) { return Math.round(translateY); }
+        function(translateY) { return Math.round(translateY); },
+        function(item, initLeft, initTop) {
+            Dom.css.set(item, {
+                left: Math.round(parseFloat(initLeft)) + "px",
+                top: Math.round(parseFloat(initTop)) + "px"
+            });
+        }
     );
 }
 

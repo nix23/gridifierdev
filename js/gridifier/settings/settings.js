@@ -185,6 +185,14 @@ Gridifier.Settings.prototype.getCoordsChangeTransitionTiming = function() {
     return this._coordsChangeTransitionTiming;
 }
 
+Gridifier.Settings.prototype.setToggleTransitionTiming = function(transitionTiming) {
+    this._toggleTransitionTiming = transitionTiming;
+}
+
+Gridifier.Settings.prototype.setCoordsChangeTransitionTiming = function(transitionTiming) {
+    this._coordsChangeTransitionTiming = transitionTiming;
+}
+
 Gridifier.Settings.prototype.setToggleAnimationMsDuration = function(animationMsDuration) {
     this._toggleAnimationMsDuration = animationMsDuration;
 }

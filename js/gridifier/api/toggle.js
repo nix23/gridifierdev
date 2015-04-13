@@ -52,6 +52,7 @@ Gridifier.Api.Toggle = function(settings, gridifier, eventEmitter, sizesResolver
 }
 
 Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING = "data-gridifier-toggle-animation-is-running";
+Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_WITH_COORDS_CHANGE_RUNNING = "data-gridifier-toggle-animation-with-coords-change-is-running";
 
 Gridifier.Api.Toggle.prototype.setCollectorInstance = function(collector) {
     this._rotateApi.setCollectorInstance(collector);

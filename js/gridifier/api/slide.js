@@ -47,6 +47,8 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
     var targetLeft = connectionLeft;
     var targetTop = connectionTop;
 
+    this._markAsToggleAnimationWithCoordsChange(item);
+
     if(animateFade)
         var animateFadeTargetItem = (this._gridifier.hasItemBindedClone(item)) ? this._gridifier.getItemClone(item) : item;
 
@@ -83,6 +85,7 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
     timeouter.add(item, slideOutTimeout);
 
     var completeSlideOutTimeout = setTimeout(function() {
+        me._unmarkAsToggleAnimationWithCoordsChange(item);
         item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
         eventEmitter.emitShowEvent(item);
 
@@ -109,6 +112,7 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
                                                            transitionTiming,
                                                            animateFade) {
     item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
+    this._markAsToggleAnimationWithCoordsChange(item);
 
     if(animateFade) {
         var animateFadeTargetItem = (this._gridifier.hasItemBindedClone(item)) ? this._gridifier.getItemClone(item) : item;
@@ -142,11 +146,30 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
             Dom.css3.transition(animateFadeTargetItem, "");
         }
 
+        me._unmarkAsToggleAnimationWithCoordsChange(item);
         item.style.visibility = "hidden";
         item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
         eventEmitter.emitHideEvent(item);
     }, animationMsDuration + 20);
     timeouter.add(item, slideInTimeout);
+}
+
+Gridifier.Api.Slide.prototype._markAsToggleAnimationWithCoordsChange = function(item) {
+    item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_WITH_COORDS_CHANGE_RUNNING, "yes");
+    if(this._gridifier.hasItemBindedClone(item)) {
+        this._gridifier.getItemClone(item).setAttribute(
+            Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_WITH_COORDS_CHANGE_RUNNING, "yes"
+        );
+    }
+}
+
+Gridifier.Api.Slide.prototype._unmarkAsToggleAnimationWithCoordsChange = function(item) {
+    item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_WITH_COORDS_CHANGE_RUNNING);
+    if(this._gridifier.hasItemBindedClone(item)) {
+        this._gridifier.getItemClone(item).removeAttribute(
+            Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_WITH_COORDS_CHANGE_RUNNING
+        );
+    }
 }
 
 Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, alignBottom, reverseDirection, animateFade) {
