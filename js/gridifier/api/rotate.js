@@ -149,22 +149,22 @@ Gridifier.Api.Rotate.prototype._rotate = function(item,
     var initRotateTimeout = setTimeout(function() {
         Dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + rotateAngles[2] + "deg");
         Dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + rotateAngles[3] + "deg");
-    }, 20);
+    }, 40);
     // No sence to sync timeouts here -> Animations are performed on clones
     //timeouter.add(item, initRotateTimeout);
 
     this._initFadeEffect(scene, isShowing, isHiding, animationMsDuration);
 
     // A little helper to reduce blink effect after animation finish
-    if(animationMsDuration > 400) {
-       var prehideItemTimeout = setTimeout(function () {
-          if (isShowing)
-             item.style.visibility = "visible";
-          else if (isHiding)
-             item.style.visibility = "hidden";
-       }, animationMsDuration - 50);
+    //if(animationMsDuration > 400) {
+       //var prehideItemTimeout = setTimeout(function () {
+       //   if (isShowing)
+       //      item.style.visibility = "visible";
+       //   else if (isHiding)
+       //      item.style.visibility = "hidden";
+       //}, animationMsDuration - 50);
        //timeouter.add(item, prehideItemTimeout);
-    }
+    //}
 
     var completeRotateTimeout = setTimeout(function() {
         scene.parentNode.removeChild(scene);
@@ -180,7 +180,7 @@ Gridifier.Api.Rotate.prototype._rotate = function(item,
             item.style.visibility = "hidden";
             me._eventEmitter.emitHideEvent(item);
         }
-    }, animationMsDuration + 20);
+    }, animationMsDuration + 40);
     //timeouter.add(item, completeRotateTimeout);
 }
 
@@ -309,7 +309,7 @@ Gridifier.Api.Rotate.prototype._initFadeEffect = function(scene, isShowing, isHi
                 Prefixer.getForCSS('opacity', scene) + " " + animationMsDuration + "ms " + me._transitionTiming
             );
             Dom.css3.opacity(scene, targetOpacity);
-        }, 20);
+        }, 40);
     }
     else if(this._rotateFadeType == Gridifier.Api.Rotate.ROTATE_FADE_TYPES.ON_HIDE_MIDDLE) {
         if(!isHiding)
