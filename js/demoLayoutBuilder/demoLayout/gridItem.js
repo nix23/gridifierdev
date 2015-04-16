@@ -157,6 +157,7 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         //"margin": "20px",
         //"box-sizing": (isBorderBoxBoxSizing) ? "border-box" : "content-box",
         "box-sizing": "border-box",
+        //margin: "10px",
 
         // "-webkit-box-shadow": "2px 2px 2px rgb(60,60,60)",
         // "box-shadow": "2px 2px 2px rgb(60,60,60)",

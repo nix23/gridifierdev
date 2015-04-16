@@ -98,10 +98,6 @@ Gridifier.Collector.prototype.attachToGrid = function(items) {
         var items = [items];
     
     for(var i = 0; i < items.length; i++) {
-        Dom.css.set(items[i], {
-            position: "absolute"
-        });
-
         if(!this._settings.shouldDisableItemHideOnGridAttach())
             Dom.css.set(items[i], {"visibility": "hidden"});
     }

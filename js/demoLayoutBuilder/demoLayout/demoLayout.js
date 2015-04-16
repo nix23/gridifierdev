@@ -453,10 +453,10 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
            //me._gridifier.toggleBy("scaleWithFade");
             //me._gridifier.toggleBy("scaleWithFade");
             //me._gridifier.toggleBy("fade");
-            //me._gridifier.toggleBy("rotateXWithFade");
+            me._gridifier.toggleBy("rotateXWithFade");
            //me._gridifier.toggleBy("rotateX");
             //me._gridifier.setCoordsChanger("CSS3Translate3DClones");
-            me._gridifier.toggleBy("slideClockwiseFromCornersWithFade");
+            //me._gridifier.toggleBy("slideClockwiseFromCornersWithFade");
             //me._gridifier.toggleBy("scale");
         }, 500);
         //me._gridifier.setCoordsChanger("CSS3Position");

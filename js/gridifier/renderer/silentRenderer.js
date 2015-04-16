@@ -54,6 +54,14 @@ Gridifier.SilentRenderer.prototype.scheduleForSilentRender = function(items) {
     }
 }
 
+// This is required to avoid duplicate triggering silent render per same item.
+// (Causes bags in rotates, etc...)
+Gridifier.SilentRenderer.prototype._preUnscheduleForSilentRender = function(items) {
+    for(var i = 0; i < items.length; i++) {
+        items[i].removeAttribute(Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR);
+    }
+}
+
 Gridifier.SilentRenderer.prototype.unscheduleForSilentRender = function(items, connections) {
     for(var i = 0; i < items.length; i++) {
         items[i].removeAttribute(Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR);
@@ -113,23 +121,31 @@ Gridifier.SilentRenderer.prototype.execute = function(items, batchSize, batchTim
     }
 
     var me = this;
+    if(typeof items != "undefined" && items != null && items) {
+        items = this._collector.toDOMCollection(items);
+        var scheduledItems = [];
+
+        for(var i = 0; i < items.length; i++) {
+            if(this.isScheduledForSilentRender(items[i]))
+                scheduledItems.push(items[i]);
+        }
+
+        items = scheduledItems;
+        this._preUnscheduleForSilentRender(items);
+    }
 
     var scheduleSilentRendererExecution = function() {
         if(typeof items == "undefined" || items == null || !items) {
             var scheduledItems = this.getScheduledForSilentRenderItems();
         }
         else {
-            items = this._collector.toDOMCollection(items);
-            var scheduledItems = [];
-            for(var i = 0; i < items.length; i++) {
-                if(this.isScheduledForSilentRender(items[i]))
-                    scheduledItems.push(items[i]);
-            }
+            var scheduledItems = items;
         }
 
         if(scheduledItems.length == 0)
             return;
 
+        this._preUnscheduleForSilentRender(scheduledItems);
         var scheduledConnections = [];
         for (var i = 0; i < scheduledItems.length; i++) {
             var scheduledItemConnection = this._connections.findConnectionByItem(scheduledItems[i], true);

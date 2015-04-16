@@ -65,7 +65,7 @@ Gridifier.CoreSettingsParser.prototype.parsePrependType = function() {
 
 Gridifier.CoreSettingsParser.prototype.parseAppendType = function() {
     if(!this._settings.hasOwnProperty("appendType")) {
-        var appendType = Gridifier.APPEND_TYPES.DEFAULT_APPEND;
+        var appendType = Gridifier.APPEND_TYPES.REVERSED_APPEND;
         return appendType;
     }
 
@@ -293,6 +293,8 @@ Gridifier.CoreSettingsParser.prototype.parseGridTransformType = function() {
 
     if(this._settings.gridTransformType == Gridifier.GRID_TRANSFORM_TYPES.EXPAND)
         return Gridifier.GRID_TRANSFORM_TYPES.EXPAND;
+    else if(this._settings.gridTransformType == Gridifier.GRID_TRANSFORM_TYPES.DISABLED)
+        return Gridifier.GRID_TRANSFORM_TYPES.DISABLED;
     else
         return Gridifier.GRID_TRANSFORM_TYPES.FIT;
 }

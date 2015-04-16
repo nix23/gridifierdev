@@ -186,12 +186,18 @@ Gridifier.Api.Rotate.prototype._rotate = function(item,
 
 Gridifier.Api.Rotate.prototype._createScene = function(item, grid, left, top) {
     var scene = document.createElement("div");
+    var itemComputedCSS = SizesResolver.getComputedCSSWithMaybePercentageSizes(item);
+
     Dom.css.set(scene, {
         width: this._sizesResolverManager.outerWidth(item) + "px",
         height: this._sizesResolverManager.outerHeight(item) + "px",
         position: "absolute",
         left: left,
-        top: top
+        top: top,
+        marginLeft: itemComputedCSS.marginLeft,
+        marginRight: itemComputedCSS.marginRight,
+        marginTop: itemComputedCSS.marginTop,
+        marginBottom: itemComputedCSS.marginBottom
     });
     Dom.css3.perspective(scene, this._settings.getRotatePerspective()); 
     grid.appendChild(scene);
@@ -214,13 +220,33 @@ Gridifier.Api.Rotate.prototype._createFrames = function(scene) {
 Gridifier.Api.Rotate.prototype._createItemClone = function(item) {
     var itemClone = item.cloneNode(true);
     this._collector.markItemAsRestrictedToCollect(itemClone);
+
+    var itemComputedCSS = SizesResolver.getComputedCSSWithMaybePercentageSizes(item);
+    var originalHeight = parseInt(itemComputedCSS.height);
+
     Dom.css.set(itemClone, {
         left: "0px",
         top: "0px",
         visibility: "visible",
         width: this._sizesResolverManager.outerWidth(item) + "px",
-        height: this._sizesResolverManager.outerHeight(item) + "px"
+        height: this._sizesResolverManager.outerHeight(item) + "px",
+        marginLeft: 0,
+        marginRight: 0,
+        marginTop: 0,
+        marginBottom: 0
     });
+
+    // If original height == 0, paddingBottom is setted up instead of height
+    // (We should drop paddings, for rotate we should use sizes resolved through
+    //  sizesResolverManager in px)
+    if(originalHeight == 0) {
+        Dom.css.set(itemClone, {
+            paddingLeft: 0,
+            paddingRight: 0,
+            paddingTop: 0,
+            paddingBottom: 0
+        });
+    }
 
     return itemClone;
 }
@@ -283,7 +309,7 @@ Gridifier.Api.Rotate.prototype._initFadeEffect = function(scene, isShowing, isHi
                 Prefixer.getForCSS('opacity', scene) + " " + animationMsDuration + "ms " + me._transitionTiming
             );
             Dom.css3.opacity(scene, targetOpacity);
-        }, 0);
+        }, 20);
     }
     else if(this._rotateFadeType == Gridifier.Api.Rotate.ROTATE_FADE_TYPES.ON_HIDE_MIDDLE) {
         if(!isHiding)
