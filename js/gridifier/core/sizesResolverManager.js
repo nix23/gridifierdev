@@ -424,8 +424,11 @@ Gridifier.SizesResolverManager.prototype.copyComputedStyle = function(sourceItem
                 if(/.*px.*/.test(childNodeComputedStyle.top))
                     targetItem.childNodes[i].style.top = me.positionTop(sourceItem.childNodes[i]) + "px";
 
+                var childNodeRawSizes = SizesResolver.getComputedCSSWithMaybePercentageSizes(sourceItem.childNodes[i]);
+
                 targetItem.childNodes[i].style.width = me.outerWidth(sourceItem.childNodes[i]) + "px";
-                targetItem.childNodes[i].style.height = me.outerHeight(sourceItem.childNodes[i]) + "px";
+                if(Dom.toInt(childNodeRawSizes.height) != 0)
+                    targetItem.childNodes[i].style.height = me.outerHeight(sourceItem.childNodes[i]) + "px";
             }
         }
     }

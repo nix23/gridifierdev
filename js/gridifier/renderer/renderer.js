@@ -142,7 +142,7 @@ Gridifier.Renderer.prototype.renderConnections = function(connections, exceptCon
 // will be called before slideOutTimeout without a delay.(Will move items instantly)
 Gridifier.Renderer.prototype.renderConnectionsAfterDelay = function(connections, delay) {
     var me = this;
-    var delay = delay || 20;
+    var delay = delay || 40;
 
     for(var i = 0; i < connections.length; i++) {
         this._rendererSchedulator.reinit();

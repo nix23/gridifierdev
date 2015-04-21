@@ -443,14 +443,14 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
                     Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms " + transitionTiming
                 );
                 Dom.css3.opacity(item, 1);
-            }, 20);
+            }, 40);
             timeouter.add(item, initFadeTimeout);
 
             var completeFadeTimeout = setTimeout(function() {
                 itemClonesManager.unlockCloneOnToggle(item);
                 item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
                 eventEmitter.emitShowEvent(item);
-            }, animationMsDuration + 40);
+            }, animationMsDuration + 60);
             timeouter.add(item, completeFadeTimeout);
         },
 

@@ -25,6 +25,7 @@ Gridifier.SizesTransformer.ItemNewRawSizesFinder = function(sizesResolverManager
 }
 
 Gridifier.SizesTransformer.ItemNewRawSizesFinder.TOGGLE_SIZES_TOGGLED_ITEM_SIZES_DATA_ATTR = "data-toggle-sizes-item-sizes-are-toggled";
+Gridifier.SizesTransformer.ItemNewRawSizesFinder.TOGGLE_SIZES_TOGGLED_ITEM_SIZES_CLASS = "gridifier-toggled-item";
 Gridifier.SizesTransformer.ItemNewRawSizesFinder.TOGGLE_SIZES_ORIGINAL_WIDTH_DATA_ATTR = "data-toggle-sizes-original-width";
 Gridifier.SizesTransformer.ItemNewRawSizesFinder.TOGGLE_SIZES_ORIGINAL_HEIGHT_DATA_ATTR = "data-toggle-sizes-original-height";
 Gridifier.SizesTransformer.ItemNewRawSizesFinder.EMPTY_DATA_ATTR_VALUE = "gridifier-data";
@@ -45,12 +46,19 @@ Gridifier.SizesTransformer.ItemNewRawSizesFinder.prototype.initConnectionTransfo
         var targetValueRegexp = new RegExp(/^\d*\.?\d*$/);
         
         if(typeof newSize != "undefined" && typeof newSize != "boolean" && typeof newSize != null) {
+            var sizeSubexpression = 0;
+            if(newSize.search(",") !== -1) {
+                var newSizeParts = newSize.split(",");
+                newSize = newSizeParts[0];
+                sizeSubexpression = Dom.toInt(newSizeParts[1]);
+            }
+
             if(targetValueWithMultiplicationExpressionRegexp.test(newSize)) {
                 var itemRawSize = me._getItemRawSize(connection.item, targetSizeType, targetSizeTypes);
                 var itemSizeParts = targetValueWithPostfixRegexp.exec(itemRawSize);
                 var multipleBy = targetValueWithMultiplicationExpressionRegexp.exec(newSize)[1];
 
-                return (itemSizeParts[1] * multipleBy) + itemSizeParts[2];
+                return (itemSizeParts[1] * multipleBy) + sizeSubexpression + itemSizeParts[2];
             }
 
             if(targetValueWithDivisionExpressionRegexp.test(newSize)) {
@@ -58,7 +66,7 @@ Gridifier.SizesTransformer.ItemNewRawSizesFinder.prototype.initConnectionTransfo
                 var itemSizeParts = targetValueWithPostfixRegexp.exec(itemRawSize);
                 var divideBy = targetValueWithDivisionExpressionRegexp.exec(newSize)[1];
 
-                return (itemSizeParts[1] / divideBy) + itemSizeParts[2];
+                return (itemSizeParts[1] / divideBy) + sizeSubexpression + itemSizeParts[2];
             }
 
             if(targetValueWithPostfixRegexp.test(newSize))
@@ -133,7 +141,8 @@ Gridifier.SizesTransformer.ItemNewRawSizesFinder.prototype.markConnectionPerTogg
     connection.item.setAttribute(
         itemNewRawSizesFinder.TOGGLE_SIZES_TOGGLED_ITEM_SIZES_DATA_ATTR,
         itemNewRawSizesFinder.EMPTY_DATA_ATTR_VALUE
-    );
+    )
+    Dom.css.addClass(connection.item, itemNewRawSizesFinder.TOGGLE_SIZES_TOGGLED_ITEM_SIZES_CLASS);
 
     var targetSizeTypes = {width: 0, height: 1, paddingBottom: 2};
     var originalItemWidth = this._getItemRawSize(connection.item, targetSizeTypes.width, targetSizeTypes);
@@ -157,4 +166,5 @@ Gridifier.SizesTransformer.ItemNewRawSizesFinder.prototype.unmarkConnectionPerTo
     connection.item.removeAttribute(itemNewSizesFinder.TOGGLE_SIZES_TOGGLED_ITEM_SIZES_DATA_ATTR);
     connection.item.removeAttribute(itemNewSizesFinder.TOGGLE_SIZES_ORIGINAL_WIDTH_DATA_ATTR);
     connection.item.removeAttribute(itemNewSizesFinder.TOGGLE_SIZES_ORIGINAL_HEIGHT_DATA_ATTR);
+    Dom.css.removeClass(connection.item, itemNewSizesFinder.TOGGLE_SIZES_TOGGLED_ITEM_SIZES_CLASS);
 }

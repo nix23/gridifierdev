@@ -81,7 +81,7 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
         coordsChanger(
             item, targetLeft, targetTop, animationMsDuration, eventEmitter, false, false, false, false, transitionTiming
         );
-    }, 20);
+    }, 40);
     timeouter.add(item, slideOutTimeout);
 
     var completeSlideOutTimeout = setTimeout(function() {
@@ -94,7 +94,7 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
                 item, item.style.left, item.style.top, 0, eventEmitter, false, false, false, false, transitionTiming
             );
         }
-    }, animationMsDuration + 40);
+    }, animationMsDuration + 60);
     timeouter.add(item, completeSlideOutTimeout);
 }
 

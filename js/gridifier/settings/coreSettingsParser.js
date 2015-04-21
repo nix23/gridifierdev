@@ -65,7 +65,10 @@ Gridifier.CoreSettingsParser.prototype.parsePrependType = function() {
 
 Gridifier.CoreSettingsParser.prototype.parseAppendType = function() {
     if(!this._settings.hasOwnProperty("appendType")) {
-        var appendType = Gridifier.APPEND_TYPES.REVERSED_APPEND;
+        if(this._settingsCore.isVerticalGrid())
+            var appendType = Gridifier.APPEND_TYPES.REVERSED_APPEND;
+        else if(this._settingsCore.isHorizontalGrid())
+            var appendType = Gridifier.APPEND_TYPES.DEFAULT_APPEND;
         return appendType;
     }
 
