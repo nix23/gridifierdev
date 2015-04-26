@@ -49,8 +49,19 @@ Gridifier.VerticalGrid.ConnectionsVerticalIntersector.prototype.isIntersectingMo
 
         for(var i = 0; i < intersectedConnectionItemIndexes.length; i++) {
             var maybeIntersectableConnection = connections[intersectedConnectionItemIndexes[i]];
+
+            // Looks like additional rounding is required, when we are comparing connection to connection
+            var maybeIntersectableConnectionOriginalY1 = maybeIntersectableConnection.y1;
+            var maybeIntersectableConnectionOriginalY2 = maybeIntersectableConnection.y2;
+
+            maybeIntersectableConnection.y1 = Math.ceil(maybeIntersectableConnection.y1);
+            maybeIntersectableConnection.y2 = Math.floor(maybeIntersectableConnection.y2);
+
             var isAbove = (connection.y1 < maybeIntersectableConnection.y1 && connection.y2 < maybeIntersectableConnection.y1);
             var isBelow = (connection.y1 > maybeIntersectableConnection.y1 && connection.y2 > maybeIntersectableConnection.y2);
+
+            maybeIntersectableConnection.y1 = maybeIntersectableConnectionOriginalY1;
+            maybeIntersectableConnection.y2 = maybeIntersectableConnectionOriginalY2;
 
             if(!isAbove && !isBelow)
                 return true;
@@ -62,6 +73,7 @@ Gridifier.VerticalGrid.ConnectionsVerticalIntersector.prototype.isIntersectingMo
     var intersectedConnectionItemsCount = 0;
     for(var i = 0; i < connections.length; i++) {
         var maybeIntersectableConnection = connections[i];
+
         var isAbove = (itemCoords.y1 < maybeIntersectableConnection.y1 && itemCoords.y2 < maybeIntersectableConnection.y1);
         var isBelow = (itemCoords.y1 > maybeIntersectableConnection.y2 && itemCoords.y2 > maybeIntersectableConnection.y2);
 
@@ -82,6 +94,7 @@ Gridifier.VerticalGrid.ConnectionsVerticalIntersector.prototype.getMostTallFromA
 
     for(var i = 0; i < connections.length; i++) {
         var maybeIntersectableConnection = connections[i];
+
         var isAbove = (itemCoords.y1 < maybeIntersectableConnection.y1 && itemCoords.y2 < maybeIntersectableConnection.y1);
         var isBelow = (itemCoords.y1 > maybeIntersectableConnection.y2 && itemCoords.y2 > maybeIntersectableConnection.y2);
 

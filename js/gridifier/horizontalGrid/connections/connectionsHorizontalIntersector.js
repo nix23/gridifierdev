@@ -49,8 +49,19 @@ Gridifier.HorizontalGrid.ConnectionsHorizontalIntersector.prototype.isIntersecti
 
         for(var i = 0; i < intersectedConnectionItemIndexes.length; i++) {
             var maybeIntersectableConnection = connections[intersectedConnectionItemIndexes[i]];
+
+            // Looks like additional rounding is required, when we are comparing connection to connection
+            var maybeIntersectableConnectionOriginalX1 = maybeIntersectableConnection.x1;
+            var maybeIntersectableConnectionOriginalX2 = maybeIntersectableConnection.x2;
+
+            maybeIntersectableConnection.x1 = Math.ceil(maybeIntersectableConnection.x1);
+            maybeIntersectableConnection.x2 = Math.floor(maybeIntersectableConnection.x2);
+
             var isBefore = (connection.x1 < maybeIntersectableConnection.x1 && connection.x2 < maybeIntersectableConnection.x1);
             var isBehind = (connection.x1 > maybeIntersectableConnection.x2 && connection.x2 > maybeIntersectableConnection.x2);
+
+            maybeIntersectableConnection.x1 = maybeIntersectableConnectionOriginalX1;
+            maybeIntersectableConnection.x2 = maybeIntersectableConnectionOriginalX2;
 
             if(!isBefore && !isBehind)
                 return true;

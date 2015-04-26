@@ -39,6 +39,8 @@ Gridifier.Grid.prototype._extractGrid = function(grid) {
         this._grid = grid.get(0);
     else if(Dom.isNativeDOMObject(grid))
         this._grid = grid;
+    else if(Dom.isArray(grid) && Dom.isNativeDOMObject(grid[0]))
+        this._grid = grid[0];
     else
         new Gridifier.Error(Gridifier.Error.ERROR_TYPES.EXTRACT_GRID);
 }

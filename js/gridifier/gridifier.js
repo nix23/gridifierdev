@@ -313,6 +313,10 @@ Gridifier.prototype.collectAllConnectedItems = function() {
     return this._collector.collectAllConnectedItems();
 }
 
+Gridifier.prototype.collectAllDisconnectedItems = function() {
+    return this._collector.collectAllDisconnectedItems();
+}
+
 Gridifier.prototype.getFirst = function() {
     return this._iterator.getFirst();
 }

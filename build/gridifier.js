@@ -1493,6 +1493,10 @@ Gridifier.prototype.collectAllConnectedItems = function() {
     return this._collector.collectAllConnectedItems();
 }
 
+Gridifier.prototype.collectAllDisconnectedItems = function() {
+    return this._collector.collectAllDisconnectedItems();
+}
+
 Gridifier.prototype.getFirst = function() {
     return this._iterator.getFirst();
 }
@@ -3203,7 +3207,7 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
         coordsChanger(
             item, targetLeft, targetTop, animationMsDuration, eventEmitter, false, false, false, false, transitionTiming
         );
-    }, 20);
+    }, 40);
     timeouter.add(item, slideOutTimeout);
 
     var completeSlideOutTimeout = setTimeout(function() {
@@ -3216,7 +3220,7 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
                 item, item.style.left, item.style.top, 0, eventEmitter, false, false, false, false, transitionTiming
             );
         }
-    }, animationMsDuration + 40);
+    }, animationMsDuration + 60);
     timeouter.add(item, completeSlideOutTimeout);
 }
 
@@ -4554,14 +4558,14 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
                     Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms " + transitionTiming
                 );
                 Dom.css3.opacity(item, 1);
-            }, 20);
+            }, 40);
             timeouter.add(item, initFadeTimeout);
 
             var completeFadeTimeout = setTimeout(function() {
                 itemClonesManager.unlockCloneOnToggle(item);
                 item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
                 eventEmitter.emitShowEvent(item);
-            }, animationMsDuration + 40);
+            }, animationMsDuration + 60);
             timeouter.add(item, completeFadeTimeout);
         },
 
@@ -4692,10 +4696,6 @@ Gridifier.Api.ToggleTimeouter.prototype.add = function(item, timeoutHandle) {
 
 Gridifier.Api.ToggleTimeouter.prototype.flush = function(item) {
     var itemGUID = this._getToggleTimeouterItemId(item);
-
-    if(typeof window.killNumber == "undefined")
-        window.killNumber = 0;
-    window.killNumber++;
 
     if(this._toggleTimeouts.hasOwnProperty(itemGUID)) {
         for(var i = 0; i < this._toggleTimeouts[itemGUID].length; i++) {
@@ -5870,8 +5870,8 @@ Gridifier.Collector.prototype._createCollectorFunction = function() {
     else if(this._settings.isByDataAttrGridItemMarkingStrategy()) {
         this._collectorFunction = function(grid) {
             var items = Dom.get.byQuery(
-                grid, 
-                "[" + Gridifier.GRID_ITEM_MARKING_DEFAULTS.DATA_ATTR + "=" + gridItemMarkingValue + "]"
+                grid,
+                "[" + gridItemMarkingValue + "]"
             );
             return me.filterNotRestrictedToCollectItems(items);
         }
@@ -6141,6 +6141,16 @@ Gridifier.Collector.prototype.filterOnlyConnectedItems = function(maybeConnected
     }
 
     return connectedItems;
+}
+
+Gridifier.Collector.prototype.filterOnlyNotConnectedItems = function(maybeConnectedItems) {
+    var notConnectedItems = [];
+    for(var i = 0; i < maybeConnectedItems.length; i++) {
+        if(!this._connectedItemMarker.isItemConnected(maybeConnectedItems[i]))
+            notConnectedItems.push(maybeConnectedItems[i]);
+    }
+
+    return notConnectedItems;
 }
 
 Gridifier.ConnectedItemMarker = function() {
@@ -10857,6 +10867,8 @@ Gridifier.Grid.prototype._extractGrid = function(grid) {
         this._grid = grid.get(0);
     else if(Dom.isNativeDOMObject(grid))
         this._grid = grid;
+    else if(Dom.isArray(grid) && Dom.isNativeDOMObject(grid[0]))
+        this._grid = grid[0];
     else
         new Gridifier.Error(Gridifier.Error.ERROR_TYPES.EXTRACT_GRID);
 }
@@ -13408,7 +13420,9 @@ Gridifier.Operations.Append = function(gridSizesUpdater,
 }
 
 Gridifier.Operations.Append.prototype.execute = function(items) {
-    var items = this._collector.toDOMCollection(items);
+    var items = this._collector.filterOnlyNotConnectedItems(
+        this._collector.toDOMCollection(items)
+    );
     this._sizesResolverManager.startCachingTransaction();
 
     this._collector.ensureAllItemsAreAttachedToGrid(items);
@@ -13610,7 +13624,9 @@ Gridifier.Operations.Prepend = function(gridSizesUpdater,
 }
 
 Gridifier.Operations.Prepend.prototype.execute = function(items) {
-    var items = this._collector.toDOMCollection(items);
+    var items = this._collector.filterOnlyNotConnectedItems(
+        this._collector.toDOMCollection(items)
+    );
     this._sizesResolverManager.startCachingTransaction();
 
     this._collector.ensureAllItemsAreAttachedToGrid(items);
@@ -14146,7 +14162,7 @@ Gridifier.Renderer.prototype.renderConnections = function(connections, exceptCon
 // will be called before slideOutTimeout without a delay.(Will move items instantly)
 Gridifier.Renderer.prototype.renderConnectionsAfterDelay = function(connections, delay) {
     var me = this;
-    var delay = delay || 20;
+    var delay = delay || 40;
 
     for(var i = 0; i < connections.length; i++) {
         this._rendererSchedulator.reinit();

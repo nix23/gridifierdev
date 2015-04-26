@@ -55,8 +55,8 @@ Gridifier.Collector.prototype._createCollectorFunction = function() {
     else if(this._settings.isByDataAttrGridItemMarkingStrategy()) {
         this._collectorFunction = function(grid) {
             var items = Dom.get.byQuery(
-                grid, 
-                "[" + Gridifier.GRID_ITEM_MARKING_DEFAULTS.DATA_ATTR + "=" + gridItemMarkingValue + "]"
+                grid,
+                "[" + gridItemMarkingValue + "]"
             );
             return me.filterNotRestrictedToCollectItems(items);
         }
@@ -326,4 +326,14 @@ Gridifier.Collector.prototype.filterOnlyConnectedItems = function(maybeConnected
     }
 
     return connectedItems;
+}
+
+Gridifier.Collector.prototype.filterOnlyNotConnectedItems = function(maybeConnectedItems) {
+    var notConnectedItems = [];
+    for(var i = 0; i < maybeConnectedItems.length; i++) {
+        if(!this._connectedItemMarker.isItemConnected(maybeConnectedItems[i]))
+            notConnectedItems.push(maybeConnectedItems[i]);
+    }
+
+    return notConnectedItems;
 }

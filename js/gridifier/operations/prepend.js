@@ -44,7 +44,9 @@ Gridifier.Operations.Prepend = function(gridSizesUpdater,
 }
 
 Gridifier.Operations.Prepend.prototype.execute = function(items) {
-    var items = this._collector.toDOMCollection(items);
+    var items = this._collector.filterOnlyNotConnectedItems(
+        this._collector.toDOMCollection(items)
+    );
     this._sizesResolverManager.startCachingTransaction();
 
     this._collector.ensureAllItemsAreAttachedToGrid(items);

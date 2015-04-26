@@ -320,6 +320,7 @@ Gridifier.VerticalGrid.Prepender.prototype._findItemConnectionCoords = function(
         Logger.logFindItemConnectionCoordsInspectConnector(sortedConnectors[i], this._connections.get()); 
         /* @system-log-end */
         var itemCoords = this._itemCoordsExtractor.connectorToPrependedItemCoords(item, sortedConnectors[i]);
+
         if(itemCoords.x2 > this._normalizer.normalizeHighRounding(this._gridifier.getGridX2())) {
             /* @system-log-start */
             Logger.logFindItemConnectionCoordsOutOfLayoutBounds(

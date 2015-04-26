@@ -46,7 +46,7 @@ Gridifier.VerticalGrid.ConnectionsSorter.prototype.sortConnectionsPerReappend = 
         if(this._settings.isDefaultAppend()) {
             connections.sort(function(firstConnection, secondConnection) {
                 if(Dom.areRoundedOrFlooredValuesEqual(firstConnection.y1, secondConnection.y1)) {
-                    if(firstConnection.x2 >secondConnection.x2)
+                    if(firstConnection.x2 > secondConnection.x2)
                         return -1;
                     else 
                         return 1;

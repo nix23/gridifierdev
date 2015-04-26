@@ -63,10 +63,6 @@ Gridifier.Api.ToggleTimeouter.prototype.add = function(item, timeoutHandle) {
 Gridifier.Api.ToggleTimeouter.prototype.flush = function(item) {
     var itemGUID = this._getToggleTimeouterItemId(item);
 
-    if(typeof window.killNumber == "undefined")
-        window.killNumber = 0;
-    window.killNumber++;
-
     if(this._toggleTimeouts.hasOwnProperty(itemGUID)) {
         for(var i = 0; i < this._toggleTimeouts[itemGUID].length; i++) {
             clearTimeout(this._toggleTimeouts[itemGUID][i]);

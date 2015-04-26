@@ -63,12 +63,13 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierSettings.gridTransformType = "expand";
 
         //me._gridifierSettings.prependType = "mirroredPrepend";
-       // me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
+        //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         me._gridifierSettings.alignmentType = "center";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
         me._gridifierSettings.dragifier = true;
+
         //me._gridifierSettings.dragifier = "testSelector";
         //me._gridifierSettings.sortDispersionMode = "custom";
         //me._gridifierSettings.sortDispersionValue = "200px";
@@ -80,7 +81,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.disableRetransformQueueOnDrags = false;
 
         setTimeout(function() {
-            me._gridifier.setToggle("fade");
+            //me._gridifier.setToggle("fade");
             //me._gridifier.setRetransformQueueBatchSize(50);
            //me._gridifier.setRetransformSort("orientationEvenly");
             //me._gridifier.setToggle("rotateX");
