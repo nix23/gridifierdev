@@ -129,7 +129,13 @@ Gridifier.EventEmitter.prototype.emitGridRetransformEvent = function() {
 
 Gridifier.EventEmitter.prototype.emitConnectionCreateEvent = function(connections) {
     for(var i = 0; i < this._connectionCreateCallbacks.length; i++) {
-        this._connectionCreateCallbacks[i](connections);
+        // A little delay here is required per usage with silentRender
+        // immediately after silentAppend.
+        (function(callback, connections) {
+            setTimeout(function() {
+                callback(connections);
+            }, 0);
+        })(this._connectionCreateCallbacks[i], connections);
     }
 }
 

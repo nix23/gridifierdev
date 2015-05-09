@@ -18,7 +18,8 @@ Gridifier.Api.SizesChanger = function(settings, eventEmitter) {
 
         me._addDefaultSizesChanger();
         me._addDefaultPaddingBottomSizesChanger();
-        me._addSimultaneousCSS3TransitionSizesChanger();
+        me._addCSS3TransitionSizesChanger();
+        me._addCSS3PaddingBottomTransitionSizesChanger();
     };
 
     this._bindEvents = function() {
@@ -84,16 +85,30 @@ Gridifier.Api.SizesChanger.prototype._addDefaultPaddingBottomSizesChanger = func
     };
 }
 
-Gridifier.Api.SizesChanger.prototype._addSimultaneousCSS3TransitionSizesChanger = function() {
-    this._sizesChangerFunctions.simultaneousCSS3Transition = function(item, newWidth, newHeight) {
+Gridifier.Api.SizesChanger.prototype._addCSS3TransitionSizesChanger = function() {
+    this._sizesChangerFunctions.css3 = function(item, newWidth, newHeight) {
         if(Dom.isBrowserSupportingTransitions()) {
-            Dom.css3.transitionProperty(item, "width 500ms ease");
-            Dom.css3.transitionProperty(item, "height 500ms ease");
+            Dom.css3.transitionProperty(item, "width 200ms ease");
+            Dom.css3.transitionProperty(item, "height 200ms ease");
         }
 
         Dom.css.set(item, {
             width: newWidth,
             height: newHeight
+        });
+    };
+}
+
+Gridifier.Api.SizesChanger.prototype._addCSS3PaddingBottomTransitionSizesChanger = function() {
+    this._sizesChangerFunctions.css3PaddingBottom = function(item, newWidth, newPaddingBottom) {
+        if(Dom.isBrowserSupportingTransitions()) {
+            Dom.css3.transitionProperty(item, "width 200ms ease");
+            Dom.css3.transitionProperty(item, "padding-bottom 200ms ease");
+        }
+
+        Dom.css.set(item, {
+            width: newWidth,
+            "padding-bottom": newPaddingBottom
         });
     };
 }

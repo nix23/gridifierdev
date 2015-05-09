@@ -8,6 +8,8 @@ Gridifier.Renderer.Schedulator = function(gridifier, settings, connections, rend
     this._rendererConnections = null;
     this._silentRenderer = null;
 
+    this._connectedItemMarker = null;
+
     // Array[
     //     [0] => {connection: connection, processingType: processingType, left: left, top: top, 
     //             (targetWidth: tw, targetHeight: th)},
@@ -28,6 +30,8 @@ Gridifier.Renderer.Schedulator = function(gridifier, settings, connections, rend
         me._connections = connections;
         me._renderer = renderer;
         me._rendererConnections = rendererConnections;
+
+        me._connectedItemMarker = new Gridifier.ConnectedItemMarker();
     };
 
     this._bindEvents = function() {
@@ -155,6 +159,10 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             continue;
 
         if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.SHOW) {
+            // Render could be called after disconnect(Through timeouts)
+            if(!this._connectedItemMarker.isItemConnected(connectionToProcess.item))
+                continue;
+
             Dom.css.set(connectionToProcess.item, {
                 position: "absolute",
                 left: left,

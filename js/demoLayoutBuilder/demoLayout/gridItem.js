@@ -100,6 +100,14 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
     else
         var isFirst = false;
 
+    if(typeof window.num == "undefined")
+        window.num = 0;
+    window.num++;
+    if(window.num % 3 == 0)
+        var itemHeight = "100%";
+    else
+        var itemHeight = "50%";
+
     this._$gridItem.css({
         //width: (isFirst) ? "25%" : "12.5%",
         //height: 0,
@@ -108,9 +116,12 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
        //height: 0,
        //"padding-bottom": "12.5%",
        width: itemSizes.width,
-      // height: itemSizes.height,
-       height: 0,
-       "padding-bottom": itemSizes.height,
+        //width: "200px",
+       //height: itemSizes.height,
+       //height: 0,
+       //"padding-bottom": itemSizes.height,
+        //height: itemHeight,
+        height: "200px",
 
         //"padding-bottom": parseFloat(itemSizes.height) + "%",
         //margin: "2em",

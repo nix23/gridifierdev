@@ -337,3 +337,7 @@ Gridifier.Collector.prototype.filterOnlyNotConnectedItems = function(maybeConnec
 
     return notConnectedItems;
 }
+
+Gridifier.Collector.prototype.isItemConnected = function(item) {
+    return this._connectedItemMarker.isItemConnected(item);
+}

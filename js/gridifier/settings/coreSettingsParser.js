@@ -46,7 +46,7 @@ Gridifier.CoreSettingsParser.prototype.parseGridType = function() {
 
 Gridifier.CoreSettingsParser.prototype.parsePrependType = function() {
     if(!this._settings.hasOwnProperty("prependType")) {
-        var prependType = Gridifier.PREPEND_TYPES.DEFAULT_PREPEND;
+        var prependType = Gridifier.PREPEND_TYPES.MIRRORED_PREPEND;
         return prependType;
     }
 
@@ -94,7 +94,8 @@ Gridifier.CoreSettingsParser.prototype.parseAppendType = function() {
 
 Gridifier.CoreSettingsParser.prototype.parseIntersectionStrategy = function() {
     if(!this._settings.hasOwnProperty("intersectionStrategy")
-        && !this._settings.hasOwnProperty("alignmentType")) {
+        && !this._settings.hasOwnProperty("alignmentType")
+        && !this._settings.hasOwnProperty("align")) {
         var intersectionStrategy = Gridifier.INTERSECTION_STRATEGIES.DEFAULT;
         return intersectionStrategy;
     }
@@ -111,7 +112,7 @@ Gridifier.CoreSettingsParser.prototype.parseIntersectionStrategy = function() {
 
     if(this._settings.hasOwnProperty("intersectionStrategy"))
         var intersectionStrategy = this._settings.intersectionStrategy;
-    else if(this._settings.hasOwnProperty("alignmentType"))
+    else if(this._settings.hasOwnProperty("alignmentType") || this._settings.hasOwnProperty("align"))
         var intersectionStrategy = Gridifier.INTERSECTION_STRATEGIES.NO_INTERSECTIONS;
     else
         var intersectionStrategy = Gridifier.INTERSECTION_STRATEGIES.DEFAULT;
@@ -122,7 +123,7 @@ Gridifier.CoreSettingsParser.prototype.parseIntersectionStrategy = function() {
 Gridifier.CoreSettingsParser.prototype.parseIntersectionStrategyAlignmentType = function() {
     var alignmentTypes = Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES;
 
-    if(!this._settings.hasOwnProperty("alignmentType")) {
+    if(!this._settings.hasOwnProperty("alignmentType") && !this._settings.hasOwnProperty("align")) {
         if(this._settingsCore.isVerticalGrid())
             var alignmentType = alignmentTypes.FOR_VERTICAL_GRID.TOP;
         else if(this._settingsCore.isHorizontalGrid()) 
@@ -131,8 +132,14 @@ Gridifier.CoreSettingsParser.prototype.parseIntersectionStrategyAlignmentType = 
         return alignmentType;
     }
 
-    this.ensureIsValidAlignmentType(this._settings.alignmentType);
-    return this._settings.alignmentType;
+    if(this._settings.hasOwnProperty("alignmentType")) {
+        this.ensureIsValidAlignmentType(this._settings.alignmentType);
+        return this._settings.alignmentType;
+    }
+    else if(this._settings.hasOwnProperty("align")) {
+        this.ensureIsValidAlignmentType(this._settings.align);
+        return this._settings.align;
+    }
 }
 
 Gridifier.CoreSettingsParser.prototype.ensureIsValidAlignmentType = function(alignmentType) {

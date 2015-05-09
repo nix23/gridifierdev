@@ -85,7 +85,7 @@ Gridifier = function(grid, settings) {
         );
 
         me._gridSizesUpdater = new Gridifier.GridSizesUpdater(
-            me._grid, me._connections, me._settings, me._eventEmitter
+            me, me._grid, me._connections, me._settings, me._eventEmitter
         );
 
         me._connectors = new Gridifier.Connectors(me._guid, me._connections);
@@ -477,6 +477,16 @@ Gridifier.prototype.setNoIntersectionStrategy = function() {
     return this;
 }
 
+Gridifier.prototype.setRetransformQueueBatchSize = function(newBatchSize) {
+    this._settings.setRetransformQueueBatchSize(newBatchSize);
+    return this;
+}
+
+Gridifier.prototype.setRetransformQueueBatchTimeout = function(newBatchTimeout) {
+    this._settings.setRetransformQueueBatchTimeout(newBatchTimeout);
+    return this;
+}
+
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     if(this._settings.isMirroredPrepend()) {
         this.insertBefore(items, null, batchSize, batchTimeout);
@@ -653,6 +663,10 @@ Gridifier.prototype.isDragifierEnabled = function() {
     return this._dragifier.isDragifierEnabled();
 }
 
+Gridifier.prototype.isItemConnected = function(item) {
+    return this._collector.isItemConnected(item);
+}
+
 Gridifier.prototype.addPreInsertLifecycleCallback = function(callback) {
     this._lifecycleCallbacks.addPreInsertCallback(callback);
     return this;
@@ -744,6 +758,9 @@ Gridifier.prototype.getConnectedItemAtPoint = function(x, y) {
 Gridifier.prototype.setToggle = Gridifier.prototype.toggleBy;
 Gridifier.prototype.setSort = Gridifier.prototype.sortBy;
 Gridifier.prototype.setFilter = Gridifier.prototype.filterBy;
+Gridifier.prototype.collectNew = Gridifier.prototype.collectAllDisconnectedItems;
+Gridifier.prototype.getForSilentRender = Gridifier.prototype.getScheduledForSilentRenderItems;
+Gridifier.prototype.setAlign = Gridifier.prototype.setAlignmentType;
 
 Gridifier.Api = {};
 Gridifier.HorizontalGrid = {};

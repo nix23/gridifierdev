@@ -32,6 +32,8 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
     this._reappendQueue = null;
     this._reappendNextQueuedItemsBatchTimeout = null;
     this._reappendedQueueData = null;
+    this._reappendStartGridX2 = 0;
+    this._reappendStartGridY2 = 0;
     this._reappendStartViewportWidth = null;
     this._reappendStartViewportHeight = null;
 
@@ -113,27 +115,46 @@ Gridifier.SizesTransformer.ItemsReappender.prototype.getQueuedConnectionsPerTran
 }
 
 Gridifier.SizesTransformer.ItemsReappender.prototype.startReappendingQueuedItems = function() {
+    this._reappendStartGridX2 = this._gridifier.getGridX2();
+    this._reappendStartGridY2 = this._gridifier.getGridY2();
     this._reappendStartViewportWidth = this._sizesResolverManager.viewportWidth();
     this._reappendStartViewportHeight = this._sizesResolverManager.viewportHeight();
 
     this._reappendNextQueuedItemsBatch();
 }
 
-Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBatch = function() {
+Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBatch = function(checkSameProcess) {
     var batchSize = this._settings.getRetransformQueueBatchSize();
     if(batchSize > this._reappendQueue.length)
         batchSize = this._reappendQueue.length;
 
-    if(this._settings.isVerticalGrid()) {
-        if(this._sizesResolverManager.viewportWidth() != this._reappendStartViewportWidth)
-            return;
-    }
-    else if(this._settings.isHorizontalGrid()) {
-        if(this._sizesResolverManager.viewportHeight() != this._reappendStartViewportHeight)
-            return;
+    this._sizesResolverManager.startCachingTransaction();
+
+    var checkIfIsSameReappendProcess = checkSameProcess || false;
+    var isSameReappendProcess = true;
+    if(checkIfIsSameReappendProcess) {
+        if(this._settings.isVerticalGrid()) {
+            if(this._reappendStartGridX2 != this._gridifier.getGridX2())
+                isSameReappendProcess = false;
+
+            if(this._sizesResolverManager.viewportWidth() != this._reappendStartViewportWidth)
+                isSameReappendProcess = false;
+        }
+        else if(this._settings.isHorizontalGrid()) {
+            if(this._reappendStartGridY2 != this._gridifier.getGridY2()) {
+                isSameReappendProcess = false;
+            }
+
+            if(this._sizesResolverManager.viewportHeight() != this._reappendStartViewportHeight)
+                isSameReappendProcess = false;
+        }
     }
 
-    this._sizesResolverManager.startCachingTransaction();
+    if(!isSameReappendProcess) {
+        this._sizesResolverManager.stopCachingTransaction();
+        return;
+    }
+
     var reappendedItemGUIDS = [];
 
     for(var i = 0; i < batchSize; i++) {
@@ -184,7 +205,7 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
     var batchTimeout = this._settings.getRetransformQueueBatchTimeout();
 
     this._reappendNextQueuedItemsBatchTimeout = setTimeout(function() {
-        me._reappendNextQueuedItemsBatch.call(me);
+        me._reappendNextQueuedItemsBatch.call(me, true);
     }, batchTimeout);
 }
 

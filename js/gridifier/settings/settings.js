@@ -143,6 +143,39 @@ Gridifier.Settings.prototype._parse = function() {
     this._shouldEnableDragifierOnInit = dragifierData.shouldEnableDragifierOnInit;
     this._dragifierItemSelector = dragifierData.dragifierItemSelector;
     this._disableRetransformQueueOnDrags = this._coreSettingsParser.parseDisableRetransformQueueOnDrags();
+
+    var me = this;
+    this._gridifier.setDefaultPrepend = function() { me.setDefaultPrepend.call(me); };
+    this._gridifier.setReversedPrepend = function() { me.setReversedPrepend.call(me); };
+    this._gridifier.setMirroredPrepend = function() { me.setMirroredPrepend.call(me); };
+    this._gridifier.setDefaultAppend = function() { me.setDefaultAppend.call(me); };
+    this._gridifier.setReversedAppend = function() { me.setReversedAppend.call(me); };
+}
+
+Gridifier.Settings.prototype.setDefaultPrepend = function() {
+    this._prependType = Gridifier.PREPEND_TYPES.DEFAULT_PREPEND;
+}
+
+Gridifier.Settings.prototype.setReversedPrepend = function() {
+    this._prependType = Gridifier.PREPEND_TYPES.REVERSED_PREPEND;
+}
+
+Gridifier.Settings.prototype.setMirroredPrepend = function() {
+    this._prependType = Gridifier.PREPEND_TYPES.MIRRORED_PREPEND;
+}
+
+Gridifier.Settings.prototype.setDefaultAppend = function() {
+    if(this.isVerticalGrid())
+        this._appendType = Gridifier.APPEND_TYPES.REVERSED_APPEND;
+    else if(this.isHorizontalGrid())
+        this._appendType = Gridifier.APPEND_TYPES.DEFAULT_APPEND;
+}
+
+Gridifier.Settings.prototype.setReversedAppend = function() {
+    if(this.isVerticalGrid())
+        this._appendType = Gridifier.APPEND_TYPES.DEFAULT_APPEND;
+    else if(this.isHorizontalGrid())
+        this._appendType = Gridifier.APPEND_TYPES.REVERSED_APPEND;
 }
 
 Gridifier.Settings.prototype.getCollector = function() {

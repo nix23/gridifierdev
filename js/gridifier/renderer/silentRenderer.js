@@ -80,6 +80,9 @@ Gridifier.SilentRenderer.prototype.getScheduledForSilentRenderItems = function(o
         "[" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR + "=" + Gridifier.SilentRenderer.SILENT_RENDER_DATA_ATTR_VALUE + "]"
     );
 
+    if(scheduledItems.length == 0)
+        return [];
+
     if(!filterItemsOnlyInsideViewport)
         return scheduledItems;
 
@@ -134,7 +137,7 @@ Gridifier.SilentRenderer.prototype.execute = function(items, batchSize, batchTim
         this._preUnscheduleForSilentRender(items);
     }
 
-    var scheduleSilentRendererExecution = function() {
+    var scheduleSilentRendererExecution = function(items, batchSize, batchTimeout) {
         if(typeof items == "undefined" || items == null || !items) {
             var scheduledItems = this.getScheduledForSilentRenderItems();
         }
@@ -179,5 +182,7 @@ Gridifier.SilentRenderer.prototype.execute = function(items, batchSize, batchTim
     }
 
     // If 100ms is not enough to silently append all required items, user should call silentRender one more time.
-    setTimeout(function() { scheduleSilentRendererExecution.call(me); }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100);
+    setTimeout(function() {
+        scheduleSilentRendererExecution.call(me, items, batchSize, batchTimeout);
+    }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100);
 }

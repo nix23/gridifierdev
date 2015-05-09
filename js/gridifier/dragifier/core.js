@@ -176,7 +176,13 @@ Gridifier.Dragifier.Core.prototype.createDraggableItemClone = function(draggable
     var cloneHeight = this._sizesResolverManager.outerHeight(draggableItem);
     draggableItemClone.style.width = cloneWidth + "px";
     draggableItemClone.style.height = cloneHeight + "px";
-    draggableItemClone.style.margin = "0px";
+    //draggableItemClone.style.margin = "0px";
+
+    var draggableItemComputedCSS = SizesResolver.getComputedCSS(draggableItem);
+    draggableItemClone.style.marginLeft = draggableItemComputedCSS.marginLeft;
+    draggableItemClone.style.marginTop = draggableItemComputedCSS.marginTop;
+    draggableItemClone.style.marginRight = draggableItemComputedCSS.marginRight;
+    draggableItemClone.style.marginBottom = draggableItemComputedCSS.marginBottom;
 
     document.body.appendChild(draggableItemClone);
 

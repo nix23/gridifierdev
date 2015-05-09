@@ -69,6 +69,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierSettings.alignmentType = "center";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
         me._gridifierSettings.dragifier = true;
+        //me._gridifierSettings.retransformQueueBatchSize = 1;
+        me._gridifierSettings.coordsChangeAnimationMsDuration = 300;
 
         //me._gridifierSettings.dragifier = "testSelector";
         //me._gridifierSettings.sortDispersionMode = "custom";
@@ -211,7 +213,6 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         // me._gridifierDynamicSettings._itemSizes[4].height = "200px"; // @todo -> Delete, tmp
 
 
-
         // me._gridifierDynamicSettings._itemSizes[0].width = "200px"; // cars tmp
         // me._gridifierDynamicSettings._itemSizes[0].height = "200px";
 
@@ -312,6 +313,25 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             {width: "5%", height: "5%"},
             {width: "5%", height: "5%"},
             {width: "5%", height: "5%"}
+
+
+            //{width: "10%", height: "100%"},
+            //{width: "5%", height: "50%"},
+            //{width: "5%", height: "50%"},
+            //{width: "5%", height: "100%"},
+            //{width: "10%", height: "50%"},
+            //{width: "5%", height: "50%"},
+            //{width: "20%", height: "100%"},
+            //{width: "10%", height: "50%"},
+            //{width: "5%", height: "50%"},
+            //
+            //{width: "20%", height: "100%"},
+            //{width: "10%", height: "100%"},
+            //{width: "5%", height: "50%"},
+            //{width: "10%", height: "50%"},
+            //{width: "5%", height: "100%"},
+            //{width: "5%", height: "50%"},
+            //{width: "5%", height: "50%"}
         ];
         for(var i = 0; i < sizes.length; i++) {
             me._gridifierDynamicSettings._itemSizes[i].width = sizes[i].width;
@@ -438,8 +458,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
        // me._gridifierSettings.coordsChangeAnimationMsDuration = 2500;
         me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
         //
-        me._gridifier.setItemClonesManagerLifecycleCallbacks();
-        me._gridifier.setCoordsChanger("CSS3Translate3DClones");
+        //me._gridifier.setItemClonesManagerLifecycleCallbacks();
+        //me._gridifier.setCoordsChanger("CSS3Translate3DClones");
 
         //me._gridifier.onDragEnd(function(items) {
         //    for(var i = 0; i < items.length; i++) {
@@ -620,10 +640,15 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             $firstGridItem = $gridItems.get(0);
             $secondGridItem = $gridItems.get(1);
 
-            me._gridifier.toggleSizes([
-                [$secondGridItem, "*2", "*2"],
-                [$firstGridItem, "*2", "*2"]
-            ]);
+            //me._gridifier.toggleSizes([
+            //    [$secondGridItem, "*2", "*2"],
+            //    [$firstGridItem, "*2", "*2"]
+            //]);
+            me._gridifier.toggleSizes($secondGridItem, "400px", "400px");
+            me._gridifier.toggleSizes($firstGridItem, "200px", "200px");
+            //setTimeout(function() {
+
+            //}, 100);
         });
 
         $(me._gridifierDynamicSettings).on(DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.EVENT_FILTER_SELECTED, function(event, filterName) {
@@ -638,6 +663,11 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             item.innerHTML = itemGUID;
             i++;
             //item.innerHTML = i;
+        });
+
+
+        me._gridifier.onConnectionCreate(function() {
+            //me._gridifier.silentRender(me._gridifier.getForSilentRender(true));
         });
 
         me._gridifier.onHide(function(item) {
@@ -720,6 +750,7 @@ DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
         //     });
         // })($gridItem, gridItem);
     }
+
 
     this._gridifier.append(itemsToAppend);
     //this._gridifier.append(itemsToAppend, 1, 100);

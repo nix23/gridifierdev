@@ -85,16 +85,20 @@ Gridifier.Connections.prototype.findConnectionByItem = function(item, disableWas
     var itemGUID = this._guid.getItemGUID(item);
     var connectionItem = null;
     for(var i = 0; i < connections.length; i++) {
-        if(itemGUID == this._guid.getItemGUID(connections[i].item))
+        if(itemGUID == connections[i].itemGUID) {
             connectionItem = connections[i];
+            break;
+        }
     }
 
     if(connectionItem == null) {
         if(!this._sizesTransformer.isTransformerQueueEmpty()) {
             var queuedConnections = this._sizesTransformer.getQueuedConnectionsPerTransform();
             for(var i = 0; i < queuedConnections.length; i++) {
-                if(itemGUID == queuedConnections[i].itemGUID)
+                if(itemGUID == queuedConnections[i].itemGUID) {
                     connectionItem = queuedConnections[i];
+                    break;
+                }
             }
         }
     }

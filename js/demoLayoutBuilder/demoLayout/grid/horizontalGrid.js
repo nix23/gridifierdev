@@ -133,7 +133,7 @@ DemoLayoutBuilder.DemoLayout.HorizontalGrid.prototype._adjustGridBgFontSize = fu
 
 DemoLayoutBuilder.DemoLayout.HorizontalGrid.prototype._recalculateGridHeightOnResizerResize = function(event) {
     var newHeight = event.pageY - this._$grid.offset().top + (Math.round(this._$gridResizer.outerHeight()) / 2);
-    
+
     if(newHeight < this._gridMinHeight)
         newHeight = this._gridMinHeight;
 

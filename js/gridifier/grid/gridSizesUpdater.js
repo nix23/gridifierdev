@@ -1,9 +1,11 @@
-Gridifier.GridSizesUpdater = function(grid,
+Gridifier.GridSizesUpdater = function(gridifier,
+                                      grid,
                                       connections,
                                       settings,
                                       eventEmitter) {
     var me = this;
 
+    me._gridifier = null;
     me._grid = null;
     me._connections = null;
     me._settings = null;
@@ -15,6 +17,7 @@ Gridifier.GridSizesUpdater = function(grid,
     };
 
     this._construct = function() {
+        me._gridifier = gridifier;
         me._grid = grid;
         me._connections = connections;
         me._settings = settings;
@@ -36,19 +39,31 @@ Gridifier.GridSizesUpdater = function(grid,
 }
 
 Gridifier.GridSizesUpdater.prototype.scheduleGridSizesUpdate = function() {
+    var me = this;
+
     if(this._gridSizesUpdateTimeout != null) {
         clearTimeout(this._gridSizesUpdateTimeout);
         this._gridSizesUpdateTimeout = null;
     }
-    
-    var me = this;
-    this._gridSizesUpdateTimeout = setTimeout(function() {
+
+    var executeSizesUpdate = function() {
         if(me._settings.isVerticalGrid()) {
             me._updateVerticalGridSizes.call(me);
         }
         else if(me._settings.isHorizontalGrid()) {
             me._updateHorizontalGridSizes.call(me);
         }
+    }
+
+    this._gridSizesUpdateTimeout = setTimeout(function() {
+        // This is required to correctly work with retransformQueue.
+        // (Update shouldn't fire between batches reappend at least with 'fit' gridTransformType.)
+        if(!me._gridifier._sizesTransformer._itemsReappender.isReappendQueueEmpty()) {
+            me.scheduleGridSizesUpdate();
+            return;
+        }
+
+        executeSizesUpdate.call(me);
     }, this._settings.getGridTransformTimeout());
 }
 

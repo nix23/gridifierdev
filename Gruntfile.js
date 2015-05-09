@@ -89,6 +89,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-strip-code');
 
   // Default task(s).
+  grunt.registerTask('build-dev-with-logs', ['concat']);
   grunt.registerTask('build-dev', ['concat', 'strip_code']);
   grunt.registerTask('build-prod', ["concat", 'strip_code', 'uglify']);
 };

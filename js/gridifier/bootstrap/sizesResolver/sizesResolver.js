@@ -356,7 +356,7 @@ var SizesResolver = {
         var propsToReclone = ["borderLeftWidth", "borderRightWidth", "borderTopWidth", "borderBottomWidth",
             "borderLeftColor", "borderRightColor", "borderTopColor", "borderBottomColor",
             "borderLeftStyle", "borderRightStyle", "borderTopStyle", "borderBottomStyle",
-            "font", "fontSize", "fontWeight"];
+            "font", "fontSize", "fontWeight", "lineHeight"];
         for(var i = 0; i < propsToReclone.length; i++) {
             var propName = propsToReclone[i];
             if(typeof sourceItemComputedStyle[propName] != "undefined" &&
