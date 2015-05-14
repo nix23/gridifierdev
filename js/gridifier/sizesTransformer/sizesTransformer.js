@@ -186,8 +186,8 @@ Gridifier.SizesTransformer.Core.prototype.transformConnectionSizes = function(tr
         this._itemsReappender.startReappendingQueuedItems();
     }
 
-    var me = this; applyTransform.call(me);
-    //setTimeout(function() { applyTransform.call(me); }, 0);
+    var me = this;
+    setTimeout(function() { applyTransform.call(me); }, 0);
 }
 
 Gridifier.SizesTransformer.Core.prototype.stopRetransformAllConnectionsQueue = function() {

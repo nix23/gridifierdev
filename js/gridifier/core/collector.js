@@ -318,6 +318,10 @@ Gridifier.Collector.prototype.unmarkItemAsRestrictedToCollect = function(item) {
         item.removeAttribute(Gridifier.Collector.RESTRICT_ITEM_COLLECT_DATA_ATTR);
 }
 
+Gridifier.Collector.prototype.isItemRestrictedToCollect = function(item) {
+    return Dom.hasAttribute(item, Gridifier.Collector.RESTRICT_ITEM_COLLECT_DATA_ATTR);
+}
+
 Gridifier.Collector.prototype.filterOnlyConnectedItems = function(maybeConnectedItems) {
     var connectedItems = [];
     for(var i = 0; i < maybeConnectedItems.length; i++) {

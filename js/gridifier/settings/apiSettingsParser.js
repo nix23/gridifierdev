@@ -26,9 +26,16 @@ Gridifier.ApiSettingsParser = function(settingsCore, settings) {
     return this;
 }
 
+Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER = "initial";
+
 Gridifier.ApiSettingsParser.prototype.parseToggleOptions = function(toggleApi) {
     if(!this._settings.hasOwnProperty("toggle")) {
         toggleApi.setToggleFunction("scale");
+        return;
+    }
+
+    if(typeof this._settings.toggle == "string" || this._settings.toggle instanceof String) {
+        toggleApi.setToggleFunction(this._settings.toggle);
         return;
     }
 
@@ -40,6 +47,7 @@ Gridifier.ApiSettingsParser.prototype.parseToggleOptions = function(toggleApi) {
     }
 
     for(var toggleFunctionName in this._settings.toggle) {
+        if(toggleFunctionName == Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER) continue;
         var toggleFunctionsData = this._settings.toggle[toggleFunctionName];
 
         if(typeof toggleFunctionsData != "object"
@@ -51,10 +59,13 @@ Gridifier.ApiSettingsParser.prototype.parseToggleOptions = function(toggleApi) {
             );
         }
 
-        toggleApi.addToggleFunction(toggleFunctionName, toggleFunctionData);
+        toggleApi.addToggleFunction(toggleFunctionName, toggleFunctionsData);
     }
-    
-    toggleApi.setToggleFunction("scale");
+
+    if(this._settings.toggle.hasOwnProperty(Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER))
+        toggleApi.setToggleFunction(this._settings.toggle[Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER]);
+    else
+        toggleApi.setToggleFunction("scale");
 }
 
 Gridifier.ApiSettingsParser.prototype.parseSortOptions = function(sortApi) {
@@ -63,13 +74,18 @@ Gridifier.ApiSettingsParser.prototype.parseSortOptions = function(sortApi) {
         return;
     }
 
-    if(typeof this._settings.sort == "function") {
+    if(typeof this._settings.sort == "string" || this._settings.sort instanceof String) {
+        sortApi.setSortFunction(this._settings.sort);
+        return;
+    }
+    else if(typeof this._settings.sort == "function") {
         sortApi.addSortFunction("clientDefault", this._settings.sort);
         sortApi.setSortFunction("clientDefault");
         return;
     }
     else if(typeof this._settings.sort == "object") {
         for(var sortFunctionName in this._settings.sort) {
+            if(sortFunctionName == Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER) continue;
             var sortFunction = this._settings.sort[sortFunctionName];
 
             if(typeof sortFunction != "function") {
@@ -81,8 +97,11 @@ Gridifier.ApiSettingsParser.prototype.parseSortOptions = function(sortApi) {
             
             sortApi.addSortFunction(sortFunctionName, sortFunction);
         }
-        
-        sortApi.setSortFunction("default");
+
+        if(this._settings.sort.hasOwnProperty(Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER))
+            sortApi.setSortFunction(this._settings.sort[Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER]);
+        else
+            sortApi.setSortFunction("default");
         return;
     }
     else {
@@ -106,13 +125,18 @@ Gridifier.ApiSettingsParser.prototype.parseRetransformSortOptions = function(sor
         throw new Error(errorMsg);
     }
 
-    if(typeof this._settings.retransformSort == "function") {
+    if(typeof this._settings.retransformSort == "string" || this._settings.retransformSort instanceof String) {
+        sortApi.setRetransformSortFunction(this._settings.retransformSort);
+        return;
+    }
+    else if(typeof this._settings.retransformSort == "function") {
         sortApi.addRetransformSortFunction("clientDefault", this._settings.retransformSort);
         sortApi.setRetransformSortFunction("clientDefault");
         return;
     }
     else if(typeof this._settings.retransformSort == "object") {
         for(var sortFunctionName in this._settings.retransformSort) {
+            if(sortFunctionName == Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER) continue;
             var sortFunction = this._settings.retransformSort[sortFunctionName];
 
             if(typeof sortFunction != "function") {
@@ -125,7 +149,10 @@ Gridifier.ApiSettingsParser.prototype.parseRetransformSortOptions = function(sor
             sortApi.addRetransformSortFunction(sortFunctionName, sortFunction);
         }
 
-        sortApi.setRetransformSortFunction("default");
+        if(this._settings.retransformSort.hasOwnProperty(Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER))
+            sortApi.setRetransformSortFunction(this._settings.retransformSort[Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER]);
+        else
+            sortApi.setRetransformSortFunction("default");
         return;
     }
     else {
@@ -142,13 +169,19 @@ Gridifier.ApiSettingsParser.prototype.parseFilterOptions = function(filterApi) {
         return;
     }
 
-    if(typeof this._settings.filter == "function") {
+    if(typeof this._settings.filter == "string" || this._settings.filter instanceof String
+       || Dom.isArray(this._settings.filter)) {
+        filterApi.setFilterFunction(this._settings.filter);
+        return;
+    }
+    else if(typeof this._settings.filter == "function") {
         filterApi.addFilterFunction("clientDefault", this._settings.filter);
         filterApi.setFilterFunction("clientDefault");
         return;
     }
     else if(typeof this._settings.filter == "object") {
         for(var filterFunctionName in this._settings.filter) {
+            if(filterFunctionName == Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER) continue;
             var filterFunction = this._settings.filter[filterFunctionName];
 
             if(typeof filterFunction != "function") {
@@ -161,7 +194,10 @@ Gridifier.ApiSettingsParser.prototype.parseFilterOptions = function(filterApi) {
             filterApi.addFilterFunction(filterFunctionName, filterFunction);
         }
 
-        filterApi.setFilterFunction("all");
+        if(this._settings.filter.hasOwnProperty(Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER))
+            filterApi.setFilterFunction(this._settings.filter[Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER]);
+        else
+            filterApi.setFilterFunction("all");
         return;
     }
     else {
@@ -178,12 +214,17 @@ Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coord
         return;
     }
 
-    if(typeof this._settings.coordsChanger == "function") {
+    if(typeof this._settings.coordsChanger == "string" || this._settings.coordsChanger instanceof String) {
+        coordsChangerApi.setCoordsChangerFunction(this._settings.coordsChanger);
+        return;
+    }
+    else if(typeof this._settings.coordsChanger == "function") {
         coordsChangerApi.addCoordsChangerFunction("clientDefault", this._settings.coordsChanger);
         coordsChangerApi.setCoordsChangerFunction("clientDefault");
     }
     else if(typeof this._settings.coordsChanger == "object") {
         for(var coordsChangerFunctionName in this._settings.coordsChanger) {
+            if(coordsChangerFunctionName == Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER) continue;
             var coordsChangerFunction = this._settings.coordsChanger[coordsChangerFunctionName];
 
             if(typeof coordsChangerFunction != "function") {
@@ -195,8 +236,11 @@ Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coord
 
             coordsChangerApi.addCoordsChangerFunction(coordsChangerFunctionName, coordsChangerFunction);
         }
-        
-        coordsChangerApi.setCoordsChangerFunction("CSS3Translate3DWithRounding");
+
+        if(this._settings.coordsChanger.hasOwnProperty(Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER))
+            coordsChangerApi.setCoordsChangerFunction(this._settings.coordsChanger[Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER]);
+        else
+            coordsChangerApi.setCoordsChangerFunction("CSS3Translate3DWithRounding");
     }
     else {
         new Gridifier.Error(
@@ -212,13 +256,18 @@ Gridifier.ApiSettingsParser.prototype.parseSizesChangerOptions = function(sizesC
         return;
     }
 
-    if(typeof this._settings.sizesChanger == "function") {
+    if(typeof this._settings.sizesChanger == "string" || this._settings.sizesChanger instanceof String) {
+        sizesChangerApi.setSizesChangerFunction(this._settings.sizesChanger);
+        return;
+    }
+    else if(typeof this._settings.sizesChanger == "function") {
         sizesChangerApi.addSizesChangerFunction("clientDefault", this._settings.sizesChanger);
         sizesChangerApi.setSizesChangerFunction("clientDefault");
         return;
     }
     else if(typeof this._settings.sizesChanger == "object") {
         for(var sizesChangerFunctionName in this._settings.sizesChanger) {
+            if(sizesChangerFunctionName == Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER) continue;
             var sizesChangerFunction = this._settings.sizesChanger[sizesChangerFunctionName];
 
             if(typeof sizesChangerFunction != "function") {
@@ -230,8 +279,11 @@ Gridifier.ApiSettingsParser.prototype.parseSizesChangerOptions = function(sizesC
 
             sizesChangerApi.addSizesChangerFunction(sizesChangerFunctionName, sizesChangerFunction);
         }
-        
-        sizesChangerApi.setSizesChangerFunction("default");
+
+        if(this._settings.sizesChanger.hasOwnProperty(Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER))
+            sizesChangerApi.setSizesChangerFunction(this._settings.sizesChanger[Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER]);
+        else
+            sizesChangerApi.setSizesChangerFunction("default");
         return;
     }
     else {
@@ -248,13 +300,18 @@ Gridifier.ApiSettingsParser.prototype.parseDraggableItemDecoratorOptions = funct
         return;
     }
 
-    if(typeof this._settings.draggableItemDecorator == "function") {
+    if(typeof this._settings.draggableItemDecorator == "string" || this._settings.draggableItemDecorator instanceof String) {
+        dragifierApi.setDraggableItemDecoratorFunction(this._settings.draggableItemDecorator);
+        return;
+    }
+    else if(typeof this._settings.draggableItemDecorator == "function") {
         dragifierApi.addDraggableItemDecoratorFunction("clientDefault", this._settings.draggableItemDecorator);
         dragifierApi.setDraggableItemDecoratorFunction("clientDefault");
         return;
     }
     else if(typeof this._settings.draggableItemDecorator == "object") {
         for(var draggableItemDecoratorFunctionName in this._settings.draggableItemDecorator) {
+            if(draggableItemDecoratorFunctionName == Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER) continue;
             var draggableItemDecoratorFunction = this._settings.draggableItemDecorator[draggableItemDecoratorFunctionName];
 
             if(typeof draggableItemDecoratorFunction != "function") {
@@ -267,7 +324,10 @@ Gridifier.ApiSettingsParser.prototype.parseDraggableItemDecoratorOptions = funct
             dragifierApi.addDraggableItemDecoratorFunction(draggableItemDecoratorFunctionName, draggableItemDecoratorFunction);
         }
 
-        dragifierApi.setDraggableItemDecoratorFunction("cloneCSS");
+        if(this._settings.draggableItemDecorator.hasOwnProperty(Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER))
+            dragifierApi.setDraggableItemDecoratorFunction(this._settings.draggableItemDecorator[Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER]);
+        else
+            dragifierApi.setDraggableItemDecoratorFunction("cloneCSS");
         return;
     }
     else {

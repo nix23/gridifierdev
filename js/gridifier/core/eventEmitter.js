@@ -9,6 +9,7 @@ Gridifier.EventEmitter = function(gridifier) {
     me._transformCallbacks = [];
     me._gridRetransformCallbacks = [];
     me._connectionCreateCallbacks = [];
+    me._disconnectCallbacks = [];
 
     me._dragEndCallbacks = [];
 
@@ -47,6 +48,7 @@ Gridifier.EventEmitter.prototype._bindEmitterToGridifier = function() {
     this._gridifier.onTransform = function(callbackFn) { me.onTransform.call(me, callbackFn); };
     this._gridifier.onGridRetransform = function(callbackFn) { me.onGridRetransform.call(me, callbackFn); };
     this._gridifier.onConnectionCreate = function(callbackFn) { me.onConnectionCreate.call(me, callbackFn); };
+    this._gridifier.onDisconnect = function(callbackFn) { me.onDisconnect.call(me, callbackFn); };
 
     this._gridifier.onDragEnd = function(callbackFn) { me.onDragEnd.call(me, callbackFn); };
 }
@@ -73,6 +75,10 @@ Gridifier.EventEmitter.prototype.onGridSizesChange = function(callbackFn) {
 
 Gridifier.EventEmitter.prototype.onConnectionCreate = function(callbackFn) {
     this._connectionCreateCallbacks.push(callbackFn);
+}
+
+Gridifier.EventEmitter.prototype.onDisconnect = function(callbackFn) {
+    this._disconnectCallbacks.push(callbackFn);
 }
 
 Gridifier.EventEmitter.prototype.onDragEnd = function(callbackFn) {
@@ -106,6 +112,12 @@ Gridifier.EventEmitter.prototype.emitHideEvent = function(item) {
             var itemClone = this._gridifier.getItemClone(item);
             this._hideCallbacks[i](item);
         }
+    }
+
+    var collector = this._gridifier.getCollector();
+    if(collector.isItemRestrictedToCollect(item)) {
+        for(var j = 0; j < this._disconnectCallbacks.length; j++)
+            this._disconnectCallbacks[j](item);
     }
 }
 

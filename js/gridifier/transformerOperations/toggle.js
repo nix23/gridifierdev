@@ -49,7 +49,7 @@ Gridifier.TransformerOperations.Toggle = function(gridifier,
     return this;
 }
 
-Gridifier.TransformerOperations.Toggle.prototype.execute = function(maybeItem, 
+Gridifier.TransformerOperations.Toggle.prototype.prepare = function(maybeItem,
                                                                     newWidth, 
                                                                     newHeight,
                                                                     usePaddingBottomInsteadHeight) {
@@ -59,7 +59,7 @@ Gridifier.TransformerOperations.Toggle.prototype.execute = function(maybeItem,
         itemsToTransform, sizesToTransform, usePaddingBottomInsteadHeight
     );
     if(transformationData.length == 0)
-        return;
+        return [];
 
     /* @system-log-start */
     Logger.startLoggingOperation(
@@ -67,9 +67,7 @@ Gridifier.TransformerOperations.Toggle.prototype.execute = function(maybeItem,
         this._loggerLegend
     );
     /* @system-log-end */
-    this._sizesResolverManager.startCachingTransaction();
-    this._sizesTransformer.transformConnectionSizes(transformationData);
-    this._sizesResolverManager.stopCachingTransaction();
+    return transformationData;
 }
 
 Gridifier.TransformerOperations.Toggle.prototype._parseTransformationData = function(itemsToTransform,

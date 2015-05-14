@@ -18,6 +18,9 @@ Gridifier.TransformerOperations.Transform = function(gridifier,
     this._loggerLegend = null;
     /* @system-log-end */
 
+    this._transformationData = [];
+    this._executeTransformOperationTimeout = null;
+
     this._css = {
     };
 
@@ -49,7 +52,7 @@ Gridifier.TransformerOperations.Transform = function(gridifier,
     return this;
 }
 
-Gridifier.TransformerOperations.Transform.prototype.execute = function(maybeItem, 
+Gridifier.TransformerOperations.Transform.prototype.prepare = function(maybeItem,
                                                                        newWidth, 
                                                                        newHeight, 
                                                                        usePaddingBottomInsteadHeight) {
@@ -59,7 +62,7 @@ Gridifier.TransformerOperations.Transform.prototype.execute = function(maybeItem
         itemsToTransform, sizesToTransform, usePaddingBottomInsteadHeight
     );
     if(transformationData.length == 0)
-        return;
+        return [];
 
     /* @system-log-start */
     Logger.startLoggingOperation(
@@ -67,9 +70,7 @@ Gridifier.TransformerOperations.Transform.prototype.execute = function(maybeItem
         this._loggerLegend
     );
     /* @system-log-end */
-    this._sizesResolverManager.startCachingTransaction();
-    this._sizesTransformer.transformConnectionSizes(transformationData);
-    this._sizesResolverManager.stopCachingTransaction();
+    return transformationData;
 }
 
 Gridifier.TransformerOperations.Transform.prototype._parseTransformationData = function(itemsToTransform,
@@ -108,6 +109,47 @@ Gridifier.TransformerOperations.Transform.prototype._parseTransformationData = f
     }
 
     return transformationData;
+}
+
+Gridifier.TransformerOperations.Transform.prototype.schedule = function(transformationData) {
+    if(transformationData.length == 0)
+        return;
+
+    if(this._executeTransformOperationTimeout == null) {
+        this._transformationData = transformationData;
+    }
+    else {
+        clearTimeout(this._executeTransformOperationTimeout);
+        this._executeTransformOperationTimeout = null;
+
+        for(var i = 0; i < transformationData.length; i++) {
+            var wasReplaced = false;
+
+            for(var j = 0; j < this._transformationData.length; j++) {
+                if(this._transformationData[j].connectionToTransform.itemGUID ==
+                    transformationData[i].connectionToTransform.itemGUID) {
+                    this._transformationData[j] = transformationData[i];
+                    wasReplaced = true;
+                    break;;
+                }
+            }
+
+            if(!wasReplaced)
+                this._transformationData.push(transformationData[i]);
+        }
+    }
+
+    var me = this;
+    this._executeTransformOperationTimeout = setTimeout(function() {
+        me._execute.call(me, me._transformationData);
+        me._transformationData = [];
+    }, 40);
+}
+
+Gridifier.TransformerOperations.Transform.prototype._execute = function(transformationData) {
+    this._sizesResolverManager.startCachingTransaction();
+    this._sizesTransformer.transformConnectionSizes(transformationData);
+    this._sizesResolverManager.stopCachingTransaction();
 }
 
 Gridifier.TransformerOperations.Transform.prototype.executeRetransformAllSizes = function() {

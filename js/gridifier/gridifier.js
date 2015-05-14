@@ -193,6 +193,8 @@ Gridifier = function(grid, settings) {
             me._eventEmitter
         );
 
+        me._settings.parseAntialiasingSettings();
+
         me._bindEvents();
     };
 
@@ -254,6 +256,18 @@ Gridifier.prototype.getCalculatedGridWidth = function() {
 
 Gridifier.prototype.getCalculatedGridHeight = function() {
     return this._connections.getMaxY2();
+}
+
+Gridifier.prototype.getGridWidth = function() {
+    return Math.round(this.getGridX2() + 1);
+}
+
+Gridifier.prototype.getGridHeight = function() {
+    return Math.round(this.getGridY2() + 1);
+}
+
+Gridifier.prototype.getCollector = function() {
+    return this._collector;
 }
 
 Gridifier.prototype.getRenderer = function() {
@@ -443,6 +457,7 @@ Gridifier.prototype.setCoordsChangeTransitionTiming = function(transitionTiming)
 Gridifier.prototype.setAlignmentType = function(alignmentType) {
     this._settings.setAlignmentType(alignmentType);
     this.retransformAllSizes();
+    return this;
 }
 
 Gridifier.prototype.setRotatePerspective = function(newRotatePerspective) {
@@ -452,6 +467,16 @@ Gridifier.prototype.setRotatePerspective = function(newRotatePerspective) {
 
 Gridifier.prototype.setRotateBackface = function(newRotateBackface) {
     this._settings.setRotateBackface(newRotateBackface);
+    return this;
+}
+
+Gridifier.prototype.enableRotateBackface = function() {
+    this._settings.setRotateBackface(true);
+    return this;
+}
+
+Gridifier.prototype.disableRotateBackface = function() {
+    this._settings.setRotateBackface(false);
     return this;
 }
 
@@ -599,28 +624,36 @@ Gridifier.prototype.retransformAllSizes = function() {
 
 Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {
     this._normalizer.updateItemAntialiasValues();
-    this._toggleOperation.execute(maybeItem, newWidth, newHeight, false);
+    this._transformOperation.schedule(
+        this._toggleOperation.prepare(maybeItem, newWidth, newHeight, false)
+    );
 
     return this;
 }
 
 Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
     this._normalizer.updateItemAntialiasValues();
-    this._transformOperation.execute(maybeItem, newWidth, newHeight, false);
+    this._transformOperation.schedule(
+        this._transformOperation.prepare(maybeItem, newWidth, newHeight, false)
+    );
 
     return this;
 }
 
 Gridifier.prototype.toggleSizesWithPaddingBottom = function(maybeItem, newWidth, newPaddingBottom) {
     this._normalizer.updateItemAntialiasValues();
-    this._toggleOperation.execute(maybeItem, newWidth, newPaddingBottom, true);
+    this._transformOperation.schedule(
+        this._toggleOperation.prepare(maybeItem, newWidth, newPaddingBottom, true)
+    );
 
     return this;
 }
 
 Gridifier.prototype.transformSizesWithPaddingBottom = function(maybeItem, newWidth, newPaddingBottom) {
     this._normalizer.updateItemAntialiasValues();
-    this._transformOperation.execute(maybeItem, newWidth, newPaddingBottom, true);
+    this._transformOperation.schedule(
+        this._transformOperation.prepare(maybeItem, newWidth, newPaddingBottom, true)
+    );
 
     return this;
 }
@@ -759,8 +792,20 @@ Gridifier.prototype.setToggle = Gridifier.prototype.toggleBy;
 Gridifier.prototype.setSort = Gridifier.prototype.sortBy;
 Gridifier.prototype.setFilter = Gridifier.prototype.filterBy;
 Gridifier.prototype.collectNew = Gridifier.prototype.collectAllDisconnectedItems;
+Gridifier.prototype.collectConnected = Gridifier.prototype.collectAllConnectedItems;
 Gridifier.prototype.getForSilentRender = Gridifier.prototype.getScheduledForSilentRenderItems;
 Gridifier.prototype.setAlign = Gridifier.prototype.setAlignmentType;
+Gridifier.prototype.enableIntersections = Gridifier.prototype.setDefaultIntersectionStrategy;
+Gridifier.prototype.disableIntersections = Gridifier.prototype.setNoIntersectionStrategy;
+Gridifier.prototype.setToggleDuration = Gridifier.prototype.setToggleAnimationMsDuration;
+Gridifier.prototype.setCoordsChangeDuration = Gridifier.prototype.setCoordsChangeAnimationMsDuration;
+Gridifier.prototype.setItemWidthPtAntialias = Gridifier.prototype.setItemWidthPercentageAntialias;
+Gridifier.prototype.setItemHeightPtAntialias = Gridifier.prototype.setItemHeightPercentageAntialias;
+Gridifier.prototype.setWidthPxAntialias = Gridifier.prototype.setItemWidthPxAntialias;
+Gridifier.prototype.setHeightPxAntialias = Gridifier.prototype.setItemHeightPxAntialias;
+Gridifier.prototype.setWidthPtAntialias = Gridifier.prototype.setItemWidthPercentageAntialias;
+Gridifier.prototype.setHeightPtAntialias = Gridifier.prototype.setItemHeightPercentageAntialias;
+Gridifier.prototype.retransformGrid = Gridifier.prototype.retransformAllSizes;
 
 Gridifier.Api = {};
 Gridifier.HorizontalGrid = {};
@@ -771,16 +816,30 @@ Gridifier.SizesTransformer = {};
 
 Gridifier.REFLOW_OPTIMIZATION_TIMEOUT = 0;
 
-Gridifier.GRID_TYPES = {VERTICAL_GRID: "verticalGrid", HORIZONTAL_GRID: "horizontalGrid"};
+Gridifier.GRID_TYPES = {VERTICAL_GRID: "verticalGrid", HORIZONTAL_GRID: "horizontalGrid",
+                        VERTICAL_GRID_SHORT: "vertical", HORIZONTAL_GRID_SHORT: "horizontal"};
 
 Gridifier.PREPEND_TYPES = {
     MIRRORED_PREPEND: "mirroredPrepend",
     DEFAULT_PREPEND: "defaultPrepend",
-    REVERSED_PREPEND: "reversedPrepend"
+    REVERSED_PREPEND: "reversedPrepend",
+    MIRRORED_PREPEND_SHORT: "mirrored",
+    DEFAULT_PREPEND_SHORT: "default",
+    REVERSED_PREPEND_SHORT: "reversed"
 };
-Gridifier.APPEND_TYPES = {DEFAULT_APPEND: "defaultAppend", REVERSED_APPEND: "reversedAppend"};
+Gridifier.APPEND_TYPES = {
+    DEFAULT_APPEND: "defaultAppend",
+    REVERSED_APPEND: "reversedAppend",
+    DEFAULT_APPEND_SHORT: "default",
+    REVERSED_APPEND_SHORT: "reversed"
+};
 
-Gridifier.INTERSECTION_STRATEGIES = {DEFAULT: "default", NO_INTERSECTIONS: "noIntersections"};
+Gridifier.INTERSECTION_STRATEGIES = {
+    DEFAULT: "default",
+    NO_INTERSECTIONS: "noIntersections",
+    DEFAULT_SHORT: "yes",
+    NO_INTERSECTIONS_SHORT: "no"
+};
 Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES = {
     FOR_VERTICAL_GRID: {
         TOP: "top", CENTER: "center", BOTTOM: "bottom"
@@ -793,7 +852,8 @@ Gridifier.INTERSECTION_STRATEGY_ALIGNMENT_TYPES = {
 Gridifier.SORT_DISPERSION_MODES = {
     DISABLED: "disabled",
     CUSTOM: "custom",
-    CUSTOM_ALL_EMPTY_SPACE: "customAllEmptySpace"
+    CUSTOM_ALL_EMPTY_SPACE: "customAllEmptySpace",
+    CUSTOM_ALL_EMPTY_SPACE_SHORT: "allGrid"
 };
 
 Gridifier.GRID_ITEM_MARKING_STRATEGIES = {BY_CLASS: "class", BY_DATA_ATTR: "data", BY_QUERY: "query"};

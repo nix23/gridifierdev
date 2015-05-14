@@ -131,6 +131,7 @@ Gridifier.Api.Toggle.prototype._addSlides = function() {
 
     var customSliders = [
         ["slideClockwiseFromCenters", "slideLeft", "slideTop", "slideRight", "slideBottom"],
+        ["slideClockwiseFromSides", "slideLeft", "slideTop", "slideRight", "slideBottom"],
         ["slideClockwiseFromCorners", "slideLeftTop", "slideRightTop", "slideRightBottom", "slideLeftBottom"]
     ];
     for(var i = 0; i < customSliders.length; i++) {

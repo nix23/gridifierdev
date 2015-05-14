@@ -235,6 +235,8 @@ Gridifier.Api.Rotate.prototype._createItemClone = function(item) {
         marginTop: 0,
         marginBottom: 0
     });
+    Dom.css3.transition(itemClone, "");
+    Dom.css3.transform(itemClone, "");
 
     // If original height == 0, paddingBottom is setted up instead of height
     // (We should drop paddings, for rotate we should use sizes resolved through

@@ -27,13 +27,18 @@ Gridifier.CoreSettingsParser = function(settingsCore, settings) {
 }
 
 Gridifier.CoreSettingsParser.prototype.parseGridType = function() {
-    if(!this._settings.hasOwnProperty("gridType")) {
+    if(!this._settings.hasOwnProperty("gridType") && !this._settings.hasOwnProperty("grid")) {
         var gridType = Gridifier.GRID_TYPES.VERTICAL_GRID;
         return gridType;
     }
 
+    if(this._settings.hasOwnProperty("grid"))
+        this._settings.gridType = this._settings.grid;
+
     if(this._settings.gridType != Gridifier.GRID_TYPES.VERTICAL_GRID
-        && this._settings.gridType != Gridifier.GRID_TYPES.HORIZONTAL_GRID) {
+        && this._settings.gridType != Gridifier.GRID_TYPES.HORIZONTAL_GRID
+        && this._settings.gridType != Gridifier.GRID_TYPES.VERTICAL_GRID_SHORT
+        && this._settings.gridType != Gridifier.GRID_TYPES.HORIZONTAL_GRID_SHORT) {
         new Gridifier.Error(
             Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_GRID_TYPE,
             this._settings.gridType
@@ -45,14 +50,20 @@ Gridifier.CoreSettingsParser.prototype.parseGridType = function() {
 }
 
 Gridifier.CoreSettingsParser.prototype.parsePrependType = function() {
-    if(!this._settings.hasOwnProperty("prependType")) {
+    if(!this._settings.hasOwnProperty("prependType") && !this._settings.hasOwnProperty("prepend")) {
         var prependType = Gridifier.PREPEND_TYPES.MIRRORED_PREPEND;
         return prependType;
     }
 
+    if(this._settings.hasOwnProperty("prepend"))
+        this._settings.prependType = this._settings.prepend;
+
     if(this._settings.prependType != Gridifier.PREPEND_TYPES.DEFAULT_PREPEND 
         && this._settings.prependType != Gridifier.PREPEND_TYPES.REVERSED_PREPEND 
-        && this._settings.prependType != Gridifier.PREPEND_TYPES.MIRRORED_PREPEND) {
+        && this._settings.prependType != Gridifier.PREPEND_TYPES.MIRRORED_PREPEND
+        && this._settings.prependType != Gridifier.PREPEND_TYPES.DEFAULT_PREPEND_SHORT
+        && this._settings.prependType != Gridifier.PREPEND_TYPES.REVERSED_PREPEND_SHORT
+        && this._settings.prependType != Gridifier.PREPEND_TYPES.MIRRORED_PREPEND_SHORT) {
         new Gridifier.Error(
             Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_PREPEND_TYPE,
             this._settings.prependType
@@ -64,7 +75,7 @@ Gridifier.CoreSettingsParser.prototype.parsePrependType = function() {
 }
 
 Gridifier.CoreSettingsParser.prototype.parseAppendType = function() {
-    if(!this._settings.hasOwnProperty("appendType")) {
+    if(!this._settings.hasOwnProperty("appendType") && !this._settings.hasOwnProperty("append")) {
         if(this._settingsCore.isVerticalGrid())
             var appendType = Gridifier.APPEND_TYPES.REVERSED_APPEND;
         else if(this._settingsCore.isHorizontalGrid())
@@ -72,8 +83,13 @@ Gridifier.CoreSettingsParser.prototype.parseAppendType = function() {
         return appendType;
     }
 
+    if(this._settings.hasOwnProperty("append"))
+        this._settings.appendType = this._settings.append;
+
     if(this._settings.appendType != Gridifier.APPEND_TYPES.DEFAULT_APPEND
-        && this._settings.appendType != Gridifier.APPEND_TYPES.REVERSED_APPEND) {
+        && this._settings.appendType != Gridifier.APPEND_TYPES.REVERSED_APPEND
+        && this._settings.appendType != Gridifier.APPEND_TYPES.DEFAULT_APPEND_SHORT
+        && this._settings.appendType != Gridifier.APPEND_TYPES.REVERSED_APPEND_SHORT) {
         new Gridifier.Error(
             Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_APPEND_TYPE,
             this._settings.appendType
@@ -83,9 +99,11 @@ Gridifier.CoreSettingsParser.prototype.parseAppendType = function() {
     if(this._settingsCore.isHorizontalGrid())
         var appendType = this._settings.appendType;
     else if(this._settingsCore.isVerticalGrid()) {
-        if(this._settings.appendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND)
+        if(this._settings.appendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND
+           || this._settings.appendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND_SHORT)
             appendType = Gridifier.APPEND_TYPES.REVERSED_APPEND;
-        else if(this._settings.appendType == Gridifier.APPEND_TYPES.REVERSED_APPEND)
+        else if(this._settings.appendType == Gridifier.APPEND_TYPES.REVERSED_APPEND
+                || this._settings.appendType == Gridifier.APPEND_TYPES.REVERSED_APPEND_SHORT)
             appendType = Gridifier.APPEND_TYPES.DEFAULT_APPEND;
     }
 
@@ -94,15 +112,21 @@ Gridifier.CoreSettingsParser.prototype.parseAppendType = function() {
 
 Gridifier.CoreSettingsParser.prototype.parseIntersectionStrategy = function() {
     if(!this._settings.hasOwnProperty("intersectionStrategy")
+        && !this._settings.hasOwnProperty("intersections")
         && !this._settings.hasOwnProperty("alignmentType")
         && !this._settings.hasOwnProperty("align")) {
         var intersectionStrategy = Gridifier.INTERSECTION_STRATEGIES.DEFAULT;
         return intersectionStrategy;
     }
 
+    if(this._settings.hasOwnProperty("intersections"))
+        this._settings.intersectionStrategy = this._settings.intersections;
+
     if(this._settings.hasOwnProperty("intersectionStrategy")) {
         if(this._settings.intersectionStrategy != Gridifier.INTERSECTION_STRATEGIES.DEFAULT
-            && this._settings.intersectionStrategy != Gridifier.INTERSECTION_STRATEGIES.NO_INTERSECTIONS) {
+            && this._settings.intersectionStrategy != Gridifier.INTERSECTION_STRATEGIES.NO_INTERSECTIONS
+            && this._settings.intersectionStrategy != Gridifier.INTERSECTION_STRATEGIES.DEFAULT_SHORT
+            && this._settings.intersectionStrategy != Gridifier.INTERSECTION_STRATEGIES.NO_INTERSECTIONS_SHORT) {
             new Gridifier.Error(
                 Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_INTERSECTION_STRATEGY,
                 this._settings.intersectionStrategy
@@ -173,14 +197,18 @@ Gridifier.CoreSettingsParser.prototype.ensureIsValidAlignmentType = function(ali
 }
 
 Gridifier.CoreSettingsParser.prototype.parseSortDispersionMode = function() {
-    if(!this._settings.hasOwnProperty("sortDispersionMode")) {
+    if(!this._settings.hasOwnProperty("sortDispersionMode") && !this._settings.hasOwnProperty("sortDispersion")) {
         var sortDispersionMode = Gridifier.SORT_DISPERSION_MODES.DISABLED;
         return sortDispersionMode;
     }
 
+    if(this._settings.hasOwnProperty("sortDispersion"))
+        this._settings.sortDispersionMode = this._settings.sortDispersion;
+
     if(this._settings.sortDispersionMode != Gridifier.SORT_DISPERSION_MODES.DISABLED 
         && this._settings.sortDispersionMode != Gridifier.SORT_DISPERSION_MODES.CUSTOM 
-        && this._settings.sortDispersionMode != Gridifier.SORT_DISPERSION_MODES.CUSTOM_ALL_EMPTY_SPACE) {
+        && this._settings.sortDispersionMode != Gridifier.SORT_DISPERSION_MODES.CUSTOM_ALL_EMPTY_SPACE
+        && this._settings.sortDispersionMode != Gridifier.SORT_DISPERSION_MODES.CUSTOM_ALL_EMPTY_SPACE_SHORT) {
         new Gridifier.Error(
             Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_SORT_DISPERSION_MODE,
             this._settings.sortDispersionMode
@@ -233,15 +261,22 @@ Gridifier.CoreSettingsParser.prototype.parseDisableItemHideOnGridAttachValue = f
 }
 
 Gridifier.CoreSettingsParser.prototype.parseToggleAnimationMsDuration = function() {
-    if(!this._settings.hasOwnProperty("toggleAnimationMsDuration"))
+    if(!this._settings.hasOwnProperty("toggleAnimationMsDuration") && !this._settings.hasOwnProperty("toggleDuration"))
         return Gridifier.DEFAULT_TOGGLE_ANIMATION_MS_DURATION;
+
+    if(this._settings.hasOwnProperty("toggleDuration"))
+        this._settings.toggleAnimationMsDuration = this._settings.toggleDuration;
 
     return this._settings.toggleAnimationMsDuration;
 }
 
 Gridifier.CoreSettingsParser.prototype.parseCoordsChangeAnimationMsDuration = function() {
-    if(!this._settings.hasOwnProperty("coordsChangeAnimationMsDuration"))
+    if(!this._settings.hasOwnProperty("coordsChangeAnimationMsDuration") &&
+       !this._settings.hasOwnProperty("coordsChangeDuration"))
         return Gridifier.DEFAULT_COORDS_CHANGE_ANIMATION_MS_DURATION;
+
+    if(this._settings.hasOwnProperty("coordsChangeDuration"))
+        this._settings.coordsChangeAnimationMsDuration = this._settings.coordsChangeDuration;
 
     return this._settings.coordsChangeAnimationMsDuration;
 }

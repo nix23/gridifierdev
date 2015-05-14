@@ -152,6 +152,17 @@ Gridifier.Settings.prototype._parse = function() {
     this._gridifier.setReversedAppend = function() { me.setReversedAppend.call(me); };
 }
 
+Gridifier.Settings.prototype.parseAntialiasingSettings = function() {
+    if(this._settings.hasOwnProperty("widthPtAntialias"))
+        this._gridifier.setWidthPtAntialias(this._settings.widthPtAntialias);
+    if(this._settings.hasOwnProperty("heightPtAntialias"))
+        this._gridifier.setHeightPtAntialias(this._settings.heightPtAntialias);
+    if(this._settings.hasOwnProperty("widthPxAntialias"))
+        this._gridifier.setWidthPxAntialias(this._settings.widthPxAntialias);
+    if(this._settings.hasOwnProperty("heightPxAntialias"))
+        this._gridifier.setHeightPxAntialias(this._settings.heightPxAntialias);
+}
+
 Gridifier.Settings.prototype.setDefaultPrepend = function() {
     this._prependType = Gridifier.PREPEND_TYPES.DEFAULT_PREPEND;
 }
@@ -315,39 +326,48 @@ Gridifier.Settings.prototype.getDragifierUserSelectToggler = function() {
 }
 
 Gridifier.Settings.prototype.isVerticalGrid = function() {
-    return this._gridType == Gridifier.GRID_TYPES.VERTICAL_GRID;
+    return this._gridType == Gridifier.GRID_TYPES.VERTICAL_GRID ||
+           this._gridType == Gridifier.GRID_TYPES.VERTICAL_GRID_SHORT;
 }
 
 Gridifier.Settings.prototype.isHorizontalGrid = function() {
-    return this._gridType == Gridifier.GRID_TYPES.HORIZONTAL_GRID;
+    return this._gridType == Gridifier.GRID_TYPES.HORIZONTAL_GRID ||
+           this._gridType == Gridifier.GRID_TYPES.HORIZONTAL_GRID_SHORT;
 }
 
 Gridifier.Settings.prototype.isDefaultPrepend = function() {
-    return this._prependType == Gridifier.PREPEND_TYPES.DEFAULT_PREPEND;
+    return this._prependType == Gridifier.PREPEND_TYPES.DEFAULT_PREPEND ||
+           this._prependType == Gridifier.PREPEND_TYPES.DEFAULT_PREPEND_SHORT;
 }
 
 Gridifier.Settings.prototype.isReversedPrepend = function() {
-    return this._prependType == Gridifier.PREPEND_TYPES.REVERSED_PREPEND;
+    return this._prependType == Gridifier.PREPEND_TYPES.REVERSED_PREPEND ||
+           this._prependType == Gridifier.PREPEND_TYPES.REVERSED_PREPEND_SHORT;
 }
 
 Gridifier.Settings.prototype.isMirroredPrepend = function() {
-    return this._prependType == Gridifier.PREPEND_TYPES.MIRRORED_PREPEND;
+    return this._prependType == Gridifier.PREPEND_TYPES.MIRRORED_PREPEND ||
+           this._prependType == Gridifier.PREPEND_TYPES.MIRRORED_PREPEND_SHORT;
 }
 
 Gridifier.Settings.prototype.isDefaultAppend = function() {
-    return this._appendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND;
+    return this._appendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND ||
+           this._appendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND_SHORT;
 }
 
 Gridifier.Settings.prototype.isReversedAppend = function() {
-    return this._appendType == Gridifier.APPEND_TYPES.REVERSED_APPEND;
+    return this._appendType == Gridifier.APPEND_TYPES.REVERSED_APPEND ||
+           this._appendType == Gridifier.APPEND_TYPES.REVERSED_APPEND_SHORT;
 }
 
 Gridifier.Settings.prototype.isDefaultIntersectionStrategy = function() {
-    return this._intersectionStrategy == Gridifier.INTERSECTION_STRATEGIES.DEFAULT;
+    return this._intersectionStrategy == Gridifier.INTERSECTION_STRATEGIES.DEFAULT ||
+           this._intersectionStrategy == Gridifier.INTERSECTION_STRATEGIES.DEFAULT_SHORT;
 }
 
 Gridifier.Settings.prototype.isNoIntersectionsStrategy = function() {
-    return this._intersectionStrategy == Gridifier.INTERSECTION_STRATEGIES.NO_INTERSECTIONS;
+    return this._intersectionStrategy == Gridifier.INTERSECTION_STRATEGIES.NO_INTERSECTIONS ||
+           this._intersectionStrategy == Gridifier.INTERSECTION_STRATEGIES.NO_INTERSECTIONS_SHORT;
 }
 
 Gridifier.Settings.prototype.isVerticalGridTopAlignmentType = function() {
@@ -383,7 +403,8 @@ Gridifier.Settings.prototype.isCustomSortDispersion = function() {
 }
 
 Gridifier.Settings.prototype.isCustomAllEmptySpaceSortDispersion = function() {
-    return this._sortDispersionMode == Gridifier.SORT_DISPERSION_MODES.CUSTOM_ALL_EMPTY_SPACE;
+    return this._sortDispersionMode == Gridifier.SORT_DISPERSION_MODES.CUSTOM_ALL_EMPTY_SPACE ||
+           this._sortDispersionMode == Gridifier.SORT_DISPERSION_MODES.CUSTOM_ALL_EMPTY_SPACE_SHORT;
 }
 
 Gridifier.Settings.prototype.getSortDispersionValue = function() {

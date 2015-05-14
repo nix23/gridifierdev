@@ -67,10 +67,13 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         me._gridifierSettings.alignmentType = "center";
+        //me._gridifierSettings.sortDispersion = "custom";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
         me._gridifierSettings.dragifier = true;
         //me._gridifierSettings.retransformQueueBatchSize = 1;
-        me._gridifierSettings.coordsChangeAnimationMsDuration = 300;
+        //me._gridifierSettings.coordsChangeAnimationMsDuration = 300;
+        //me._gridifierSettings.toggleDuration = 1500;
+        //me._gridifierSettings.coordsChangeDuration = 1500;
 
         //me._gridifierSettings.dragifier = "testSelector";
         //me._gridifierSettings.sortDispersionMode = "custom";
@@ -613,7 +616,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         // @todo -> Replace this.(Tmp for testing)
         me._$view.on("click", ".gridItem", function() { ///console.log("toggle");
-            //me._gridifier.disconnect($(this)); return;
+            me._gridifier.disconnect($(this)); return;
             //me._gridifier.transformSizes($(this), "*2", "*2");
            //me._gridifier.toggleSizesWithPaddingBottom($(this), "*2", "*2");
             me._gridifier.toggleSizes($(this), "*2", "*2");
@@ -640,12 +643,15 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             $firstGridItem = $gridItems.get(0);
             $secondGridItem = $gridItems.get(1);
 
-            //me._gridifier.toggleSizes([
-            //    [$secondGridItem, "*2", "*2"],
-            //    [$firstGridItem, "*2", "*2"]
-            //]);
-            me._gridifier.toggleSizes($secondGridItem, "400px", "400px");
-            me._gridifier.toggleSizes($firstGridItem, "200px", "200px");
+            me._gridifier.toggleSizes([
+                [$secondGridItem, "*2", "*2"],
+                [$firstGridItem, "*2", "*2"]
+            ]);
+            //me._gridifier.toggleSizes($secondGridItem, "400px", "400px");
+            //me._gridifier.toggleSizes($firstGridItem, "200px", "200px");
+            //me._gridifier.setSizesChanger('defaultPaddingBottom');
+            //me._gridifier.toggleSizesWithPaddingBottom($secondGridItem, "*2.5", "*2.5");
+            //me._gridifier.toggleSizesWithPaddingBottom($firstGridItem, "*2.5", "*2.5");
             //setTimeout(function() {
 
             //}, 100);
@@ -670,7 +676,12 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             //me._gridifier.silentRender(me._gridifier.getForSilentRender(true));
         });
 
+        me._gridifier.onDisconnect(function(item) {
+            console.log("item disconnected = ", item);
+        });
+
         me._gridifier.onHide(function(item) {
+            console.log("item hidden = ", item);
             // var itemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
             // console.log("item = ", item);
             // console.log("Item with GUID = " + itemGUID + " was hiden!");
