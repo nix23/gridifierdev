@@ -14,6 +14,7 @@ Gridifier.Api.Sort = function(settings, gridifier, eventEmitter) {
 
     this._retransformSortFunction = null;
     this._retransformSortFunctions = {};
+    this._retransformSortGridRefreshTimeout = null;
 
     this._css = {
     };
@@ -125,10 +126,10 @@ Gridifier.Api.Sort.prototype.getSortComparatorTools = function() {
                 return 0;
             },
 
-            byMultipleComparators: function(firstItem, secondItem, comparators, reverseOrder) {
+            byMultipleComparators: function(firstItem, secondItem, comparators) {
                 for(var i = 0; i < comparators.length; i++) {
                     var result = this.byComparator(
-                        comparators[i].forFirstItem, comparators[i].forSecondItem, reverseOrder
+                        comparators[i].forFirstItem, comparators[i].forSecondItem, comparators[i].reverseOrder
                     );
                     if(result == 0) {
                         if(i == comparators.length - 1)
@@ -145,24 +146,37 @@ Gridifier.Api.Sort.prototype.getSortComparatorTools = function() {
                                        secondItem,
                                        comparatorGetterFn,
                                        comparatorParam,
-                                       comparatorParamReplacers) {
+                                       comparatorParamReplacers,
+                                       reverseOrder) {
                 if(typeof comparatorParam == "undefined")
                     throw new Error("Gridifier error: sort comparator param is undefined.");
 
-                if(!Dom.isArray(comparatorParam))
-                    var comparatorParams = [comparatorParam];
-                else
-                    var comparatorParams = comparatorParam;
+                if(!Dom.isArray(comparatorParam)) {
+                    var comparatorParams = [[comparatorParam, reverseOrder]];
+                }
+                else {
+                    var comparatorParams = [];
+                    for(var i = 0; i < comparatorParam.length; i++) {
+                        var reverseOrder = false;
+                        if(comparatorParam[i].indexOf("|desc") !== -1) {
+                            reverseOrder = true;
+                            comparatorParam[i] = comparatorParam[i].replace("|desc", "");
+                        }
+
+                        comparatorParams.push([comparatorParam[i], reverseOrder]);
+                    }
+                }
 
                 var comparators = [];
                 for(var i = 0; i < comparatorParams.length; i++) {
                     comparators.push({
                         forFirstItem: comparatorGetterFn(
-                            firstItem, comparatorParams[i], comparatorParamReplacers
+                            firstItem, comparatorParams[i][0], comparatorParamReplacers
                         ),
                         forSecondItem: comparatorGetterFn(
-                            secondItem, comparatorParams[i], comparatorParamReplacers
-                        )
+                            secondItem, comparatorParams[i][0], comparatorParamReplacers
+                        ),
+                        reverseOrder: comparatorParams[i][1]
                     });
                 }
 
@@ -183,9 +197,9 @@ Gridifier.Api.Sort.prototype.getSortComparatorTools = function() {
                         secondItem,
                         comparatorGetterFn,
                         comparatorParam,
-                        comparatorParamReplacers || false
-                    ),
-                    reverseOrder || false
+                        comparatorParamReplacers || false,
+                        reverseOrder || false
+                    )
                 );
             },
 
@@ -283,8 +297,27 @@ Gridifier.Api.Sort.prototype.setRetransformSortFunction = function(retransformSo
     }
     else {
         this._eventEmitter.onBeforeShowPerRetransformSorter(function() {
-            setTimeout(function() {
-                me._gridifier.triggerResize();
+            if(me._retransformSortGridRefreshTimeout != null) {
+                clearTimeout(me._retransformSortGridRefreshTimeout);
+                me._retransformSortGridRefreshTimeout = null;
+            }
+
+            me._retransformSortGridRefreshTimeout = setTimeout(function() {
+                if(me._settings.hasCustomRepackSize()) {
+                    var repackSize = me._settings.getCustomRepackSize();
+                    var items = me._gridifier.getAll();
+
+                    if(items.length < repackSize)
+                        me._gridifier.triggerResize();
+                    else {
+                        var retransformStartItem = items[items.length - repackSize];
+                        var transformOperation = me._gridifier.getTransformOperation();
+                        transformOperation.executeRetransformFromFirstSortedConnection([retransformStartItem]);
+                    }
+                }
+                else {
+                    me._gridifier.triggerResize();
+                }
             }, Gridifier.Api.Sort.RETRANSFORM_SORT_GRID_REFRESH_TIMEOUT);
         });
     }
@@ -323,7 +356,7 @@ Gridifier.Api.Sort.prototype._addBySizesRetransformSort = function() {
         for(var i = 0; i < connections.length; i++) {
             var connectionWidth = Math.abs(connections[i].x2 - connections[i].x1) + 1;
             var connectionHeight = Math.abs(connections[i].y2 - connections[i].y1) + 1;
-            var connectionArea = connectionWidth * connectionHeight;
+            var connectionArea = Math.round(connectionWidth * connectionHeight);
             connections[i].area = connectionArea;
 
             if(connectionWidth >= connectionHeight)

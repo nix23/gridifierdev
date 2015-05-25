@@ -10,6 +10,8 @@ Gridifier.EventEmitter = function(gridifier) {
     me._gridRetransformCallbacks = [];
     me._connectionCreateCallbacks = [];
     me._disconnectCallbacks = [];
+    me._insertCallbacks = [];
+    me._insertEventTimeout = null;
 
     me._dragEndCallbacks = [];
 
@@ -49,6 +51,7 @@ Gridifier.EventEmitter.prototype._bindEmitterToGridifier = function() {
     this._gridifier.onGridRetransform = function(callbackFn) { me.onGridRetransform.call(me, callbackFn); };
     this._gridifier.onConnectionCreate = function(callbackFn) { me.onConnectionCreate.call(me, callbackFn); };
     this._gridifier.onDisconnect = function(callbackFn) { me.onDisconnect.call(me, callbackFn); };
+    this._gridifier.onInsert = function(callbackFn) { me.onInsert.call(me, callbackFn); };
 
     this._gridifier.onDragEnd = function(callbackFn) { me.onDragEnd.call(me, callbackFn); };
 }
@@ -79,6 +82,10 @@ Gridifier.EventEmitter.prototype.onConnectionCreate = function(callbackFn) {
 
 Gridifier.EventEmitter.prototype.onDisconnect = function(callbackFn) {
     this._disconnectCallbacks.push(callbackFn);
+}
+
+Gridifier.EventEmitter.prototype.onInsert = function(callbackFn) {
+    this._insertCallbacks.push(callbackFn);
 }
 
 Gridifier.EventEmitter.prototype.onDragEnd = function(callbackFn) {
@@ -149,6 +156,24 @@ Gridifier.EventEmitter.prototype.emitConnectionCreateEvent = function(connection
             }, 0);
         })(this._connectionCreateCallbacks[i], connections);
     }
+}
+
+Gridifier.EventEmitter.prototype.emitInsertEvent = function() {
+    var emitEvent = function() {
+        for(var i = 0; i < this._insertCallbacks.length; i++) {
+            this._insertCallbacks[i]();
+        }
+    }
+
+    if(this._insertEventTimeout != null) {
+        clearTimeout(this._insertEventTimeout);
+        this._insertEventTimeout = null;
+    }
+
+    var me = this;
+    this._insertEventTimeout = setTimeout(function() {
+        emitEvent.call(me);
+    }, 20);
 }
 
 Gridifier.EventEmitter.prototype.emitDragEndEvent = function(sortedItems) {

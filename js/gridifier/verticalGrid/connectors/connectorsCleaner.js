@@ -20,14 +20,6 @@ Gridifier.VerticalGrid.ConnectorsCleaner = function(connectors, connections, set
         me._connectorsNormalizer = new Gridifier.ConnectorsNormalizer(
             me._connections, me._connectors, me._settings
         );
-
-        if(me._settings.isDisabledSortDispersion()) {
-            me.setConnectorInsideOrBeforeItemIntersectionStrategy();
-        }
-        else if(me._settings.isCustomSortDispersion() ||
-                me._settings.isCustomAllEmptySpaceSortDispersion()) {
-            me.setConnectorInsideItemIntersectionStrategy();
-        }
     };
 
     this._bindEvents = function() {
@@ -65,12 +57,24 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype.setConnectorInsideOrBeforeIte
     this._connectionItemIntersectionStrategy = intersectionStrategies.CONNECTOR_INSIDE_OR_BEFORE_CONNECTION_ITEM;
 }
 
+Gridifier.VerticalGrid.ConnectorsCleaner.prototype._updateConnectorIntersectionStrategy = function() {
+    if(this._settings.isDisabledSortDispersion()) {
+        this.setConnectorInsideOrBeforeItemIntersectionStrategy();
+    }
+    else if(this._settings.isCustomSortDispersion() ||
+        this._settings.isCustomAllEmptySpaceSortDispersion()) {
+        this.setConnectorInsideItemIntersectionStrategy();
+    }
+}
+
 Gridifier.VerticalGrid.ConnectorsCleaner.prototype.isConnectorInsideItemIntersectionStrategy = function() {
+    this._updateConnectorIntersectionStrategy();
     var intersectionStrategies = Gridifier.VerticalGrid.ConnectorsCleaner.CONNECTION_ITEM_INTERSECTION_STRATEGIES;
     return (this._connectionItemIntersectionStrategy == intersectionStrategies.CONNECTOR_INSIDE_CONNECTION_ITEM);
 }
 
 Gridifier.VerticalGrid.ConnectorsCleaner.prototype.isConnectorInsideOrBeforeItemIntersectionStrategy = function() {
+    this._updateConnectorIntersectionStrategy();
     var intersectionStrategies = Gridifier.VerticalGrid.ConnectorsCleaner.CONNECTION_ITEM_INTERSECTION_STRATEGIES;
     return (this._connectionItemIntersectionStrategy == intersectionStrategies.CONNECTOR_INSIDE_OR_BEFORE_CONNECTION_ITEM);
 }

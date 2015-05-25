@@ -290,7 +290,7 @@ Gridifier.VerticalGrid.ReversedAppender.prototype._findItemConnectionCoords = fu
     /* @system-log-start */
     Logger.startLoggingFindItemConnectionCoords();
     /* @system-log-end */
-    
+
     for(var i = 0; i < sortedConnectors.length; i++) {
         /* @system-log-start */
         Logger.logFindItemConnectionCoordsInspectConnector(sortedConnectors[i], this._connections.get());

@@ -69,7 +69,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridifierSettings.alignmentType = "center";
         //me._gridifierSettings.sortDispersion = "custom";
         me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
-        me._gridifierSettings.dragifier = true;
+        //me._gridifierSettings.dragifier = true;
         //me._gridifierSettings.retransformQueueBatchSize = 1;
         //me._gridifierSettings.coordsChangeAnimationMsDuration = 300;
         //me._gridifierSettings.toggleDuration = 1500;
@@ -99,45 +99,47 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
         //me._gridifierSettings.appendType = "reversedAppend";
 
-        // me._gridifierSettings.sort = function(firstItem, secondItem) { 
-        //     var firstItemClassParts = firstItem.getAttribute("class").split(" ");
-        //     var secondItemClassParts = secondItem.getAttribute("class").split(" ");
 
-        //     var firstItemColorClass = "";
-        //     var secondItemColorClass = "";
 
-        //     for(var i = 0; i < firstItemClassParts.length; i++) {
-        //         if(firstItemClassParts[i].search("Bg") !== -1) {
-        //             firstItemColorClass = firstItemClassParts[i];
-        //             break;
-        //         }
-        //     }
+        me._gridifierSettings.sort = {"byColor": function(firstItem, secondItem) {
+             var firstItemClassParts = firstItem.getAttribute("class").split(" ");
+             var secondItemClassParts = secondItem.getAttribute("class").split(" ");
 
-        //     for(var i = 0; i < secondItemClassParts.length; i++) {
-        //         if(secondItemClassParts[i].search("Bg") !== -1) {
-        //             secondItemColorClass = secondItemClassParts[i];
-        //             break;
-        //         }
-        //     }
+             var firstItemColorClass = "";
+             var secondItemColorClass = "";
 
-        //     var classNameToOrderNumber = function(className) {
-        //         if(className == "gridFirstBg") return 1;
-        //         else if(className == "gridSecondBg") return 2;
-        //         else if(className == "gridThirdBg") return 3;
-        //         else if(className == "gridFourthBg") return 4;
-        //         else if(className == "gridFifthBg") return 5;
-        //     }
+             for(var i = 0; i < firstItemClassParts.length; i++) {
+                 if(firstItemClassParts[i].search("Bg") !== -1) {
+                     firstItemColorClass = firstItemClassParts[i];
+                     break;
+                 }
+             }
 
-        //     var firstItemOrderNum = classNameToOrderNumber(firstItemColorClass);
-        //     var secondItemOrderNum = classNameToOrderNumber(secondItemColorClass);
+             for(var i = 0; i < secondItemClassParts.length; i++) {
+                 if(secondItemClassParts[i].search("Bg") !== -1) {
+                     secondItemColorClass = secondItemClassParts[i];
+                     break;
+                 }
+             }
 
-        //     if(firstItemOrderNum < secondItemOrderNum)
-        //         return -1;
-        //     else if(firstItemOrderNum == secondItemOrderNum)
-        //         return 0;
-        //     else if(firstItemOrderNum > secondItemOrderNum)
-        //         return 1;
-        // };
+             var classNameToOrderNumber = function(className) {
+                 if(className == "gridFirstBg") return 1;
+                 else if(className == "gridSecondBg") return 2;
+                 else if(className == "gridThirdBg") return 3;
+                 else if(className == "gridFourthBg") return 4;
+                 else if(className == "gridFifthBg") return 5;
+             }
+
+             var firstItemOrderNum = classNameToOrderNumber(firstItemColorClass);
+             var secondItemOrderNum = classNameToOrderNumber(secondItemColorClass);
+
+             if(firstItemOrderNum < secondItemOrderNum)
+                 return -1;
+             else if(firstItemOrderNum == secondItemOrderNum)
+                 return 0;
+             else if(firstItemOrderNum > secondItemOrderNum)
+                 return 1;
+        }};
 
         // window.createDiv = function() {
         //     return $("<div/>").css({
@@ -298,7 +300,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //    me._gridifierDynamicSettings._itemSizes[i].height = sizes[i].height;
         //}
 
-        me._gridifierDynamicSettings._batchSize = 16;
+        me._gridifierDynamicSettings._batchSize = 10;
+        //me._gridifierDynamicSettings._batchSize = 3;
         var sizes = [
             {width: "10%", height: "10%"},
             {width: "5%", height: "5%"},
@@ -308,14 +311,18 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             {width: "5%", height: "5%"},
             {width: "20%", height: "20%"},
             {width: "10%", height: "10%"},
-            {width: "5%", height: "5%"},
+            {width: "10%", height: "10%"},
             {width: "20%", height: "20%"},
-            {width: "10%", height: "10%"},
-            {width: "5%", height: "5%"},
-            {width: "10%", height: "10%"},
-            {width: "5%", height: "5%"},
-            {width: "5%", height: "5%"},
-            {width: "5%", height: "5%"}
+            //{width: "33.33%", "height": "20%"},
+            //{width: "33.33%", "height": "20%"},
+            //{width: "33.33%", "height": "20%"},
+            //{width: "33.33%", "height": "20%"},
+            //{width: "5%", height: "10%"},
+            //{width: "10%", height: "10%"},
+            //{width: "5%", height: "5%"},
+            //{width: "5%", height: "5%"},
+            //{width: "5%", height: "5%"},
+            //{width: "10%", height: "10%"},
 
 
             //{width: "10%", height: "100%"},
@@ -616,7 +623,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         // @todo -> Replace this.(Tmp for testing)
         me._$view.on("click", ".gridItem", function() { ///console.log("toggle");
-            me._gridifier.disconnect($(this)); return;
+            //me._gridifier.disconnect($(this)); return;
             //me._gridifier.transformSizes($(this), "*2", "*2");
            //me._gridifier.toggleSizesWithPaddingBottom($(this), "*2", "*2");
             me._gridifier.toggleSizes($(this), "*2", "*2");
@@ -671,17 +678,22 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             //item.innerHTML = i;
         });
 
+        me._gridifier.setSort("byColor");
+        me._gridifier.onInsert(function() {
+            //me._gridifier.resort();
+        });
+
 
         me._gridifier.onConnectionCreate(function() {
             //me._gridifier.silentRender(me._gridifier.getForSilentRender(true));
         });
 
         me._gridifier.onDisconnect(function(item) {
-            console.log("item disconnected = ", item);
+            //console.log("item disconnected = ", item);
         });
 
         me._gridifier.onHide(function(item) {
-            console.log("item hidden = ", item);
+            //console.log("item hidden = ", item);
             // var itemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
             // console.log("item = ", item);
             // console.log("Item with GUID = " + itemGUID + " was hiden!");

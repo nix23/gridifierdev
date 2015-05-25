@@ -4,7 +4,8 @@ Gridifier.Operations.Prepend = function(gridSizesUpdater,
                                         settings,
                                         prepender,
                                         reversedPrepender,
-                                        sizesResolverManager) {
+                                        sizesResolverManager,
+                                        eventEmitter) {
     var me = this;
 
     this._gridSizesUpdater = null;
@@ -14,6 +15,7 @@ Gridifier.Operations.Prepend = function(gridSizesUpdater,
     this._prepender = null;
     this._reversedPrepender = null;
     this._sizesResolverManager = null;
+    this._eventEmitter = null;
 
     this._css = {
     };
@@ -26,6 +28,7 @@ Gridifier.Operations.Prepend = function(gridSizesUpdater,
         me._prepender = prepender;
         me._reversedPrepender = reversedPrepender;
         me._sizesResolverManager = sizesResolverManager;
+        me._eventEmitter = eventEmitter;
     };
 
     this._bindEvents = function() {
@@ -64,6 +67,7 @@ Gridifier.Operations.Prepend.prototype.execute = function(items) {
 
     this._sizesResolverManager.stopCachingTransaction();
     this._gridSizesUpdater.scheduleGridSizesUpdate();
+    this._eventEmitter.emitInsertEvent();
 }
 
 Gridifier.Operations.Prepend.prototype._prepend = function(item) {

@@ -141,9 +141,13 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
 
     var slideInTimeout = setTimeout(function() {
         if(animateFade) {
-            Dom.css3.transition(animateFadeTargetItem, "none");
+            Dom.css3.transitionProperty(
+                animateFadeTargetItem,
+                Prefixer.getForCSS('opacity', animateFadeTargetItem) + " 0ms " + transitionTiming
+            );
+            //Dom.css3.transition(animateFadeTargetItem, "none");
             Dom.css3.opacity(animateFadeTargetItem, 1);
-            Dom.css3.transition(animateFadeTargetItem, "");
+            //Dom.css3.transition(animateFadeTargetItem, "");
         }
 
         me._unmarkAsToggleAnimationWithCoordsChange(item);

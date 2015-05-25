@@ -449,3 +449,10 @@ Gridifier.CoreSettingsParser.prototype.parseDisableRetransformQueueOnDrags = fun
 
     return this._settings.disableRetransformQueueOnDrags;
 }
+
+Gridifier.CoreSettingsParser.prototype.parseCustomRepackSize = function() {
+    if(!this._settings.hasOwnProperty("repackSize"))
+        return null;
+
+    return this._settings.repackSize;
+}

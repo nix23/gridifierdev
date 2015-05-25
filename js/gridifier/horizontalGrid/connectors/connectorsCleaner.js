@@ -18,14 +18,6 @@ Gridifier.HorizontalGrid.ConnectorsCleaner = function(connectors, connections, s
         me._connectorsNormalizer = new Gridifier.ConnectorsNormalizer(
             me._connections, me._connectors, me._settings
         );
-
-        if(me._settings.isDisabledSortDispersion()) {
-            me.setConnectorInsideOrBeforeItemIntersectionStrategy();
-        }
-        else if(me._settings.isCustomSortDispersion() ||
-                me._settings.isCustomAllEmptySpaceSortDispersion()) {
-            me.setConnectorInsideItemIntersectionStrategy();
-        }
     };
 
     this._bindEvents = function() {
@@ -63,12 +55,24 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.setConnectorInsideOrBeforeI
     this._connectionItemIntersectionStrategy = intersectionStrategies.CONNECTOR_INSIDE_OR_BEFORE_CONNECTION_ITEM;
 }
 
+Gridifier.HorizontalGrid.ConnectorsCleaner.prototype._updateConnectorIntersectionStrategy = function() {
+    if(this._settings.isDisabledSortDispersion()) {
+        this.setConnectorInsideOrBeforeItemIntersectionStrategy();
+    }
+    else if(this._settings.isCustomSortDispersion() ||
+        this._settings.isCustomAllEmptySpaceSortDispersion()) {
+        this.setConnectorInsideItemIntersectionStrategy();
+    }
+}
+
 Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.isConnectorInsideItemIntersectionStrategy = function() {
+    this._updateConnectorIntersectionStrategy();
     var intersectionStrategies = Gridifier.HorizontalGrid.ConnectorsCleaner.CONNECTION_ITEM_INTERSECTION_STRATEGIES;
     return (this._connectionItemIntersectionStrategy == intersectionStrategies.CONNECTOR_INSIDE_CONNECTION_ITEM);
 }
 
 Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.isConnectorInsideOrBeforeItemIntersectionStrategy = function() {
+    this._updateConnectorIntersectionStrategy();
     var intersectionStrategies = Gridifier.HorizontalGrid.ConnectorsCleaner.CONNECTION_ITEM_INTERSECTION_STRATEGIES;
     return (this._connectionItemIntersectionStrategy == intersectionStrategies.CONNECTOR_INSIDE_OR_BEFORE_CONNECTION_ITEM);
 }

@@ -214,6 +214,10 @@ Gridifier.Dragifier.Core.prototype.createDraggableItemPointer = function(draggab
         top: (draggableItemOffsetTop - this._gridOffsetTop) + "px"
     });
 
+    var draggableItemComputedCSS = SizesResolver.getComputedCSS(draggableItem);
+    var marginLeft = draggableItemComputedCSS.marginLeft;
+    var marginTop = draggableItemComputedCSS.marginTop;
+
     this._gridifier.getGrid().appendChild(draggableItemPointer);
 
     var draggableItemPointerDecorator = this._settings.getDraggableItemPointerDecorator();
@@ -221,8 +225,8 @@ Gridifier.Dragifier.Core.prototype.createDraggableItemPointer = function(draggab
 
     this._dragifierRenderer.render(
         draggableItemPointer,
-        (draggableItemOffsetLeft - this._gridOffsetLeft),
-        (draggableItemOffsetTop - this._gridOffsetTop)
+        (draggableItemOffsetLeft - this._gridOffsetLeft + parseFloat(marginLeft)),
+        (draggableItemOffsetTop - this._gridOffsetTop + parseFloat(marginTop))
     );
 
     return draggableItemPointer;

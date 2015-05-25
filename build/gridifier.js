@@ -1346,7 +1346,8 @@ Gridifier = function(grid, settings) {
             me._appender,
             me._reversedAppender,
             me._sizesTransformer,
-            me._sizesResolverManager
+            me._sizesResolverManager,
+            me._eventEmitter
         );
 
         me._silentRenderer = new Gridifier.SilentRenderer(
@@ -1454,6 +1455,10 @@ Gridifier.prototype.getRenderer = function() {
     return this._renderer;
 }
 
+Gridifier.prototype.getTransformOperation = function() {
+    return this._transformOperation;
+}
+
 Gridifier.prototype.markAsGridItem = function(items) {
     this._grid.markAsGridItem(items);
     return this;
@@ -1479,6 +1484,12 @@ Gridifier.prototype.sortBy = function(sortFunctionName) {
 
 Gridifier.prototype.setRetransformSort = function(retransformSortFn) {
     this._settings.setRetransformSort(retransformSortFn);
+    this.retransformAllSizes();
+    return this;
+}
+
+Gridifier.prototype.setRepackSize = function(newSize) {
+    this._settings.setCustomRepackSize(newSize);
     return this;
 }
 
@@ -3361,9 +3372,13 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
 
     var slideInTimeout = setTimeout(function() {
         if(animateFade) {
-            Dom.css3.transition(animateFadeTargetItem, "none");
+            Dom.css3.transitionProperty(
+                animateFadeTargetItem,
+                Prefixer.getForCSS('opacity', animateFadeTargetItem) + " 0ms " + transitionTiming
+            );
+            //Dom.css3.transition(animateFadeTargetItem, "none");
             Dom.css3.opacity(animateFadeTargetItem, 1);
-            Dom.css3.transition(animateFadeTargetItem, "");
+            //Dom.css3.transition(animateFadeTargetItem, "");
         }
 
         me._unmarkAsToggleAnimationWithCoordsChange(item);
@@ -3695,6 +3710,7 @@ Gridifier.Api.Sort = function(settings, gridifier, eventEmitter) {
 
     this._retransformSortFunction = null;
     this._retransformSortFunctions = {};
+    this._retransformSortGridRefreshTimeout = null;
 
     this._css = {
     };
@@ -3806,10 +3822,10 @@ Gridifier.Api.Sort.prototype.getSortComparatorTools = function() {
                 return 0;
             },
 
-            byMultipleComparators: function(firstItem, secondItem, comparators, reverseOrder) {
+            byMultipleComparators: function(firstItem, secondItem, comparators) {
                 for(var i = 0; i < comparators.length; i++) {
                     var result = this.byComparator(
-                        comparators[i].forFirstItem, comparators[i].forSecondItem, reverseOrder
+                        comparators[i].forFirstItem, comparators[i].forSecondItem, comparators[i].reverseOrder
                     );
                     if(result == 0) {
                         if(i == comparators.length - 1)
@@ -3826,24 +3842,37 @@ Gridifier.Api.Sort.prototype.getSortComparatorTools = function() {
                                        secondItem,
                                        comparatorGetterFn,
                                        comparatorParam,
-                                       comparatorParamReplacers) {
+                                       comparatorParamReplacers,
+                                       reverseOrder) {
                 if(typeof comparatorParam == "undefined")
                     throw new Error("Gridifier error: sort comparator param is undefined.");
 
-                if(!Dom.isArray(comparatorParam))
-                    var comparatorParams = [comparatorParam];
-                else
-                    var comparatorParams = comparatorParam;
+                if(!Dom.isArray(comparatorParam)) {
+                    var comparatorParams = [[comparatorParam, reverseOrder]];
+                }
+                else {
+                    var comparatorParams = [];
+                    for(var i = 0; i < comparatorParam.length; i++) {
+                        var reverseOrder = false;
+                        if(comparatorParam[i].indexOf("|desc") !== -1) {
+                            reverseOrder = true;
+                            comparatorParam[i] = comparatorParam[i].replace("|desc", "");
+                        }
+
+                        comparatorParams.push([comparatorParam[i], reverseOrder]);
+                    }
+                }
 
                 var comparators = [];
                 for(var i = 0; i < comparatorParams.length; i++) {
                     comparators.push({
                         forFirstItem: comparatorGetterFn(
-                            firstItem, comparatorParams[i], comparatorParamReplacers
+                            firstItem, comparatorParams[i][0], comparatorParamReplacers
                         ),
                         forSecondItem: comparatorGetterFn(
-                            secondItem, comparatorParams[i], comparatorParamReplacers
-                        )
+                            secondItem, comparatorParams[i][0], comparatorParamReplacers
+                        ),
+                        reverseOrder: comparatorParams[i][1]
                     });
                 }
 
@@ -3864,9 +3893,9 @@ Gridifier.Api.Sort.prototype.getSortComparatorTools = function() {
                         secondItem,
                         comparatorGetterFn,
                         comparatorParam,
-                        comparatorParamReplacers || false
-                    ),
-                    reverseOrder || false
+                        comparatorParamReplacers || false,
+                        reverseOrder || false
+                    )
                 );
             },
 
@@ -3964,8 +3993,27 @@ Gridifier.Api.Sort.prototype.setRetransformSortFunction = function(retransformSo
     }
     else {
         this._eventEmitter.onBeforeShowPerRetransformSorter(function() {
-            setTimeout(function() {
-                me._gridifier.triggerResize();
+            if(me._retransformSortGridRefreshTimeout != null) {
+                clearTimeout(me._retransformSortGridRefreshTimeout);
+                me._retransformSortGridRefreshTimeout = null;
+            }
+
+            me._retransformSortGridRefreshTimeout = setTimeout(function() {
+                if(me._settings.hasCustomRepackSize()) {
+                    var repackSize = me._settings.getCustomRepackSize();
+                    var items = me._gridifier.getAll();
+
+                    if(items.length < repackSize)
+                        me._gridifier.triggerResize();
+                    else {
+                        var retransformStartItem = items[items.length - repackSize];
+                        var transformOperation = me._gridifier.getTransformOperation();
+                        transformOperation.executeRetransformFromFirstSortedConnection([retransformStartItem]);
+                    }
+                }
+                else {
+                    me._gridifier.triggerResize();
+                }
             }, Gridifier.Api.Sort.RETRANSFORM_SORT_GRID_REFRESH_TIMEOUT);
         });
     }
@@ -4004,7 +4052,7 @@ Gridifier.Api.Sort.prototype._addBySizesRetransformSort = function() {
         for(var i = 0; i < connections.length; i++) {
             var connectionWidth = Math.abs(connections[i].x2 - connections[i].x1) + 1;
             var connectionHeight = Math.abs(connections[i].y2 - connections[i].y1) + 1;
-            var connectionArea = connectionWidth * connectionHeight;
+            var connectionArea = Math.round(connectionWidth * connectionHeight);
             connections[i].area = connectionArea;
 
             if(connectionWidth >= connectionHeight)
@@ -6162,34 +6210,19 @@ Gridifier.Collector.prototype.toDOMCollection = function(items) {
 
 Gridifier.Collector.prototype.filterCollection = function(items) {
     var filters = this._settings.getFilter();
-    var filteredItems = [];
-
-    var filteredItemDataAttr = "data-gridifier-filtered-item";
-    var markAsFiltered = function(item) {
-        item.setAttribute(filteredItemDataAttr, "yes");
-    }
-
-    var unmarkAsFiltered = function(item) {
-        item.removeAttribute(filteredItemDataAttr);
-    }
-
-    var isAlreadyFiltered = function(item) {
-        return Dom.hasAttribute(item, filteredItemDataAttr);
-    }
+    var filteredItems = items;
 
     for(var i = 0; i < filters.length; i++) {
-        for(var j = 0; j < items.length; j++) {
-            if(filters[i](items[j])) {
-                if(!isAlreadyFiltered(items[j])) {
-                    filteredItems.push(items[j]);
-                    markAsFiltered(items[j]);
-                }
+        var currentFilteredItems = [];
+
+        for(var j = 0; j < filteredItems.length; j++) {
+            if(filters[i](filteredItems[j])) {
+                currentFilteredItems.push(filteredItems[j]);
             }
         }
-    }
 
-    for(var i = 0; i < items.length; i++)
-        unmarkAsFiltered(items[i]);
+        filteredItems = currentFilteredItems;
+    }
 
     return filteredItems;
 }
@@ -6419,6 +6452,8 @@ Gridifier.EventEmitter = function(gridifier) {
     me._gridRetransformCallbacks = [];
     me._connectionCreateCallbacks = [];
     me._disconnectCallbacks = [];
+    me._insertCallbacks = [];
+    me._insertEventTimeout = null;
 
     me._dragEndCallbacks = [];
 
@@ -6458,6 +6493,7 @@ Gridifier.EventEmitter.prototype._bindEmitterToGridifier = function() {
     this._gridifier.onGridRetransform = function(callbackFn) { me.onGridRetransform.call(me, callbackFn); };
     this._gridifier.onConnectionCreate = function(callbackFn) { me.onConnectionCreate.call(me, callbackFn); };
     this._gridifier.onDisconnect = function(callbackFn) { me.onDisconnect.call(me, callbackFn); };
+    this._gridifier.onInsert = function(callbackFn) { me.onInsert.call(me, callbackFn); };
 
     this._gridifier.onDragEnd = function(callbackFn) { me.onDragEnd.call(me, callbackFn); };
 }
@@ -6488,6 +6524,10 @@ Gridifier.EventEmitter.prototype.onConnectionCreate = function(callbackFn) {
 
 Gridifier.EventEmitter.prototype.onDisconnect = function(callbackFn) {
     this._disconnectCallbacks.push(callbackFn);
+}
+
+Gridifier.EventEmitter.prototype.onInsert = function(callbackFn) {
+    this._insertCallbacks.push(callbackFn);
 }
 
 Gridifier.EventEmitter.prototype.onDragEnd = function(callbackFn) {
@@ -6558,6 +6598,24 @@ Gridifier.EventEmitter.prototype.emitConnectionCreateEvent = function(connection
             }, 0);
         })(this._connectionCreateCallbacks[i], connections);
     }
+}
+
+Gridifier.EventEmitter.prototype.emitInsertEvent = function() {
+    var emitEvent = function() {
+        for(var i = 0; i < this._insertCallbacks.length; i++) {
+            this._insertCallbacks[i]();
+        }
+    }
+
+    if(this._insertEventTimeout != null) {
+        clearTimeout(this._insertEventTimeout);
+        this._insertEventTimeout = null;
+    }
+
+    var me = this;
+    this._insertEventTimeout = setTimeout(function() {
+        emitEvent.call(me);
+    }, 20);
 }
 
 Gridifier.EventEmitter.prototype.emitDragEndEvent = function(sortedItems) {
@@ -9392,6 +9450,10 @@ Gridifier.Dragifier.Core.prototype.createDraggableItemPointer = function(draggab
         top: (draggableItemOffsetTop - this._gridOffsetTop) + "px"
     });
 
+    var draggableItemComputedCSS = SizesResolver.getComputedCSS(draggableItem);
+    var marginLeft = draggableItemComputedCSS.marginLeft;
+    var marginTop = draggableItemComputedCSS.marginTop;
+
     this._gridifier.getGrid().appendChild(draggableItemPointer);
 
     var draggableItemPointerDecorator = this._settings.getDraggableItemPointerDecorator();
@@ -9399,8 +9461,8 @@ Gridifier.Dragifier.Core.prototype.createDraggableItemPointer = function(draggab
 
     this._dragifierRenderer.render(
         draggableItemPointer,
-        (draggableItemOffsetLeft - this._gridOffsetLeft),
-        (draggableItemOffsetTop - this._gridOffsetTop)
+        (draggableItemOffsetLeft - this._gridOffsetLeft + parseFloat(marginLeft)),
+        (draggableItemOffsetTop - this._gridOffsetTop + parseFloat(marginTop))
     );
 
     return draggableItemPointer;
@@ -12307,14 +12369,6 @@ Gridifier.HorizontalGrid.ConnectorsCleaner = function(connectors, connections, s
         me._connectorsNormalizer = new Gridifier.ConnectorsNormalizer(
             me._connections, me._connectors, me._settings
         );
-
-        if(me._settings.isDisabledSortDispersion()) {
-            me.setConnectorInsideOrBeforeItemIntersectionStrategy();
-        }
-        else if(me._settings.isCustomSortDispersion() ||
-                me._settings.isCustomAllEmptySpaceSortDispersion()) {
-            me.setConnectorInsideItemIntersectionStrategy();
-        }
     };
 
     this._bindEvents = function() {
@@ -12352,12 +12406,24 @@ Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.setConnectorInsideOrBeforeI
     this._connectionItemIntersectionStrategy = intersectionStrategies.CONNECTOR_INSIDE_OR_BEFORE_CONNECTION_ITEM;
 }
 
+Gridifier.HorizontalGrid.ConnectorsCleaner.prototype._updateConnectorIntersectionStrategy = function() {
+    if(this._settings.isDisabledSortDispersion()) {
+        this.setConnectorInsideOrBeforeItemIntersectionStrategy();
+    }
+    else if(this._settings.isCustomSortDispersion() ||
+        this._settings.isCustomAllEmptySpaceSortDispersion()) {
+        this.setConnectorInsideItemIntersectionStrategy();
+    }
+}
+
 Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.isConnectorInsideItemIntersectionStrategy = function() {
+    this._updateConnectorIntersectionStrategy();
     var intersectionStrategies = Gridifier.HorizontalGrid.ConnectorsCleaner.CONNECTION_ITEM_INTERSECTION_STRATEGIES;
     return (this._connectionItemIntersectionStrategy == intersectionStrategies.CONNECTOR_INSIDE_CONNECTION_ITEM);
 }
 
 Gridifier.HorizontalGrid.ConnectorsCleaner.prototype.isConnectorInsideOrBeforeItemIntersectionStrategy = function() {
+    this._updateConnectorIntersectionStrategy();
     var intersectionStrategies = Gridifier.HorizontalGrid.ConnectorsCleaner.CONNECTION_ITEM_INTERSECTION_STRATEGIES;
     return (this._connectionItemIntersectionStrategy == intersectionStrategies.CONNECTOR_INSIDE_OR_BEFORE_CONNECTION_ITEM);
 }
@@ -13531,7 +13597,8 @@ Gridifier.Operations.Append = function(gridSizesUpdater,
                                        appender,
                                        reversedAppender,
                                        sizesTransformer,
-                                       sizesResolverManager) {
+                                       sizesResolverManager,
+                                       eventEmitter) {
     var me = this;
 
     this._gridSizesUpdater = null;
@@ -13544,6 +13611,7 @@ Gridifier.Operations.Append = function(gridSizesUpdater,
     this._reversedAppender = null;
     this._sizesTransformer = null;
     this._sizesResolverManager = null;
+    this._eventEmitter = null;
 
     this._css = {
     };
@@ -13559,6 +13627,7 @@ Gridifier.Operations.Append = function(gridSizesUpdater,
         me._reversedAppender = reversedAppender;
         me._sizesTransformer = sizesTransformer;
         me._sizesResolverManager = sizesResolverManager;
+        me._eventEmitter = eventEmitter;
     };
 
     this._bindEvents = function() {
@@ -13597,6 +13666,7 @@ Gridifier.Operations.Append.prototype.execute = function(items) {
 
     this._sizesResolverManager.stopCachingTransaction();
     this._gridSizesUpdater.scheduleGridSizesUpdate();
+    this._eventEmitter.emitInsertEvent();
 }
 
 Gridifier.Operations.Append.prototype._append = function(item) {
@@ -13741,7 +13811,8 @@ Gridifier.Operations.Prepend = function(gridSizesUpdater,
                                         settings,
                                         prepender,
                                         reversedPrepender,
-                                        sizesResolverManager) {
+                                        sizesResolverManager,
+                                        eventEmitter) {
     var me = this;
 
     this._gridSizesUpdater = null;
@@ -13751,6 +13822,7 @@ Gridifier.Operations.Prepend = function(gridSizesUpdater,
     this._prepender = null;
     this._reversedPrepender = null;
     this._sizesResolverManager = null;
+    this._eventEmitter = null;
 
     this._css = {
     };
@@ -13763,6 +13835,7 @@ Gridifier.Operations.Prepend = function(gridSizesUpdater,
         me._prepender = prepender;
         me._reversedPrepender = reversedPrepender;
         me._sizesResolverManager = sizesResolverManager;
+        me._eventEmitter = eventEmitter;
     };
 
     this._bindEvents = function() {
@@ -13801,6 +13874,7 @@ Gridifier.Operations.Prepend.prototype.execute = function(items) {
 
     this._sizesResolverManager.stopCachingTransaction();
     this._gridSizesUpdater.scheduleGridSizesUpdate();
+    this._eventEmitter.emitInsertEvent();
 }
 
 Gridifier.Operations.Prepend.prototype._prepend = function(item) {
@@ -13823,7 +13897,8 @@ Gridifier.Operations.Queue = function(gridSizesUpdater,
                                       appender,
                                       reversedAppender,
                                       sizesTransformer,
-                                      sizesResolverManager) {
+                                      sizesResolverManager,
+                                      eventEmitter) {
     var me = this;
 
     this._gridSizesUpdater = null;
@@ -13838,6 +13913,7 @@ Gridifier.Operations.Queue = function(gridSizesUpdater,
     this._reversedAppender = null;
     this._sizesTransformer = null;
     this._sizesResolverManager = null;
+    this._eventEmitter = null;
 
     this._operationsQueue = null;
 
@@ -13870,6 +13946,7 @@ Gridifier.Operations.Queue = function(gridSizesUpdater,
         me._reversedAppender = reversedAppender;
         me._sizesTransformer = sizesTransformer;
         me._sizesResolverManager = sizesResolverManager;
+        me._eventEmitter = eventEmitter;
 
         me._prependOperation = new Gridifier.Operations.Prepend(
             me._gridSizesUpdater, 
@@ -13878,7 +13955,8 @@ Gridifier.Operations.Queue = function(gridSizesUpdater,
             me._settings, 
             me._prepender, 
             me._reversedPrepender,
-            me._sizesResolverManager
+            me._sizesResolverManager,
+            me._eventEmitter
         );
         me._appendOperation = new Gridifier.Operations.Append(
             me._gridSizesUpdater, 
@@ -13890,7 +13968,8 @@ Gridifier.Operations.Queue = function(gridSizesUpdater,
             me._appender, 
             me._reversedAppender,
             me._sizesTransformer,
-            me._sizesResolverManager
+            me._sizesResolverManager,
+            me._eventEmitter
         );
     };
 
@@ -15768,6 +15847,13 @@ Gridifier.CoreSettingsParser.prototype.parseDisableRetransformQueueOnDrags = fun
     return this._settings.disableRetransformQueueOnDrags;
 }
 
+Gridifier.CoreSettingsParser.prototype.parseCustomRepackSize = function() {
+    if(!this._settings.hasOwnProperty("repackSize"))
+        return null;
+
+    return this._settings.repackSize;
+}
+
 Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesResolverManager) {
     var me = this;
 
@@ -15828,6 +15914,8 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
     this._retransformQueueBatchSize = null;
     this._retransformQueueBatchTimeout = null;
     this._disableRetransformQueueOnDrags = false;
+
+    this._repackSize = null;
 
     this._css = {
     };
@@ -15914,12 +16002,20 @@ Gridifier.Settings.prototype._parse = function() {
     this._dragifierItemSelector = dragifierData.dragifierItemSelector;
     this._disableRetransformQueueOnDrags = this._coreSettingsParser.parseDisableRetransformQueueOnDrags();
 
+    this._repackSize = this._coreSettingsParser.parseCustomRepackSize();
+
     var me = this;
     this._gridifier.setDefaultPrepend = function() { me.setDefaultPrepend.call(me); };
     this._gridifier.setReversedPrepend = function() { me.setReversedPrepend.call(me); };
     this._gridifier.setMirroredPrepend = function() { me.setMirroredPrepend.call(me); };
     this._gridifier.setDefaultAppend = function() { me.setDefaultAppend.call(me); };
     this._gridifier.setReversedAppend = function() { me.setReversedAppend.call(me); };
+    this._gridifier.setDisabledSortDispersion = function() {
+        me._sortDispersionMode = Gridifier.SORT_DISPERSION_MODES.DISABLED;
+    }
+    this._gridifier.setAllGridSortDispersion = function() {
+        me._sortDispersionMode = Gridifier.SORT_DISPERSION_MODES.CUSTOM_ALL_EMPTY_SPACE_SHORT;
+    }
 }
 
 Gridifier.Settings.prototype.parseAntialiasingSettings = function() {
@@ -16292,6 +16388,18 @@ Gridifier.Settings.prototype.setDefaultIntersectionStrategy = function() {
 Gridifier.Settings.prototype.setAlignmentType = function(newAlignmentType) {
     this._coreSettingsParser.ensureIsValidAlignmentType(newAlignmentType);
     this._alignmentType = newAlignmentType;
+}
+
+Gridifier.Settings.prototype.setCustomRepackSize = function(newSize) {
+    this._repackSize = newSize;
+}
+
+Gridifier.Settings.prototype.hasCustomRepackSize = function() {
+    return this._repackSize != null;
+}
+
+Gridifier.Settings.prototype.getCustomRepackSize = function() {
+    return this._repackSize;
 }
 
 Gridifier.SizesTransformer.EmptySpaceNormalizer = function(connections, connectors, settings) {
@@ -18987,14 +19095,6 @@ Gridifier.VerticalGrid.ConnectorsCleaner = function(connectors, connections, set
         me._connectorsNormalizer = new Gridifier.ConnectorsNormalizer(
             me._connections, me._connectors, me._settings
         );
-
-        if(me._settings.isDisabledSortDispersion()) {
-            me.setConnectorInsideOrBeforeItemIntersectionStrategy();
-        }
-        else if(me._settings.isCustomSortDispersion() ||
-                me._settings.isCustomAllEmptySpaceSortDispersion()) {
-            me.setConnectorInsideItemIntersectionStrategy();
-        }
     };
 
     this._bindEvents = function() {
@@ -19032,12 +19132,24 @@ Gridifier.VerticalGrid.ConnectorsCleaner.prototype.setConnectorInsideOrBeforeIte
     this._connectionItemIntersectionStrategy = intersectionStrategies.CONNECTOR_INSIDE_OR_BEFORE_CONNECTION_ITEM;
 }
 
+Gridifier.VerticalGrid.ConnectorsCleaner.prototype._updateConnectorIntersectionStrategy = function() {
+    if(this._settings.isDisabledSortDispersion()) {
+        this.setConnectorInsideOrBeforeItemIntersectionStrategy();
+    }
+    else if(this._settings.isCustomSortDispersion() ||
+        this._settings.isCustomAllEmptySpaceSortDispersion()) {
+        this.setConnectorInsideItemIntersectionStrategy();
+    }
+}
+
 Gridifier.VerticalGrid.ConnectorsCleaner.prototype.isConnectorInsideItemIntersectionStrategy = function() {
+    this._updateConnectorIntersectionStrategy();
     var intersectionStrategies = Gridifier.VerticalGrid.ConnectorsCleaner.CONNECTION_ITEM_INTERSECTION_STRATEGIES;
     return (this._connectionItemIntersectionStrategy == intersectionStrategies.CONNECTOR_INSIDE_CONNECTION_ITEM);
 }
 
 Gridifier.VerticalGrid.ConnectorsCleaner.prototype.isConnectorInsideOrBeforeItemIntersectionStrategy = function() {
+    this._updateConnectorIntersectionStrategy();
     var intersectionStrategies = Gridifier.VerticalGrid.ConnectorsCleaner.CONNECTION_ITEM_INTERSECTION_STRATEGIES;
     return (this._connectionItemIntersectionStrategy == intersectionStrategies.CONNECTOR_INSIDE_OR_BEFORE_CONNECTION_ITEM);
 }
@@ -19924,7 +20036,7 @@ Gridifier.VerticalGrid.ReversedAppender.prototype._filterConnectorsPerNextConnec
 
 Gridifier.VerticalGrid.ReversedAppender.prototype._findItemConnectionCoords = function(item, sortedConnectors) {
     var itemConnectionCoords = null;
-    
+
     for(var i = 0; i < sortedConnectors.length; i++) {
         var itemCoords = this._itemCoordsExtractor.connectorToReversedAppendedItemCoords(item, sortedConnectors[i]);
 

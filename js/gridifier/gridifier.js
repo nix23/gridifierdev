@@ -166,7 +166,8 @@ Gridifier = function(grid, settings) {
             me._appender,
             me._reversedAppender,
             me._sizesTransformer,
-            me._sizesResolverManager
+            me._sizesResolverManager,
+            me._eventEmitter
         );
 
         me._silentRenderer = new Gridifier.SilentRenderer(
@@ -274,6 +275,10 @@ Gridifier.prototype.getRenderer = function() {
     return this._renderer;
 }
 
+Gridifier.prototype.getTransformOperation = function() {
+    return this._transformOperation;
+}
+
 Gridifier.prototype.markAsGridItem = function(items) {
     this._grid.markAsGridItem(items);
     return this;
@@ -299,6 +304,12 @@ Gridifier.prototype.sortBy = function(sortFunctionName) {
 
 Gridifier.prototype.setRetransformSort = function(retransformSortFn) {
     this._settings.setRetransformSort(retransformSortFn);
+    this.retransformAllSizes();
+    return this;
+}
+
+Gridifier.prototype.setRepackSize = function(newSize) {
+    this._settings.setCustomRepackSize(newSize);
     return this;
 }
 

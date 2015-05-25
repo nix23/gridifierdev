@@ -248,34 +248,19 @@ Gridifier.Collector.prototype.toDOMCollection = function(items) {
 
 Gridifier.Collector.prototype.filterCollection = function(items) {
     var filters = this._settings.getFilter();
-    var filteredItems = [];
-
-    var filteredItemDataAttr = "data-gridifier-filtered-item";
-    var markAsFiltered = function(item) {
-        item.setAttribute(filteredItemDataAttr, "yes");
-    }
-
-    var unmarkAsFiltered = function(item) {
-        item.removeAttribute(filteredItemDataAttr);
-    }
-
-    var isAlreadyFiltered = function(item) {
-        return Dom.hasAttribute(item, filteredItemDataAttr);
-    }
+    var filteredItems = items;
 
     for(var i = 0; i < filters.length; i++) {
-        for(var j = 0; j < items.length; j++) {
-            if(filters[i](items[j])) {
-                if(!isAlreadyFiltered(items[j])) {
-                    filteredItems.push(items[j]);
-                    markAsFiltered(items[j]);
-                }
+        var currentFilteredItems = [];
+
+        for(var j = 0; j < filteredItems.length; j++) {
+            if(filters[i](filteredItems[j])) {
+                currentFilteredItems.push(filteredItems[j]);
             }
         }
-    }
 
-    for(var i = 0; i < items.length; i++)
-        unmarkAsFiltered(items[i]);
+        filteredItems = currentFilteredItems;
+    }
 
     return filteredItems;
 }

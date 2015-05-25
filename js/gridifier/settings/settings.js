@@ -59,6 +59,8 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
     this._retransformQueueBatchTimeout = null;
     this._disableRetransformQueueOnDrags = false;
 
+    this._repackSize = null;
+
     this._css = {
     };
 
@@ -144,12 +146,20 @@ Gridifier.Settings.prototype._parse = function() {
     this._dragifierItemSelector = dragifierData.dragifierItemSelector;
     this._disableRetransformQueueOnDrags = this._coreSettingsParser.parseDisableRetransformQueueOnDrags();
 
+    this._repackSize = this._coreSettingsParser.parseCustomRepackSize();
+
     var me = this;
     this._gridifier.setDefaultPrepend = function() { me.setDefaultPrepend.call(me); };
     this._gridifier.setReversedPrepend = function() { me.setReversedPrepend.call(me); };
     this._gridifier.setMirroredPrepend = function() { me.setMirroredPrepend.call(me); };
     this._gridifier.setDefaultAppend = function() { me.setDefaultAppend.call(me); };
     this._gridifier.setReversedAppend = function() { me.setReversedAppend.call(me); };
+    this._gridifier.setDisabledSortDispersion = function() {
+        me._sortDispersionMode = Gridifier.SORT_DISPERSION_MODES.DISABLED;
+    }
+    this._gridifier.setAllGridSortDispersion = function() {
+        me._sortDispersionMode = Gridifier.SORT_DISPERSION_MODES.CUSTOM_ALL_EMPTY_SPACE_SHORT;
+    }
 }
 
 Gridifier.Settings.prototype.parseAntialiasingSettings = function() {
@@ -522,4 +532,16 @@ Gridifier.Settings.prototype.setDefaultIntersectionStrategy = function() {
 Gridifier.Settings.prototype.setAlignmentType = function(newAlignmentType) {
     this._coreSettingsParser.ensureIsValidAlignmentType(newAlignmentType);
     this._alignmentType = newAlignmentType;
+}
+
+Gridifier.Settings.prototype.setCustomRepackSize = function(newSize) {
+    this._repackSize = newSize;
+}
+
+Gridifier.Settings.prototype.hasCustomRepackSize = function() {
+    return this._repackSize != null;
+}
+
+Gridifier.Settings.prototype.getCustomRepackSize = function() {
+    return this._repackSize;
 }

@@ -9,7 +9,8 @@ Gridifier.Operations.Queue = function(gridSizesUpdater,
                                       appender,
                                       reversedAppender,
                                       sizesTransformer,
-                                      sizesResolverManager) {
+                                      sizesResolverManager,
+                                      eventEmitter) {
     var me = this;
 
     this._gridSizesUpdater = null;
@@ -24,6 +25,7 @@ Gridifier.Operations.Queue = function(gridSizesUpdater,
     this._reversedAppender = null;
     this._sizesTransformer = null;
     this._sizesResolverManager = null;
+    this._eventEmitter = null;
 
     this._operationsQueue = null;
 
@@ -56,6 +58,7 @@ Gridifier.Operations.Queue = function(gridSizesUpdater,
         me._reversedAppender = reversedAppender;
         me._sizesTransformer = sizesTransformer;
         me._sizesResolverManager = sizesResolverManager;
+        me._eventEmitter = eventEmitter;
 
         me._prependOperation = new Gridifier.Operations.Prepend(
             me._gridSizesUpdater, 
@@ -64,7 +67,8 @@ Gridifier.Operations.Queue = function(gridSizesUpdater,
             me._settings, 
             me._prepender, 
             me._reversedPrepender,
-            me._sizesResolverManager
+            me._sizesResolverManager,
+            me._eventEmitter
         );
         me._appendOperation = new Gridifier.Operations.Append(
             me._gridSizesUpdater, 
@@ -76,7 +80,8 @@ Gridifier.Operations.Queue = function(gridSizesUpdater,
             me._appender, 
             me._reversedAppender,
             me._sizesTransformer,
-            me._sizesResolverManager
+            me._sizesResolverManager,
+            me._eventEmitter
         );
     };
 
