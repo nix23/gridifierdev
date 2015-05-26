@@ -1,6 +1,7 @@
 Gridifier.Disconnector = function(gridifier,
                                   collector,
                                   connections,
+                                  connectionsSorter,
                                   connectors,
                                   settings,
                                   guid,
@@ -11,6 +12,7 @@ Gridifier.Disconnector = function(gridifier,
     this._gridifier = null;
     this._collector = null;
     this._connections = null;
+    this._connectionsSorter = null;
     this._connectors = null;
     this._settings = null;
     this._guid = null;
@@ -25,6 +27,7 @@ Gridifier.Disconnector = function(gridifier,
         me._gridifier = gridifier;
         me._collector = collector;
         me._connections = connections;
+        me._connectionsSorter = connectionsSorter;
         me._connectors = connectors;
         me._settings = settings;
         me._guid = guid;
@@ -73,9 +76,7 @@ Gridifier.Disconnector.prototype.disconnect = function(items, disconnectType) {
         this._connectedItemMarker.unmarkItemAsConnected(connectionsToDisconnect[i].item);
 
     this._connections.reinitRanges();
-    
-    var renderer = this._gridifier.getRenderer();
-    renderer.hideConnections(connectionsToDisconnect);
+    this._scheduleDisconnectedItemsRender(connectionsToDisconnect);
 }
 
 Gridifier.Disconnector.prototype._findConnectionsToDisconnect = function(items) {
@@ -99,5 +100,24 @@ Gridifier.Disconnector.prototype._recreateConnectors = function() {
     }
     else if(this._settings.isReversedAppend()) {
         this._reversedAppender.createInitialConnector();
+    }
+}
+
+Gridifier.Disconnector.prototype._scheduleDisconnectedItemsRender = function(disconnectedConnections) {
+    disconnectedConnections = this._connectionsSorter.sortConnectionsPerReappend(disconnectedConnections);
+    var renderer = this._gridifier.getRenderer();
+    var connectionBatches = this._gridifier.splitToBatches(disconnectedConnections, 12);
+
+    var itemsToDisconnect = [];
+    for(var i = 0; i < connectionBatches.length; i++) {
+        for(var j = 0; j < connectionBatches[i].length; j++)
+            itemsToDisconnect.push(connectionBatches[i][j].item);
+    }
+
+    renderer.markItemsAsScheduledToHide(itemsToDisconnect);
+    for(var i = 0; i < connectionBatches.length; i++) {
+        (function(connectionBatch, i) {
+            setTimeout(function() { renderer.hideConnections(connectionBatch); }, 60 * i);
+        })(connectionBatches[i], i);
     }
 }

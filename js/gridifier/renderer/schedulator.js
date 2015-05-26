@@ -225,6 +225,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             showItem(connectionToProcess.item);
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
+            this._renderer.unmarkItemAsScheduledToHide(connectionToProcess.item);
+
             var toggleFunction = this._settings.getToggle();
             var toggleTimeouter = this._settings.getToggleTimeouter();
             var eventEmitter = this._settings.getEventEmitter();

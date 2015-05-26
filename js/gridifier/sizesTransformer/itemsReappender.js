@@ -185,6 +185,7 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
 
     this._sizesResolverManager.stopCachingTransaction();
     var reappendedConnections = this._connections.getConnectionsByItemGUIDS(reappendedItemGUIDS);
+    this._gridifier.getResponsiveClassesManager().emitTransformEvents(reappendedConnections);
     this._gridifier.getRenderer().renderTransformedConnections(reappendedConnections);
 
     this._reappendedQueueData = this._reappendedQueueData.concat(this._reappendQueue.splice(0, batchSize));

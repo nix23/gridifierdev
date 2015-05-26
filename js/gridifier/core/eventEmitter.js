@@ -7,6 +7,7 @@ Gridifier.EventEmitter = function(gridifier) {
     me._hideCallbacks = [];
     me._gridSizesChangeCallbacks = [];
     me._transformCallbacks = [];
+    me._responsiveTransformCallbacks = [];
     me._gridRetransformCallbacks = [];
     me._connectionCreateCallbacks = [];
     me._disconnectCallbacks = [];
@@ -48,6 +49,7 @@ Gridifier.EventEmitter.prototype._bindEmitterToGridifier = function() {
     this._gridifier.onHide = function(callbackFn) { me.onHide.call(me, callbackFn); };
     this._gridifier.onGridSizesChange = function(callbackFn) { me.onGridSizesChange.call(me, callbackFn); };
     this._gridifier.onTransform = function(callbackFn) { me.onTransform.call(me, callbackFn); };
+    this._gridifier.onResponsiveTransform = function(callbackFn) { me.onResponsiveTransform.call(me, callbackFn); };
     this._gridifier.onGridRetransform = function(callbackFn) { me.onGridRetransform.call(me, callbackFn); };
     this._gridifier.onConnectionCreate = function(callbackFn) { me.onConnectionCreate.call(me, callbackFn); };
     this._gridifier.onDisconnect = function(callbackFn) { me.onDisconnect.call(me, callbackFn); };
@@ -66,6 +68,10 @@ Gridifier.EventEmitter.prototype.onHide = function(callbackFn) {
 
 Gridifier.EventEmitter.prototype.onTransform = function(callbackFn) {
     this._transformCallbacks.push(callbackFn);
+}
+
+Gridifier.EventEmitter.prototype.onResponsiveTransform = function(callbackFn) {
+    this._responsiveTransformCallbacks.push(callbackFn);
 }
 
 Gridifier.EventEmitter.prototype.onGridRetransform = function(callbackFn) {
@@ -131,6 +137,12 @@ Gridifier.EventEmitter.prototype.emitHideEvent = function(item) {
 Gridifier.EventEmitter.prototype.emitGridSizesChangeEvent = function() {
     for(var i = 0; i < this._gridSizesChangeCallbacks.length; i++) {
         this._gridSizesChangeCallbacks[i]();
+    }
+}
+
+Gridifier.EventEmitter.prototype.emitResponsiveTransformEvent = function(item, addedClasses, removedClasses) {
+    for(var i = 0; i < this._responsiveTransformCallbacks.length; i++) {
+        this._responsiveTransformCallbacks[i](item, addedClasses, removedClasses);
     }
 }
 

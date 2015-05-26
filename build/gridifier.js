@@ -1258,7 +1258,9 @@ Gridifier = function(grid, settings) {
         }
 
         me._itemClonesManager = new Gridifier.ItemClonesManager(me._grid, me._collector, me._connections, me._sizesResolverManager);
-        me._responsiveClassesManager = new Gridifier.ResponsiveClassesManager(me, me._collector, me._itemClonesManager);
+        me._responsiveClassesManager = new Gridifier.ResponsiveClassesManager(
+            me, me._settings, me._collector, me._guid, me._eventEmitter, me._itemClonesManager
+        );
 
         me._iterator = new Gridifier.Iterator(
             me._settings, me._collector, me._connections, me._connectionsSorter, me._guid
@@ -1304,7 +1306,7 @@ Gridifier = function(grid, settings) {
             me, me._collector, me._connections, me._settings, me._guid
         );
         me._disconnector = new Gridifier.Disconnector(
-            me, me._collector, me._connections, me._connectors, me._settings, me._guid, me._appender, me._reversedAppender
+            me, me._collector, me._connections, me._connectionsSorter, me._connectors, me._settings, me._guid, me._appender, me._reversedAppender
         );
         me._filtrator = new Gridifier.Filtrator(
             me, me._collector, me._connections, me._settings, me._guid, me._disconnector
@@ -1457,6 +1459,14 @@ Gridifier.prototype.getRenderer = function() {
 
 Gridifier.prototype.getTransformOperation = function() {
     return this._transformOperation;
+}
+
+Gridifier.prototype.getResponsiveClassesManager = function() {
+    return this._responsiveClassesManager;
+}
+
+Gridifier.prototype.splitToBatches = function(items, batchSize) {
+    return this._operationsQueue.splitItemsToBatches(items, batchSize);
 }
 
 Gridifier.prototype.markAsGridItem = function(items) {
@@ -1997,6 +2007,8 @@ Gridifier.prototype.setHeightPxAntialias = Gridifier.prototype.setItemHeightPxAn
 Gridifier.prototype.setWidthPtAntialias = Gridifier.prototype.setItemWidthPercentageAntialias;
 Gridifier.prototype.setHeightPtAntialias = Gridifier.prototype.setItemHeightPercentageAntialias;
 Gridifier.prototype.retransformGrid = Gridifier.prototype.retransformAllSizes;
+Gridifier.prototype.setDragDecorator = Gridifier.prototype.setDraggableItemDecorator;
+Gridifier.prototype.add = Gridifier.prototype.addToGrid;
 
 Gridifier.Api = {};
 Gridifier.HorizontalGrid = {};
@@ -6339,6 +6351,7 @@ Gridifier.ConnectedItemMarker.prototype.unmarkItemAsConnected = function(item) {
 Gridifier.Disconnector = function(gridifier,
                                   collector,
                                   connections,
+                                  connectionsSorter,
                                   connectors,
                                   settings,
                                   guid,
@@ -6349,6 +6362,7 @@ Gridifier.Disconnector = function(gridifier,
     this._gridifier = null;
     this._collector = null;
     this._connections = null;
+    this._connectionsSorter = null;
     this._connectors = null;
     this._settings = null;
     this._guid = null;
@@ -6363,6 +6377,7 @@ Gridifier.Disconnector = function(gridifier,
         me._gridifier = gridifier;
         me._collector = collector;
         me._connections = connections;
+        me._connectionsSorter = connectionsSorter;
         me._connectors = connectors;
         me._settings = settings;
         me._guid = guid;
@@ -6411,9 +6426,7 @@ Gridifier.Disconnector.prototype.disconnect = function(items, disconnectType) {
         this._connectedItemMarker.unmarkItemAsConnected(connectionsToDisconnect[i].item);
 
     this._connections.reinitRanges();
-    
-    var renderer = this._gridifier.getRenderer();
-    renderer.hideConnections(connectionsToDisconnect);
+    this._scheduleDisconnectedItemsRender(connectionsToDisconnect);
 }
 
 Gridifier.Disconnector.prototype._findConnectionsToDisconnect = function(items) {
@@ -6440,6 +6453,25 @@ Gridifier.Disconnector.prototype._recreateConnectors = function() {
     }
 }
 
+Gridifier.Disconnector.prototype._scheduleDisconnectedItemsRender = function(disconnectedConnections) {
+    disconnectedConnections = this._connectionsSorter.sortConnectionsPerReappend(disconnectedConnections);
+    var renderer = this._gridifier.getRenderer();
+    var connectionBatches = this._gridifier.splitToBatches(disconnectedConnections, 12);
+
+    var itemsToDisconnect = [];
+    for(var i = 0; i < connectionBatches.length; i++) {
+        for(var j = 0; j < connectionBatches[i].length; j++)
+            itemsToDisconnect.push(connectionBatches[i][j].item);
+    }
+
+    renderer.markItemsAsScheduledToHide(itemsToDisconnect);
+    for(var i = 0; i < connectionBatches.length; i++) {
+        (function(connectionBatch, i) {
+            setTimeout(function() { renderer.hideConnections(connectionBatch); }, 60 * i);
+        })(connectionBatches[i], i);
+    }
+}
+
 Gridifier.EventEmitter = function(gridifier) {
     var me = this;
 
@@ -6449,6 +6481,7 @@ Gridifier.EventEmitter = function(gridifier) {
     me._hideCallbacks = [];
     me._gridSizesChangeCallbacks = [];
     me._transformCallbacks = [];
+    me._responsiveTransformCallbacks = [];
     me._gridRetransformCallbacks = [];
     me._connectionCreateCallbacks = [];
     me._disconnectCallbacks = [];
@@ -6490,6 +6523,7 @@ Gridifier.EventEmitter.prototype._bindEmitterToGridifier = function() {
     this._gridifier.onHide = function(callbackFn) { me.onHide.call(me, callbackFn); };
     this._gridifier.onGridSizesChange = function(callbackFn) { me.onGridSizesChange.call(me, callbackFn); };
     this._gridifier.onTransform = function(callbackFn) { me.onTransform.call(me, callbackFn); };
+    this._gridifier.onResponsiveTransform = function(callbackFn) { me.onResponsiveTransform.call(me, callbackFn); };
     this._gridifier.onGridRetransform = function(callbackFn) { me.onGridRetransform.call(me, callbackFn); };
     this._gridifier.onConnectionCreate = function(callbackFn) { me.onConnectionCreate.call(me, callbackFn); };
     this._gridifier.onDisconnect = function(callbackFn) { me.onDisconnect.call(me, callbackFn); };
@@ -6508,6 +6542,10 @@ Gridifier.EventEmitter.prototype.onHide = function(callbackFn) {
 
 Gridifier.EventEmitter.prototype.onTransform = function(callbackFn) {
     this._transformCallbacks.push(callbackFn);
+}
+
+Gridifier.EventEmitter.prototype.onResponsiveTransform = function(callbackFn) {
+    this._responsiveTransformCallbacks.push(callbackFn);
 }
 
 Gridifier.EventEmitter.prototype.onGridRetransform = function(callbackFn) {
@@ -6573,6 +6611,12 @@ Gridifier.EventEmitter.prototype.emitHideEvent = function(item) {
 Gridifier.EventEmitter.prototype.emitGridSizesChangeEvent = function() {
     for(var i = 0; i < this._gridSizesChangeCallbacks.length; i++) {
         this._gridSizesChangeCallbacks[i]();
+    }
+}
+
+Gridifier.EventEmitter.prototype.emitResponsiveTransformEvent = function(item, addedClasses, removedClasses) {
+    for(var i = 0; i < this._responsiveTransformCallbacks.length; i++) {
+        this._responsiveTransformCallbacks[i](item, addedClasses, removedClasses);
     }
 }
 
@@ -7545,19 +7589,27 @@ Gridifier.Resorter.prototype._resortAllVerticalGridConnectionsPerReappend = func
     }
 }
 
-Gridifier.ResponsiveClassesManager = function(gridifier, collector, itemClonesManager) {
+Gridifier.ResponsiveClassesManager = function(gridifier, settings, collector, guid, eventEmitter, itemClonesManager) {
     var me = this;
 
     this._gridifier = null;
+    this._settings = null;
     this._collector = null;
+    this._guid = null;
+    this._eventEmitter = null;
     this._itemClonesManager = null;
+
+    this._eventsData = [];
 
     this._css = {
     };
 
     this._construct = function() {
         me._gridifier = gridifier;
+        me._settings = settings;
         me._collector = collector;
+        me._guid = guid;
+        me._eventEmitter = eventEmitter;
         me._itemClonesManager = itemClonesManager;
     };
 
@@ -7575,6 +7627,49 @@ Gridifier.ResponsiveClassesManager = function(gridifier, collector, itemClonesMa
     return this;
 }
 
+Gridifier.ResponsiveClassesManager.prototype._saveTransformDataPerEvent = function(item, addedClasses, removedClasses) {
+    var itemGUID = this._guid.getItemGUID(item);
+
+    var itemEventData = null;
+    for(var i = 0; i < this._eventsData.length; i++) {
+        if(this._eventsData[i].itemGUID == itemGUID) {
+            itemEventData = this._eventsData[i];
+            break;
+        }
+    }
+
+    if(itemEventData == null) {
+        itemEventData = {};
+        this._eventsData.push(itemEventData);
+    }
+
+    itemEventData.itemGUID = itemGUID;
+    itemEventData.addedClasses = addedClasses;
+    itemEventData.removedClasses = removedClasses;
+}
+
+Gridifier.ResponsiveClassesManager.prototype.emitTransformEvents = function(connections) {
+    if(this._eventsData.length == 0)
+        return;
+
+    var me = this;
+    for(var i = 0; i < connections.length; i++) {
+        for(var j = 0; j < this._eventsData.length; j++) {
+            if(Dom.toInt(connections[i].itemGUID) == this._eventsData[j].itemGUID) {
+                (function(item, addedClasses, removedClasses) {
+                    setTimeout(function() {
+                        me._eventEmitter.emitResponsiveTransformEvent(
+                            item, addedClasses, removedClasses
+                        );
+                    }, me._settings.getCoordsChangeAnimationMsDuration());
+                })(connections[i].item, this._eventsData[j].addedClasses, this._eventsData[j].removedClasses);
+                this._eventsData.splice(j, 1);
+                break;
+            }
+        }
+    }
+}
+
 Gridifier.ResponsiveClassesManager.prototype.toggleResponsiveClasses = function(maybeItem, className) {
     var items = this._itemClonesManager.unfilterClones(maybeItem);
     this._collector.ensureAllItemsAreConnectedToGrid(items);
@@ -7590,18 +7685,27 @@ Gridifier.ResponsiveClassesManager.prototype.toggleResponsiveClasses = function(
         else
             var itemClone = null;
 
+        var addedClasses = [];
+        var removedClasses = [];
+
         for(var j = 0; j < classNames.length; j++) {
             if(Dom.css.hasClass(items[i], classNames[j])) {
+                removedClasses.push(classNames[j]);
                 Dom.css.removeClass(items[i], classNames[j]);
+
                 if(itemClone != null)
                     Dom.css.removeClass(itemClone, classNames[j]);
             }
             else {
+                addedClasses.push(classNames[j]);
                 Dom.css.addClass(items[i], classNames[j]);
+
                 if(itemClone != null)
                     Dom.css.addClass(itemClone, classNames[j]);
             }
         }
+
+        this._saveTransformDataPerEvent(items[i], addedClasses, removedClasses);
     }
 
     return items;
@@ -7622,13 +7726,19 @@ Gridifier.ResponsiveClassesManager.prototype.addResponsiveClasses = function(may
         else
             var itemClone = null;
 
+        var addedClasses = [];
+
         for(var j = 0; j < classNames.length; j++) {
             if(!Dom.css.hasClass(items[i], classNames[j])) {
+                addedClasses.push(classNames[j]);
                 Dom.css.addClass(items[i], classNames[j]);
+
                 if(itemClone != null)
                     Dom.css.addClass(itemClone, className[j]);
             }
         }
+
+        this._saveTransformDataPerEvent(items[i], addedClasses, []);
     }
 
     return items;
@@ -7649,13 +7759,19 @@ Gridifier.ResponsiveClassesManager.prototype.removeResponsiveClasses = function(
         else
             var itemClone = null;
 
+        var removedClasses = [];
+
         for(var j = 0; j < classNames.length; j++) {
             if(Dom.css.hasClass(items[i], classNames[j])) {
+                removedClasses.push(classNames[j]);
                 Dom.css.removeClass(items[i], classNames[j]);
+
                 if(itemClone != null)
                     Dom.css.removeClass(itemClone, classNames[j]);
             }
         }
+
+        this._saveTransformDataPerEvent(items[i], [], removedClasses);
     }
 
     return items;
@@ -14300,6 +14416,9 @@ Gridifier.Renderer = function(gridifier, connections, settings, normalizer) {
     return this;
 }
 
+Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR = "data-gridifier-scheduled-to-hide";
+Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR_VALUE = "yes";
+
 Gridifier.Renderer.prototype.getRendererConnections = function() {
     return this._rendererConnections;
 }
@@ -14315,6 +14434,7 @@ Gridifier.Renderer.prototype.showConnections = function(connections) {
         var connections = [connections];
 
     for(var i = 0; i < connections.length; i++) {
+        this.unmarkItemAsScheduledToHide(connections[i].item);
         if(this._rendererConnections.isConnectionItemRendered(connections[i]))
             continue;
 
@@ -14327,6 +14447,23 @@ Gridifier.Renderer.prototype.showConnections = function(connections) {
     }
 }
 
+Gridifier.Renderer.prototype.markItemsAsScheduledToHide = function(items) {
+    for(var i = 0; i < items.length; i++) {
+        items[i].setAttribute(
+            Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR,
+            Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR_VALUE
+        );
+    }
+}
+
+Gridifier.Renderer.prototype.unmarkItemAsScheduledToHide = function(item) {
+    item.removeAttribute(Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR);
+}
+
+Gridifier.Renderer.prototype.wasItemScheduledToHide = function(item) {
+    return Dom.hasAttribute(item, Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR);
+}
+
 Gridifier.Renderer.prototype.hideConnections = function(connections) {
     var me = this;
 
@@ -14334,6 +14471,10 @@ Gridifier.Renderer.prototype.hideConnections = function(connections) {
         var connections = [connections];
 
     for(var i = 0; i < connections.length; i++) {
+        if(!this.wasItemScheduledToHide(connections[i].item)) {
+            continue;
+        }
+
         var left = this._rendererConnections.getCssLeftPropertyValuePerConnection(connections[i]);
         var top = this._rendererConnections.getCssTopPropertyValuePerConnection(connections[i]);
         this._rendererConnections.unmarkConnectionItemAsRendered(connections[i]);
@@ -14731,6 +14872,8 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             showItem(connectionToProcess.item);
         }
         else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.HIDE) {
+            this._renderer.unmarkItemAsScheduledToHide(connectionToProcess.item);
+
             var toggleFunction = this._settings.getToggle();
             var toggleTimeouter = this._settings.getToggleTimeouter();
             var eventEmitter = this._settings.getEventEmitter();
@@ -15352,10 +15495,13 @@ Gridifier.ApiSettingsParser.prototype.parseSizesChangerOptions = function(sizesC
 }
 
 Gridifier.ApiSettingsParser.prototype.parseDraggableItemDecoratorOptions = function(dragifierApi) {
-    if(!this._settings.hasOwnProperty("draggableItemDecorator")) {
+    if(!this._settings.hasOwnProperty("draggableItemDecorator") && !this._settings.hasOwnProperty("dragDecorator")) {
         dragifierApi.setDraggableItemDecoratorFunction("cloneCSS");
         return;
     }
+
+    if(this._settings.hasOwnProperty("dragDecorator"))
+        this._settings.draggableItemDecorator = this._settings.dragDecorator;
 
     if(typeof this._settings.draggableItemDecorator == "string" || this._settings.draggableItemDecorator instanceof String) {
         dragifierApi.setDraggableItemDecoratorFunction(this._settings.draggableItemDecorator);
@@ -16900,6 +17046,7 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
 
     this._sizesResolverManager.stopCachingTransaction();
     var reappendedConnections = this._connections.getConnectionsByItemGUIDS(reappendedItemGUIDS);
+    this._gridifier.getResponsiveClassesManager().emitTransformEvents(reappendedConnections);
     this._gridifier.getRenderer().renderTransformedConnections(reappendedConnections);
 
     this._reappendedQueueData = this._reappendedQueueData.concat(this._reappendQueue.splice(0, batchSize));

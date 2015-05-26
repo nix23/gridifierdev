@@ -44,6 +44,9 @@ Gridifier.Renderer = function(gridifier, connections, settings, normalizer) {
     return this;
 }
 
+Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR = "data-gridifier-scheduled-to-hide";
+Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR_VALUE = "yes";
+
 Gridifier.Renderer.prototype.getRendererConnections = function() {
     return this._rendererConnections;
 }
@@ -59,6 +62,7 @@ Gridifier.Renderer.prototype.showConnections = function(connections) {
         var connections = [connections];
 
     for(var i = 0; i < connections.length; i++) {
+        this.unmarkItemAsScheduledToHide(connections[i].item);
         if(this._rendererConnections.isConnectionItemRendered(connections[i]))
             continue;
 
@@ -71,6 +75,23 @@ Gridifier.Renderer.prototype.showConnections = function(connections) {
     }
 }
 
+Gridifier.Renderer.prototype.markItemsAsScheduledToHide = function(items) {
+    for(var i = 0; i < items.length; i++) {
+        items[i].setAttribute(
+            Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR,
+            Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR_VALUE
+        );
+    }
+}
+
+Gridifier.Renderer.prototype.unmarkItemAsScheduledToHide = function(item) {
+    item.removeAttribute(Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR);
+}
+
+Gridifier.Renderer.prototype.wasItemScheduledToHide = function(item) {
+    return Dom.hasAttribute(item, Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR);
+}
+
 Gridifier.Renderer.prototype.hideConnections = function(connections) {
     var me = this;
 
@@ -78,6 +99,10 @@ Gridifier.Renderer.prototype.hideConnections = function(connections) {
         var connections = [connections];
 
     for(var i = 0; i < connections.length; i++) {
+        if(!this.wasItemScheduledToHide(connections[i].item)) {
+            continue;
+        }
+
         var left = this._rendererConnections.getCssLeftPropertyValuePerConnection(connections[i]);
         var top = this._rendererConnections.getCssTopPropertyValuePerConnection(connections[i]);
         this._rendererConnections.unmarkConnectionItemAsRendered(connections[i]);

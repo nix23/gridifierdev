@@ -75,6 +75,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.toggleDuration = 1500;
         //me._gridifierSettings.coordsChangeDuration = 1500;
 
+
+
         //me._gridifierSettings.dragifier = "testSelector";
         //me._gridifierSettings.sortDispersionMode = "custom";
         //me._gridifierSettings.sortDispersionValue = "200px";
@@ -620,9 +622,17 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             me._gridifier.triggerResize();
             $(me).trigger(DemoLayoutBuilder.DemoLayout.EVENT_DEMO_LAYOUT_SIZES_CHANGE);
         });
+
+        //me._gridifier.onResponsiveTransform(function(item, addedClasses, removedClasses) {
+        //    console.log(item);
+        //    console.log(addedClasses);
+        //    console.log(removedClasses);
+        //});
         
         // @todo -> Replace this.(Tmp for testing)
         me._$view.on("click", ".gridItem", function() { ///console.log("toggle");
+            me._gridifier.toggleResponsiveClasses([$(this), $(this).next(".gridifier-connected-item")], ["wideItem", "wideBlackItem"]);
+            return;
             //me._gridifier.disconnect($(this)); return;
             //me._gridifier.transformSizes($(this), "*2", "*2");
            //me._gridifier.toggleSizesWithPaddingBottom($(this), "*2", "*2");

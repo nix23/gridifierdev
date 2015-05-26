@@ -295,10 +295,13 @@ Gridifier.ApiSettingsParser.prototype.parseSizesChangerOptions = function(sizesC
 }
 
 Gridifier.ApiSettingsParser.prototype.parseDraggableItemDecoratorOptions = function(dragifierApi) {
-    if(!this._settings.hasOwnProperty("draggableItemDecorator")) {
+    if(!this._settings.hasOwnProperty("draggableItemDecorator") && !this._settings.hasOwnProperty("dragDecorator")) {
         dragifierApi.setDraggableItemDecoratorFunction("cloneCSS");
         return;
     }
+
+    if(this._settings.hasOwnProperty("dragDecorator"))
+        this._settings.draggableItemDecorator = this._settings.dragDecorator;
 
     if(typeof this._settings.draggableItemDecorator == "string" || this._settings.draggableItemDecorator instanceof String) {
         dragifierApi.setDraggableItemDecoratorFunction(this._settings.draggableItemDecorator);

@@ -78,7 +78,9 @@ Gridifier = function(grid, settings) {
         }
 
         me._itemClonesManager = new Gridifier.ItemClonesManager(me._grid, me._collector, me._connections, me._sizesResolverManager);
-        me._responsiveClassesManager = new Gridifier.ResponsiveClassesManager(me, me._collector, me._itemClonesManager);
+        me._responsiveClassesManager = new Gridifier.ResponsiveClassesManager(
+            me, me._settings, me._collector, me._guid, me._eventEmitter, me._itemClonesManager
+        );
 
         me._iterator = new Gridifier.Iterator(
             me._settings, me._collector, me._connections, me._connectionsSorter, me._guid
@@ -124,7 +126,7 @@ Gridifier = function(grid, settings) {
             me, me._collector, me._connections, me._settings, me._guid
         );
         me._disconnector = new Gridifier.Disconnector(
-            me, me._collector, me._connections, me._connectors, me._settings, me._guid, me._appender, me._reversedAppender
+            me, me._collector, me._connections, me._connectionsSorter, me._connectors, me._settings, me._guid, me._appender, me._reversedAppender
         );
         me._filtrator = new Gridifier.Filtrator(
             me, me._collector, me._connections, me._settings, me._guid, me._disconnector
@@ -277,6 +279,14 @@ Gridifier.prototype.getRenderer = function() {
 
 Gridifier.prototype.getTransformOperation = function() {
     return this._transformOperation;
+}
+
+Gridifier.prototype.getResponsiveClassesManager = function() {
+    return this._responsiveClassesManager;
+}
+
+Gridifier.prototype.splitToBatches = function(items, batchSize) {
+    return this._operationsQueue.splitItemsToBatches(items, batchSize);
 }
 
 Gridifier.prototype.markAsGridItem = function(items) {
@@ -817,6 +827,8 @@ Gridifier.prototype.setHeightPxAntialias = Gridifier.prototype.setItemHeightPxAn
 Gridifier.prototype.setWidthPtAntialias = Gridifier.prototype.setItemWidthPercentageAntialias;
 Gridifier.prototype.setHeightPtAntialias = Gridifier.prototype.setItemHeightPercentageAntialias;
 Gridifier.prototype.retransformGrid = Gridifier.prototype.retransformAllSizes;
+Gridifier.prototype.setDragDecorator = Gridifier.prototype.setDraggableItemDecorator;
+Gridifier.prototype.add = Gridifier.prototype.addToGrid;
 
 Gridifier.Api = {};
 Gridifier.HorizontalGrid = {};
