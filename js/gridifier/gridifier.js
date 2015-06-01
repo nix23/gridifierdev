@@ -1,4 +1,4 @@
-Gridifier = function(grid, settings) {
+var Gridifier = function(grid, settings) {
     var me = this;
 
     this._grid = null;
@@ -813,6 +813,8 @@ Gridifier.prototype.setToggle = Gridifier.prototype.toggleBy;
 Gridifier.prototype.setSort = Gridifier.prototype.sortBy;
 Gridifier.prototype.setFilter = Gridifier.prototype.filterBy;
 Gridifier.prototype.collectNew = Gridifier.prototype.collectAllDisconnectedItems;
+Gridifier.prototype.appendNew = function(bs, bt) { this.append(this.collectNew(), bs, bt); return this; };
+Gridifier.prototype.prependNew = function(bs, bt) { this.prepend(this.collectNew(), bs, bt); return this; };
 Gridifier.prototype.collectConnected = Gridifier.prototype.collectAllConnectedItems;
 Gridifier.prototype.getForSilentRender = Gridifier.prototype.getScheduledForSilentRenderItems;
 Gridifier.prototype.setAlign = Gridifier.prototype.setAlignmentType;

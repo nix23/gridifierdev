@@ -334,6 +334,20 @@ var Dom = {
         },
 
         byQuery: function(rootEl, selector) {
+            var firstChar = selector.gridifierTrim()[0];
+            if(firstChar == ">") {
+                var selectorPostfix = selector.substr(2, selector.length - 1);
+                var items = rootEl.querySelectorAll(selectorPostfix);
+                var directChilds = [];
+
+                for(var i = 0; i < items.length; i++) {
+                    if(items[i].parentNode == rootEl)
+                        directChilds.push(items[i]);
+                }
+
+                return directChilds;
+            }
+
             return rootEl.querySelectorAll(selector);
         }
     },

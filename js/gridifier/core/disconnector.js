@@ -87,7 +87,7 @@ Gridifier.Disconnector.prototype._findConnectionsToDisconnect = function(items) 
         connectionsToDisconnect.push(itemConnection);
     }
 
-    return connectionsToDisconnect;
+    return this._connectionsSorter.sortConnectionsPerReappend(connectionsToDisconnect);
 }
 
 // We should recreate connectors on connections.length == 0,
@@ -104,7 +104,6 @@ Gridifier.Disconnector.prototype._recreateConnectors = function() {
 }
 
 Gridifier.Disconnector.prototype._scheduleDisconnectedItemsRender = function(disconnectedConnections) {
-    disconnectedConnections = this._connectionsSorter.sortConnectionsPerReappend(disconnectedConnections);
     var renderer = this._gridifier.getRenderer();
     var connectionBatches = this._gridifier.splitToBatches(disconnectedConnections, 12);
 

@@ -8,8 +8,17 @@ module.exports = function(grunt) {
       options: {
         separator: '\r\n\r\n'
       },
+
+      copy: {
+          files: {
+              '/var/www/gridifier/src/**/*.js': 'js/gridifier/**/*.js'
+          }
+      },
+
       dist: {
         src: [
+          'js/gridifier/loader/loaderPrefix.js',
+
           /* Bootstrap */
           'js/gridifier/bootstrap/sizesResolver/sizesResolver.js',
           'js/gridifier/bootstrap/sizesResolver/init.js',
@@ -30,7 +39,6 @@ module.exports = function(grunt) {
           'js/gridifier/discretizer/discretizer.js',
           'js/gridifier/discretizer/horizontalCore.js',
           'js/gridifier/discretizer/verticalCore.js',
-          // @todo -> Exclude discretizer demonstrator???
           'js/gridifier/discretizer/demonstrator.js',
 
           'js/gridifier/dragifier/dragifier.js',
@@ -53,7 +61,9 @@ module.exports = function(grunt) {
           'js/gridifier/settings/**/*.js',
           'js/gridifier/sizesTransformer/**/*.js',
           'js/gridifier/transformerOperations/**/*.js',
-          'js/gridifier/verticalGrid/**/*.js'
+          'js/gridifier/verticalGrid/**/*.js',
+
+          'js/gridifier/loader/loaderPostfix.js'
         ],
         dest: 'build/gridifier.js'
       }

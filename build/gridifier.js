@@ -1,3 +1,13 @@
+(function (root, factory) {
+    if (typeof define === 'function' && define.amd) {
+        define([], factory);
+    } else if (typeof exports === 'object' && exports) {
+        module.exports = factory();
+    } else {
+        root.Gridifier = factory();
+    }
+}(this, function () {
+
 var SizesResolver = {
     getComputedCSS: null,
     propertiesToGet: {
@@ -1159,6 +1169,20 @@ var Dom = {
         },
 
         byQuery: function(rootEl, selector) {
+            var firstChar = selector.gridifierTrim()[0];
+            if(firstChar == ">") {
+                var selectorPostfix = selector.substr(2, selector.length - 1);
+                var items = rootEl.querySelectorAll(selectorPostfix);
+                var directChilds = [];
+
+                for(var i = 0; i < items.length; i++) {
+                    if(items[i].parentNode == rootEl)
+                        directChilds.push(items[i]);
+                }
+
+                return directChilds;
+            }
+
             return rootEl.querySelectorAll(selector);
         }
     },
@@ -1178,7 +1202,7 @@ var Dom = {
 Dom.init();
 SizesResolver.init();
 
-Gridifier = function(grid, settings) {
+var Gridifier = function(grid, settings) {
     var me = this;
 
     this._grid = null;
@@ -1993,6 +2017,8 @@ Gridifier.prototype.setToggle = Gridifier.prototype.toggleBy;
 Gridifier.prototype.setSort = Gridifier.prototype.sortBy;
 Gridifier.prototype.setFilter = Gridifier.prototype.filterBy;
 Gridifier.prototype.collectNew = Gridifier.prototype.collectAllDisconnectedItems;
+Gridifier.prototype.appendNew = function(bs, bt) { this.append(this.collectNew(), bs, bt); return this; };
+Gridifier.prototype.prependNew = function(bs, bt) { this.prepend(this.collectNew(), bs, bt); return this; };
 Gridifier.prototype.collectConnected = Gridifier.prototype.collectAllConnectedItems;
 Gridifier.prototype.getForSilentRender = Gridifier.prototype.getScheduledForSilentRenderItems;
 Gridifier.prototype.setAlign = Gridifier.prototype.setAlignmentType;
@@ -6437,7 +6463,7 @@ Gridifier.Disconnector.prototype._findConnectionsToDisconnect = function(items) 
         connectionsToDisconnect.push(itemConnection);
     }
 
-    return connectionsToDisconnect;
+    return this._connectionsSorter.sortConnectionsPerReappend(connectionsToDisconnect);
 }
 
 // We should recreate connectors on connections.length == 0,
@@ -6454,7 +6480,6 @@ Gridifier.Disconnector.prototype._recreateConnectors = function() {
 }
 
 Gridifier.Disconnector.prototype._scheduleDisconnectedItemsRender = function(disconnectedConnections) {
-    disconnectedConnections = this._connectionsSorter.sortConnectionsPerReappend(disconnectedConnections);
     var renderer = this._gridifier.getRenderer();
     var connectionBatches = this._gridifier.splitToBatches(disconnectedConnections, 12);
 
@@ -20462,3 +20487,6 @@ Gridifier.VerticalGrid.ReversedPrepender.prototype._findItemConnectionCoords = f
 
     return itemConnectionCoords;
 }
+
+    return Gridifier;
+}));

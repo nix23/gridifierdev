@@ -1,4 +1,0 @@
-order deny,allow
-deny from all
-allow from 192.168.48.128
-allow from 83.99.157.93

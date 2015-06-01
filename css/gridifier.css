@@ -7,14 +7,6 @@ html, body {
     font-family: "Open Sans";
 }
 
-.wideItem {
-    width: 100% !important;
-}
-
-.wideBlackItem {
-    background: black !important;
-}
-
 body {
     overflow-y: scroll;
 }
