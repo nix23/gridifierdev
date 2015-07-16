@@ -182,7 +182,9 @@ Gridifier.SilentRenderer.prototype.execute = function(items, batchSize, batchTim
     }
 
     // If 100ms is not enough to silently append all required items, user should call silentRender one more time.
+    // Deprecated, listen per onConnectionCreate event instead
     setTimeout(function() {
         scheduleSilentRendererExecution.call(me, items, batchSize, batchTimeout);
-    }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100);
+        //}, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT + 100);
+    }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
 }

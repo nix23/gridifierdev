@@ -100,13 +100,13 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
     else
         var isFirst = false;
 
-    if(typeof window.num == "undefined")
-        window.num = 0;
-    window.num++;
-    if(window.num % 3 == 0)
-        var itemHeight = "100%";
-    else
-        var itemHeight = "50%";
+    //if(typeof window.num == "undefined")
+    //    window.num = 0;
+    //window.num++;
+    //if(window.num % 3 == 0)
+    //    var itemHeight = "100%";
+    //else
+    //    var itemHeight = "50%";
 
     this._$gridItem.css({
         //width: (isFirst) ? "25%" : "12.5%",
@@ -115,11 +115,15 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
        //width: "12.5%",
        //height: 0,
        //"padding-bottom": "12.5%",
-       width: itemSizes.width,
+       //width: itemSizes.width,
+        width: "20%",
+        "margin-left": "2.5%",
+        "margin-right": "2.5%",
+        "margin-top": "20px",
         //width: "200px",
        //height: itemSizes.height,
-       height: 0,
-       "padding-bottom": itemSizes.height,
+       //height: 0,
+       //"padding-bottom": itemSizes.height,
         //height: itemHeight,
         //height: "200px",
 
@@ -168,6 +172,8 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         //"margin": "20px",
         //"box-sizing": (isBorderBoxBoxSizing) ? "border-box" : "content-box",
         "box-sizing": "border-box",
+        //"border": "3px rgb(60,60,60) solid",
+        "border": "5px white solid",
         //margin: "10px",
 
         // "-webkit-box-shadow": "2px 2px 2px rgb(60,60,60)",
@@ -188,14 +194,30 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         var bgs = "url(img/Cars2.jpg)";
 
     var $gridItemBg = $("<div/>");
+    var $gridItemImg = $("<img/>").css("max-width", "100%");
+    //$gridItemImg.attr("src", "http://deelay.me/1000?http://g3.delphi.lv/images/pix/355x215/9mCnxFYV_ho/litex-jelgava-46198655.jpg");
+    //$gridItemImg.css({"max-width": "100%"});
+
+    if(typeof window.num == "undefined")
+        window.num = 1;
+    else
+        window.num++;
+
+    if(window.num < 21)
+        $gridItemImg.attr("src", "img/hotel/" + window.num + ".jpeg");
+    else
+        $gridItemImg.attr("src", "img/hotel/" + window.num + ".jpg");
+
+    this._$gridItem.append($gridItemImg);
+
     $gridItemBg.css({
         position: "absolute",
         //width: "80%",
         //height: "80%",
         //"margin-left": "10%",
         //"margin-top": "10%",
-        width: "100.0%",
-        height: "100%",
+        width: "20.0%",
+        //height: "100%",
         // @todo -> Make Crossbrowser
         //background: "url(img/gridItemBg9.png)",
         background: "url(img/test2.png)",
@@ -206,9 +228,10 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         "background-position": "center center"
     });
     //this._$gridItem.append($gridItemBg);
+    //this._$gridItem.append($gridItemImg);
 }
 
 DemoLayoutBuilder.DemoLayout.GridItem.prototype.renderGUID = function() {
     var itemGUID = this._$gridItem.attr(Gridifier.GUID.GUID_DATA_ATTR);
-    this._$gridItem.append(itemGUID);
+    //this._$gridItem.append(itemGUID);
 }

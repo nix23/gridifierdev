@@ -50,6 +50,7 @@ Gridifier.Operations.Prepend.prototype.execute = function(items) {
     var items = this._collector.filterOnlyNotConnectedItems(
         this._collector.toDOMCollection(items)
     );
+    if(items.length == 0) return;
     this._sizesResolverManager.startCachingTransaction();
 
     this._collector.ensureAllItemsAreAttachedToGrid(items);

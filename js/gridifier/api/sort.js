@@ -1,3 +1,8 @@
+/* You can define your custom sorts and retransform sorts in this class.
+ * Read about custom builds at http://gridifier.io/essentials/install
+ * Read about sorts at http://gridifier.io/sortings/sorts
+ * Read about retransform sorts at http://gridifier.io/sortings/retransform-sorts
+ */
 Gridifier.Api.Sort = function(settings, gridifier, eventEmitter) {
     var me = this;
 
@@ -27,7 +32,12 @@ Gridifier.Api.Sort = function(settings, gridifier, eventEmitter) {
         me._sortFunctions = {};
 
         me._addDefaultSort();
+        // Call register function per each sort here
+        // me._addCustomSort();
+
         me._addDefaultRetransformSort();
+        // Call register function per each retransform sort here
+        // me._addCustomRetransformSort();
     };
 
     this._bindEvents = function() {
@@ -273,6 +283,14 @@ Gridifier.Api.Sort.prototype._addDefaultSort = function() {
     };
 }
 
+//Custom sort
+//Gridifier.Api.Sort.prototype._addCustomSort = function() {
+//    this._sortFunctions.customSort = function(first, second, sort) {
+//        // return sort comparator result here
+//        // never return 0 from this function(sorts are unstable in most browsers)
+//    }
+//}
+
 Gridifier.Api.Sort.RETRANSFORM_SORT_GRID_REFRESH_TIMEOUT = 20;
 
 Gridifier.Api.Sort.prototype.setRetransformSortFunction = function(retransformSortFunctionName) {
@@ -346,6 +364,15 @@ Gridifier.Api.Sort.prototype._addDefaultRetransformSort = function() {
         return connections;
     };
 }
+
+//Custom retransform sort
+//Gridifier.Api.Sort.prototype._addCustomRetransformSort = function() {
+//    this._retransformSortFunctions.customRetransformSort = function(connections) {
+//        // sort connections here
+//        // each connections array entry has x1, y1, x2, y2 coords available
+//         return connections;
+//    }
+//}
 
 Gridifier.Api.Sort.RETRANSFORM_SORT_SINGLE_BATCH_MARKER = 100000;
 

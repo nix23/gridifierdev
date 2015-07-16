@@ -65,17 +65,19 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.prependType = "mirroredPrepend";
         //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
-        me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
-        me._gridifierSettings.alignmentType = "center";
+        //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
+        //me._gridifierSettings.alignmentType = "center";
         //me._gridifierSettings.sortDispersion = "custom";
-        me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
+        //me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
         //me._gridifierSettings.dragifier = true;
-        //me._gridifierSettings.retransformQueueBatchSize = 1;
+        //me._gridifierSettings.dragifierMode = "discretization";
+        //me._gridifierSettings.retransformSort = "areaEvenly";
+        //me._gridifierSettings.retransformQueueBatchSize = 500;
         //me._gridifierSettings.coordsChangeAnimationMsDuration = 300;
         //me._gridifierSettings.toggleDuration = 1500;
         //me._gridifierSettings.coordsChangeDuration = 1500;
 
-
+        me._gridifierSettings.resolveImages = true;
 
         //me._gridifierSettings.dragifier = "testSelector";
         //me._gridifierSettings.sortDispersionMode = "custom";
@@ -302,19 +304,68 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //    me._gridifierDynamicSettings._itemSizes[i].height = sizes[i].height;
         //}
 
-        me._gridifierDynamicSettings._batchSize = 10;
+        me._gridifierDynamicSettings._batchSize = 25;
         //me._gridifierDynamicSettings._batchSize = 3;
         var sizes = [
-            {width: "10%", height: "10%"},
-            {width: "5%", height: "5%"},
-            {width: "5%", height: "5%"},
-            {width: "5%", height: "5%"},
-            {width: "10%", height: "10%"},
-            {width: "5%", height: "5%"},
-            {width: "20%", height: "20%"},
-            {width: "10%", height: "10%"},
-            {width: "10%", height: "10%"},
-            {width: "20%", height: "20%"},
+            //{width: "10%", height: "10%"},
+            //{width: "5%", height: "5%"},
+            //{width: "5%", height: "5%"},
+            //{width: "5%", height: "5%"},
+            //{width: "10%", height: "10%"},
+            //{width: "5%", height: "5%"},
+            //{width: "20%", height: "20%"},
+            //{width: "10%", height: "10%"},
+            //{width: "10%", height: "10%"},
+            //{width: "20%", height: "20%"},
+            {width: "200px", height: "200px"},
+            {width: "100px", height: "100px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+            {width: "200px", height: "200px"},
+            {width: "100px", height: "100px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+
+            {width: "200px", height: "200px"},
+            {width: "100px", height: "100px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+            {width: "200px", height: "200px"},
+            {width: "100px", height: "100px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+
+            {width: "200px", height: "200px"},
+            {width: "100px", height: "100px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+            {width: "200px", height: "200px"},
+            {width: "100px", height: "100px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+
+            {width: "200px", height: "200px"},
+            {width: "100px", height: "100px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+            {width: "200px", height: "200px"},
+            {width: "100px", height: "100px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+            {width: "50px", height: "50px"},
+
+
+
+
+
+
             //{width: "33.33%", "height": "20%"},
             //{width: "33.33%", "height": "20%"},
             //{width: "33.33%", "height": "20%"},
@@ -683,9 +734,18 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         var i = 0;
         me._gridifier.onShow(function(item) {
             var itemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
-            item.innerHTML = itemGUID;
+            //item.innerHTML = itemGUID;
             i++;
             //item.innerHTML = i;
+            var $div = $("<div/>").css({
+                position: "absolute",
+                left: "0px",
+                top: "0px",
+                color: "red",
+                fontSize: "20px"
+            });
+            $(item).append($div);
+            $div.get(0).innerHTML = itemGUID;
         });
 
         me._gridifier.setSort("byColor");
@@ -784,8 +844,8 @@ DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
         // })($gridItem, gridItem);
     }
 
-
     this._gridifier.append(itemsToAppend);
+    //this._gridifier.prepend(itemsToAppend, 2, 100);
     //this._gridifier.append(itemsToAppend, 1, 100);
     //this._gridifier.silentAppend(itemsToAppend);
     // @todo -> append and prepend by one or by batch????

@@ -1,3 +1,8 @@
+/* You can define your custom sizes changers in this class.
+ * (Sizes changers are used per default grid retransforms)
+ * Read about custom builds at http://gridifier.io/essentials/install
+ * Read about sizes changers at http://gridifier.io/grids/sizes-transforms
+ */
 Gridifier.Api.SizesChanger = function(settings, eventEmitter) {
     var me = this;
 
@@ -20,6 +25,8 @@ Gridifier.Api.SizesChanger = function(settings, eventEmitter) {
         me._addDefaultPaddingBottomSizesChanger();
         me._addCSS3TransitionSizesChanger();
         me._addCSS3PaddingBottomTransitionSizesChanger();
+        // Call register function per each sizes changer here
+        // me._addCustomSizesChanger();
     };
 
     this._bindEvents = function() {
@@ -112,3 +119,11 @@ Gridifier.Api.SizesChanger.prototype._addCSS3PaddingBottomTransitionSizesChanger
         });
     };
 }
+
+// Gridifier.Api.SizesChanger.prototype._addCustomSizesChanger = function() {
+//     // If you want use coords changer with toggle/transformSizesWithPaddingBottom,
+//     // 3-rd parameter will be newPaddingBottom
+//     this._sizesChangerFunctions["customSizesChanger"] = function(item, newWidth, newHeight) {
+//         // Do something with item here :)
+//     }
+// }

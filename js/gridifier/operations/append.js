@@ -59,6 +59,7 @@ Gridifier.Operations.Append.prototype.execute = function(items) {
     var items = this._collector.filterOnlyNotConnectedItems(
         this._collector.toDOMCollection(items)
     );
+    if(items.length == 0) return;
     this._sizesResolverManager.startCachingTransaction();
 
     this._collector.ensureAllItemsAreAttachedToGrid(items);
@@ -107,6 +108,11 @@ Gridifier.Operations.Append.prototype._append = function(item) {
 }
 
 Gridifier.Operations.Append.prototype.executeInsertBefore = function(items, beforeItem) {
+    var items = this._collector.filterOnlyNotConnectedItems(
+        this._collector.toDOMCollection(items)
+    );
+    if(items.length == 0) return;
+
     var connections = this._connections.get();
     if(connections.length == 0) {
         this.execute(items);
@@ -170,6 +176,11 @@ Gridifier.Operations.Append.prototype.executeInsertBefore = function(items, befo
 }
 
 Gridifier.Operations.Append.prototype.executeInsertAfter = function(items, afterItem) {
+    var items = this._collector.filterOnlyNotConnectedItems(
+        this._collector.toDOMCollection(items)
+    );
+    if(items.length == 0) return;
+
     var connections = this._connections.get();
     if(connections.length == 0) {
         this.execute(items);

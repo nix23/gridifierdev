@@ -254,10 +254,14 @@ Gridifier.CoreSettingsParser.prototype.parseResizeTimeoutValue = function() {
 }
 
 Gridifier.CoreSettingsParser.prototype.parseDisableItemHideOnGridAttachValue = function() {
-    if(!this._settings.hasOwnProperty("disableItemHideOnGridAttach"))
+    if(!this._settings.hasOwnProperty("disableItemHideOnGridAttach")
+        && !this._settings.hasOwnProperty("hideItems"))
         return false;
 
-    return true;
+    if(this._settings.hasOwnProperty("hideItems"))
+        return (this._settings.hideItems) ? false : true;
+
+    return this._settings.disableItemHideOnGridAttach;
 }
 
 Gridifier.CoreSettingsParser.prototype.parseToggleAnimationMsDuration = function() {
@@ -455,4 +459,11 @@ Gridifier.CoreSettingsParser.prototype.parseCustomRepackSize = function() {
         return null;
 
     return this._settings.repackSize;
+}
+
+Gridifier.CoreSettingsParser.prototype.parseResolveImages = function() {
+    if(!this._settings.hasOwnProperty("resolveImages"))
+        return false;
+
+    return this._settings.resolveImages;
 }

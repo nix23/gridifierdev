@@ -1,3 +1,9 @@
+/* You can define your custom togglers in this class.
+ * Read about custom builds at http://gridifier.io/essentials/install
+ * Read about sizes changers at http://gridifier.io/api/togglers
+ * (To write custom toggler some additional information is required.
+ *  So, we will write separate chapter about it later)
+ */
 Gridifier.Api.Toggle = function(settings, gridifier, eventEmitter, sizesResolverManager) {
     var me = this;
 

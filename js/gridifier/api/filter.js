@@ -1,3 +1,7 @@
+/* You can define your custom filters in this class.
+ * Read about custom builds at http://gridifier.io/essentials/install
+ * Read about filters at http://gridifier.io/sortings/filters
+ */
 Gridifier.Api.Filter = function(settings, eventEmitter) {
     var me = this;
 
@@ -17,6 +21,8 @@ Gridifier.Api.Filter = function(settings, eventEmitter) {
         me._filterFunctions = {};
 
         me._addAllFilter();
+        // Call register function per each filter here
+        // me._addCustomFilter();
     };
 
     this._bindEvents = function() {
@@ -66,3 +72,10 @@ Gridifier.Api.Filter.prototype._addAllFilter = function() {
         return true;
     };
 }
+
+//Custom filter
+//Gridifier.Api.Filter.prototype._addCustomFilter = function() {
+//    this._filterFunctions.customFilter = function(item) {
+//        return (show_item_conditions) ? true : false;
+//    }
+//}

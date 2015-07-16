@@ -15,6 +15,7 @@ var Gridifier = function(grid, settings) {
     this._lifecycleCallbacks = null;
     this._itemClonesManager = null;
     this._responsiveClassesManager = null;
+    this._imagesResolver = null;
 
     this._connectors = null;
     this._connections = null;
@@ -59,6 +60,10 @@ var Gridifier = function(grid, settings) {
         me._lifecycleCallbacks = new Gridifier.LifecycleCallbacks(me._collector);
 
         me._grid.setCollectorInstance(me._collector);
+
+        if(me._settings.shouldResolveImages()) {
+            me._imagesResolver = new Gridifier.ImagesResolver(me);
+        }
 
         if(me._settings.isVerticalGrid()) {
             me._connections = new Gridifier.VerticalGrid.Connections(
@@ -534,6 +539,21 @@ Gridifier.prototype.setRetransformQueueBatchTimeout = function(newBatchTimeout) 
 }
 
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
+    if(this._settings.shouldResolveImages()) {
+        this._imagesResolver.scheduleImagesResolve(
+            this._collector.toDOMCollection(items),
+            Gridifier.ImagesResolver.OPERATIONS.PREPEND,
+            {batchSize: batchSize, batchTimeout: batchTimeout}
+        );
+    }
+    else {
+        this.executePrepend(items, batchSize, batchTimeout);
+    }
+
+    return this;
+}
+
+Gridifier.prototype.executePrepend = function(items, batchSize, batchTimeout) {
     if(this._settings.isMirroredPrepend()) {
         this.insertBefore(items, null, batchSize, batchTimeout);
         return this;
@@ -548,11 +568,24 @@ Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     setTimeout(function() {
         execute.call(me);
     }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+}
+
+Gridifier.prototype.append = function(items, batchSize, batchTimeout) {
+    if(this._settings.shouldResolveImages()) {
+        this._imagesResolver.scheduleImagesResolve(
+            this._collector.toDOMCollection(items),
+            Gridifier.ImagesResolver.OPERATIONS.APPEND,
+            {batchSize: batchSize, batchTimeout: batchTimeout}
+        );
+    }
+    else {
+        this.executeAppend(items, batchSize, batchTimeout);
+    }
 
     return this;
 }
 
-Gridifier.prototype.append = function(items, batchSize, batchTimeout) {
+Gridifier.prototype.executeAppend = function(items, batchSize, batchTimeout) {
     this._lifecycleCallbacks.executePreInsertCallbacks(items);
 
     var execute = function() {
@@ -563,17 +596,28 @@ Gridifier.prototype.append = function(items, batchSize, batchTimeout) {
     setTimeout(function() {
         execute.call(me);
     }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+}
+
+Gridifier.prototype.silentAppend = function(items, batchSize, batchTimeout) {
+    if(this._settings.shouldResolveImages()) {
+        this._imagesResolver.scheduleImagesResolve(
+            this._collector.toDOMCollection(items),
+            Gridifier.ImagesResolver.OPERATIONS.SILENT_APPEND,
+            {batchSize: batchSize, batchTimeout: batchTimeout}
+        );
+    }
+    else {
+        this.executeSilentAppend(items, batchSize, batchTimeout);
+    }
 
     return this;
 }
 
-Gridifier.prototype.silentAppend = function(items, batchSize, batchTimeout) {
+Gridifier.prototype.executeSilentAppend = function(items, batchSize, batchTimeout) {
     this._silentRenderer.scheduleForSilentRender(
         this._collector.toDOMCollection(items)
     );
-    this.append(items, batchSize, batchTimeout);
-
-    return this;
+    this.executeAppend(items, batchSize, batchTimeout);
 }
 
 Gridifier.prototype.silentRender = function(items, batchSize, batchTimeout) {
@@ -583,6 +627,66 @@ Gridifier.prototype.silentRender = function(items, batchSize, batchTimeout) {
 
 Gridifier.prototype.getScheduledForSilentRenderItems = function(onlyInsideViewport) {
     return this._silentRenderer.getScheduledForSilentRenderItems(onlyInsideViewport);
+}
+
+Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchTimeout) {
+    if(this._settings.shouldResolveImages()) {
+        this._imagesResolver.scheduleImagesResolve(
+            this._collector.toDOMCollection(items),
+            Gridifier.ImagesResolver.OPERATIONS.INSERT_BEFORE,
+            {batchSize: batchSize, batchTimeout: batchTimeout, beforeItem: beforeItem}
+        );
+    }
+    else {
+        this.executeInsertBefore(items, beforeItem, batchSize, batchTimeout);
+    }
+
+    return this;
+}
+
+Gridifier.prototype.executeInsertBefore = function(items, beforeItem, batchSize, batchTimeout) {
+    this._lifecycleCallbacks.executePreInsertCallbacks(items);
+
+    var execute = function() {
+        this._operationsQueue.scheduleInsertBeforeOperation(
+            items, beforeItem, batchSize, batchTimeout
+        );
+    }
+
+    var me = this;
+    setTimeout(function() {
+        execute.call(me);
+    }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
+}
+
+Gridifier.prototype.insertAfter = function(items, afterItem, batchSize, batchTimeout) {
+    if(this._settings.shouldResolveImages()) {
+        this._imagesResolver.scheduleImagesResolve(
+            this._collector.toDOMCollection(items),
+            Gridifier.ImagesResolver.OPERATIONS.INSERT_AFTER,
+            {batchSize: batchSize, batchTimeout: batchTimeout, afterItem: afterItem}
+        );
+    }
+    else {
+        this.executeInsertAfter(items, afterItem, batchSize, batchTimeout);
+    }
+
+    return this;
+}
+
+Gridifier.prototype.executeInsertAfter = function(items, afterItem, batchSize, batchTimeout) {
+    this._lifecycleCallbacks.executePreInsertCallbacks(items);
+
+    var execute = function() {
+        this._operationsQueue.scheduleInsertAfterOperation(
+            items, afterItem, batchSize, batchTimeout
+        );
+    }
+
+    var me = this;
+    setTimeout(function() {
+        execute.call(me);
+    }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
 }
 
 Gridifier.prototype.triggerRotate = function(items, rotateTogglerType, batchSize, batchTimeout) {
@@ -599,40 +703,6 @@ Gridifier.prototype.triggerRotate = function(items, rotateTogglerType, batchSize
     this._operationsQueue.scheduleAsyncFnExecutionByBatches(
         itemsToRotate, batchSize, batchTimeout, function(itemBatch) { me._renderer.rotateItems(itemBatch); }
     );
-    return this;
-}
-
-Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchTimeout) {
-    this._lifecycleCallbacks.executePreInsertCallbacks(items);
-
-    var execute = function() {
-        this._operationsQueue.scheduleInsertBeforeOperation(
-            items, beforeItem, batchSize, batchTimeout
-        );
-    }
-
-    var me = this;
-    setTimeout(function() {
-        execute.call(me);
-    }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
-
-    return this;
-}
-
-Gridifier.prototype.insertAfter = function(items, afterItem, batchSize, batchTimeout) {
-    this._lifecycleCallbacks.executePreInsertCallbacks(items);
-
-    var execute = function() {
-        this._operationsQueue.scheduleInsertAfterOperation(
-            items, afterItem, batchSize, batchTimeout
-        );
-    }
-
-    var me = this;
-    setTimeout(function() {
-        execute.call(me);
-    }, Gridifier.REFLOW_OPTIMIZATION_TIMEOUT);
-
     return this;
 }
 
@@ -831,6 +901,8 @@ Gridifier.prototype.setHeightPtAntialias = Gridifier.prototype.setItemHeightPerc
 Gridifier.prototype.retransformGrid = Gridifier.prototype.retransformAllSizes;
 Gridifier.prototype.setDragDecorator = Gridifier.prototype.setDraggableItemDecorator;
 Gridifier.prototype.add = Gridifier.prototype.addToGrid;
+Gridifier.prototype.enableDragifier = Gridifier.prototype.bindDragifierEvents;
+Gridifier.prototype.disableDragifier = Gridifier.prototype.unbindDragifierEvents;
 
 Gridifier.Api = {};
 Gridifier.HorizontalGrid = {};

@@ -60,6 +60,7 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
     this._disableRetransformQueueOnDrags = false;
 
     this._repackSize = null;
+    this._resolveImages = false;
 
     this._css = {
     };
@@ -147,6 +148,7 @@ Gridifier.Settings.prototype._parse = function() {
     this._disableRetransformQueueOnDrags = this._coreSettingsParser.parseDisableRetransformQueueOnDrags();
 
     this._repackSize = this._coreSettingsParser.parseCustomRepackSize();
+    this._resolveImages = this._coreSettingsParser.parseResolveImages();
 
     var me = this;
     this._gridifier.setDefaultPrepend = function() { me.setDefaultPrepend.call(me); };
@@ -544,4 +546,8 @@ Gridifier.Settings.prototype.hasCustomRepackSize = function() {
 
 Gridifier.Settings.prototype.getCustomRepackSize = function() {
     return this._repackSize;
+}
+
+Gridifier.Settings.prototype.shouldResolveImages = function() {
+    return this._resolveImages;
 }

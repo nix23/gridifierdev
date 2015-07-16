@@ -14,7 +14,10 @@ $(document).ready(function() {
 
         _before: function() {
             var me = this;
-            this._realSizesResolver = SizesResolver;
+            //this._realSizesResolver = SizesResolver;
+            this._realSizesResolver = {};
+            this._realSizesResolver.outerWidth = SizesResolver.outerWidth;
+            this._realSizesResolver.clearRecursiveSubcallsData = SizesResolver.clearRecursiveSubcallsData;
             this._sizesResolverMock = {
                 outerWidth: function(DOMElem, includeMargins) {
                     var response = "";
@@ -35,11 +38,15 @@ $(document).ready(function() {
                 }
             }
             
-            SizesResolver = this._sizesResolverMock;
+            //SizesResolver = this._sizesResolverMock;
+            SizesResolver.outerWidth = this._sizesResolverMock.outerWidth;
+            SizesResolver.clearRecursiveSubcallsData = this._sizesResolverMock.clearRecursiveSubcallsData;
         },
 
         _after: function() {
-            SizesResolver = this._realSizesResolver;
+            //SizesResolver = this._realSizesResolver;
+            SizesResolver.outerWidth = this._realSizesResolver.outerWidth;
+            SizesResolver.clearRecursiveSubcallsData = this._realSizesResolver.clearRecursiveSubcallsData;
         },
 
         runTests: function() {
@@ -268,7 +275,9 @@ $(document).ready(function() {
         },
 
         _testWithAntialiasingOnTestElem: function() {
-            SizesResolver = this._realSizesResolver;
+            //SizesResolver = this._realSizesResolver;
+            SizesResolver.outerWidth = this._realSizesResolver.outerWidth;
+            SizesResolver.clearRecursiveSubcallsData = this._realSizesResolver.clearRecursiveSubcallsData;
 
             clearTestData();
 
@@ -306,7 +315,9 @@ $(document).ready(function() {
 
             sizesResolverManager.stopCachingTransaction();
 
-            SizesResolver = this._sizesResolverMock;
+            //SizesResolver = this._sizesResolverMock;
+            SizesResolver.outerWidth = this._sizesResolverMock.outerWidth;
+            SizesResolver.clearRecursiveSubcallsData = this._sizesResolverMock.clearRecursiveSubcallsData;
             clearTestData();
         }
     }
@@ -327,7 +338,10 @@ $(document).ready(function() {
 
         _before: function() {
             var me = this;
-            this._realSizesResolver = SizesResolver;
+            //this._realSizesResolver = SizesResolver;
+            this._realSizesResolver = {};
+            this._realSizesResolver.outerHeight = SizesResolver.outerHeight;
+            this._realSizesResolver.clearRecursiveSubcallsData = SizesResolver.clearRecursiveSubcallsData;
             this._sizesResolverMock = {
                 outerHeight: function(DOMElem, includeMargins) {
                     var response = "";
@@ -348,11 +362,15 @@ $(document).ready(function() {
                 }
             }
 
-            SizesResolver = this._sizesResolverMock;
+            //SizesResolver = this._sizesResolverMock;
+            SizesResolver.outerHeight = this._sizesResolverMock.outerHeight;
+            SizesResolver.clearRecursiveSubcallsData = this._sizesResolverMock.clearRecursiveSubcallsData;
         },
 
         _after: function() {
-            SizesResolver = this._realSizesResolver;
+            //SizesResolver = this._realSizesResolver;
+            SizesResolver.outerHeight = this._realSizesResolver.outerHeight;
+            SizesResolver.clearRecursiveSubcallsData = this._realSizesResolver.clearRecursiveSubcallsData;
         },
 
         runTests: function() {
@@ -580,7 +598,10 @@ $(document).ready(function() {
         },
 
         _testWithAntialiasingOnTestElem: function() {
-            SizesResolver = this._realSizesResolver;
+            //SizesResolver = this._realSizesResolver;
+            SizesResolver.outerHeight = this._realSizesResolver.outerHeight;
+            SizesResolver.clearRecursiveSubcallsData = this._realSizesResolver.clearRecursiveSubcallsData;
+
             clearTestData();
 
             var testerDiv = document.createElement("div");
@@ -616,6 +637,10 @@ $(document).ready(function() {
             );
 
             sizesResolverManager.stopCachingTransaction();
+
+            SizesResolver.outerHeight = this._sizesResolverMock.outerHeight;
+            SizesResolver.clearRecursiveSubcallsData = this._sizesResolverMock.clearRecursiveSubcallsData;
+
             clearTestData();
         }
     }
