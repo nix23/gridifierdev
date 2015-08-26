@@ -77,7 +77,7 @@ Gridifier.Operations.Append.prototype.execute = function(items) {
 
     this._sizesResolverManager.stopCachingTransaction();
     this._gridSizesUpdater.scheduleGridSizesUpdate();
-    this._eventEmitter.emitInsertEvent();
+    this._eventEmitter.emitInsertEvent(items);
 }
 
 Gridifier.Operations.Append.prototype._append = function(item) {

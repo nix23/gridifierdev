@@ -62,13 +62,13 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         
         me._gridifierSettings.gridTransformType = "expand";
 
-        //me._gridifierSettings.prependType = "mirroredPrepend";
+        me._gridifierSettings.prependType = "mirroredPrepend";
         //me._gridifierSettings.appendType = "reversedAppend";   // @todo -> Delete, tmp
         //me._gridifierSettings.prependType = "reversedPrepend"; // @todo -> Delete, tmp
         //me._gridifierSettings.intersectionStrategy = "noIntersections"; // @todo -> Delete, tmp
         //me._gridifierSettings.alignmentType = "center";
         //me._gridifierSettings.sortDispersion = "custom";
-        //me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
+        me._gridifierSettings.sortDispersionMode = "customAllEmptySpace";
         //me._gridifierSettings.dragifier = true;
         //me._gridifierSettings.dragifierMode = "discretization";
         //me._gridifierSettings.retransformSort = "areaEvenly";
@@ -78,6 +78,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.coordsChangeDuration = 1500;
 
         me._gridifierSettings.resolveImages = true;
+        //me._gridifierSettings.retransformQueueBatchSize = 10000;
+        //me._gridifierSettings.dragifier = true;
 
         //me._gridifierSettings.dragifier = "testSelector";
         //me._gridifierSettings.sortDispersionMode = "custom";
@@ -105,45 +107,45 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
 
 
-        me._gridifierSettings.sort = {"byColor": function(firstItem, secondItem) {
-             var firstItemClassParts = firstItem.getAttribute("class").split(" ");
-             var secondItemClassParts = secondItem.getAttribute("class").split(" ");
-
-             var firstItemColorClass = "";
-             var secondItemColorClass = "";
-
-             for(var i = 0; i < firstItemClassParts.length; i++) {
-                 if(firstItemClassParts[i].search("Bg") !== -1) {
-                     firstItemColorClass = firstItemClassParts[i];
-                     break;
-                 }
-             }
-
-             for(var i = 0; i < secondItemClassParts.length; i++) {
-                 if(secondItemClassParts[i].search("Bg") !== -1) {
-                     secondItemColorClass = secondItemClassParts[i];
-                     break;
-                 }
-             }
-
-             var classNameToOrderNumber = function(className) {
-                 if(className == "gridFirstBg") return 1;
-                 else if(className == "gridSecondBg") return 2;
-                 else if(className == "gridThirdBg") return 3;
-                 else if(className == "gridFourthBg") return 4;
-                 else if(className == "gridFifthBg") return 5;
-             }
-
-             var firstItemOrderNum = classNameToOrderNumber(firstItemColorClass);
-             var secondItemOrderNum = classNameToOrderNumber(secondItemColorClass);
-
-             if(firstItemOrderNum < secondItemOrderNum)
-                 return -1;
-             else if(firstItemOrderNum == secondItemOrderNum)
-                 return 0;
-             else if(firstItemOrderNum > secondItemOrderNum)
-                 return 1;
-        }};
+        //me._gridifierSettings.sort = {"byColor": function(firstItem, secondItem) {
+        //     var firstItemClassParts = firstItem.getAttribute("class").split(" ");
+        //     var secondItemClassParts = secondItem.getAttribute("class").split(" ");
+        //
+        //     var firstItemColorClass = "";
+        //     var secondItemColorClass = "";
+        //
+        //     for(var i = 0; i < firstItemClassParts.length; i++) {
+        //         if(firstItemClassParts[i].search("Bg") !== -1) {
+        //             firstItemColorClass = firstItemClassParts[i];
+        //             break;
+        //         }
+        //     }
+        //
+        //     for(var i = 0; i < secondItemClassParts.length; i++) {
+        //         if(secondItemClassParts[i].search("Bg") !== -1) {
+        //             secondItemColorClass = secondItemClassParts[i];
+        //             break;
+        //         }
+        //     }
+        //
+        //     var classNameToOrderNumber = function(className) {
+        //         if(className == "gridFirstBg") return 1;
+        //         else if(className == "gridSecondBg") return 2;
+        //         else if(className == "gridThirdBg") return 3;
+        //         else if(className == "gridFourthBg") return 4;
+        //         else if(className == "gridFifthBg") return 5;
+        //     }
+        //
+        //     var firstItemOrderNum = classNameToOrderNumber(firstItemColorClass);
+        //     var secondItemOrderNum = classNameToOrderNumber(secondItemColorClass);
+        //
+        //     if(firstItemOrderNum < secondItemOrderNum)
+        //         return -1;
+        //     else if(firstItemOrderNum == secondItemOrderNum)
+        //         return 0;
+        //     else if(firstItemOrderNum > secondItemOrderNum)
+        //         return 1;
+        //}};
 
         // window.createDiv = function() {
         //     return $("<div/>").css({
@@ -180,7 +182,17 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
                 return false;
         }
 
+        setTimeout(function() {
+            window.gridifier.setToggle("rotateZWithFade");
+            //window.gridifier.disableIntersections().setAlign("center");
+            window.gridifier.setToggleDuration(1000);
+            //window.gridifier.setCoordsChangeDuration(1000);
+        }, 500);
+
         me._gridifierSettings.filter = {
+            //"initial": "disabled",
+            //initial: "blue",
+
             "blue": function(item) {
                 return itemFilterCore(item, "gridFirstBg");
             },
@@ -199,8 +211,20 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
             "green": function(item) {
                 return itemFilterCore(item, "gridFifthBg");
+            },
+
+            "disabled": function(item) {
+                return false;
             }
         };
+
+        //$(window).on("resize", function() {
+        //    window.gridifier.silentRender(window.gridifier.getForSilentRender(true));
+        //});
+        //
+        //$(document).on("scroll", function() {
+        //    window.gridifier.silentRender(window.gridifier.getForSilentRender(true));
+        //});
 
         me._attachView();
         me._gridifierDynamicSettings = new DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings();
@@ -304,7 +328,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //    me._gridifierDynamicSettings._itemSizes[i].height = sizes[i].height;
         //}
 
-        me._gridifierDynamicSettings._batchSize = 25;
+        me._gridifierDynamicSettings._batchSize = 10;
+        //me._gridifierDynamicSettings._batchSize = 25;
         //me._gridifierDynamicSettings._batchSize = 3;
         var sizes = [
             //{width: "10%", height: "10%"},
@@ -317,49 +342,49 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             //{width: "10%", height: "10%"},
             //{width: "10%", height: "10%"},
             //{width: "20%", height: "20%"},
-            {width: "200px", height: "200px"},
-            {width: "100px", height: "100px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
-            {width: "200px", height: "200px"},
-            {width: "100px", height: "100px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
+            //{width: "50%", height: "25%"},
+            //{width: "50%", height: "12%"},
+            //{width: "25%", height: "12%"},
+            //{width: "12.5%", height: "25%"},
+            //{width: "200px", height: "200px"},
+            //{width: "100px", height: "100px"},
+            //{width: "50px", height: "50px"},
+            //{width: "50px", height: "50px"},
+            //{width: "50px", height: "50px"},
+            //{width: "50px", height: "50px"},
 
+            {width: "400px", height: "400px"},
             {width: "200px", height: "200px"},
-            {width: "100px", height: "100px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
+            {width: "400px", height: "400px"},
             {width: "200px", height: "200px"},
-            {width: "100px", height: "100px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
-
             {width: "200px", height: "200px"},
-            {width: "100px", height: "100px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
+            {width: "400px", height: "400px"},
+            {width: "400px", height: "400px"},
             {width: "200px", height: "200px"},
-            {width: "100px", height: "100px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
-
+            {width: "400px", height: "200px"},
             {width: "200px", height: "200px"},
-            {width: "100px", height: "100px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
-            {width: "200px", height: "200px"},
-            {width: "100px", height: "100px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
-            {width: "50px", height: "50px"},
+            //
+            //{width: "200px", height: "200px"},
+            //{width: "100px", height: "100px"},
+            //{width: "50px", height: "50px"},
+            //{width: "50px", height: "50px"},
+            //{width: "200px", height: "200px"},
+            //{width: "100px", height: "100px"},
+            //{width: "50px", height: "50px"},
+            //{width: "50px", height: "50px"},
+            //{width: "50px", height: "50px"},
+            //{width: "50px", height: "50px"},
+            //
+            //{width: "200px", height: "200px"},
+            //{width: "100px", height: "100px"},
+            //{width: "50px", height: "50px"},
+            //{width: "50px", height: "50px"},
+            //{width: "200px", height: "200px"},
+            //{width: "100px", height: "100px"},
+            //{width: "50px", height: "50px"},
+            //{width: "50px", height: "50px"},
+            //{width: "50px", height: "50px"},
+            //{width: "50px", height: "50px"},
 
 
 
@@ -748,7 +773,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             $div.get(0).innerHTML = itemGUID;
         });
 
-        me._gridifier.setSort("byColor");
+        //me._gridifier.setSort("byColor");
         me._gridifier.onInsert(function() {
             //me._gridifier.resort();
         });

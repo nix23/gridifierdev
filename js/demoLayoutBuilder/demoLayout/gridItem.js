@@ -115,15 +115,16 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
        //width: "12.5%",
        //height: 0,
        //"padding-bottom": "12.5%",
-       //width: itemSizes.width,
-        width: "20%",
-        "margin-left": "2.5%",
-        "margin-right": "2.5%",
-        "margin-top": "20px",
+       width: itemSizes.width,
+        //width: "25%",
+        //"margin-left": "2.5%",
+        //"margin-right": "2.5%",
+        //"margin-top": "20px",
         //width: "200px",
-       //height: itemSizes.height,
+       height: itemSizes.height,
        //height: 0,
        //"padding-bottom": itemSizes.height,
+        //margin: "5px",
         //height: itemHeight,
         //height: "200px",
 
@@ -173,7 +174,7 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         //"box-sizing": (isBorderBoxBoxSizing) ? "border-box" : "content-box",
         "box-sizing": "border-box",
         //"border": "3px rgb(60,60,60) solid",
-        "border": "5px white solid",
+        "border": "5px red solid",
         //margin: "10px",
 
         // "-webkit-box-shadow": "2px 2px 2px rgb(60,60,60)",
@@ -183,9 +184,21 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
 
         "color": "white",
         "font-size": "14px",
-        "font-weight": "bold"
+        "font-weight": "bold",
+        "margin": "15px",
+
+       //background: "url(img/test2.png)",
+       // "background-size": "cover",
+       // "background-repeat": "no-repeat",
+       // "background-position": "center center"
     });
     this._$gridItem.addClass(itemBgClass);
+    var res = Math.floor(Math.random()*(2-1+1)+1);
+    //if(res == 1)
+    //    var itemBgClass = "gridFirstBg";
+    //else
+    //    var itemBgClass = "gridSecondBg";
+    //this._$gridItem.addClass(itemBgClass);
 
     var res = Math.floor(Math.random()*(2-1+1)+1);
     if(res == 1) 
@@ -203,12 +216,12 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
     else
         window.num++;
 
-    if(window.num < 21)
-        $gridItemImg.attr("src", "img/hotel/" + window.num + ".jpeg");
-    else
-        $gridItemImg.attr("src", "img/hotel/" + window.num + ".jpg");
-
-    this._$gridItem.append($gridItemImg);
+    //if(window.num < 21)
+    //    $gridItemImg.attr("src", "img/hotel/" + window.num + ".jpeg");
+    //else
+    //    $gridItemImg.attr("src", "img/hotel/" + window.num + ".jpg");
+    //
+    //this._$gridItem.append($gridItemImg);
 
     $gridItemBg.css({
         position: "absolute",

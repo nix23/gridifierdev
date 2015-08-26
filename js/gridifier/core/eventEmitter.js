@@ -170,10 +170,10 @@ Gridifier.EventEmitter.prototype.emitConnectionCreateEvent = function(connection
     }
 }
 
-Gridifier.EventEmitter.prototype.emitInsertEvent = function() {
+Gridifier.EventEmitter.prototype.emitInsertEvent = function(items) {
     var emitEvent = function() {
         for(var i = 0; i < this._insertCallbacks.length; i++) {
-            this._insertCallbacks[i]();
+            this._insertCallbacks[i](items);
         }
     }
 

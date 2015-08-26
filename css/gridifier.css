@@ -236,11 +236,13 @@ body {
     cursor: not-allowed;
     background: rgb(170,170,170);
 }
-/*
+
 @media screen and ( max-width: 1200px ) {
-  .gridItem { width: 100% !important; }
+    .gridItem {
+        width: 100% !important;
+        animation-name: test;
+    }
 }
-*/
 
 .disableSelect {
     -webkit-user-select: none;  /* Chrome all / Safari all */

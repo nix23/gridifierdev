@@ -44,26 +44,35 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
                                                            transitionTiming,
                                                            animateFade) {
     var me = this;
+
     var targetLeft = connectionLeft;
     var targetTop = connectionTop;
+    var animateFadeTargetItem = null;
 
-    this._markAsToggleAnimationWithCoordsChange(item);
+    var preinitSlideout = function() {
+        this._markAsToggleAnimationWithCoordsChange(item);
 
-    if(animateFade)
-        var animateFadeTargetItem = (this._gridifier.hasItemBindedClone(item)) ? this._gridifier.getItemClone(item) : item;
+        if(animateFade)
+            animateFadeTargetItem = (this._gridifier.hasItemBindedClone(item)) ? this._gridifier.getItemClone(item) : item;
 
-    if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
-        if(animateFade) {
-            Dom.css3.transition(animateFadeTargetItem, "none");
-            Dom.css3.opacity(animateFadeTargetItem, 0);
-            Dom.css3.transition(animateFadeTargetItem, "");
+        if(!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
+            if(animateFade) {
+                Dom.css3.transition(animateFadeTargetItem, "none");
+                Dom.css3.opacity(animateFadeTargetItem, 0);
+                Dom.css3.transition(animateFadeTargetItem, "");
+            }
+            coordsChanger(
+                item, startLeft, startTop, 0, eventEmitter, false, false, false, false, transitionTiming
+            );
+
+            item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
         }
-        coordsChanger(
-            item, startLeft, startTop, 0, eventEmitter, false, false, false, false, transitionTiming
-        );
-
-        item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
     }
+
+    var preinitSlideoutTimeout = setTimeout(function() {
+        preinitSlideout.call(me);
+    }, 0);
+    timeouter.add(item, preinitSlideoutTimeout);
 
     // Setting translated position after 0ms call requires a little delay
     // per browsers repaint(Also it should be enough to propogate NIS item align(20ms))

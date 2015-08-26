@@ -230,7 +230,9 @@ var Gridifier = function(grid, settings) {
     };
 
     this._unbindEvents = function() {
-        Event.remove(window, "resize");
+        Event.remove(window, "resize", me._resizeEventHandler);
+        if(me.isDragifierEnabled())
+            me.disableDragifier();
     };
 
     this.destruct = function() {
@@ -540,25 +542,28 @@ Gridifier.prototype.setRetransformQueueBatchTimeout = function(newBatchTimeout) 
 
 Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
     if(this._settings.shouldResolveImages()) {
+        if(this._settings.isMirroredPrepend())
+            var resolverOperation = Gridifier.ImagesResolver.OPERATIONS.INSERT_BEFORE;
+        else
+            var resolverOperation = Gridifier.ImagesResolver.OPERATIONS.PREPEND;
+
         this._imagesResolver.scheduleImagesResolve(
             this._collector.toDOMCollection(items),
-            Gridifier.ImagesResolver.OPERATIONS.PREPEND,
-            {batchSize: batchSize, batchTimeout: batchTimeout}
+            resolverOperation,
+            {batchSize: batchSize, batchTimeout: batchTimeout, beforeItem: null}
         );
     }
     else {
-        this.executePrepend(items, batchSize, batchTimeout);
+        if(this._settings.isMirroredPrepend())
+            this.insertBefore(items, null, batchSize, batchTimeout);
+        else
+            this.executePrepend(items, batchSize, batchTimeout);
     }
 
     return this;
 }
 
 Gridifier.prototype.executePrepend = function(items, batchSize, batchTimeout) {
-    if(this._settings.isMirroredPrepend()) {
-        this.insertBefore(items, null, batchSize, batchTimeout);
-        return this;
-    }
-
     this._lifecycleCallbacks.executePreInsertCallbacks(items);
     var execute = function() {
         this._operationsQueue.schedulePrependOperation(items, batchSize, batchTimeout);

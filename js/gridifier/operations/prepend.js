@@ -68,7 +68,7 @@ Gridifier.Operations.Prepend.prototype.execute = function(items) {
 
     this._sizesResolverManager.stopCachingTransaction();
     this._gridSizesUpdater.scheduleGridSizesUpdate();
-    this._eventEmitter.emitInsertEvent();
+    this._eventEmitter.emitInsertEvent(items);
 }
 
 Gridifier.Operations.Prepend.prototype._prepend = function(item) {
