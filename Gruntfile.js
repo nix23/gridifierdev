@@ -32,8 +32,8 @@ module.exports = function(grunt) {
             "connectors", "connectorsIntersector", "connectorsNormalizer", "connectorsShifter", "transformerConnectors"
         ]},
         {"/core/": [
-            "collector", "connectedItemMarker", "disconnector", "eventEmitter", "filtrator", "guid", "itemClonesManager",
-            "iterator", "lifecycleCallbacks", "normalizer", "operation", "resorter", "responsiveClassesManager",
+            "collector", "connectedItemMarker", "disconnector", "eventEmitter", "filtrator", "guid",
+            "iterator", "normalizer", "operation", "resorter", "responsiveClassesManager",
             "sizesResolverManager"
         ]},
         {"/discretizer/": ["discretizer", "horizontalCore", "verticalCore", "demonstrator"]},

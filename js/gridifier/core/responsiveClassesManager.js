@@ -1,4 +1,4 @@
-Gridifier.ResponsiveClassesManager = function(gridifier, settings, collector, guid, eventEmitter, itemClonesManager) {
+Gridifier.ResponsiveClassesManager = function(gridifier, settings, collector, guid, eventEmitter) {
     var me = this;
 
     this._gridifier = null;
@@ -6,7 +6,6 @@ Gridifier.ResponsiveClassesManager = function(gridifier, settings, collector, gu
     this._collector = null;
     this._guid = null;
     this._eventEmitter = null;
-    this._itemClonesManager = null;
 
     this._eventsData = [];
 
@@ -19,7 +18,6 @@ Gridifier.ResponsiveClassesManager = function(gridifier, settings, collector, gu
         me._collector = collector;
         me._guid = guid;
         me._eventEmitter = eventEmitter;
-        me._itemClonesManager = itemClonesManager;
     };
 
     this._bindEvents = function() {
@@ -80,7 +78,7 @@ Gridifier.ResponsiveClassesManager.prototype.emitTransformEvents = function(conn
 }
 
 Gridifier.ResponsiveClassesManager.prototype.toggleResponsiveClasses = function(maybeItem, className) {
-    var items = this._itemClonesManager.unfilterClones(maybeItem);
+    var items = this._collector.toDOMCollection(maybeItem);
     this._collector.ensureAllItemsAreConnectedToGrid(items);
 
     if(!Dom.isArray(className))
@@ -89,11 +87,6 @@ Gridifier.ResponsiveClassesManager.prototype.toggleResponsiveClasses = function(
         var classNames = className;
 
     for(var i = 0; i < items.length; i++) {
-        if(this._gridifier.hasItemBindedClone(items[i]))
-            var itemClone = this._gridifier.getItemClone(items[i]);
-        else
-            var itemClone = null;
-
         var addedClasses = [];
         var removedClasses = [];
 
@@ -101,16 +94,10 @@ Gridifier.ResponsiveClassesManager.prototype.toggleResponsiveClasses = function(
             if(Dom.css.hasClass(items[i], classNames[j])) {
                 removedClasses.push(classNames[j]);
                 Dom.css.removeClass(items[i], classNames[j]);
-
-                if(itemClone != null)
-                    Dom.css.removeClass(itemClone, classNames[j]);
             }
             else {
                 addedClasses.push(classNames[j]);
                 Dom.css.addClass(items[i], classNames[j]);
-
-                if(itemClone != null)
-                    Dom.css.addClass(itemClone, classNames[j]);
             }
         }
 
@@ -121,7 +108,7 @@ Gridifier.ResponsiveClassesManager.prototype.toggleResponsiveClasses = function(
 }
 
 Gridifier.ResponsiveClassesManager.prototype.addResponsiveClasses = function(maybeItem, className) {
-    var items = this._itemClonesManager.unfilterClones(maybeItem);
+    var items = this._collector.toDOMCollection(maybeItem);
     this._collector.ensureAllItemsAreConnectedToGrid(items);
 
     if(!Dom.isArray(className))
@@ -130,20 +117,12 @@ Gridifier.ResponsiveClassesManager.prototype.addResponsiveClasses = function(may
         var classNames = className;
 
     for(var i = 0; i < items.length; i++) {
-        if(this._gridifier.hasItemBindedClone(items[i]))
-            var itemClone = this._gridifier.getItemClone(items[i]);
-        else
-            var itemClone = null;
-
         var addedClasses = [];
 
         for(var j = 0; j < classNames.length; j++) {
             if(!Dom.css.hasClass(items[i], classNames[j])) {
                 addedClasses.push(classNames[j]);
                 Dom.css.addClass(items[i], classNames[j]);
-
-                if(itemClone != null)
-                    Dom.css.addClass(itemClone, className[j]);
             }
         }
 
@@ -154,7 +133,7 @@ Gridifier.ResponsiveClassesManager.prototype.addResponsiveClasses = function(may
 }
 
 Gridifier.ResponsiveClassesManager.prototype.removeResponsiveClasses = function(maybeItem, className) {
-    var items = this._itemClonesManager.unfilterClones(maybeItem);
+    var items = this._collector.toDOMCollection(maybeItem);
     this._collector.ensureAllItemsAreConnectedToGrid(items);
 
     if(!Dom.isArray(className))
@@ -163,20 +142,12 @@ Gridifier.ResponsiveClassesManager.prototype.removeResponsiveClasses = function(
         var classNames = className;
 
     for(var i = 0; i < items.length; i++) {
-        if(this._gridifier.hasItemBindedClone(items[i]))
-            var itemClone = this._gridifier.getItemClone(items[i]);
-        else
-            var itemClone = null;
-
         var removedClasses = [];
 
         for(var j = 0; j < classNames.length; j++) {
             if(Dom.css.hasClass(items[i], classNames[j])) {
                 removedClasses.push(classNames[j]);
                 Dom.css.removeClass(items[i], classNames[j]);
-
-                if(itemClone != null)
-                    Dom.css.removeClass(itemClone, classNames[j]);
             }
         }
 

@@ -150,12 +150,6 @@ Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._initDraggable
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype._hideDraggableItem = function() {
     this._draggableItem.style.visibility = "hidden";
     this._draggableItem.setAttribute(Gridifier.Dragifier.IS_DRAGGABLE_ITEM_DATA_ATTR, "yes");
-
-    var itemClonesManager = this._gridifier.getItemClonesManager();
-    if(itemClonesManager.hasBindedClone(this._draggableItem)) {
-        var draggableItemRendererClone = itemClonesManager.getBindedClone(this._draggableItem);
-        draggableItemRendererClone.style.visibility = "hidden";
-    }
 }
 
 Gridifier.Dragifier.ConnectionIntersectionDraggableItem.prototype.processDragMove = function(cursorX, cursorY) {

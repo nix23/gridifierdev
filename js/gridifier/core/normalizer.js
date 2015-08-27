@@ -188,11 +188,6 @@ Gridifier.Normalizer.prototype.bindZIndexesUpdates = function() {
                     var connection = packedByAreasConnections[areaProps[i]][j];
                     connection.item.style.zIndex = nextItemZIndex;
 
-                    if(me._gridifier.hasItemBindedClone(connection.item)) {
-                        var itemClone = me._gridifier.getItemClone(connection.item);
-                        itemClone.style.zIndex = nextItemZIndex - 1;
-                    }
-
                     nextItemZIndex++;
                 }
             }

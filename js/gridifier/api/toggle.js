@@ -271,8 +271,6 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                     return;
                 }
 
-                itemClonesManager.lockCloneOnToggle(item);
-
                 if(coordsChangerApi.hasTranslateOrTranslate3DTransformSet(item)) {
                     coordsChangerApi.setTransformOriginAccordingToCurrentTranslate(
                         item,
@@ -302,7 +300,6 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 timeouter.add(item, initScaleTimeout);
 
                 var completeScaleTimeout = setTimeout(function () {
-                    itemClonesManager.unlockCloneOnToggle(item);
                     coordsChangerApi.resetTransformOrigin(item);
 
                     item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
@@ -330,8 +327,6 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                     eventEmitter.emitHideEvent(item);
                     return;
                 }
-
-                itemClonesManager.lockCloneOnToggle(item);
 
                 if(coordsChangerApi.hasTranslateOrTranslate3DTransformSet(item)) {
                     coordsChangerApi.setTransformOriginAccordingToCurrentTranslate(
@@ -367,8 +362,6 @@ Gridifier.Api.Toggle.prototype._addScale = function() {
                 timeouter.add(item, prehideItemTimeout);
 
                 var completeScaleTimeout = setTimeout(function () {
-                    itemClonesManager.unlockCloneOnToggle(item).hideCloneOnToggle(item);
-
                     item.style.visibility = "hidden";
                     Dom.css3.transition(item, "none");
                     Dom.css3.transformProperty(item, "scale3d", "1,1,1");
@@ -435,8 +428,6 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
                 return;
             }
 
-            itemClonesManager.lockCloneOnToggle(item);
-
             if (!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
                 Dom.css3.transition(item, "none");
                 Dom.css3.opacity(item, "0");
@@ -454,7 +445,6 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
             timeouter.add(item, initFadeTimeout);
 
             var completeFadeTimeout = setTimeout(function() {
-                itemClonesManager.unlockCloneOnToggle(item);
                 item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
                 eventEmitter.emitShowEvent(item);
             }, animationMsDuration + 60);
@@ -481,7 +471,6 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
                 return;
             }
 
-            itemClonesManager.lockCloneOnToggle(item);
             Dom.css3.transition(
                 item,
                 Prefixer.getForCSS('opacity', item) + " " + animationMsDuration + "ms " + transitionTiming
@@ -491,7 +480,6 @@ Gridifier.Api.Toggle.prototype._addFade = function() {
             Dom.css3.opacity(item, "0");
 
             var executeFadeOutTimeout = setTimeout(function () {
-                itemClonesManager.unlockCloneOnToggle(item).hideCloneOnToggle(item);
                 item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
                 item.style.visibility = "hidden";
 

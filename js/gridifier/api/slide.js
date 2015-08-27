@@ -53,7 +53,7 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
         this._markAsToggleAnimationWithCoordsChange(item);
 
         if(animateFade)
-            animateFadeTargetItem = (this._gridifier.hasItemBindedClone(item)) ? this._gridifier.getItemClone(item) : item;
+            animateFadeTargetItem = item;
 
         if(!item.hasAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING)) {
             if(animateFade) {
@@ -77,8 +77,7 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
     // Setting translated position after 0ms call requires a little delay
     // per browsers repaint(Also it should be enough to propogate NIS item align(20ms))
     var slideOutTimeout = setTimeout(function() {
-        if(!me._gridifier.hasItemBindedClone(item))
-            item.style.visibility = "visible";
+        item.style.visibility = "visible";
 
         if(animateFade) {
             Dom.css3.transitionProperty(
@@ -97,12 +96,6 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
         me._unmarkAsToggleAnimationWithCoordsChange(item);
         item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING);
         eventEmitter.emitShowEvent(item);
-
-        if(me._gridifier.hasItemBindedClone(item)) {
-            coordsChanger(
-                item, item.style.left, item.style.top, 0, eventEmitter, false, false, false, false, transitionTiming
-            );
-        }
     }, animationMsDuration + 60);
     timeouter.add(item, completeSlideOutTimeout);
 }
@@ -124,7 +117,7 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
     this._markAsToggleAnimationWithCoordsChange(item);
 
     if(animateFade) {
-        var animateFadeTargetItem = (this._gridifier.hasItemBindedClone(item)) ? this._gridifier.getItemClone(item) : item;
+        var animateFadeTargetItem = item;
         Dom.css3.transition(
             animateFadeTargetItem,
             Prefixer.getForCSS('opacity', animateFadeTargetItem) + " " + animationMsDuration + "ms " + transitionTiming
@@ -140,11 +133,6 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
     var me = this;
     var prehideTimeout = setTimeout(function() {
         item.style.visibility = "hidden";
-
-        if(me._gridifier.hasItemBindedClone(item)) {
-            var itemClone = me._gridifier.getItemClone(item);
-            itemClone.style.visibility = "hidden";
-        }
     }, animationMsDuration);
     timeouter.add(item, prehideTimeout);
 
@@ -169,20 +157,10 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
 
 Gridifier.Api.Slide.prototype._markAsToggleAnimationWithCoordsChange = function(item) {
     item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_WITH_COORDS_CHANGE_RUNNING, "yes");
-    if(this._gridifier.hasItemBindedClone(item)) {
-        this._gridifier.getItemClone(item).setAttribute(
-            Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_WITH_COORDS_CHANGE_RUNNING, "yes"
-        );
-    }
 }
 
 Gridifier.Api.Slide.prototype._unmarkAsToggleAnimationWithCoordsChange = function(item) {
     item.removeAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_WITH_COORDS_CHANGE_RUNNING);
-    if(this._gridifier.hasItemBindedClone(item)) {
-        this._gridifier.getItemClone(item).removeAttribute(
-            Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_WITH_COORDS_CHANGE_RUNNING
-        );
-    }
 }
 
 Gridifier.Api.Slide.prototype.createHorizontalSlideToggler = function(alignTop, alignBottom, reverseDirection, animateFade) {

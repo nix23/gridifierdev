@@ -138,7 +138,6 @@ Gridifier.Api.Rotate.prototype._rotate = function(item,
         Dom.css.addClass(scene, Gridifier.Api.Rotate.ROTATE_ITEM_SCENE_CLASS_PREFIX + this._nextRotateItemGUID);
 
         item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
-        itemClonesManager.lockCloneOnToggle(item);
         frontFrame = this._createFrontFrame(frames, rotateProp, rotateMatrix, isShowing, isHiding);
         backFrame = this._createBackFrame(frames, rotateProp, rotateMatrix, isShowing, isHiding);
 
@@ -217,12 +216,10 @@ Gridifier.Api.Rotate.prototype._rotate = function(item,
         item.removeAttribute(Gridifier.Api.Rotate.ROTATE_ITEM_GUID_DATA_ATTR);
 
         if(isShowing) {
-            itemClonesManager.unlockCloneOnToggle(item);
             item.style.visibility = "visible";
             me._eventEmitter.emitShowEvent(item);
         }
         else if(isHiding) {
-            itemClonesManager.unlockCloneOnToggle(item).hideCloneOnToggle(item);
             item.style.visibility = "hidden";
             me._eventEmitter.emitHideEvent(item);
         }

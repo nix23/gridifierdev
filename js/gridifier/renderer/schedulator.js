@@ -168,16 +168,6 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 left: left,
                 top: top
             });
-
-            if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
-               var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
-
-               Dom.css.set(itemClone, {
-                  position: "absolute",
-                  left: left,
-                  top: top
-               });
-            }
             
             var toggleFunction = this._settings.getToggle();
             var toggleTimeouter = this._settings.getToggleTimeouter();
@@ -187,7 +177,6 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var coordsChanger = this._settings.getCoordsChanger();
             var collector = this._settings.getCollector();
             var coordsChangerApi = this._settings.getCoordsChangerApi();
-            var itemClonesManager = this._gridifier.getItemClonesManager();
             var toggleTransitionTiming = this._settings.getToggleTransitionTiming();
 
             var showItem = function(item) {
@@ -203,7 +192,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                     left,
                     top,
                     coordsChangerApi,
-                    itemClonesManager,
+                    null,
                     toggleTransitionTiming
                 );
             };
@@ -213,13 +202,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             // Scale always should be first(otherwise animation will break), translates should be also
             // setted up with SINGLE rule at start. Thus, they can be overriden later. Otherwise,
             // animation will break.
-            if(this._gridifier.hasItemBindedClone(connectionToProcess.item)) {
-                var itemClone = this._gridifier.getItemClone(connectionToProcess.item);
-                coordsChanger(itemClone, left, top, animationMsDuration, eventEmitter, false, false, false, true);
-            }
-            else {
-                coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter, false, false, false, true);
-            }
+            coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter, false, false, false, true);
 
             eventEmitter.emitBeforeShowPerRetransformSortEvent();
             showItem(connectionToProcess.item);
@@ -235,7 +218,6 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             var coordsChanger = this._settings.getCoordsChanger();
             var collector = this._settings.getCollector();
             var coordsChangerApi = this._settings.getCoordsChangerApi();
-            var itemClonesManager = this._gridifier.getItemClonesManager();
             var toggleTransitionTiming = this._settings.getToggleTransitionTiming();
 
             var hideItem = function(item) {
@@ -251,7 +233,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                     left,
                     top,
                     coordsChangerApi,
-                    itemClonesManager,
+                    null,
                     toggleTransitionTiming
                 );
             };

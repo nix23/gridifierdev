@@ -12,8 +12,6 @@ var Gridifier = function(grid, settings) {
     this._filtrator = null;
     this._disconnector = null;
     this._sizesResolverManager = null;
-    this._lifecycleCallbacks = null;
-    this._itemClonesManager = null;
     this._responsiveClassesManager = null;
     this._imagesResolver = null;
 
@@ -57,7 +55,6 @@ var Gridifier = function(grid, settings) {
 
         me._normalizer = new Gridifier.Normalizer(me, me._sizesResolverManager);
         me._operation = new Gridifier.Operation();
-        me._lifecycleCallbacks = new Gridifier.LifecycleCallbacks(me._collector);
 
         me._grid.setCollectorInstance(me._collector);
 
@@ -82,9 +79,8 @@ var Gridifier = function(grid, settings) {
             );
         }
 
-        me._itemClonesManager = new Gridifier.ItemClonesManager(me._grid, me._collector, me._connections, me._sizesResolverManager);
         me._responsiveClassesManager = new Gridifier.ResponsiveClassesManager(
-            me, me._settings, me._collector, me._guid, me._eventEmitter, me._itemClonesManager
+            me, me._settings, me._collector, me._guid, me._eventEmitter
         );
 
         me._iterator = new Gridifier.Iterator(
@@ -398,9 +394,8 @@ Gridifier.prototype.shift = function() {
 Gridifier.prototype.disconnect = function(items) {
     var me = this;
 
-    items = me._itemClonesManager.unfilterClones(items);
+    items = me._collector.toDOMCollection(items)
     items = me._collector.filterOnlyConnectedItems(items);
-    me._lifecycleCallbacks.executePreDisconnectCallbacks(items);
 
     var execute = function() {
         this._sizesTransformer.stopRetransformAllConnectionsQueue();
@@ -564,7 +559,6 @@ Gridifier.prototype.prepend = function(items, batchSize, batchTimeout) {
 }
 
 Gridifier.prototype.executePrepend = function(items, batchSize, batchTimeout) {
-    this._lifecycleCallbacks.executePreInsertCallbacks(items);
     var execute = function() {
         this._operationsQueue.schedulePrependOperation(items, batchSize, batchTimeout);
     }
@@ -591,8 +585,6 @@ Gridifier.prototype.append = function(items, batchSize, batchTimeout) {
 }
 
 Gridifier.prototype.executeAppend = function(items, batchSize, batchTimeout) {
-    this._lifecycleCallbacks.executePreInsertCallbacks(items);
-
     var execute = function() {
         this._operationsQueue.scheduleAppendOperation(items, batchSize, batchTimeout);
     }
@@ -650,8 +642,6 @@ Gridifier.prototype.insertBefore = function(items, beforeItem, batchSize, batchT
 }
 
 Gridifier.prototype.executeInsertBefore = function(items, beforeItem, batchSize, batchTimeout) {
-    this._lifecycleCallbacks.executePreInsertCallbacks(items);
-
     var execute = function() {
         this._operationsQueue.scheduleInsertBeforeOperation(
             items, beforeItem, batchSize, batchTimeout
@@ -680,8 +670,6 @@ Gridifier.prototype.insertAfter = function(items, afterItem, batchSize, batchTim
 }
 
 Gridifier.prototype.executeInsertAfter = function(items, afterItem, batchSize, batchTimeout) {
-    this._lifecycleCallbacks.executePreInsertCallbacks(items);
-
     var execute = function() {
         this._operationsQueue.scheduleInsertAfterOperation(
             items, afterItem, batchSize, batchTimeout
@@ -796,72 +784,6 @@ Gridifier.prototype.isItemConnected = function(item) {
     return this._collector.isItemConnected(item);
 }
 
-Gridifier.prototype.addPreInsertLifecycleCallback = function(callback) {
-    this._lifecycleCallbacks.addPreInsertCallback(callback);
-    return this;
-}
-
-Gridifier.prototype.addPreDisconnectLifecycleCallback = function(callback) {
-    this._lifecycleCallbacks.addPreDisconnectCallback(callback);
-    return this;
-}
-
-Gridifier.prototype.setItemClonesManagerLifecycleCallbacks = function() {
-    var me = this;
-    this.addPreInsertLifecycleCallback(function(items) {
-        for(var i = 0; i < items.length; i++) {
-            me._itemClonesManager.createClone(items[i]);
-        }
-    });
-
-    this.addPreDisconnectLifecycleCallback(function(items) {
-        // Clone delete should happen after toggle finish.
-        // (Otherwise it will hide instantly).
-        setTimeout(function() {
-            for(var i = 0; i < items.length; i++) {
-                me._itemClonesManager.destroyClone(items[i]);
-            }
-        }, me._settings.getToggleAnimationMsDuration());
-    });
-
-    return this;
-}
-
-Gridifier.prototype.getItemClonesManager = function() {
-    return this._itemClonesManager;
-}
-
-Gridifier.prototype.hasItemBindedClone = function(item) {
-    var items = this._collector.toDOMCollection(item);
-    var item = items[0];
-
-    return this._itemClonesManager.hasBindedClone(item);
-}
-
-Gridifier.prototype.isItemClone = function(item) {
-    var items = this._collector.toDOMCollection(item);
-    var item = items[0];
-
-    return this._itemClonesManager.isItemClone(item);
-}
-
-Gridifier.prototype.getItemClone = function(item) {
-    var items = this._collector.toDOMCollection(item);
-    var item = items[0];
-
-    if(!this._itemClonesManager.hasBindedClone(item))
-        new Error("Gridifier error: item has no binded clone.(Wrong item?). Item = ", item);
-
-    return this._itemClonesManager.getBindedClone(item);
-}
-
-Gridifier.prototype.getOriginalItemFromClone = function(itemClone) {
-    var items = this._collector.toDOMCollection(itemClone);
-    var item = items[0];
-
-    return this._itemClonesManager.getOriginalItemFromClone(item);
-}
-
 Gridifier.prototype.getConnectedItems = function() {
     var connections = this._connections.get();
     var items = [];
@@ -870,18 +792,6 @@ Gridifier.prototype.getConnectedItems = function() {
         items.push(connections[i].item);
 
     return items;
-}
-
-Gridifier.prototype.hasConnectedItemAtPoint = function(x, y) {
-    var itemAtPoint = this._itemClonesManager.getConnectionItemAtPoint(x, y);
-    if(itemAtPoint == null)
-        return false;
-
-    return true;
-}
-
-Gridifier.prototype.getConnectedItemAtPoint = function(x, y) {
-    return this._itemClonesManager.getConnectionItemAtPoint(x, y);
 }
 
 Gridifier.prototype.setToggle = Gridifier.prototype.toggleBy;

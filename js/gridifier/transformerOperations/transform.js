@@ -83,9 +83,6 @@ Gridifier.TransformerOperations.Transform.prototype._parseTransformationData = f
     /* @system-log-end */
 
     for(var i = 0; i < itemsToTransform.length; i++) {
-        if(this._gridifier.isItemClone(itemsToTransform[i]))
-            continue;
-
         var connectionToTransform = this._connections.findConnectionByItem(itemsToTransform[i]);
         var targetSizesToTransform = null;
 
