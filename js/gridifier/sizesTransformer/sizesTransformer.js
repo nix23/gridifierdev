@@ -31,12 +31,8 @@ Gridifier.SizesTransformer.Core = function(gridifier,
     this._connectorsSelector = null;
     this._transformerConnectors = null;
 
-    this._transformedConnectionsSorter = null;
-    this._itemNewPxSizesFinder = null;
-    this._transformedItemMarker = null;
     this._itemsToReappendFinder = null;
     this._itemsReappender = null;
-    this._emptySpaceNormalizer = null;
 
     this._css = {
     };
@@ -69,13 +65,6 @@ Gridifier.SizesTransformer.Core = function(gridifier,
 
         me._connectorsSelector = new Gridifier.VerticalGrid.ConnectorsSelector(me._guid);
 
-        me._transformedConnectionsSorter = new Gridifier.SizesTransformer.TransformedConnectionsSorter(
-            me._connectionsSorter
-        );
-        me._itemNewPxSizesFinder = new Gridifier.SizesTransformer.ItemNewPxSizesFinder(
-            me._gridifier, me._collector, me._connections, me._sizesResolverManager
-        );
-        me._transformedItemMarker = new Gridifier.SizesTransformer.TransformedItemMarker();
         me._itemsToReappendFinder = new Gridifier.SizesTransformer.ItemsToReappendFinder(
             me._connections, me._connectionsSorter, me._settings
         );
@@ -91,12 +80,7 @@ Gridifier.SizesTransformer.Core = function(gridifier,
             me._normalizer,
             me,
             me._connectorsCleaner,
-            me._transformedItemMarker,
             me._operation
-        );
-
-        me._emptySpaceNormalizer = new Gridifier.SizesTransformer.EmptySpaceNormalizer(
-            me._connections, me._connectors, me._settings
         );
 
         me._itemsReappender = new Gridifier.SizesTransformer.ItemsReappender(
@@ -110,8 +94,6 @@ Gridifier.SizesTransformer.Core = function(gridifier,
             me._transformerConnectors,
             me._settings, 
             me._guid,
-            me._transformedItemMarker,
-            me._emptySpaceNormalizer,
             me._sizesResolverManager,
             me._eventEmitter
         );
@@ -140,54 +122,6 @@ Gridifier.SizesTransformer.Core.prototype.isTransformerQueueEmpty = function() {
 
 Gridifier.SizesTransformer.Core.prototype.getQueuedConnectionsPerTransform = function() {
     return this._itemsReappender.getQueuedConnectionsPerTransform();
-}
-
-Gridifier.SizesTransformer.Core.prototype.transformConnectionSizes = function(transformationData) {
-    transformationData = this._transformedConnectionsSorter.sortTransformedConnections(
-        transformationData
-    );
-    transformationData = this._itemNewPxSizesFinder.calculateNewPxSizesPerAllTransformedItems(
-        transformationData
-    );
-
-    // Timeout is required here because of DOM-tree changes inside transformed item clones creation.
-    // (Optimizing getComputedStyle after reflow performance)
-    var applyTransform = function() {
-        this._guid.unmarkAllPrependedItems();
-        this._transformedItemMarker.markEachConnectionItemWithTransformData(transformationData);
-
-        var connectionsToReappend = [];
-        if(!this._itemsReappender.isReappendQueueEmpty()) {
-            var currentQueueState = this._itemsReappender.stopReappendingQueuedItems();
-
-            for(var i = 0; i < currentQueueState.reappendQueue.length; i++) {
-                var queuedConnection = currentQueueState.reappendQueue[i].connectionToReappend;
-                if(queuedConnection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT])
-                    continue;
-
-                connectionsToReappend.push(queuedConnection);
-            }
-        }
-
-        var itemsToReappendData = this._itemsToReappendFinder.findAllOnSizesTransform(
-            connectionsToReappend, transformationData[0].connectionToTransform
-        );
-
-        var itemsToReappend = itemsToReappendData.itemsToReappend;
-        var connectionsToReappend = itemsToReappendData.connectionsToReappend;
-        var firstConnectionToReappend = itemsToReappendData.firstConnectionToReappend;
-        
-        this._transformedItemMarker.markAllTransformDependedItems(itemsToReappend);
-        this._transformerConnectors.recreateConnectorsPerFirstItemReappendOnTransform(
-            itemsToReappend[0], firstConnectionToReappend
-        );
-
-        this._itemsReappender.createReappendQueue(itemsToReappend, connectionsToReappend);
-        this._itemsReappender.startReappendingQueuedItems();
-    }
-
-    var me = this;
-    setTimeout(function() { applyTransform.call(me); }, 0);
 }
 
 Gridifier.SizesTransformer.Core.prototype.stopRetransformAllConnectionsQueue = function() {
@@ -265,7 +199,6 @@ Gridifier.SizesTransformer.Core.prototype.retransformAllConnections = function()
                 connections.push(connectionsToKeep[i]);
         }
 
-        this._transformedItemMarker.markAllTransformDependedItems(itemsToReappend);
         this._transformerConnectors.recreateConnectorsPerFirstItemReappendOnTransform(
             firstConnectionToReappend.item, firstConnectionToReappend
         );
@@ -274,43 +207,7 @@ Gridifier.SizesTransformer.Core.prototype.retransformAllConnections = function()
         this._itemsReappender.startReappendingQueuedItems();
     }
 
-    var wereItemSizesSyncs = this._syncAllScheduledToTransformItemSizes(connections);
-    if(!wereItemSizesSyncs) {
-        applyRetransform.call(this);
-    }
-    // Timeout is required here because of DOM-tree changes inside transformed item clones creation.
-    // (Optimizing getComputedStyle after reflow performance)
-    else {
-        var me = this;
-        setTimeout(function() { applyRetransform.call(me); }, 0);
-    }
-}
-
-// Sync is required, because scheduled connection to transform may has changed % sizes after resizes.
-Gridifier.SizesTransformer.Core.prototype._syncAllScheduledToTransformItemSizes = function(connections) {
-    var transformationData = [];
-    for(var i = 0; i < connections.length; i++) {
-        if(this._transformedItemMarker.isTransformedItem(connections[i].item)) {
-            var rawSizes = this._transformedItemMarker.getTransformedItemTargetRawSizes(
-                connections[i].item
-            );
-            transformationData.push({
-                connectionToTransform: connections[i],
-                widthToTransform: rawSizes.targetRawWidth,
-                heightToTransform: rawSizes.targetRawHeight
-            });
-        }
-    }
-
-    if(transformationData.length == 0)
-        return false;
-
-    transformationData = this._itemNewPxSizesFinder.calculateNewPxSizesPerAllTransformedItems(
-        transformationData
-    );
-    this._transformedItemMarker.markEachConnectionItemWithTransformData(transformationData);
-
-    return true;
+    applyRetransform.call(this);
 }
 
 // This method has no async actions before starting the queue.
@@ -339,8 +236,7 @@ Gridifier.SizesTransformer.Core.prototype.retransformFrom = function(firstConnec
     var itemsToReappend = itemsToReappendData.itemsToReappend;
     var connectionsToReappend = itemsToReappendData.connectionsToReappend;
     var firstConnectionToReappend = itemsToReappendData.firstConnectionToReappend;
-    
-    this._transformedItemMarker.markAllTransformDependedItems(itemsToReappend);
+
     this._transformerConnectors.recreateConnectorsPerFirstItemReappendOnTransform(
         itemsToReappend[0], firstConnectionToReappend
     );
@@ -400,7 +296,6 @@ Gridifier.SizesTransformer.Core.prototype.retransformFromFirstSortedConnection =
     var connectionsToReappend = itemsToReappendData.connectionsToReappend;
     var firstConnectionToReappend = itemsToReappendData.firstConnectionToReappend;
 
-    this._transformedItemMarker.markAllTransformDependedItems(itemsToReappend);
     this._transformerConnectors.recreateConnectorsPerFirstItemReappendOnTransform(
         itemsToReappend[0], firstConnectionToReappend
     );

@@ -8,7 +8,6 @@ Gridifier.TransformerConnectors = function(gridifier,
                                            normalizer,
                                            sizesTransformer,
                                            connectorsCleaner,
-                                           transformedItemMarker,
                                            operation) {
     var me = this;
 
@@ -23,7 +22,6 @@ Gridifier.TransformerConnectors = function(gridifier,
     this._sizesTransformer = null;
 
     this._connectorsCleaner = null;
-    this._transformedItemMarker = null;
     this._itemsReappender = null;
     this._operation = null;
 
@@ -41,7 +39,6 @@ Gridifier.TransformerConnectors = function(gridifier,
         me._normalizer = normalizer;
         me._sizesTransformer = sizesTransformer;
         me._connectorsCleaner = connectorsCleaner;
-        me._transformedItemMarker = transformedItemMarker;
         me._operation = operation;
     };
 

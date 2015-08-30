@@ -250,50 +250,6 @@ Gridifier.ApiSettingsParser.prototype.parseCoordsChangerOptions = function(coord
     }
 }
 
-Gridifier.ApiSettingsParser.prototype.parseSizesChangerOptions = function(sizesChangerApi) {
-    if(!this._settings.hasOwnProperty("sizesChanger")) {
-        sizesChangerApi.setSizesChangerFunction("default");
-        return;
-    }
-
-    if(typeof this._settings.sizesChanger == "string" || this._settings.sizesChanger instanceof String) {
-        sizesChangerApi.setSizesChangerFunction(this._settings.sizesChanger);
-        return;
-    }
-    else if(typeof this._settings.sizesChanger == "function") {
-        sizesChangerApi.addSizesChangerFunction("clientDefault", this._settings.sizesChanger);
-        sizesChangerApi.setSizesChangerFunction("clientDefault");
-        return;
-    }
-    else if(typeof this._settings.sizesChanger == "object") {
-        for(var sizesChangerFunctionName in this._settings.sizesChanger) {
-            if(sizesChangerFunctionName == Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER) continue;
-            var sizesChangerFunction = this._settings.sizesChanger[sizesChangerFunctionName];
-
-            if(typeof sizesChangerFunction != "function") {
-                new Gridifier.Error(
-                    Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_ONE_OF_SIZES_CHANGER_FUNCTION_TYPES,
-                    sizesChangerFunction
-                );
-            }
-
-            sizesChangerApi.addSizesChangerFunction(sizesChangerFunctionName, sizesChangerFunction);
-        }
-
-        if(this._settings.sizesChanger.hasOwnProperty(Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER))
-            sizesChangerApi.setSizesChangerFunction(this._settings.sizesChanger[Gridifier.ApiSettingsParser.INITIAL_SETTING_MARKER]);
-        else
-            sizesChangerApi.setSizesChangerFunction("default");
-        return;
-    }
-    else {
-        new Gridifier.Error(
-            Gridifier.Error.ERROR_TYPES.SETTINGS.INVALID_SIZES_CHANGER_PARAM_VALUE,
-            this._settings.sizesChanger
-        );
-    }
-}
-
 Gridifier.ApiSettingsParser.prototype.parseDraggableItemDecoratorOptions = function(dragifierApi) {
     if(!this._settings.hasOwnProperty("draggableItemDecorator") && !this._settings.hasOwnProperty("dragDecorator")) {
         dragifierApi.setDraggableItemDecoratorFunction("cloneCSS");

@@ -50,7 +50,6 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
             errorType == errors.INVALID_ONE_OF_RETRANSFORM_SORT_FUNCTION_TYPES ||
             errorType == errors.INVALID_ONE_OF_FILTER_FUNCTION_TYPES ||
             errorType == errors.INVALID_ONE_OF_COORDS_CHANGER_FUNCTION_TYPES ||
-            errorType == errors.INVALID_ONE_OF_SIZES_CHANGER_FUNCTION_TYPES ||
             errorType == errors.INVALID_ONE_OF_DRAGGABLE_ITEM_DECORATOR_FUNCTION_TYPES) {
         this._markAsApiSettingsError();
 
@@ -66,9 +65,6 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         else if(errorType == errors.INVALID_ONE_OF_COORDS_CHANGER_FUNCTION_TYPES) {
             var paramName = "coordsChanger";
         }
-        else if(errorType == errors.INVALID_ONE_OF_SIZES_CHANGER_FUNCTION_TYPES) {
-            var paramName = "sizesChanger";
-        }
         else if(errorType == errors.INVALID_ONE_OF_DRAGGABLE_ITEM_DECORATOR_FUNCTION_TYPES) {
             var paramName = "draggableItemDecorator";
         }
@@ -80,7 +76,6 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
             errorType == errors.INVALID_RETRANSFORM_SORT_PARAM_VALUE ||
             errorType == errors.INVALID_FILTER_PARAM_VALUE ||
             errorType == errors.INVALID_COORDS_CHANGER_PARAM_VALUE ||
-            errorType == errors.INVALID_SIZES_CHANGER_PARAM_VALUE ||
             errorType == errors.INVALID_DRAGGABLE_ITEM_DECORATOR_PARAM_VALUE) {
         this._markAsApiSettingsError();
 
@@ -99,9 +94,6 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         else if(errorType == errors.INVALID_COORDS_CHANGER_PARAM_VALUE) {
             var paramName = "coordsChanger";
         }
-        else if(errorType == errors.INVALID_SIZES_CHANGER_PARAM_VALUE) {
-            var paramName = "sizesChanger";
-        }
         else if(errorType == errors.INVALID_DRAGGABLE_ITEM_DECORATOR_PARAM_VALUE) {
             var paramName = "draggableItemDecorator";
         }
@@ -113,7 +105,6 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
             errorType == errors.SET_SORT_INVALID_PARAM ||
             errorType == errors.SET_RETRANSFORM_SORT_INVALID_PARAM ||
             errorType == errors.SET_COORDS_CHANGER_INVALID_PARAM ||
-            errorType == errors.SET_SIZES_CHANGER_INVALID_PARAM ||
             errorType == errors.SET_DRAGGABLE_ITEM_DECORATOR_INVALID_PARAM) {
         this._markAsApiSettingsError();
 
@@ -131,9 +122,6 @@ Gridifier.ApiSettingsErrors.prototype._parseIfIsApiSettingsError = function(erro
         }
         else if(errorType == errors.SET_COORDS_CHANGER_INVALID_PARAM) {
             var functionName = "coordsChanger";
-        }
-        else if(errorType == errors.SET_SIZES_CHANGER_INVALID_PARAM) {
-            var functionName = "sizesChanger";
         }
         else if(errorType == errors.SET_DRAGGABLE_ITEM_DECORATOR_INVALID_PARAM) {
             var functionName = "draggableItemDecorator";

@@ -8,8 +8,6 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
                                                       transformerConnectors,
                                                       settings, 
                                                       guid,
-                                                      transformedItemMarker,
-                                                      emptySpaceNormalizer,
                                                       sizesResolverManager,
                                                       eventEmitter) {
     var me = this;
@@ -24,8 +22,6 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
     this._transformerConnectors = null;
     this._settings = null;
     this._guid = null;
-    this._transformedItemMarker = null;
-    this._emptySpaceNormalizer = null;
     this._sizesResolverManager = null;
     this._eventEmitter = null;
 
@@ -51,8 +47,6 @@ Gridifier.SizesTransformer.ItemsReappender = function(gridifier,
         me._transformerConnectors = transformerConnectors;
         me._settings = settings;
         me._guid = guid;
-        me._transformedItemMarker = transformedItemMarker;
-        me._emptySpaceNormalizer = emptySpaceNormalizer;
         me._sizesResolverManager = sizesResolverManager;
         me._eventEmitter = eventEmitter;
     };
@@ -190,9 +184,6 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
 
     this._reappendedQueueData = this._reappendedQueueData.concat(this._reappendQueue.splice(0, batchSize));
     if(this._reappendQueue.length == 0) {
-        //if(this._settings.isNoIntersectionsStrategy()) {
-        //    this._emptySpaceNormalizer.normalizeFreeSpace();
-        //}
         this._eventEmitter.emitItemsReappendExecutionEndPerDragifier();
         this._eventEmitter.emitGridRetransformEvent();
         this._reappendNextQueuedItemsBatchTimeout = null;
@@ -212,14 +203,10 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendNextQueuedItemsBat
 
 Gridifier.SizesTransformer.ItemsReappender.prototype._reappendItem = function(reappendType,
                                                                               itemToReappend) {
-    /* @system-log-start */
-    var isTransformedItem = this._transformedItemMarker.isTransformedItem(itemToReappend);
-    var loggerItemType = (isTransformedItem) ? "Transformed" : "Depended";
-    /* @system-log-end */
     if(reappendType == Gridifier.APPEND_TYPES.REVERSED_APPEND) {
         /* @system-log-start */
         Logger.startLoggingSubaction(
-            "reappend" + loggerItemType + "ItemWithReversedAppend",
+            "reappendItemWithReversedAppend",
             "reversedAppend item with GUID: " + this._guid.getItemGUID(itemToReappend)
         );
         /* @system-log-end */
@@ -228,7 +215,7 @@ Gridifier.SizesTransformer.ItemsReappender.prototype._reappendItem = function(re
     else if(reappendType == Gridifier.APPEND_TYPES.DEFAULT_APPEND) {
         /* @system-log-start */
         Logger.startLoggingSubaction(
-            "reappend" + loggerItemType + "ItemWithDefaultAppend",
+            "reappendItemWithDefaultAppend",
             "defaultAppend item with GUID: " + this._guid.getItemGUID(itemToReappend)
         );
         /* @system-log-end */

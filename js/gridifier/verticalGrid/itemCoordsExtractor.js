@@ -3,7 +3,6 @@ Gridifier.VerticalGrid.ItemCoordsExtractor = function(gridifier, sizesResolverMa
 
     this._gridifier = null;
     this._sizesResolverManager = null;
-    this._transformedItemMarker = null;
 
     this._css = {
     };
@@ -11,7 +10,6 @@ Gridifier.VerticalGrid.ItemCoordsExtractor = function(gridifier, sizesResolverMa
     this._construct = function() {
         me._gridifier = gridifier;
         me._sizesResolverManager = sizesResolverManager;
-        me._transformedItemMarker = new Gridifier.SizesTransformer.TransformedItemMarker();
     };
 
     this._bindEvents = function() {
@@ -30,20 +28,10 @@ Gridifier.VerticalGrid.ItemCoordsExtractor = function(gridifier, sizesResolverMa
 }
 
 Gridifier.VerticalGrid.ItemCoordsExtractor.prototype._getItemSizesPerAppend = function(item) {
-    if(this._transformedItemMarker.isTransformedItem(item)) {
-        var itemTargetPxSizes = this._transformedItemMarker.getTransformedItemTargetPxSizes(item);
-
-        return {
-            targetWidth: parseFloat(itemTargetPxSizes.targetPxWidth),
-            targetHeight: parseFloat(itemTargetPxSizes.targetPxHeight)
-        };
-    }
-    else {
-        return {
-            targetWidth: this._sizesResolverManager.outerWidth(item, true),
-            targetHeight: this._sizesResolverManager.outerHeight(item, true)
-        };
-    }
+    return {
+        targetWidth: this._sizesResolverManager.outerWidth(item, true),
+        targetHeight: this._sizesResolverManager.outerHeight(item, true)
+    };
 }
 
 Gridifier.VerticalGrid.ItemCoordsExtractor.prototype.getItemTargetSizes = function(item) {

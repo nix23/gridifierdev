@@ -31,7 +31,6 @@ var Gridifier = function(grid, settings) {
     this._reversedAppender = null;
 
     this._operationsQueue = null;
-    this._toggleOperation = null;
     this._transformOperation = null;
 
     this._dragifier = null;
@@ -150,11 +149,8 @@ var Gridifier = function(grid, settings) {
         );
         me._connections.setSizesTransformerInstance(me._sizesTransformer);
 
-        me._toggleOperation = new Gridifier.TransformerOperations.Toggle(
-            me, me._collector, me._connections, me._guid, me._sizesTransformer, me._sizesResolverManager
-        );
         me._transformOperation = new Gridifier.TransformerOperations.Transform(
-            me, me._collector, me._connections, me._guid, me._sizesTransformer, me._sizesResolverManager
+            me._sizesTransformer, me._sizesResolverManager
         );
 
         me._operationsQueue = new Gridifier.Operations.Queue(
@@ -411,11 +407,6 @@ Gridifier.prototype.disconnect = function(items) {
 
 Gridifier.prototype.setCoordsChanger = function(coordsChangerName) {
     this._settings.setCoordsChanger(coordsChangerName);
-    return this;
-}
-
-Gridifier.prototype.setSizesChanger = function(sizesChangerName) {
-    this._settings.setSizesChanger(sizesChangerName);
     return this;
 }
 
@@ -702,42 +693,6 @@ Gridifier.prototype.triggerRotate = function(items, rotateTogglerType, batchSize
 Gridifier.prototype.retransformAllSizes = function() {
     this._normalizer.updateItemAntialiasValues();
     this._transformOperation.executeRetransformAllSizes();
-
-    return this;
-}
-
-Gridifier.prototype.toggleSizes = function(maybeItem, newWidth, newHeight) {
-    this._normalizer.updateItemAntialiasValues();
-    this._transformOperation.schedule(
-        this._toggleOperation.prepare(maybeItem, newWidth, newHeight, false)
-    );
-
-    return this;
-}
-
-Gridifier.prototype.transformSizes = function(maybeItem, newWidth, newHeight) {
-    this._normalizer.updateItemAntialiasValues();
-    this._transformOperation.schedule(
-        this._transformOperation.prepare(maybeItem, newWidth, newHeight, false)
-    );
-
-    return this;
-}
-
-Gridifier.prototype.toggleSizesWithPaddingBottom = function(maybeItem, newWidth, newPaddingBottom) {
-    this._normalizer.updateItemAntialiasValues();
-    this._transformOperation.schedule(
-        this._toggleOperation.prepare(maybeItem, newWidth, newPaddingBottom, true)
-    );
-
-    return this;
-}
-
-Gridifier.prototype.transformSizesWithPaddingBottom = function(maybeItem, newWidth, newPaddingBottom) {
-    this._normalizer.updateItemAntialiasValues();
-    this._transformOperation.schedule(
-        this._transformOperation.prepare(maybeItem, newWidth, newPaddingBottom, true)
-    );
 
     return this;
 }

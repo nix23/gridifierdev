@@ -65,9 +65,6 @@ Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
                                                        newTop,
                                                        animationMsDuration,
                                                        eventEmitter,
-                                                       emitTransformEvent,
-                                                       newWidth,
-                                                       newHeight,
                                                        isItemInitializationCall,
                                                        transitionTiming) {
         var isItemInitializationCall = isItemInitializationCall || false;
@@ -82,10 +79,6 @@ Gridifier.Api.CoordsChanger.prototype._addDefaultCoordsChanger = function() {
             Dom.css.set(item, {left: newLeft});
         if(newTop != item.style.top)
             Dom.css.set(item, {top: newTop});
-
-        if(emitTransformEvent) {
-            eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
-        }
     };
 }
 
@@ -97,14 +90,11 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
                                                          newTop,
                                                          animationMsDuration,
                                                          eventEmitter,
-                                                         emitTransformEvent,
-                                                         newWidth,
-                                                         newHeight,
                                                          isItemInitializationCall,
                                                          transitionTiming) {
         if(!Dom.isBrowserSupportingTransitions()) {
             me._coordsChangerFunctions["default"](
-                item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+                item, newLeft, newTop, animationMsDuration, eventEmitter
             );
             return;
         }
@@ -127,12 +117,6 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3PositionCoordsChanger = function()
             Dom.css3.transitionProperty(item, "top " + animationMsDuration + "ms " + transitionTiming);
             Dom.css.set(item, {top: newTop});
         }
-
-        if(emitTransformEvent) {
-            setTimeout(function() {
-                eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
-            }, animationMsDuration + 20);
-        }
     }
 }
 
@@ -145,14 +129,11 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function(
                         newTop,
                         animationMsDuration,
                         eventEmitter,
-                        emitTransformEvent,
-                        newWidth,
-                        newHeight,
                         isItemInitializationCall,
                         transitionTiming) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 me._coordsChangerFunctions["default"](
-                    item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+                    item, newLeft, newTop, animationMsDuration, eventEmitter
                 );
                 return;
             }
@@ -211,12 +192,6 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3TranslateCoordsChanger = function(
 
                 Dom.css3.transformProperty(item, "translate", translateX + "px," + translateY + "px");
             }
-
-            if(emitTransformEvent) {
-                setTimeout(function () {
-                    eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
-                }, animationMsDuration + 20);
-            }
         }
     };
 
@@ -244,14 +219,11 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
                          newTop,
                          animationMsDuration,
                          eventEmitter,
-                         emitTransformEvent,
-                         newWidth,
-                         newHeight,
                          isItemInitializationCall,
                          transitionTiming) {
             if(!Dom.isBrowserSupportingTransitions()) {
                 me._coordsChangerFunctions["default"](
-                    item, newLeft, newTop, animationMsDuration, eventEmitter, emitTransformEvent, newWidth, newHeight
+                    item, newLeft, newTop, animationMsDuration, eventEmitter
                 );
                 return;
             }
@@ -311,12 +283,6 @@ Gridifier.Api.CoordsChanger.prototype._addCSS3Translate3DCoordsChanger = functio
                 Dom.css3.perspective(item, "1000");
                 Dom.css3.backfaceVisibility(item, "hidden");
                 Dom.css3.transformProperty(item, "translate3d", translateX + "px," + translateY + "px,0px");
-            }
-
-            if(emitTransformEvent) {
-                setTimeout(function () {
-                    eventEmitter.emitTransformEvent(item, newWidth, newHeight, newLeft, newTop);
-                }, animationMsDuration + 20);
             }
         };
     }

@@ -18,7 +18,7 @@ module.exports = function(grunt) {
 
     var apiFiles = [
         {"/api/": [
-            "coordsChanger", "dragifier", "filter", "rotate", "sizesChanger",
+            "coordsChanger", "dragifier", "filter", "rotate",
             "slide", "sort", "toggle", "toggleTimeouter"
         ]}
     ];
@@ -53,10 +53,9 @@ module.exports = function(grunt) {
         {"/renderer/": ["renderer", "rendererConnections", "schedulator", "silentRenderer"]},
         {"/settings/": ["apiSettingsParser", "coreSettingsParser", "settings"]},
         {"/sizesTransformer/": [
-            "emptySpaceNormalizer", "itemNewPxSizesFinder", "itemNewRawSizesFinder", "itemsReappender",
-            "itemsToReappendFinder", "sizesTransformer", "transformedConnectionsSorter", "transformedItemMarker"
+            "itemsReappender", "itemsToReappendFinder", "sizesTransformer",
         ]},
-        {"/transformerOperations/": ["optionsParser", "toggle", "transform"]},
+        {"/transformerOperations/": ["transform"]},
         {"/verticalGrid/": ["appender", "itemCoordsExtractor", "prepender", "reversedAppender", "reversedPrepender"]},
         {"/verticalGrid/connections/": [
             "connections", "connectionsVerticalIntersector", "connectionsIntersector",

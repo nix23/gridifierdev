@@ -104,17 +104,19 @@ Gridifier.Operations.Queue.QUEUED_OPERATION_TYPES = {PREPEND: 0, APPEND: 1, INSE
 Gridifier.Operations.Queue.PROCESS_QUEUED_OPERATIONS_TIMEOUT = 100;
 Gridifier.Operations.Queue.DEFAULT_BATCH_TIMEOUT = 100;
 
-Gridifier.Operations.Queue.prototype.schedulePrependOperation = function(items, batchSize, batchTimeout) {
+Gridifier.Operations.Queue.prototype._scheduleOperation = function(items, targetItem, batchSize, batchTimeout, operationExecutorFn, operationType) {
     var me = this;
-    var schedulePrepend = function(items) {
+    var scheduleOperation = function(items, targetItem) {
         setTimeout(function() {
             if(me._sizesTransformer.isTransformerQueueEmpty()) {
-                me._executePrependOperation.call(me, items);
+                operationExecutorFn(items, targetItem);
             }
             else {
                 me._queuedOperations.push({
-                    queuedOperationType: Gridifier.Operations.Queue.QUEUED_OPERATION_TYPES.PREPEND,
-                    items: items
+                    queuedOperationType: operationType,
+                    items: items,
+                    beforeItem: targetItem,
+                    afterItem: targetItem
                 });
 
                 if(me._isWaitingForTransformerQueueRelease)
@@ -129,7 +131,7 @@ Gridifier.Operations.Queue.prototype.schedulePrependOperation = function(items, 
     }
 
     if(typeof batchSize == "undefined") {
-        schedulePrepend.call(me, items);
+        scheduleOperation.call(me, items, targetItem);
         return;
     }
 
@@ -137,47 +139,37 @@ Gridifier.Operations.Queue.prototype.schedulePrependOperation = function(items, 
     var itemBatches = this._packItemsToBatches(items, batchSize);
     for(var i = 0; i < itemBatches.length; i++) {
         (function(itemBatch, i) {
-            setTimeout(function() { schedulePrepend.call(me, itemBatch); }, batchTimeout * i);
+            setTimeout(function() { scheduleOperation.call(me, itemBatch, targetItem); }, batchTimeout * i);
         })(itemBatches[i], i);
     }
 }
 
+Gridifier.Operations.Queue.prototype.schedulePrependOperation = function(items, batchSize, batchTimeout) {
+    var me = this;
+    this._scheduleOperation(
+        items,
+        null,
+        batchSize,
+        batchTimeout,
+        function(items) {
+            me._executePrependOperation.call(me, items);
+        },
+        Gridifier.Operations.Queue.QUEUED_OPERATION_TYPES.PREPEND
+    );
+}
+
 Gridifier.Operations.Queue.prototype.scheduleAppendOperation = function(items, batchSize, batchTimeout) {
     var me = this;
-    var scheduleAppend = function(items) {
-        setTimeout(function() { 
-            if(me._sizesTransformer.isTransformerQueueEmpty()) {
-                me._executeAppendOperation.call(me, items);
-            }
-            else {
-                me._queuedOperations.push({
-                    queuedOperationType: Gridifier.Operations.Queue.QUEUED_OPERATION_TYPES.APPEND,
-                    items: items
-                });
-
-                if(me._isWaitingForTransformerQueueRelease)
-                    return;
-
-                setTimeout(function() {
-                    me._isWaitingForTransformerQueueRelease = true;
-                    me._processQueuedOperations.call(me);
-                }, Gridifier.Operations.Queue.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
-            }
-        }, 0);
-    }
-
-    if(typeof batchSize == "undefined") {
-        scheduleAppend.call(me, items);
-        return;
-    }
-
-    var batchTimeout = batchTimeout || Gridifier.Operations.Queue.DEFAULT_BATCH_TIMEOUT;
-    var itemBatches = this._packItemsToBatches(items, batchSize);
-    for(var i = 0; i < itemBatches.length; i++) {
-        (function(itemBatch, i) {
-            setTimeout(function() { scheduleAppend.call(me, itemBatch); }, batchTimeout * i);
-        })(itemBatches[i], i);
-    }
+    this._scheduleOperation(
+        items,
+        null,
+        batchSize,
+        batchTimeout,
+        function(items) {
+            me._executeAppendOperation.call(me, items);
+        },
+        Gridifier.Operations.Queue.QUEUED_OPERATION_TYPES.APPEND
+    );
 }
 
 Gridifier.Operations.Queue.prototype.scheduleInsertBeforeOperation = function(items, 
@@ -185,41 +177,16 @@ Gridifier.Operations.Queue.prototype.scheduleInsertBeforeOperation = function(it
                                                                               batchSize, 
                                                                               batchTimeout) {
     var me = this;
-    var scheduleInsertBefore = function(items, beforeItem) {
-        setTimeout(function() { 
-            if(me._sizesTransformer.isTransformerQueueEmpty()) {
-                me._executeInsertBeforeOperation.call(me, items, beforeItem);
-            }
-            else {
-                me._queuedOperations.push({
-                    queuedOperationType: Gridifier.Operations.Queue.QUEUED_OPERATION_TYPES.INSERT_BEFORE,
-                    items: items,
-                    beforeItem: beforeItem
-                });
-
-                if(me._isWaitingForTransformerQueueRelease)
-                    return;
-
-                setTimeout(function() {
-                    me._isWaitingForTransformerQueueRelease = true;
-                    me._processQueuedOperations.call(me);
-                }, Gridifier.Operations.Queue.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
-            }
-        }, 0);
-    }
-
-    if(typeof batchSize == "undefined") {
-        scheduleInsertBefore.call(me, items, beforeItem);
-        return;
-    }
-
-    var batchTimeout = batchTimeout || Gridifier.Operations.Queue.DEFAULT_BATCH_TIMEOUT;
-    var itemBatches = this._packItemsToBatches(items, batchSize);
-    for(var i = 0; i < itemBatches.length; i++) {
-        (function(itemBatch, i) {
-            setTimeout(function() { scheduleInsertBefore.call(me, itemBatch, beforeItem); }, batchTimeout * i);
-        })(itemBatches[i], i);
-    }
+    this._scheduleOperation(
+        items,
+        beforeItem,
+        batchSize,
+        batchTimeout,
+        function(items, beforeItem) {
+            me._executeInsertBeforeOperation.call(me, items, beforeItem);
+        },
+        Gridifier.Operations.Queue.QUEUED_OPERATION_TYPES.INSERT_BEFORE
+    );
 }
 
 Gridifier.Operations.Queue.prototype.scheduleInsertAfterOperation = function(items,
@@ -227,41 +194,16 @@ Gridifier.Operations.Queue.prototype.scheduleInsertAfterOperation = function(ite
                                                                              batchSize,
                                                                              batchTimeout) {
     var me = this;
-    var scheduleInsertAfter = function(items, afterItem) {
-        setTimeout(function() {
-            if(me._sizesTransformer.isTransformerQueueEmpty()) {
-                me._executeInsertAfterOperation.call(me, items, afterItem);
-            }
-            else {
-                me._queuedOperations.push({
-                    queuedOperationType: Gridifier.Operations.Queue.QUEUED_OPERATION_TYPES.INSERT_AFTER,
-                    items: items,
-                    afterItem: afterItem
-                });
-
-                if(me._isWaitingForTransformerQueueRelease)
-                    return;
-
-                setTimeout(function() {
-                    me._isWaitingForTransformerQueueRelease = true;
-                    me._processQueuedOperations.call(me);
-                }, Gridifier.Operations.Queue.PROCESS_QUEUED_OPERATIONS_TIMEOUT);
-            }
-        }, 0);
-    }
-
-    if(typeof batchSize == "undefined") {
-        scheduleInsertAfter.call(me, items, afterItem);
-        return;
-    }
-
-    var batchTimeout = batchTimeout || Gridifier.Operations.Queue.DEFAULT_BATCH_TIMEOUT;
-    var itemBatches = this._packItemsToBatches(items, batchSize);
-    for(var i = 0; i < itemBatches.length; i++) {
-        (function(itemBatch, i) {
-            setTimeout(function() { scheduleInsertAfter.call(me, itemBatch, afterItem); }, batchTimeout * i);
-        })(itemBatches[i], i);
-    }
+    this._scheduleOperation(
+        items,
+        afterItem,
+        batchSize,
+        batchTimeout,
+        function(items, afterItem) {
+            me._executeInsertAfterOperation.call(me, items, afterItem);
+        },
+        Gridifier.Operations.Queue.QUEUED_OPERATION_TYPES.INSERT_AFTER
+    );
 }
 
 Gridifier.Operations.Queue.prototype._packItemsToBatches = function(items, batchSize) {

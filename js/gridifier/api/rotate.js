@@ -166,9 +166,6 @@ Gridifier.Api.Rotate.prototype._rotate = function(item,
             this._settings.getCoordsChangeAnimationMsDuration(),
             this._eventEmitter,
             false,
-            false,
-            false,
-            false,
             this._settings.getCoordsChangeTransitionTiming()
         );
     }
@@ -246,16 +243,13 @@ Gridifier.Api.Rotate.prototype._createScene = function(item, grid, left, top) {
     grid.appendChild(scene);
 
     // Fix per filter changes(left and top changes should be applied to scene)
-    this._settings.getCoordsChanger()(scene, left, top, this._settings.getCoordsChangeAnimationMsDuration(), this._eventEmitter, false, false, false, true);
+    this._settings.getCoordsChanger()(scene, left, top, this._settings.getCoordsChangeAnimationMsDuration(), this._eventEmitter, true);
     this._settings.getCoordsChanger()(
         scene,
         left,
         top,
         this._settings.getCoordsChangeAnimationMsDuration(),
         this._eventEmitter,
-        false,
-        false,
-        false,
         false,
         this._settings.getCoordsChangeTransitionTiming()
     );
@@ -377,14 +371,15 @@ Gridifier.Api.Rotate.prototype._initFadeEffect = function(scene, isShowing, isHi
         timeouter.add(item, fadeTimeout);
     }
     else if(this._rotateFadeType == Gridifier.Api.Rotate.ROTATE_FADE_TYPES.ON_HIDE_MIDDLE) {
+        Dom.css3.transition(
+            scene,
+            Prefixer.getForCSS('opacity', scene) + " " + (animationMsDuration / 2) + "ms " + me._transitionTiming
+        );
+
         if(!isHiding)
             return;
 
         var fadeTimeout = setTimeout(function () {
-            Dom.css3.transition(
-                scene,
-                Prefixer.getForCSS('opacity', scene) + " " + (animationMsDuration / 2) + "ms " + me._transitionTiming
-            );
             Dom.css3.opacity(scene, 0);
         }, animationMsDuration / 2);
         timeouter.add(item, fadeTimeout);

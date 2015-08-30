@@ -6,8 +6,6 @@ Gridifier.Renderer = function(gridifier, connections, settings, normalizer) {
     this._settings = null;
     this._normalizer = null;
 
-    this._transformedItemMarker = null;
-
     this._rendererSchedulator = null;
     this._rendererConnections = null;
 
@@ -19,8 +17,6 @@ Gridifier.Renderer = function(gridifier, connections, settings, normalizer) {
         me._connections = connections;
         me._settings = settings;
         me._normalizer = normalizer;
-
-        me._transformedItemMarker = new Gridifier.SizesTransformer.TransformedItemMarker();
 
         me._rendererConnections = new Gridifier.Renderer.Connections(
             me._settings
@@ -113,27 +109,7 @@ Gridifier.Renderer.prototype.hideConnections = function(connections) {
 }
 
 Gridifier.Renderer.prototype.renderTransformedConnections = function(connections) {
-    for(var i = 0; i < connections.length; i++) {
-        var left = this._rendererConnections.getCssLeftPropertyValuePerConnection(connections[i]);
-        var top = this._rendererConnections.getCssTopPropertyValuePerConnection(connections[i]);
-
-        this._rendererSchedulator.reinit();
-
-        if(this._transformedItemMarker.isTransformedItem(connections[i].item)) {
-            var targetRawSizes = this._transformedItemMarker.getTransformedItemTargetRawSizes(
-                connections[i].item
-            );
-
-            this._rendererSchedulator.scheduleRenderTransformed(
-                connections[i], left, top, targetRawSizes.targetRawWidth, targetRawSizes.targetRawHeight
-            );
-            this._transformedItemMarker.unmarkItemAsTransformed(connections[i].item);
-        }
-        else if(this._transformedItemMarker.isDependedItem(connections[i].item)) {
-            this._rendererSchedulator.scheduleRenderDepended(connections[i], left, top);
-            this._transformedItemMarker.unmarkItemAsDepended(connections[i].item);
-        }
-    }
+    this.renderConnections(connections, false);
 }
 
 Gridifier.Renderer.prototype.renderConnections = function(connections, exceptConnections) {

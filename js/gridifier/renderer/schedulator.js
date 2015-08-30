@@ -50,7 +50,7 @@ Gridifier.Renderer.Schedulator = function(gridifier, settings, connections, rend
 
 Gridifier.Renderer.Schedulator.PROCESS_SCHEDULED_CONNECTIONS_TIMEOUT = 20;
 Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES = {
-    SHOW: 0, HIDE: 1, RENDER: 2, RENDER_TRANSFORMED: 3, RENDER_DEPENDED: 4, DELAYED_RENDER: 5
+    SHOW: 0, HIDE: 1, RENDER: 2, DELAYED_RENDER: 3
 };
 
 Gridifier.Renderer.Schedulator.prototype.setSilentRendererInstance = function(silentRenderer) {
@@ -107,32 +107,6 @@ Gridifier.Renderer.Schedulator.prototype.scheduleDelayedRender = function(connec
         left: left,
         top: top,
         delay: delay
-    });
-    this._schedule();
-}
-
-Gridifier.Renderer.Schedulator.prototype.scheduleRenderTransformed = function(connection, 
-                                                                              left, 
-                                                                              top,
-                                                                              targetWidth,
-                                                                              targetHeight) {
-    this._scheduledConnectionsToProcessData.push({
-        connection: connection,
-        processingType: Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_TRANSFORMED,
-        left: left,
-        top: top,
-        targetWidth: targetWidth,
-        targetHeight: targetHeight
-    });
-    this._schedule();
-}
-
-Gridifier.Renderer.Schedulator.prototype.scheduleRenderDepended = function(connection, left, top) {
-    this._scheduledConnectionsToProcessData.push({
-        connection: connection,
-        processingType: Gridifier.Renderer.Schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED,
-        left: left,
-        top: top
     });
     this._schedule();
 }
@@ -202,7 +176,7 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
             // Scale always should be first(otherwise animation will break), translates should be also
             // setted up with SINGLE rule at start. Thus, they can be overriden later. Otherwise,
             // animation will break.
-            coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter, false, false, false, true);
+            coordsChanger(connectionToProcess.item, left, top, animationMsDuration, eventEmitter, true);
 
             eventEmitter.emitBeforeShowPerRetransformSortEvent();
             showItem(connectionToProcess.item);
@@ -271,16 +245,12 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                         animationMsDuration,
                         eventEmitter,
                         false,
-                        false,
-                        false,
-                        false,
                         transitionTiming
                     );
                 }, delay);
             })(connectionToProcess.item, animationMsDuration, eventEmitter, coordsChangeTransitionTiming, delay);
         }
-        else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER ||
-                processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_DEPENDED) {
+        else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER) {
             var coordsChanger = this._settings.getCoordsChanger();
             var eventEmitter = this._settings.getEventEmitter();
 
@@ -299,39 +269,6 @@ Gridifier.Renderer.Schedulator.prototype._processScheduledConnections = function
                 top,
                 animationMsDuration,
                 eventEmitter,
-                false,
-                false,
-                false,
-                false,
-                coordsChangeTransitionTiming
-            );
-        }
-        else if(processingType == schedulator.SCHEDULED_CONNECTIONS_PROCESSING_TYPES.RENDER_TRANSFORMED) {
-            var targetWidth = this._scheduledConnectionsToProcessData[i].targetWidth;
-            var targetHeight = this._scheduledConnectionsToProcessData[i].targetHeight;
-
-            var sizesChanger = this._settings.getSizesChanger();
-
-            sizesChanger(
-                connectionToProcess.item, 
-                targetWidth, 
-                targetHeight
-            );
-
-            var coordsChanger = this._settings.getCoordsChanger();
-            var animationMsDuration = this._settings.getCoordsChangeAnimationMsDuration();
-            var eventEmitter = this._settings.getEventEmitter();
-            var coordsChangeTransitionTiming = this._settings.getCoordsChangeTransitionTiming();
-
-            coordsChanger(
-                connectionToProcess.item, 
-                left, 
-                top,
-                animationMsDuration,
-                eventEmitter,
-                true,
-                targetWidth,
-                targetHeight,
                 false,
                 coordsChangeTransitionTiming
             );

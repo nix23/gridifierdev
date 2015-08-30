@@ -62,7 +62,7 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
                 Dom.css3.transition(animateFadeTargetItem, "");
             }
             coordsChanger(
-                item, startLeft, startTop, 0, eventEmitter, false, false, false, false, transitionTiming
+                item, startLeft, startTop, 0, eventEmitter, false, transitionTiming
             );
 
             item.setAttribute(Gridifier.Api.Toggle.IS_TOGGLE_ANIMATION_RUNNING, "yes");
@@ -87,7 +87,7 @@ Gridifier.Api.Slide.prototype._executeSlideShow = function(item,
             Dom.css3.opacity(animateFadeTargetItem, 1);
         }
         coordsChanger(
-            item, targetLeft, targetTop, animationMsDuration, eventEmitter, false, false, false, false, transitionTiming
+            item, targetLeft, targetTop, animationMsDuration, eventEmitter, false, transitionTiming
         );
     }, 40);
     timeouter.add(item, slideOutTimeout);
@@ -126,7 +126,7 @@ Gridifier.Api.Slide.prototype._executeSlideHide = function(item,
     }
 
     coordsChanger(
-        item, targetLeft, targetTop, animationMsDuration, eventEmitter, false, false, false, false, transitionTiming
+        item, targetLeft, targetTop, animationMsDuration, eventEmitter, false, transitionTiming
     );
 
     // Hidding item and possibly clone a little before animation def finish(Blink fix)

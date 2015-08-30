@@ -183,9 +183,9 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         }
 
         setTimeout(function() {
-            window.gridifier.setToggle("rotateZWithFade");
+            window.gridifier.setToggle("rotateXWithFadeOut");
             //window.gridifier.disableIntersections().setAlign("center");
-            window.gridifier.setToggleDuration(1000);
+            window.gridifier.setToggleDuration(5000);
             //window.gridifier.setCoordsChangeDuration(1000);
         }, 500);
 

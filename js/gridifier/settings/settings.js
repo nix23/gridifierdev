@@ -29,7 +29,6 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
     this._sortApi = null;
     this._filterApi = null;
     this._coordsChangerApi = null;
-    this._sizesChangerApi = null;
     this._dragifierApi = null;
 
     this._resizeTimeout = null;
@@ -80,7 +79,6 @@ Gridifier.Settings = function(settings, gridifier, guid, eventEmitter, sizesReso
         me._sortApi = new Gridifier.Api.Sort(me, me._gridifier, me._eventEmitter);
         me._filterApi = new Gridifier.Api.Filter(me, me._eventEmitter);
         me._coordsChangerApi = new Gridifier.Api.CoordsChanger(me, me._gridifier, me._eventEmitter);
-        me._sizesChangerApi = new Gridifier.Api.SizesChanger(me, me._eventEmitter);
         me._dragifierApi = new Gridifier.Api.Dragifier();
 
         me._parse();
@@ -134,7 +132,6 @@ Gridifier.Settings.prototype._parse = function() {
     this._apiSettingsParser.parseRetransformSortOptions(this._sortApi);
     this._apiSettingsParser.parseFilterOptions(this._filterApi);
     this._apiSettingsParser.parseCoordsChangerOptions(this._coordsChangerApi);
-    this._apiSettingsParser.parseSizesChangerOptions(this._sizesChangerApi);
     this._apiSettingsParser.parseDraggableItemDecoratorOptions(this._dragifierApi);
 
     var gridItemMarkingStrategyData = this._coreSettingsParser.parseGridItemMarkingStrategy();
@@ -463,20 +460,12 @@ Gridifier.Settings.prototype.setCoordsChanger = function(coordsChangerFunctionNa
     this._coordsChangerApi.setCoordsChangerFunction(coordsChangerFunctionName);
 }
 
-Gridifier.Settings.prototype.setSizesChanger = function(sizesChangerFunctionName) {
-    this._sizesChangerApi.setSizesChangerFunction(sizesChangerFunctionName);
-}
-
 Gridifier.Settings.prototype.setDraggableItemDecorator = function(draggableItemDecoratorFunctionName) {
     this._dragifierApi.setDraggableItemDecoratorFunction(draggableItemDecoratorFunctionName);
 }
 
 Gridifier.Settings.prototype.getCoordsChanger = function() {
     return this._coordsChangerApi.getCoordsChangerFunction();
-}
-
-Gridifier.Settings.prototype.getSizesChanger = function() {
-    return this._sizesChangerApi.getSizesChangerFunction();
 }
 
 Gridifier.Settings.prototype.getDraggableItemDecorator = function() {

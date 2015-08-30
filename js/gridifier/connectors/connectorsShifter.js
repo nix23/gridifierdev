@@ -61,7 +61,7 @@ Gridifier.ConnectorsShifter.prototype._createShiftedConnector = function(x, y, c
         y: parseFloat(y),
         itemGUID: Dom.toInt(connector.itemGUID)
     };
-    
+
     this._shiftedConnectors.push(shiftedConnector);
     this._allConnectors.push(shiftedConnector);
 }
@@ -103,11 +103,11 @@ Gridifier.ConnectorsShifter.prototype._shiftLeftTopConnector = function(connecto
     var mostBottomConnection = this._ci.getMostBottomFromIntersectedTopOrTopLeftItems(connector);
 
     if(mostBottomConnection != null) {
-        if(mostBottomConnection.y2 + 1 != connector.y) 
+        if(mostBottomConnection.y2 + 1 != connector.y)
             this._createShiftedConnector(connector.x, mostBottomConnection.y2 + 1, connector);
     }
     else {
-        if(connector.y != 0) 
+        if(connector.y != 0)
             this._createShiftedConnector(connector.x, 0, connector);
     }
 }
@@ -122,7 +122,7 @@ Gridifier.ConnectorsShifter.prototype._shiftLeftBottomConnector = function(conne
     else {
         var maxYFromAllConnections = this._connections.getMaxYFromAllConnections();
         if(maxYFromAllConnections != 0) {
-            if(maxYFromAllConnections - 1 != connector.y) 
+            if(maxYFromAllConnections - 1 != connector.y)
                 this._createShiftedConnector(connector.x, maxYFromAllConnections - 1, connector);
         }
     }
@@ -153,7 +153,7 @@ Gridifier.ConnectorsShifter.prototype._shiftTopLeftConnector = function(connecto
             this._createShiftedConnector(mostRightConnection.x2 + 1, connector.y, connector);
     }
     else {
-        if(connector.x != 0) 
+        if(connector.x != 0)
             this._createShiftedConnector(0, connector.y, connector);
     }
 }
@@ -168,7 +168,7 @@ Gridifier.ConnectorsShifter.prototype._shiftRightBottomConnector = function(conn
     else {
         var maxYFromAllConnections = this._connections.getMaxYFromAllConnections();
         if(maxYFromAllConnections != 0) {
-            if(maxYFromAllConnections - 1 != connector.y) 
+            if(maxYFromAllConnections - 1 != connector.y)
                 this._createShiftedConnector(connector.x, maxYFromAllConnections - 1, connector);
         }
     }

@@ -54,10 +54,6 @@ Gridifier.CoreErrors.prototype._parseIfIsCoreError = function(errorType) {
         this._markAsCoreError();
         this._connectionByItemNotFoundError();
     }
-    else if(errorType == errors.SIZES_TRANSFORMER.WRONG_TARGET_TRANSFORMATION_SIZES) {
-        this._markAsCoreError();
-        this._wrongTargetTransformationSizesError();
-    }
     else if(errorType == errors.APPENDER.WRONG_INSERT_BEFORE_TARGET_ITEM) {
         this._markAsCoreError();
         this._wrongInsertBeforeTargetItem();
@@ -105,18 +101,6 @@ Gridifier.CoreErrors.prototype._connectionByItemNotFoundError = function() {
     msg += "Connections:\n";
     for(var i = 0; i < error.connections.length; i++)
         msg += error.connections[i] + "\n";
-
-    this._errorMsg = msg;
-}
-
-Gridifier.CoreErrors.prototype._wrongTargetTransformationSizesError = function() {
-    var msg = this._error.getErrorMsgPrefix();
-    var error = this._error.getErrorParam();
-
-    msg += "Wrong target transformation sizes. 'transformSizes' and 'toggleSizes' functions accepts 4 types of values:\n";
-    msg += "    gridifier.transformSizes(item, '100px', '60%'); // px or % values\n";
-    msg += "    gridifier.transformSizes(item, 100, 200.5); // values without postfix will be parsed as px value.";
-    msg += "    gridifier.transformSizes(item, '*2', '/0.5'); // values with multiplication or division expressions.";
 
     this._errorMsg = msg;
 }
