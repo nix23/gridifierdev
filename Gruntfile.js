@@ -14,7 +14,7 @@ module.exports = function(grunt) {
     var staticBanner = banner.slice(0);
     staticBanner = "/* Gridifier v1.~.~ source file for custom build.\n" + banner;
 
-    banner = "/* Gridifier v1.0.2\n" + banner;
+    banner = "/* Gridifier v1.0.3\n" + banner;
 
     var apiFiles = [
         {"/api/": [

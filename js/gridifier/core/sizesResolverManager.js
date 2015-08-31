@@ -1,5 +1,5 @@
 Gridifier.SizesResolverManager = function() {
-    this.C = Gridifier.SizesResolverManager;
+    var me = this;
 
     this._outerWidthCache = [
         // { cachedItemGUID: Number, DOMElem: Object, cachedReturnedValues: {
@@ -22,342 +22,416 @@ Gridifier.SizesResolverManager = function() {
 
     this._outerWidthAntialiasValue = 0;
     this._outerHeightAntialiasValue = 0;
+
+    this._css = {
+    };
+
+    this._construct = function() {
+    };
+
+    this._bindEvents = function() {
+    };
+
+    this._unbindEvents = function() {
+    };
+
+    this.destruct = function() {
+        me._unbindEvents();
+    };
+
+    this._construct();
+    return this;
 }
 
-Gridifier.SizesResolverManager.CACHED_PER_OW_ITEM_GUID_DATA_ATTR = "data-gridifier-cached-per-ow-guid";
-Gridifier.SizesResolverManager.CACHED_PER_OH_ITEM_GUID_DATA_ATTR = "data-gridifier-cached-per-oh-guid";
-Gridifier.SizesResolverManager.CACHED_PER_OW_DATA_ATTR = "data-gridifier-cached-per-ow";
-Gridifier.SizesResolverManager.CACHED_PER_OH_DATA_ATTR = "data-gridifier-cached-per-oh";
-Gridifier.SizesResolverManager.EMPTY_DATA_ATTR_VALUE = "e";
+Gridifier.SizesResolverManager.CACHED_PER_OUTERWIDTH_ITEM_GUID_DATA_ATTR = "data-gridifier-cached-per-outerwidth-guid";
+Gridifier.SizesResolverManager.CACHED_PER_OUTERHEIGHT_ITEM_GUID_DATA_ATTR = "data-gridifier-cached-per-outerheight-guid";
+Gridifier.SizesResolverManager.CACHED_PER_OUTERWIDTH_DATA_ATTR = "data-gridifier-cached-per-outerwidth";
+Gridifier.SizesResolverManager.CACHED_PER_OUTERHEIGHT_DATA_ATTR = "data-gridifier-cached-per-outerheight";
+Gridifier.SizesResolverManager.EMPTY_DATA_ATTR_VALUE = "gridifier-empty-data";
 
-proto(Gridifier.SizesResolverManager, {
-    setOuterWidthAntialiasValue: function(newValue) {
-        this._outerWidthAntialiasValue = newValue;
-    },
+Gridifier.SizesResolverManager.prototype.setOuterWidthAntialiasValue = function(newValue) {
+    this._outerWidthAntialiasValue = newValue;
+}
 
-    setOuterHeightAntialiasValue: function(newValue) {
-        this._outerHeightAntialiasValue = newValue;
-    },
+Gridifier.SizesResolverManager.prototype.setOuterHeightAntialiasValue = function(newValue) {
+    this._outerHeightAntialiasValue = newValue;
+}
 
-    _markAsCachedPerOuterWidth: function(item, cachedItemGUID) {
-        Dom.set(item, [
-            [this.C.CACHED_PER_OW_DATA_ATTR, this.C.EMPTY_DATA_ATTR_VALUE],
-            [this.C.CACHED_PER_OW_ITEM_GUID_DATA_ATTR, cachedItemGUID]
-        ]);
-    },
+Gridifier.SizesResolverManager.prototype._markAsCachedPerOuterWidth = function(DOMElem, cachedItemGUID) {
+    DOMElem.setAttribute(
+        Gridifier.SizesResolverManager.CACHED_PER_OUTERWIDTH_DATA_ATTR,
+        Gridifier.SizesResolverManager.EMPTY_DATA_ATTR_VALUE
+    );
 
-    _markAsCachedPerOuterHeight: function(item, cachedItemGUID) {
-        Dom.set(item, [
-            [this.C.CACHED_PER_OH_DATA_ATTR, this.C.EMPTY_DATA_ATTR_VALUE],
-            [this.C.CACHED_PER_OH_ITEM_GUID_DATA_ATTR, cachedItemGUID]
-        ]);
-    },
+    DOMElem.setAttribute(
+        Gridifier.SizesResolverManager.CACHED_PER_OUTERWIDTH_ITEM_GUID_DATA_ATTR,
+        cachedItemGUID
+    );
+}
 
-    unmarkAsCached: function(item) {
-        Dom.rmIfHas(item, [
-            this.C.CACHED_PER_OW_DATA_ATTR,
-            this.C.CACHED_PER_OW_ITEM_GUID_DATA_ATTR,
-            this.C.CACHED_PER_OH_DATA_ATTR,
-            this.C.CACHED_PER_OH_ITEM_GUID_DATA_ATTR
-        ]);
-    },
+Gridifier.SizesResolverManager.prototype._markAsCachedPerOuterHeight = function(DOMElem, cachedItemGUID) {
+    DOMElem.setAttribute(
+        Gridifier.SizesResolverManager.CACHED_PER_OUTERHEIGHT_DATA_ATTR,
+        Gridifier.SizesResolverManager.EMPTY_DATA_ATTR_VALUE
+    );
 
-    _getCachedItemEntry: function(item, cache, cachedItemGUID) {
-        for(var i = 0; i < cache.length; i++) {
-            if(parseInt(cache[i].cachedItemGUID) == parseInt(cachedItemGUID))
-                return cache[i];
-        }
-    },
+    DOMElem.setAttribute(
+        Gridifier.SizesResolverManager.CACHED_PER_OUTERHEIGHT_ITEM_GUID_DATA_ATTR,
+        cachedItemGUID
+    );
+}
 
-    _getOuterWidthCachedItemEntry: function(item) {
-        return this._getCachedItemEntry(item, this._outerWidthCache, Dom.get(item, this.C.CACHED_PER_OW_ITEM_GUID_DATA_ATTR));
-    },
+Gridifier.SizesResolverManager.prototype.unmarkAsCached = function(DOMElem) {
+    if(Dom.hasAttribute(DOMElem, Gridifier.SizesResolverManager.CACHED_PER_OUTERWIDTH_DATA_ATTR))
+        DOMElem.removeAttribute(Gridifier.SizesResolverManager.CACHED_PER_OUTERWIDTH_DATA_ATTR);
 
-    _getOuterHeightCachedItemEntry: function(DOMElem) {
-        return this._getCachedItemEntry(item, this._outerHeightCache, Dom.get(item, this.C.CACHED_PER_OH_ITEM_GUID_DATA_ATTR))
-    },
+    if(Dom.hasAttribute(DOMElem, Gridifier.SizesResolverManager.CACHED_PER_OUTERWIDTH_ITEM_GUID_DATA_ATTR))
+        DOMElem.removeAttribute(Gridifier.SizesResolverManager.CACHED_PER_OUTERWIDTH_ITEM_GUID_DATA_ATTR);
 
-    _isCallWithSuchParamsCached: function(item, includeMargins, cacheAttr, cacheGetter) {
-        if(!Dom.has(item, cacheAttr))
-            return false;
+    if(Dom.hasAttribute(DOMElem, Gridifier.SizesResolverManager.CACHED_PER_OUTERHEIGHT_DATA_ATTR))
+        DOMElem.removeAttribute(Gridifier.SizesResolverManager.CACHED_PER_OUTERHEIGHT_DATA_ATTR);
 
-        var cachedItemEntry = cacheGetter(item);
+    if(Dom.hasAttribute(DOMElem, Gridifier.SizesResolverManager.CACHED_PER_OUTERHEIGHT_ITEM_GUID_DATA_ATTR))
+        DOMElem.removeAttribute(Gridifier.SizesResolverManager.CACHED_PER_OUTERHEIGHT_ITEM_GUID_DATA_ATTR);
+}
 
+Gridifier.SizesResolverManager.prototype._getOuterWidthCachedItemEntry = function(DOMElem) {
+    var cachedItemGUIDAttr = Gridifier.SizesResolverManager.CACHED_PER_OUTERWIDTH_ITEM_GUID_DATA_ATTR;
+    var cachedItemGUID = DOMElem.getAttribute(cachedItemGUIDAttr);
+
+    for(var i = 0; i < this._outerWidthCache.length; i++) {
+        if(parseInt(this._outerWidthCache[i].cachedItemGUID) == parseInt(cachedItemGUID))
+            return this._outerWidthCache[i];
+    }
+}
+
+Gridifier.SizesResolverManager.prototype._getOuterHeightCachedItemEntry = function(DOMElem) {
+    var cachedItemGUIDAttr = Gridifier.SizesResolverManager.CACHED_PER_OUTERHEIGHT_ITEM_GUID_DATA_ATTR;
+    var cachedItemGUID = DOMElem.getAttribute(cachedItemGUIDAttr);
+
+    for(var i = 0; i < this._outerHeightCache.length; i++) {
+        if(parseInt(this._outerHeightCache[i].cachedItemGUID) == parseInt(cachedItemGUID))
+            return this._outerHeightCache[i];
+    }
+}
+
+Gridifier.SizesResolverManager.prototype._isOuterWidthCallWithSuchParamsCached = function(DOMElem, includeMarginsCallParam) {
+    if(!Dom.hasAttribute(DOMElem, Gridifier.SizesResolverManager.CACHED_PER_OUTERWIDTH_DATA_ATTR))
+        return false;
+
+    var cachedItemEntry = this._getOuterWidthCachedItemEntry(DOMElem);
+
+    if(includeMarginsCallParam)
+        return (cachedItemEntry.cachedReturnedValues.withIncludeMarginsParam != null) ? true : false;
+    else
+        return (cachedItemEntry.cachedReturnedValues.withoutIncludeMarginsParam != null) ? true : false;
+}
+
+Gridifier.SizesResolverManager.prototype._isOuterHeightCallWithSuchParamsCached = function(DOMElem, includeMarginsCallParam) {
+    if(!Dom.hasAttribute(DOMElem, Gridifier.SizesResolverManager.CACHED_PER_OUTERHEIGHT_DATA_ATTR))
+        return false;
+
+    var cachedItemEntry = this._getOuterHeightCachedItemEntry(DOMElem);
+
+    if(includeMarginsCallParam)
+        return (cachedItemEntry.cachedReturnedValues.withIncludeMarginsParam != null) ? true : false;
+    else
+        return (cachedItemEntry.cachedReturnedValues.withoutIncludeMarginsParam) ? true : false;
+}
+
+Gridifier.SizesResolverManager.prototype.startCachingTransaction = function() {
+    this._isCachingTransactionActive = true;
+}
+
+Gridifier.SizesResolverManager.prototype.stopCachingTransaction = function() {
+    this._isCachingTransactionActive = false;
+
+    for(var i = 0; i < this._outerWidthCache.length; i++)
+        this.unmarkAsCached(this._outerWidthCache[i].DOMElem);
+
+    for(var i = 0; i < this._outerHeightCache.length; i++)
+        this.unmarkAsCached(this._outerHeightCache[i].DOMElem);
+
+    this._outerWidthCache = [];
+    this._outerHeightCache = [];
+
+    this._nextCachedItemGUIDPerOuterWidth = 0;
+    this._nextCachedItemGUIDPerOuterHeight = 0;
+}
+
+Gridifier.SizesResolverManager.prototype.outerWidth = function(DOMElem,
+                                                               includeMargins,
+                                                               disableAntialiasing,
+                                                               disablePercentageCSSRecalc,
+                                                               disableBordersCalc,
+                                                               isRecursiveSubcall) {
+    var disableAntialiasing = disableAntialiasing || false;
+    var isRecursiveSubcall = isRecursiveSubcall || false;
+
+    if(!this._isCachingTransactionActive) {
+        return this._callRealOuterWidth(
+            DOMElem, includeMargins, disableAntialiasing, disablePercentageCSSRecalc, disableBordersCalc, isRecursiveSubcall
+        );
+    }
+
+    if(this._isOuterWidthCallWithSuchParamsCached(DOMElem, includeMargins)) {
+        var cachedItemEntry = this._getOuterWidthCachedItemEntry(DOMElem);
         if(includeMargins)
-            return (cachedItemEntry.cachedReturnedValues.withIncludeMarginsParam != null) ? true : false;
+            return cachedItemEntry.cachedReturnedValues.withIncludeMarginsParam;
         else
-            return (cachedItemEntry.cachedReturnedValues.withoutIncludeMarginsParam != null) ? true : false
-    },
+            return cachedItemEntry.cachedReturnedValues.withoutIncludeMarginsParam;
+    }
 
-    _isOuterWidthCallWithSuchParamsCached: function(item, includeMargins) {
-        var me = this;
-        return this._isCallWithSuchParamsCached(item, includeMargins, this.C.CACHED_PER_OW_DATA_ATTR, function(item) {
-            return me._getOuterWidthCachedItemEntry(item);
+    var returnedValue = this._callRealOuterWidth(
+        DOMElem, includeMargins, disableAntialiasing, disablePercentageCSSRecalc, disableBordersCalc, isRecursiveSubcall
+    );
+
+    if(Dom.hasAttribute(DOMElem, Gridifier.SizesResolverManager.CACHED_PER_OUTERWIDTH_DATA_ATTR)) {
+        var cachedItemEntry = this._getOuterWidthCachedItemEntry(DOMElem);
+        if(includeMargins)
+            cachedItemEntry.cachedReturnedValues.withIncludeMarginsParam = returnedValue;
+        else
+            cachedItemEntry.cachedReturnedValues.withoutIncludeMarginsParam = returnedValue;
+    }
+    else {
+        this._nextCachedItemGUIDPerOuterWidth++;
+        this._markAsCachedPerOuterWidth(DOMElem, this._nextCachedItemGUIDPerOuterWidth);
+
+        var cachedReturnedValues = {};
+        cachedReturnedValues.withIncludeMarginsParam = (includeMargins) ? returnedValue : null;
+        cachedReturnedValues.withoutIncludeMarginsParam = (!includeMargins) ? returnedValue : null;
+
+        this._outerWidthCache.push({
+            cachedItemGUID: this._nextCachedItemGUIDPerOuterWidth,
+            DOMElem: DOMElem,
+            cachedReturnedValues: cachedReturnedValues
         });
-    },
+    }
 
-    _isOuterHeightCallWithSuchParamsCached: function(item, includeMargins) {
-        var me = this;
-        return this._isCallWithSuchParamsCached(item, includeMargins, this.C.CACHED_PER_OH_DATA_ATTR, function(item) {
-            return me._getOuterHeightCachedItemEntry(item);
+    return returnedValue;
+}
+
+Gridifier.SizesResolverManager.prototype._callRealOuterWidth = function(DOMElem,
+                                                                        includeMargins,
+                                                                        disableAntialiasing,
+                                                                        disablePercentageCSSRecalc,
+                                                                        disableBordersCalc,
+                                                                        isRecursiveSubcall) {
+    var me = this;
+    var realRecalculatePercentageWidthFunction = SizesResolver.recalculatePercentageWidthFunction;
+
+    SizesResolver.recalculatePercentageWidthFunction = function(DOMElem,
+                                                                includeMargins,
+                                                                disablePercentageCSSRecalc,
+                                                                disableBordersCalc) {
+        return me.outerWidth(
+            DOMElem, includeMargins, true, disablePercentageCSSRecalc, disableBordersCalc, true
+        );
+    }
+
+    if(!isRecursiveSubcall)
+        SizesResolver.clearRecursiveSubcallsData();
+
+    var returnedValue = SizesResolver.outerWidth(
+        DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc
+    );
+
+    if(!disableAntialiasing)
+        returnedValue -= this._outerWidthAntialiasValue;
+
+    SizesResolver.recalculatePercentageWidthFunction = realRecalculatePercentageWidthFunction;
+
+    return returnedValue;
+}
+
+Gridifier.SizesResolverManager.prototype.outerHeight = function(DOMElem,
+                                                                includeMargins,
+                                                                disableAntialiasing,
+                                                                disablePercentageCSSRecalc,
+                                                                disableBordersCalc,
+                                                                isRecursiveSubcall) {
+    var disableAntialiasing = disableAntialiasing || false;
+    var isRecursiveSubcall = isRecursiveSubcall || false;
+
+    if(!this._isCachingTransactionActive) {
+        return this._callRealOuterHeight(
+            DOMElem, includeMargins, disableAntialiasing, disablePercentageCSSRecalc, disableBordersCalc, isRecursiveSubcall
+        );
+    }
+
+    if(this._isOuterHeightCallWithSuchParamsCached(DOMElem, includeMargins)) {
+        var cachedItemEntry = this._getOuterHeightCachedItemEntry(DOMElem);
+        if(includeMargins)
+            return cachedItemEntry.cachedReturnedValues.withIncludeMarginsParam;
+        else
+            return cachedItemEntry.cachedReturnedValues.withoutIncludeMarginsParam;
+    }
+
+    var returnedValue = this._callRealOuterHeight(
+        DOMElem, includeMargins, disableAntialiasing, disablePercentageCSSRecalc, disableBordersCalc, isRecursiveSubcall
+    );
+
+    if(Dom.hasAttribute(DOMElem, Gridifier.SizesResolverManager.CACHED_PER_OUTERHEIGHT_DATA_ATTR)) {
+        var cachedItemEntry = this._getOuterHeightCachedItemEntry(DOMElem);
+        if(includeMargins)
+            cachedItemEntry.cachedReturnedValues.withIncludeMarginsParam = returnedValue;
+        else
+            cachedItemEntry.cachedReturnedValues.withoutIncludeMarginsParam = returnedValue;
+    }
+    else {
+        this._nextCachedItemGUIDPerOuterHeight++;
+        this._markAsCachedPerOuterHeight(DOMElem, this._nextCachedItemGUIDPerOuterHeight);
+
+        var cachedReturnedValues = {};
+        cachedReturnedValues.withIncludeMarginsParam = (includeMargins) ? returnedValue : null;
+        cachedReturnedValues.withoutIncludeMarginsParam = (!includeMargins) ? returnedValue : null;
+
+        this._outerHeightCache.push({
+            cachedItemGUID: this._nextCachedItemGUIDPerOuterHeight,
+            DOMElem: DOMElem,
+            cachedReturnedValues: cachedReturnedValues
         });
-    },
+    }
 
-    startCachingTransaction: function() {
-        this._isCachingTransactionActive = true;
-    },
+    return returnedValue;
+}
 
-    stopCachingTransaction: function() {
-        this._isCachingTransactionActive = false;
+Gridifier.SizesResolverManager.prototype._callRealOuterHeight = function(DOMElem,
+                                                                         includeMargins,
+                                                                         disableAntialiasing,
+                                                                         disablePercentageCSSRecalc,
+                                                                         disableBordersCalc,
+                                                                         isRecursiveSubcall) {
+    var me = this;
+    var realRecalculatePercentageWidthFunction = SizesResolver.recalculatePercentageWidthFunction;
+    var realRecalculatePercentageHeightFunction = SizesResolver.recalculatePercentageHeightFunction;
 
-        for(var i = 0; i < this._outerWidthCache.length; i++)
-            this.unmarkAsCached(this._outerWidthCache[i].DOMElem);
-
-        for(var i = 0; i < this._outerHeightCache.length; i++)
-            this.unmarkAsCached(this._outerHeightCache[i].DOMElem);
-
-        this._outerWidthCache = [];
-        this._outerHeightCache = [];
-
-        this._nextCachedItemGUIDPerOuterWidth = 0;
-        this._nextCachedItemGUIDPerOuterHeight = 0;
-    },
-
-    _outer: function(item,
-                     includeMargins,
-                     disableAntialiasing,
-                     disablePercentageCSSRecalc,
-                     disableBordersCalc,
-                     isRecursiveSubcall,
-                     isOhCall) {
-        var args = arguments;
-
-        var isOhCall = isOhCall || false;
-        args[2] = args[2] || false;
-        args[5] = args[5] || false;
-
-        if(!this._isCachingTransactionActive)
-            return (!isOhCall) ? this._callRealOuterWidth.apply(this, args) : this._callRealOuterHeight.apply(this, args);
-
-        var cachedItemEntry = null;
-        if(!isOhCall && this._isOuterWidthCallWithSuchParamsCached(item, includeMargins))
-            cachedItemEntry = this._getOuterWidthCachedItemEntry(item);
-        else if(isOhCall && this._isOuterHeightCallWithSuchParamsCached(item, includeMargins))
-            cachedItemEntry = this._getOuterHeightCachedItemEntry(item);
-
-        if(cachedItemEntry != null) {
-            var cachedVals = cachedItemEntry.cachedReturnedValues;
-            return (includeMargins) ? cachedVals.withIncludeMarginsParam : cachedVals.withoutIncludeMarginsParam;
-        }
-
-        var returnedValue = (!isOhCall) ? this._callRealOuterWidth.apply(this, args) : this._callRealOuterHeight.apply(this, args);
-
-        if((!isOhCall && Dom.has(item, this.C.CACHED_PER_OW_DATA_ATTR)) || (isOhCall && Dom.has(item, this.C.CACHED_PER_OH_DATA_ATTR))) {
-            var cachedItemEntry = (!isOhCall) ? this._getOuterWidthCachedItemEntry(item) : this._getOuterHeightCachedItemEntry(item);
-            if(includeMargins)
-                cachedItemEntry.cachedReturnedValues.withIncludeMarginsParam = returnedValue;
-            else
-                cachedItemEntry.cachedReturnedValues.withoutIncludeMarginsParam = returnedValue;
-        }
-        else {
-            if(!isOhCall)
-                this._markAsCachedPerOuterWidth(item, ++this._nextCachedItemGUIDPerOuterWidth);
-            else
-                this._markAsCachedPerOuterHeight(item, ++this._nextCachedItemGUIDPerOuterHeight);
-
-            var cachedReturnedValues = {
-                withIncludeMarginsParam: (includeMargins) ? returnedValue : null,
-                withoutIncludeMarginsParam: (!includeMargins) ? returnedValue : null
-            };
-            var cache = (!isOhCall) ? this._outerWidthCache : this._outerHeightCache;
-            cache.push({
-                cachedItemGUID: (!isOhCall) ? this._nextCachedItemGUIDPerOuterWidth : this._nextCachedItemGUIDPerOuterHeight,
-                DOMElem: item,
-                cachedReturnedValues: cachedReturnedValues
-            });
-        }
-
-        return returnedValue;
-    },
-
-    outerWidth: function() {
-        return this._outer(arguments);
-    },
-
-    outerHeight: function() {
-        return this._outer(arguments.push(true));
-    },
-
-    _callRealOuterWidth: function(DOMElem,
-                                  includeMargins,
-                                  disableAntialiasing,
-                                  disablePercentageCSSRecalc,
-                                  disableBordersCalc,
-                                  isRecursiveSubcall) {
-        var me = this;
-        var realRecalculatePercentageWidthFunction = SizesResolver.recalculatePercentageWidthFunction;
-
-        SizesResolver.recalculatePercentageWidthFunction = function(DOMElem,
-                                                                    includeMargins,
-                                                                    disablePercentageCSSRecalc,
-                                                                    disableBordersCalc) {
-            return me.outerWidth(
-                DOMElem, includeMargins, true, disablePercentageCSSRecalc, disableBordersCalc, true
-            );
-        }
-
-        if(!isRecursiveSubcall)
-            SizesResolver.clearRecursiveSubcallsData();
-
-        var returnedValue = SizesResolver.outerWidth(
-            DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc
+    SizesResolver.recalculatePercentageWidthFunction = function(DOMElem,
+                                                                includeMargins,
+                                                                disablePercentageCSSRecalc,
+                                                                disableBordersCalc) {
+        return me.outerWidth(
+            DOMElem, includeMargins, true, disablePercentageCSSRecalc, disableBordersCalc, true
         );
-
-        if(!disableAntialiasing)
-            returnedValue -= this._outerWidthAntialiasValue;
-
-        SizesResolver.recalculatePercentageWidthFunction = realRecalculatePercentageWidthFunction;
-
-        return returnedValue;
-    },
-
-    _callRealOuterHeight: function(DOMElem,
-                                   includeMargins,
-                                   disableAntialiasing,
-                                   disablePercentageCSSRecalc,
-                                   disableBordersCalc,
-                                   isRecursiveSubcall) {
-        var me = this;
-        var realRecalculatePercentageWidthFunction = SizesResolver.recalculatePercentageWidthFunction;
-        var realRecalculatePercentageHeightFunction = SizesResolver.recalculatePercentageHeightFunction;
-
-        SizesResolver.recalculatePercentageWidthFunction = function(DOMElem,
-                                                                    includeMargins,
-                                                                    disablePercentageCSSRecalc,
-                                                                    disableBordersCalc) {
-            return me.outerWidth(
-                DOMElem, includeMargins, true, disablePercentageCSSRecalc, disableBordersCalc, true
-            );
-        }
-        SizesResolver.recalculatePercentageHeightFunction = function(DOMElem,
-                                                                     includeMargins,
-                                                                     disablePercentageCSSRecalc,
-                                                                     disableBordersCalc) {
-            return me.outerHeight(
-                DOMElem, includeMargins, true, disablePercentageCSSRecalc, disableBordersCalc, true
-            );
-        }
-
-        if(!isRecursiveSubcall)
-            SizesResolver.clearRecursiveSubcallsData();
-
-        var returnedValue = SizesResolver.outerHeight(
-            DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc
+    }
+    SizesResolver.recalculatePercentageHeightFunction = function(DOMElem,
+                                                                 includeMargins,
+                                                                 disablePercentageCSSRecalc,
+                                                                 disableBordersCalc) {
+        return me.outerHeight(
+            DOMElem, includeMargins, true, disablePercentageCSSRecalc, disableBordersCalc, true
         );
+    }
 
-        if(!disableAntialiasing)
-            returnedValue -= this._outerHeightAntialiasValue;
+    if(!isRecursiveSubcall)
+        SizesResolver.clearRecursiveSubcallsData();
 
-        SizesResolver.recalculatePercentageWidthFunction = realRecalculatePercentageWidthFunction;
-        SizesResolver.recalculatePercentageHeightFunction = realRecalculatePercentageHeightFunction;
+    var returnedValue = SizesResolver.outerHeight(
+        DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc
+    );
 
-        return returnedValue;
-    },
+    if(!disableAntialiasing)
+        returnedValue -= this._outerHeightAntialiasValue;
 
-    positionTop: function(DOMElem) {
-        return SizesResolver.positionTop(DOMElem);
-    },
+    SizesResolver.recalculatePercentageWidthFunction = realRecalculatePercentageWidthFunction;
+    SizesResolver.recalculatePercentageHeightFunction = realRecalculatePercentageHeightFunction;
 
-    positionLeft: function(DOMElem) {
-        return SizesResolver.positionLeft(DOMElem);
-    },
+    return returnedValue;
+}
 
-    offsetLeft: function(DOMElem, substractMargins) {
-        var substractMargins = substractMargins || false;
+Gridifier.SizesResolverManager.prototype.positionTop = function(DOMElem) {
+    return SizesResolver.positionTop(DOMElem);
+}
 
-        if(substractMargins) {
-            var elemWidth = this.outerWidth(DOMElem);
-            var elemWidthWithMargins = this.outerWidth(DOMElem, true);
-            var marginWidth = elemWidthWithMargins - elemWidth;
-            var halfOfMarginWidth = marginWidth / 2;
-            var offsetLeft = SizesResolver.offsetLeft(DOMElem) - halfOfMarginWidth;
-        }
-        else {
-            var offsetLeft = SizesResolver.offsetLeft(DOMElem);
-        }
+Gridifier.SizesResolverManager.prototype.positionLeft = function(DOMElem) {
+    return SizesResolver.positionLeft(DOMElem);
+}
 
-        return offsetLeft;
-    },
+Gridifier.SizesResolverManager.prototype.offsetLeft = function(DOMElem, substractMargins) {
+    var substractMargins = substractMargins || false;
 
-    offsetTop: function(DOMElem, substractMargins) {
-        var substractMargins = substractMargins || false;
+    if(substractMargins) {
+        var elemWidth = this.outerWidth(DOMElem);
+        var elemWidthWithMargins = this.outerWidth(DOMElem, true);
+        var marginWidth = elemWidthWithMargins - elemWidth;
+        var halfOfMarginWidth = marginWidth / 2;
+        var offsetLeft = SizesResolver.offsetLeft(DOMElem) - halfOfMarginWidth;
+    }
+    else {
+        var offsetLeft = SizesResolver.offsetLeft(DOMElem);
+    }
 
-        if(substractMargins) {
-            var elemHeight = this.outerHeight(DOMElem);
-            var elemHeightWithMargins = this.outerHeight(DOMElem, true);
-            var marginHeight = elemHeightWithMargins - elemHeight;
-            var halfOfMarginHeight = marginHeight / 2;
-            var offsetTop = SizesResolver.offsetTop(DOMElem) - halfOfMarginHeight;
-        }
-        else {
-            var offsetTop = SizesResolver.offsetTop(DOMElem);
-        }
+    return offsetLeft;
+}
 
-        return offsetTop;
-    },
+Gridifier.SizesResolverManager.prototype.offsetTop = function(DOMElem, substractMargins) {
+    var substractMargins = substractMargins || false;
 
-    viewportWidth: function() {
-        return document.documentElement.clientWidth;
-    },
+    if(substractMargins) {
+        var elemHeight = this.outerHeight(DOMElem);
+        var elemHeightWithMargins = this.outerHeight(DOMElem, true);
+        var marginHeight = elemHeightWithMargins - elemHeight;
+        var halfOfMarginHeight = marginHeight / 2;
+        var offsetTop = SizesResolver.offsetTop(DOMElem) - halfOfMarginHeight;
+    }
+    else {
+        var offsetTop = SizesResolver.offsetTop(DOMElem);
+    }
 
-    viewportHeight: function() {
-        return document.documentElement.clientHeight;
-    },
+    return offsetTop;
+}
 
-    viewportScrollLeft: function() {
-        return window.pageXOffset || document.documentElement.scrollLeft;
-    },
+Gridifier.SizesResolverManager.prototype.viewportWidth = function() {
+    return document.documentElement.clientWidth;
+}
 
-    viewportScrollTop: function() {
-        return window.pageYOffset || document.documentElement.scrollTop;
-    },
+Gridifier.SizesResolverManager.prototype.viewportHeight = function() {
+    return document.documentElement.clientHeight;
+}
 
-    viewportDocumentCoords: function() {
-        return {
-            x1: this.viewportScrollLeft(),
-            x2: this.viewportScrollLeft() + this.viewportWidth() - 1,
-            y1: this.viewportScrollTop(),
-            y2: this.viewportScrollTop() + this.viewportHeight() - 1
-        };
-    },
+Gridifier.SizesResolverManager.prototype.viewportScrollLeft = function() {
+    return window.pageXOffset || document.documentElement.scrollLeft;
+}
 
-    copyComputedStyle: function(sourceItem, targetItem) {
-        var me = this;
+Gridifier.SizesResolverManager.prototype.viewportScrollTop = function() {
+    return window.pageYOffset || document.documentElement.scrollTop;
+}
 
-        var copyRecursive = function(sourceItem, targetItem) {
-            SizesResolver.cloneComputedStyle(sourceItem, targetItem);
+Gridifier.SizesResolverManager.prototype.viewportDocumentCoords = function() {
+    return {
+        x1: this.viewportScrollLeft(),
+        x2: this.viewportScrollLeft() + this.viewportWidth() - 1,
+        y1: this.viewportScrollTop(),
+        y2: this.viewportScrollTop() + this.viewportHeight() - 1
+    };
+}
 
-            for(var i = 0; i < sourceItem.childNodes.length; i++) {
-                if(sourceItem.childNodes[i].nodeType == 1) {
-                    copyRecursive(sourceItem.childNodes[i], targetItem.childNodes[i]);
+Gridifier.SizesResolverManager.prototype.copyComputedStyle = function(sourceItem, targetItem) {
+    var me = this;
 
-                    var childNodeComputedStyle = SizesResolver.getComputedCSS(sourceItem.childNodes[i]);
+    var copyRecursive = function(sourceItem, targetItem) {
+        SizesResolver.cloneComputedStyle(sourceItem, targetItem);
 
-                    // Don't override 'auto' value
-                    if(/.*px.*/.test(childNodeComputedStyle.left))
-                        targetItem.childNodes[i].style.left = me.positionLeft(sourceItem.childNodes[i]) + "px";
-                    if(/.*px.*/.test(childNodeComputedStyle.top))
-                        targetItem.childNodes[i].style.top = me.positionTop(sourceItem.childNodes[i]) + "px";
+        for(var i = 0; i < sourceItem.childNodes.length; i++) {
+            if(sourceItem.childNodes[i].nodeType == 1) {
+                copyRecursive(sourceItem.childNodes[i], targetItem.childNodes[i]);
 
-                    var childNodeRawSizes = SizesResolver.getComputedCSSWithMaybePercentageSizes(sourceItem.childNodes[i]);
+                var childNodeComputedStyle = SizesResolver.getComputedCSS(sourceItem.childNodes[i]);
 
-                    targetItem.childNodes[i].style.width = me.outerWidth(sourceItem.childNodes[i]) + "px";
-                    if(Dom.toInt(childNodeRawSizes.height) != 0)
-                        targetItem.childNodes[i].style.height = me.outerHeight(sourceItem.childNodes[i]) + "px";
-                }
+                // Don't override 'auto' value
+                if(/.*px.*/.test(childNodeComputedStyle.left))
+                    targetItem.childNodes[i].style.left = me.positionLeft(sourceItem.childNodes[i]) + "px";
+                if(/.*px.*/.test(childNodeComputedStyle.top))
+                    targetItem.childNodes[i].style.top = me.positionTop(sourceItem.childNodes[i]) + "px";
+
+                var childNodeRawSizes = SizesResolver.getComputedCSSWithMaybePercentageSizes(sourceItem.childNodes[i]);
+
+                targetItem.childNodes[i].style.width = me.outerWidth(sourceItem.childNodes[i]) + "px";
+                if(Dom.toInt(childNodeRawSizes.height) != 0)
+                    targetItem.childNodes[i].style.height = me.outerHeight(sourceItem.childNodes[i]) + "px";
             }
         }
-
-        copyRecursive(sourceItem, targetItem);
     }
-});
+
+    copyRecursive(sourceItem, targetItem);
+}

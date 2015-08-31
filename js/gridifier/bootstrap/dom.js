@@ -61,36 +61,32 @@ var Dom = {
         }
     },
 
-    set: function(item, attr, val) {
-        if(this.isArray(attr)) {
-            for(var i = 0; i < attr.length; i++)
-                item.setAttribute(attr[i][0], attr[i][1]);
-            return;
-        }
-
-        item.setAttribute(attr, val);
-    },
-
-    get: function(item, attr) {
-        return item.getAttribute(attr);
-    },
-
-    rm: function(item, attr) {
-        item.removeAttribute(attr);
-    },
-
-    rmIfHas: function(item, attr) {
-        if(this.isArray(attr)) {
-            for(var prop in attr) {
-                if(this.has(item, prop))
-                    this.rm(item, prop);
-            }
-            return;
-        }
-
-        if(this.has(item, attr))
-            this.rm(item, attr);
-    },
+    //set: function(item, attr, val) {
+    //    if(this.isArray(attr)) {
+    //        for(var i = 0; i < attr.length; i++)
+    //            item.setAttribute(attr[i][0], attr[i][1]);
+    //        return;
+    //    }
+    //
+    //    item.setAttribute(attr, val);
+    //},
+    //
+    //rm: function(item, attr) {
+    //    item.removeAttribute(attr);
+    //},
+    //
+    //rmIfHas: function(item, attr) {
+    //    if(this.isArray(attr)) {
+    //        for(var prop in attr) {
+    //            if(this.has(item, attr[prop]))
+    //                this.rm(item, attr[prop]);
+    //        }
+    //        return;
+    //    }
+    //
+    //    if(this.has(item, attr))
+    //        this.rm(item, attr);
+    //},
 
     hasAttribute: function(DOMElem, attr) {
         if((DOMElem.getAttribute(attr) === null) || (DOMElem.getAttribute(attr) === ''))

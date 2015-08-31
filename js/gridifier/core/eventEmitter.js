@@ -6,7 +6,6 @@ Gridifier.EventEmitter = function(gridifier) {
     me._showCallbacks = [];
     me._hideCallbacks = [];
     me._gridSizesChangeCallbacks = [];
-    me._transformCallbacks = [];
     me._responsiveTransformCallbacks = [];
     me._gridRetransformCallbacks = [];
     me._connectionCreateCallbacks = [];
@@ -48,7 +47,6 @@ Gridifier.EventEmitter.prototype._bindEmitterToGridifier = function() {
     this._gridifier.onShow = function(callbackFn) { me.onShow.call(me, callbackFn); };
     this._gridifier.onHide = function(callbackFn) { me.onHide.call(me, callbackFn); };
     this._gridifier.onGridSizesChange = function(callbackFn) { me.onGridSizesChange.call(me, callbackFn); };
-    this._gridifier.onTransform = function(callbackFn) { me.onTransform.call(me, callbackFn); };
     this._gridifier.onResponsiveTransform = function(callbackFn) { me.onResponsiveTransform.call(me, callbackFn); };
     this._gridifier.onGridRetransform = function(callbackFn) { me.onGridRetransform.call(me, callbackFn); };
     this._gridifier.onConnectionCreate = function(callbackFn) { me.onConnectionCreate.call(me, callbackFn); };
@@ -64,10 +62,6 @@ Gridifier.EventEmitter.prototype.onShow = function(callbackFn) {
 
 Gridifier.EventEmitter.prototype.onHide = function(callbackFn) {
     this._hideCallbacks.push(callbackFn);
-}
-
-Gridifier.EventEmitter.prototype.onTransform = function(callbackFn) {
-    this._transformCallbacks.push(callbackFn);
 }
 
 Gridifier.EventEmitter.prototype.onResponsiveTransform = function(callbackFn) {
@@ -133,12 +127,6 @@ Gridifier.EventEmitter.prototype.emitGridSizesChangeEvent = function() {
 Gridifier.EventEmitter.prototype.emitResponsiveTransformEvent = function(item, addedClasses, removedClasses) {
     for(var i = 0; i < this._responsiveTransformCallbacks.length; i++) {
         this._responsiveTransformCallbacks[i](item, addedClasses, removedClasses);
-    }
-}
-
-Gridifier.EventEmitter.prototype.emitTransformEvent = function(item, newWidth, newHeight, newLeft, newTop) {
-    for(var i = 0; i < this._transformCallbacks.length; i++) {
-        this._transformCallbacks[i](item, newWidth, newHeight, newLeft, newTop);
     }
 }
 

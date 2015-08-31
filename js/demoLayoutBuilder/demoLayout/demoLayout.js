@@ -794,11 +794,11 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             // console.log("Item with GUID = " + itemGUID + " was hiden!");
         });
 
-        me._gridifier.onTransform(function(item, newWidth, newHeight, newLeft, newTop) {
+        //me._gridifier.onTransform(function(item, newWidth, newHeight, newLeft, newTop) {
             // console.log("Item transformed ! newwidth = " + newWidth + " newheight = " + newHeight);
             // console.log(" newleft = " + newLeft + ", newTop = " + newTop);
             // console.log('item = ', item);
-        });
+        //});
 
         me._gridifier.onGridRetransform(function() {
             //console.log("grid retransform event!");
