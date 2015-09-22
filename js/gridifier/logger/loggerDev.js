@@ -126,11 +126,11 @@ var Logger = {
             this._currentOperationActions.push(logData);
     },
 
-    startLoggingFindItemConnectionCoords: function() {
+    startFindCnCoordsLog: function() {
         this._findItemConnectionCoordsData = [];
     },
 
-    stopLoggingFindItemConnectionCoords: function() {
+    stopFindCnCoordsLog: function() {
         var logData = {
             heading: "findItemConnectionCoords per item",
             subheading: "",
@@ -167,7 +167,7 @@ var Logger = {
         return subheading;
     },
 
-    logFindItemConnectionCoordsInspectConnector: function(connectorToInspect, connections) {
+    logInspectConnector: function(connectorToInspect, connections) {
         var logData = {
             heading: "Inspecting connector",
             subheading: this._getConnectorLabel(connectorToInspect),
@@ -180,7 +180,7 @@ var Logger = {
         this._findItemConnectionCoordsData.push(logData);
     },
 
-    logFindItemConnectionCoordsOutOfLayoutBounds: function(connector, itemCoords, connections) {
+    logOutOfLayoutBounds: function(connector, itemCoords, connections) {
         var logData = {
             heading: "Item coords are out of the layout bounds",
             subheading: this._getConnectorLabel(connector) + "<br>" +
@@ -195,10 +195,10 @@ var Logger = {
         this._findItemConnectionCoordsData.push(logData); 
     },
 
-    logFindItemConnectionCoordsIntersectionFound: function(connector, 
-                                                           itemCoords, 
-                                                           maybeIntersectableConnections, 
-                                                           connections) {
+    logIntFound: function(connector,
+                          itemCoords,
+                          maybeIntersectableConnections,
+                          connections) {
         var logData = {
             heading: "Item coords are intersection other connections",
             subheading: this._getConnectorLabel(connector) + "<br>" +
@@ -214,10 +214,10 @@ var Logger = {
         this._findItemConnectionCoordsData.push(logData);
     },
 
-    logFindItemConnectionCoordsWrongSorting: function(connector,
-                                                      itemCoords, 
-                                                      connectionsBelowCurrent, 
-                                                      connections) {
+    logWrongSorting: function(connector,
+                              itemCoords,
+                              connectionsBelowCurrent,
+                              connections) {
         var logData = {
             heading: "Item sorting is wrong at this coords",
             subheading: this._getConnectorLabel(connector) + "<br>" +
@@ -233,9 +233,9 @@ var Logger = {
         this._findItemConnectionCoordsData.push(logData);
     },
 
-    logFindItemConnectionCoordsVerticalIntersectionsError: function(connector, itemCoords, connections) {
+    logIntersectionsError: function(connector, itemCoords, connections) {
         var logData = {
-            heading: "noIntersectionsStrategy more than 1 vertical intersection",
+            heading: "noIntersectionsStrategy more than 1 ver/hor intersection",
             subheading: this._getConnectorLabel(connector) + "<br>" +
                         this._getItemCoordsLabel(itemCoords),
             connector: this._cloneObject(connector),
@@ -248,22 +248,7 @@ var Logger = {
         this._findItemConnectionCoordsData.push(logData);
     },
 
-    logFindItemConnectionCoordsHorizontalIntersectionsError: function(connector, itemCoords, connections) {
-        var logData = {
-            heading: "noIntersectionsStrategy more than 1 horizontal intersection",
-            subheading: this._getConnectorLabel(connector) + "<br>" +
-                        this._getItemCoordsLabel(itemCoords),
-            connector: this._cloneObject(connector),
-            itemCoords: this._cloneObject(itemCoords),
-            connections: this._cloneConnections(connections),
-            actionType: Logger.FIND_ITEM_CONNECTION_COORDS_ACTION_TYPES.HORIZONTAL_INTERSECTIONS_ERROR,
-            gridWidth: SizesResolver.outerWidth(this._grid),
-            gridHeight: SizesResolver.outerHeight(this._grid)
-        };
-        this._findItemConnectionCoordsData.push(logData);
-    },
-
-    logFindItemConnectionCoordsFound: function(connector, itemConnectionCoords, item, connections) {
+    logCnCoordsFound: function(connector, itemConnectionCoords, item, connections) {
         var logData = {
             heading: "Item coords found",
             subheading: this._getItemCoordsLabel(itemConnectionCoords),

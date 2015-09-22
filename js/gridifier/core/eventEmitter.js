@@ -1,185 +1,99 @@
-Gridifier.EventEmitter = function(gridifier) {
-    var me = this;
+var EventEmitter = function() {
+    this._callbacks = {};
+    this._insertEvTimeout = null;
 
-    me._gridifier = null;
-
-    me._showCallbacks = [];
-    me._hideCallbacks = [];
-    me._gridSizesChangeCallbacks = [];
-    me._responsiveTransformCallbacks = [];
-    me._gridRetransformCallbacks = [];
-    me._connectionCreateCallbacks = [];
-    me._disconnectCallbacks = [];
-    me._insertCallbacks = [];
-    me._insertEventTimeout = null;
-
-    me._dragEndCallbacks = [];
-
-    me._kernelCallbacks = {
-        itemsReappendExecutionEndPerDragifier: null,
-        beforeItemShowPerRetransformSorter: null
-    };
-
-    this._css = {
-    };
-
-    this._construct = function() {
-        me._gridifier = gridifier;
-        me._bindEmitterToGridifier();
-    };
-
-    this._bindEvents = function() {
-    };
-
-    this._unbindEvents = function() {
-    };
-
-    this.destruct = function() {
-        me._unbindEvents();
-    };
-
-    this._construct();
-    return this;
+    this._init();
 }
 
-Gridifier.EventEmitter.prototype._bindEmitterToGridifier = function() {
-    var me = this;
-    this._gridifier.onShow = function(callbackFn) { me.onShow.call(me, callbackFn); };
-    this._gridifier.onHide = function(callbackFn) { me.onHide.call(me, callbackFn); };
-    this._gridifier.onGridSizesChange = function(callbackFn) { me.onGridSizesChange.call(me, callbackFn); };
-    this._gridifier.onResponsiveTransform = function(callbackFn) { me.onResponsiveTransform.call(me, callbackFn); };
-    this._gridifier.onGridRetransform = function(callbackFn) { me.onGridRetransform.call(me, callbackFn); };
-    this._gridifier.onConnectionCreate = function(callbackFn) { me.onConnectionCreate.call(me, callbackFn); };
-    this._gridifier.onDisconnect = function(callbackFn) { me.onDisconnect.call(me, callbackFn); };
-    this._gridifier.onInsert = function(callbackFn) { me.onInsert.call(me, callbackFn); };
+proto(EventEmitter, {
+    _init: function() {
+        var me = this;
 
-    this._gridifier.onDragEnd = function(callbackFn) { me.onDragEnd.call(me, callbackFn); };
-}
+        var init = function(evObj, initNull, evTarget) {
+            for(var prop in evObj) {
+                var evName = evObj[prop];
+                this._callbacks[evName] = (initNull) ? null : [];
 
-Gridifier.EventEmitter.prototype.onShow = function(callbackFn) {
-    this._showCallbacks.push(callbackFn);
-}
-
-Gridifier.EventEmitter.prototype.onHide = function(callbackFn) {
-    this._hideCallbacks.push(callbackFn);
-}
-
-Gridifier.EventEmitter.prototype.onResponsiveTransform = function(callbackFn) {
-    this._responsiveTransformCallbacks.push(callbackFn);
-}
-
-Gridifier.EventEmitter.prototype.onGridRetransform = function(callbackFn) {
-    this._gridRetransformCallbacks.push(callbackFn);
-}
-
-Gridifier.EventEmitter.prototype.onGridSizesChange = function(callbackFn) {
-    this._gridSizesChangeCallbacks.push(callbackFn);
-}
-
-Gridifier.EventEmitter.prototype.onConnectionCreate = function(callbackFn) {
-    this._connectionCreateCallbacks.push(callbackFn);
-}
-
-Gridifier.EventEmitter.prototype.onDisconnect = function(callbackFn) {
-    this._disconnectCallbacks.push(callbackFn);
-}
-
-Gridifier.EventEmitter.prototype.onInsert = function(callbackFn) {
-    this._insertCallbacks.push(callbackFn);
-}
-
-Gridifier.EventEmitter.prototype.onDragEnd = function(callbackFn) {
-    this._dragEndCallbacks.push(callbackFn);
-}
-
-Gridifier.EventEmitter.prototype.onItemsReappendExecutionEndPerDragifier = function(callbackFn) {
-    this._kernelCallbacks.itemsReappendExecutionEndPerDragifier = callbackFn;
-}
-
-Gridifier.EventEmitter.prototype.onBeforeShowPerRetransformSorter = function(callbackFn) {
-    this._kernelCallbacks.beforeItemShowPerRetransformSorter = callbackFn;
-}
-
-Gridifier.EventEmitter.prototype.emitShowEvent = function(item) {
-    for(var i = 0; i < this._showCallbacks.length; i++) {
-        this._showCallbacks[i](item);
-    }
-}
-
-Gridifier.EventEmitter.prototype.emitHideEvent = function(item) {
-    for(var i = 0; i < this._hideCallbacks.length; i++) {
-        this._hideCallbacks[i](item);
-    }
-
-    var collector = this._gridifier.getCollector();
-    if(collector.isItemRestrictedToCollect(item)) {
-        for(var j = 0; j < this._disconnectCallbacks.length; j++)
-            this._disconnectCallbacks[j](item);
-    }
-}
-
-Gridifier.EventEmitter.prototype.emitGridSizesChangeEvent = function() {
-    for(var i = 0; i < this._gridSizesChangeCallbacks.length; i++) {
-        this._gridSizesChangeCallbacks[i]();
-    }
-}
-
-Gridifier.EventEmitter.prototype.emitResponsiveTransformEvent = function(item, addedClasses, removedClasses) {
-    for(var i = 0; i < this._responsiveTransformCallbacks.length; i++) {
-        this._responsiveTransformCallbacks[i](item, addedClasses, removedClasses);
-    }
-}
-
-Gridifier.EventEmitter.prototype.emitGridRetransformEvent = function() {
-    for(var i = 0; i < this._gridRetransformCallbacks.length; i++) {
-        this._gridRetransformCallbacks[i]();
-    }
-}
-
-Gridifier.EventEmitter.prototype.emitConnectionCreateEvent = function(connections) {
-    for(var i = 0; i < this._connectionCreateCallbacks.length; i++) {
-        // A little delay here is required per usage with silentRender
-        // immediately after silentAppend.
-        (function(callback, connections) {
-            setTimeout(function() {
-                callback(connections);
-            }, 0);
-        })(this._connectionCreateCallbacks[i], connections);
-    }
-}
-
-Gridifier.EventEmitter.prototype.emitInsertEvent = function(items) {
-    var emitEvent = function() {
-        for(var i = 0; i < this._insertCallbacks.length; i++) {
-            this._insertCallbacks[i](items);
+                (function(evName) {
+                    evTarget["on" + evName] = function(cb) {
+                        me._callbacks[evName].push(cb);
+                    }
+                })(evName);
+            }
         }
+
+        init.call(me, EV, false, gridifier);
+        init.call(me, INT_EV, true, me);
+    },
+
+    _getArgs: function(evObj, evName, origArgs) {
+        if(!Dom.hasOwnProp(evObj, evName))
+            err("no " + evName + " to emit");
+
+        var args = [];
+        Array.prototype.push.apply(args, origArgs);
+        args.shift();
+
+        return args;
+    },
+
+    emit: function(evName) {
+        var args = this._getArgs(EV, evName, arguments);
+        var me = this;
+
+        if(evName == EV.INSERT) {
+            this._emitInsertEvent(args[0]);
+            return;
+        }
+
+        for(var i = 0; i < this._callbacks[evName].length; i++) {
+            if(evName == EV.REPOSITION) {
+                (function(cb, args) {
+                    // Delay for silentRender() call imm-ly after silentAppend()
+                    setTimeout(function() { cb.apply(me, args); }, 0);
+                })(this._callbacks[evName][i], args);
+            }
+            else
+                this._callbacks[evName][i].apply(this, args);
+        }
+
+        if(evName == EV.HIDE && collector.isNotCollectable(args[0])) {
+            for(var i = 0; i < this._callbacks[EV.DISCONNECT].length; i++)
+                this._callbacks[EV.DISCONNECT][i](args[0]);
+        }
+    },
+
+    _emitInsertEvent: function(items) {
+        var emit = function(items) {
+            for(var i = 0; i < this._callbacks[EV.INSERT].length; i++)
+                this._callbacks[EV.INSERT][i](items);
+        }
+
+        if(this._insertEvTimeout != null) {
+            clearTimeout(this._insertEvTimeout);
+            this._insertEvTimeout = null;
+            items.concat(this._insertEvItems);
+        }
+
+        var me = this;
+        this._insertEvItems = items;
+        this._insertEvTimeout = setTimeout(function() {
+            me._insertEvTimeout = null;
+            emit.call(me, items);
+        }, 20);
+    },
+
+    emitInternal: function(evName) {
+        var args = this._getArgs(INT_EV, evName, arguments);
+        if(this._callbacks[evName] == null) return;
+
+        this._callbacks[evName].apply(this, args);
+        if(evName == INT_EV.REPOSITION_END_FOR_DRAG)
+            this._callbacks[evName] = null;
+    },
+
+    rmInternal: function(evName) {
+        this._getArgs(INT_EV, evName, arguments);
+        this._callbacks[evName] = null;
     }
-
-    if(this._insertEventTimeout != null) {
-        clearTimeout(this._insertEventTimeout);
-        this._insertEventTimeout = null;
-    }
-
-    var me = this;
-    this._insertEventTimeout = setTimeout(function() {
-        emitEvent.call(me);
-    }, 20);
-}
-
-Gridifier.EventEmitter.prototype.emitDragEndEvent = function(sortedItems) {
-    for(var i = 0; i < this._dragEndCallbacks.length; i++) {
-        this._dragEndCallbacks[i](sortedItems);
-    }
-}
-
-Gridifier.EventEmitter.prototype.emitItemsReappendExecutionEndPerDragifier = function() {
-    if(this._kernelCallbacks.itemsReappendExecutionEndPerDragifier != null) {
-        this._kernelCallbacks.itemsReappendExecutionEndPerDragifier();
-        this._kernelCallbacks.itemsReappendExecutionEndPerDragifier = null;
-    }
-}
-
-Gridifier.EventEmitter.prototype.emitBeforeShowPerRetransformSortEvent = function() {
-    if(this._kernelCallbacks.beforeItemShowPerRetransformSorter != null)
-        this._kernelCallbacks.beforeItemShowPerRetransformSorter();
-}
+});

@@ -1,122 +1,58 @@
-Gridifier.Disconnector = function(gridifier,
-                                  collector,
-                                  connections,
-                                  connectionsSorter,
-                                  connectors,
-                                  settings,
-                                  guid,
-                                  appender,
-                                  reversedAppender) {
-    var me = this;
+var Disconnector = function() {}
 
-    this._gridifier = null;
-    this._collector = null;
-    this._connections = null;
-    this._connectionsSorter = null;
-    this._connectors = null;
-    this._settings = null;
-    this._guid = null;
-    this._connectedItemMarker = null;
-    this._appender = null;
-    this._reversedAppender = null;
+proto(Disconnector, {
+    disconnect: function(items, discType) {
+        var discType = discType || C.DISC_TYPES.SOFT;
+        var items = gridItem.filterConnected(gridItem.toNative(items));
 
-    this._css = {
-    };
+        if(discType == C.DISC_TYPES.HARD) {
+            for(var i = 0; i < items.length; i++)
+                collector.markAsNotCollectable(items[i]);
+        }
 
-    this._construct = function() {
-        me._gridifier = gridifier;
-        me._collector = collector;
-        me._connections = connections;
-        me._connectionsSorter = connectionsSorter;
-        me._connectors = connectors;
-        me._settings = settings;
-        me._guid = guid;
-        me._connectedItemMarker = new Gridifier.ConnectedItemMarker();
-        me._appender = appender;
-        me._reversedAppender = reversedAppender;
-    };
+        var cnsToDisc = this._findCnsToDisc(items);
+        for(var i = 0; i < cnsToDisc.length; i++) {
+            connections.rm(cnsToDisc[i]);
+            guid.rm(cnsToDisc[i].item);
+        }
 
-    this._bindEvents = function() {
-    };
+        if(connections.count() == 0)
+            this._recreateCrs();
 
-    this._unbindEvents = function() {
-    };
+        for(var i = 0; i < cnsToDisc.length; i++)
+            gridItem.unmarkAsConnected(cnsToDisc[i].item);
 
-    this.destruct = function() {
-        me._unbindEvents();
-    };
+        connections.reinitRanges();
+        this._scheduleRender(cnsToDisc);
+    },
 
-    this._construct();
-    return this;
-}
+    _findCnsToDisc: function(items) {
+        var cns = [];
+        for(var i = 0 ; i < items.length; i++)
+            cns.push(connections.find(items[i]));
 
-// Soft disconnect is used in filters.(After hard disconnect items
-//  shouldn't show on filter show)
-Gridifier.Disconnector.DISCONNECT_TYPES = {SOFT: 0, HARD: 1};
+        return cnsSorter.sortForReappend(cns);
+    },
 
-Gridifier.Disconnector.prototype.disconnect = function(items, disconnectType) {
-    var items = this._collector.toDOMCollection(items);
-    this._collector.ensureAllItemsAreConnectedToGrid(items);
+    // We should recreate crs on cns.length == 0,
+    // because reposition.all() will exit before recreating positionCrs.
+    _recreateCrs: function() {
+        connectors.flush();
 
-    var disconnectType = disconnectType || Gridifier.Disconnector.DISCONNECT_TYPES.SOFT;
-    if(disconnectType == Gridifier.Disconnector.DISCONNECT_TYPES.HARD) {
-        for(var i = 0; i < items.length; i++)
-            this._collector.markItemAsRestrictedToCollect(items[i]);
+        if(settings.eq("append", "default"))
+            appender.createInitialCr();
+        else
+            reversedAppender.createInitialCr();
+    },
+
+    _scheduleRender: function(discCns) {
+        var cnBatches = insertQueue.itemsToBatches(discCns, C.DISC_BATCH);
+        renderer.markAsSchToHide(discCns);
+
+        for(var i = 0; i < cnBatches.length; i++) {
+            (function(cnBatch, i) {
+                setTimeout(function() { renderer.hide(cnBatch); }, C.DISC_DELAY * i);
+            })(cnBatches[i], i);
+        }
     }
-
-    var connectionsToDisconnect = this._findConnectionsToDisconnect(items);
-    for(var i = 0; i < connectionsToDisconnect.length; i++) {
-        this._connections.removeConnection(connectionsToDisconnect[i]);
-        this._guid.removeItemGUID(connectionsToDisconnect[i].item);
-    }
-    if(this._connections.get().length == 0)
-        this._recreateConnectors();
-    
-    for(var i = 0; i < connectionsToDisconnect.length; i++)
-        this._connectedItemMarker.unmarkItemAsConnected(connectionsToDisconnect[i].item);
-
-    this._connections.reinitRanges();
-    this._scheduleDisconnectedItemsRender(connectionsToDisconnect);
-}
-
-Gridifier.Disconnector.prototype._findConnectionsToDisconnect = function(items) {
-    var connectionsToDisconnect = [];
-
-    for(var i = 0; i < items.length; i++) {
-        var itemConnection = this._connections.findConnectionByItem(items[i]);
-        connectionsToDisconnect.push(itemConnection);
-    }
-
-    return this._connectionsSorter.sortConnectionsPerReappend(connectionsToDisconnect);
-}
-
-// We should recreate connectors on connections.length == 0,
-// because retransformAllSizes will exit before recreating transformerConnectors.
-Gridifier.Disconnector.prototype._recreateConnectors = function() {
-    this._connectors.flush();
-
-    if(this._settings.isDefaultAppend()) {
-        this._appender.createInitialConnector();
-    }
-    else if(this._settings.isReversedAppend()) {
-        this._reversedAppender.createInitialConnector();
-    }
-}
-
-Gridifier.Disconnector.prototype._scheduleDisconnectedItemsRender = function(disconnectedConnections) {
-    var renderer = this._gridifier.getRenderer();
-    var connectionBatches = this._gridifier.splitToBatches(disconnectedConnections, 12);
-
-    var itemsToDisconnect = [];
-    for(var i = 0; i < connectionBatches.length; i++) {
-        for(var j = 0; j < connectionBatches[i].length; j++)
-            itemsToDisconnect.push(connectionBatches[i][j].item);
-    }
-
-    renderer.markItemsAsScheduledToHide(itemsToDisconnect);
-    for(var i = 0; i < connectionBatches.length; i++) {
-        (function(connectionBatch, i) {
-            setTimeout(function() { renderer.hideConnections(connectionBatch); }, 60 * i);
-        })(connectionBatches[i], i);
-    }
-}
+});

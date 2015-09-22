@@ -1,107 +1,50 @@
-Gridifier.Iterator = function(settings, collector, connections, connectionsSorter, guid) {
-    var me = this;
-
-    this._settings = null;
-    this._collector = null;
-    this._connections = null;
-    this._connectionsSorter = null;
-    this._guid = null;
-
-    this._css = {
-    };
-
-    this._construct = function() {
-        me._settings = settings;
-        me._collector = collector;
-        me._connections = connections;
-        me._connectionsSorter = connectionsSorter;
-        me._guid = guid;
-    };
-
-    this._bindEvents = function() {
-
-    };
-
-    this._unbindEvents = function() {
-    };
-
-    this.destruct = function() {
-        me._unbindEvents();
-    };
-
-    this._construct();
-    return this;
+var Iterator = function() {
+    var g = this.get;
+    self(this, {
+        first: function() { return g("first"); },
+        last: function() { return g("last"); },
+        next: function(i) { return g("next", i); },
+        prev: function(i) { return g("prev", i); },
+        all: function() { return g("all"); }
+    });
 }
 
-Gridifier.Iterator.prototype.getFirst = function() {
-    var connections = this._connections.get();
-    if(connections.length == 0)
-        return null;
+proto(Iterator, {
+    get: function(type, item) {
+        var cns = connections.get();
+        if(cns.length == 0)
+            return (type == "all") ? [] : null;
 
-    connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
-    return connections[0].item;
-}
+        cns = cnsSorter.sortForReappend(cns);
+        if(type == "first")
+            return cns[0].item;
+        else if(type == "last")
+            return cns[cns.length - 1].item;
 
-Gridifier.Iterator.prototype.getLast = function() {
-    var connections = this._connections.get();
-    if(connections.length == 0)
-        return null;
+        var cond = function(i1, i2) {
+            return guid.get(i1) == guid.get(gridItem.toNative(i2)[0]);
+        };
 
-    connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
-    return connections[connections.length - 1].item;
-}
-
-Gridifier.Iterator.prototype.getNext = function(item) {
-    var items = this._collector.toDOMCollection(item);
-    item = items[0];
-
-    var connections = this._connections.get();
-    if(connections.length == 0)
-        return null;
-
-    connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
-    for(var i = 0; i < connections.length; i++) {
-        if(this._guid.getItemGUID(connections[i].item) == this._guid.getItemGUID(item)) {
-            if(i + 1 > connections.length - 1)
-                return null;
-
-            return connections[i + 1].item;
+        if(type == "next") {
+            for(var i = 0; i < cns.length; i++) {
+                if(cond(cns[i].item, item))
+                    return (i + 1 > cns.length - 1) ? null : cns[i + 1].item;
+            }
         }
-    }
-
-    return null;
-}
-
-Gridifier.Iterator.prototype.getPrev = function(item) {
-    var items = this._collector.toDOMCollection(item);
-    item = items[0];
-
-    var connections = this._connections.get();
-    if(connections.length == 0)
-        return null;
-
-    connections = this._connectionsSorter.sortConnectionsPerReappend(connections);
-    for(var i = connections.length - 1; i >= 0; i--) {
-        if(this._guid.getItemGUID(connections[i].item) == this._guid.getItemGUID(item)) {
-            if(i - 1 < 0)
-                return null;
-
-            return connections[i - 1].item;
+        else if(type == "prev") {
+            for(var i = cns.length - 1; i >= 0; i--) {
+                if(cond(cns[i].item, item))
+                    return (i - 1 < 0) ? null : cns[i - 1].item;
+            }
         }
+        else if(type == "all") {
+            var items = [];
+            for(var i = 0; i < cns.length; i++)
+                items.push(cns[i].item);
+
+            return items;
+        }
+
+        return null;
     }
-
-    return null;
-}
-
-Gridifier.Iterator.prototype.getAll = function() {
-    var connections = this._connections.get();
-    if(connections.length == 0)
-        return [];
-
-    var sortedConnections = this._connectionsSorter.sortConnectionsPerReappend(connections);
-    var items = [];
-    for(var i = 0; i < sortedConnections.length; i++)
-        items.push(sortedConnections[i].item);
-
-    return items;
-}
+});

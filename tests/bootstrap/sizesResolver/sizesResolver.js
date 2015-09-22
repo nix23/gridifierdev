@@ -19,6 +19,7 @@ $(document).ready(function() {
                 me._testCallWithElementWithoutParentNode.call(me, assert);
                 me._testCallWithWrongCSSProperty.call(me, assert);
 
+                me._testCallWithArray.call(me);
                 me._testCallPerAllPossibleValuesWithElementPxValue.call(me);
                 me._testCallPerAllPossibleValuesWithElementPercentageValue.call(me);
                 me._testCallPerAllPossibleValuesWithElementPercentageValueDeclaredInClass.call(me);
@@ -33,8 +34,8 @@ $(document).ready(function() {
 
             var testerDiv = document.createElement("div");
             assert.throws(
-                function() { SizesResolver.hasPercentageCSSValue("testCSSProperty", testerDiv); },
-                /(.*)Can't resolve element parentNode per element:(.*)/,
+                function() { SizesResolver._hasPtCSSVal("testCSSProperty", testerDiv); },
+                /(.*)Error: no parentNode(.*)/,
                 "call on element without parent node"
             );
         },
@@ -46,9 +47,35 @@ $(document).ready(function() {
             $testContent.append($(testerDiv));
 
             assert.throws(
-                function() { SizesResolver.hasPercentageCSSValue("wrongCSSProperty", testerDiv); },
-                /(.*)Can't find property 'wrongCSSProperty' in elementComputedCSS.(.*)/,
+                function() { SizesResolver._hasPtCSSVal("wrongCSSProperty", testerDiv); },
+                /(.*)Error: no prop(.*)/,
                 "call with wrong CSS property"
+            );
+        },
+
+        _testCallWithArray: function() {
+            clearTestData();
+
+            var testerDiv = document.createElement("div");
+            testerDiv.style["width"] = "20px";
+            testerDiv.style["height"] = "20%";
+            $testContent.append($(testerDiv));
+
+            ok(
+                SizesResolver._hasPtCSSVal(["width", "height"], testerDiv),
+                "call with [Array]cssProperty = 'width = 20px, height = 20%'"
+            );
+
+            clearTestData();
+
+            var testerDiv = document.createElement("div");
+            testerDiv.style["width"] = "20px";
+            testerDiv.style["height"] = "30px";
+            $testContent.append($(testerDiv));
+
+            ok(
+                !SizesResolver._hasPtCSSVal(["width", "height"], testerDiv),
+                "call with [Array]cssProperty = 'width = 20px, height = 20px'"
             );
         },
 
@@ -68,13 +95,13 @@ $(document).ready(function() {
                 $testContent.append($(testerDiv));
 
                 ok(
-                    !SizesResolver.hasPercentageCSSValue(cssProperty, testerDiv),
+                    !SizesResolver._hasPtCSSVal(cssProperty, testerDiv),
                     "call with cssProperty = '" + cssProperty + "' and px value"
                 );
 
-                var recalculatedElementCSS = SizesResolver._getComputedCSSWithMaybePercentageSizes(testerDiv);
+                var recalculatedElementCSS = SizesResolver.getUncomputedCSS(testerDiv);
                 ok(
-                    !SizesResolver.hasPercentageCSSValue(cssProperty, testerDiv, recalculatedElementCSS),
+                    !SizesResolver._hasPtCSSVal(cssProperty, testerDiv, recalculatedElementCSS),
                     "call with cssProperty = '" + cssProperty + "', px value and recalculatedElementCSS"
                 );
             }
@@ -96,13 +123,13 @@ $(document).ready(function() {
                 $testContent.append($(testerDiv));
 
                 ok(
-                    SizesResolver.hasPercentageCSSValue(cssProperty, testerDiv),
+                    SizesResolver._hasPtCSSVal(cssProperty, testerDiv),
                     "call with cssProperty = '" + cssProperty + "' and % value"
                 );
 
-                var recalculatedElementCSS = SizesResolver._getComputedCSSWithMaybePercentageSizes(testerDiv);
+                var recalculatedElementCSS = SizesResolver.getUncomputedCSS(testerDiv);
                 ok(
-                    SizesResolver.hasPercentageCSSValue(cssProperty, testerDiv, recalculatedElementCSS),
+                    SizesResolver._hasPtCSSVal(cssProperty, testerDiv, recalculatedElementCSS),
                     "call with cssProperty = '" + cssProperty + "', % value and recalculatedElementCSS"
                 );
             }
@@ -131,13 +158,13 @@ $(document).ready(function() {
                 $testContent.append($(testerDiv));
 
                 ok(
-                    SizesResolver.hasPercentageCSSValue(cssProperty, testerDiv),
+                    SizesResolver._hasPtCSSVal(cssProperty, testerDiv),
                     "call with cssProperty = '" + cssProperty + "' and % value(declared in class)"
                 );
 
-                var recalculatedElementCSS = SizesResolver._getComputedCSSWithMaybePercentageSizes(testerDiv);
+                var recalculatedElementCSS = SizesResolver.getUncomputedCSS(testerDiv);
                 ok(
-                    SizesResolver.hasPercentageCSSValue(cssProperty, testerDiv, recalculatedElementCSS),
+                    SizesResolver._hasPtCSSVal(cssProperty, testerDiv, recalculatedElementCSS),
                     "call with cssProperty = '" + cssProperty + "', % value(declared in class) and recalculatedElementCSS"
                 );
             }
@@ -171,7 +198,7 @@ $(document).ready(function() {
 
                 var areAllFullhandedPropertiesCorrectlyCalculated = true;
                 for(var j = 0; j < computedCssPropertiesToCheck.length; j++) {
-                    if(!SizesResolver.hasPercentageCSSValue(computedCssPropertiesToCheck[j], testerDiv))
+                    if(!SizesResolver._hasPtCSSVal(computedCssPropertiesToCheck[j], testerDiv))
                         areAllFullhandedPropertiesCorrectlyCalculated = false;
                 }
 
@@ -217,8 +244,8 @@ $(document).ready(function() {
 
             var testerDiv = document.createElement("div");
             assert.throws(
-                function() { SizesResolver.getPercentageCSSValue("testCSSProperty", testerDiv); },
-                /(.*)Can't resolve element parentNode per element:(.*)/,
+                function() { SizesResolver._getPtCSSVal("testCSSProperty", testerDiv); },
+                /(.*)Error: no parentNode(.*)/,
                 "call on element without parent node"
             );
         },
@@ -230,8 +257,8 @@ $(document).ready(function() {
             $testContent.append($(testerDiv));
 
             assert.throws(
-                function() { SizesResolver.getPercentageCSSValue("wrongCSSProperty", testerDiv); },
-                /(.*)Can't find property 'wrongCSSProperty' in elementComputedCSS.(.*)/,
+                function() { SizesResolver._getPtCSSVal("wrongCSSProperty", testerDiv); },
+                /(.*)Error: no prop(.*)/,
                 "call with wrong CSS property"
             );
         },
@@ -252,13 +279,13 @@ $(document).ready(function() {
                 $testContent.append($(testerDiv));
 
                 ok(
-                    SizesResolver.getPercentageCSSValue(cssProperty, testerDiv) == "20%",
+                    SizesResolver._getPtCSSVal(cssProperty, testerDiv) == "20%",
                     "call with cssProperty = '" + cssProperty + "' and % value"
                 );
 
-                var recalculatedElementCSS = SizesResolver._getComputedCSSWithMaybePercentageSizes(testerDiv);
+                var recalculatedElementCSS = SizesResolver.getUncomputedCSS(testerDiv);
                 ok(
-                    SizesResolver.getPercentageCSSValue(cssProperty, testerDiv, recalculatedElementCSS) == "20%",
+                    SizesResolver._getPtCSSVal(cssProperty, testerDiv, recalculatedElementCSS) == "20%",
                     "call with cssProperty = '" + cssProperty + "', % value and recalculatedElementCSS"
                 );
             }
@@ -287,13 +314,13 @@ $(document).ready(function() {
                 $testContent.append($(testerDiv));
 
                 ok(
-                    SizesResolver.getPercentageCSSValue(cssProperty, testerDiv) == "60%",
+                    SizesResolver._getPtCSSVal(cssProperty, testerDiv) == "60%",
                     "call with cssProperty = '" + cssProperty + "' and % value(declared in class)"
                 );
 
-                var recalculatedElementCSS = SizesResolver._getComputedCSSWithMaybePercentageSizes(testerDiv);
+                var recalculatedElementCSS = SizesResolver.getUncomputedCSS(testerDiv);
                 ok(
-                    SizesResolver.getPercentageCSSValue(cssProperty, testerDiv, recalculatedElementCSS) == "60%",
+                    SizesResolver._getPtCSSVal(cssProperty, testerDiv, recalculatedElementCSS) == "60%",
                     "call with cssProperty = '" + cssProperty + "', % value(declared in class) and recalculatedElementCSS"
                 );
             }
@@ -327,7 +354,7 @@ $(document).ready(function() {
 
                 var areAllFullhandedPropertiesCorrectlyCalculated = true;
                 for(var j = 0; j < computedCssPropertiesToCheck.length; j++) {
-                    if(!SizesResolver.getPercentageCSSValue(computedCssPropertiesToCheck[j], testerDiv) == "60%")
+                    if(!SizesResolver._getPtCSSVal(computedCssPropertiesToCheck[j], testerDiv) == "60%")
                         areAllFullhandedPropertiesCorrectlyCalculated = false;
                 }
 
@@ -357,8 +384,8 @@ $(document).ready(function() {
             test("_recalculateTwoSidePropertyWithPercentageValues", function(assert) {
                 me._before.call(me);
 
-                me._testCallWithWrongDirection.call(me, assert);
-                me._testCallWithWrongCSSProperty.call(me, assert);
+                //me._testCallWithWrongDirection.call(me, assert);
+                //me._testCallWithWrongCSSProperty.call(me, assert);
 
                 me._testCallToRecalculateHorizontalPaddingsWithLeftPercentagePadding.call(me);
                 me._testCallToRecalculateHorizontalPaddingsWithRightPercentagePadding.call(me);
@@ -384,7 +411,7 @@ $(document).ready(function() {
             clearTestData();
 
             assert.throws(
-                function() { SizesResolver._recalculateTwoSidePropertyWithPercentageValues(null, null, null, null, null, "wrongDirection"); },
+                function() { SizesResolver._recalcTwoSidePropPtVals(null, null, null, null, null, "wrongDirection"); },
                 /(.*)SizesResolver error: wrong direction in twoSideProperty recalculation.(.*)/,
                 "call with wrong direction"
             );
@@ -394,7 +421,7 @@ $(document).ready(function() {
             clearTestData();
 
             assert.throws(
-                function() { SizesResolver._recalculateTwoSidePropertyWithPercentageValues(null, null, null, null, "wrongProperty", "horizontal"); },
+                function() { SizesResolver._recalcTwoSidePropPtVals(null, null, null, null, "wrongProperty", "horizontal"); },
                 /(.*)SizesResolver error: unknown CSSProperty in twoSideProperty recalculation.(.*)/,
                 "call with wrong CSS property"
             );
@@ -426,13 +453,12 @@ $(document).ready(function() {
             };
 
             ok(
-                SizesResolver._recalculateTwoSidePropertyWithPercentageValues(
+                SizesResolver._recalcTwoSidePropPtVals(
                     $testerDiv.get(0), 
                     1000,
                     computedPropertiesMock,
                     false,
-                    "padding",
-                    "horizontal"
+                    "padding"
                 ) == 115,
                 "call with parentNode width = 1000px, padding-left = 10.5%, padding-right = 10px"
             );
@@ -464,13 +490,12 @@ $(document).ready(function() {
             };
 
             ok(
-                SizesResolver._recalculateTwoSidePropertyWithPercentageValues(
+                SizesResolver._recalcTwoSidePropPtVals(
                     $testerDiv.get(0), 
                     1000,
                     computedPropertiesMock,
                     false,
-                    "padding",
-                    "horizontal"
+                    "padding"
                 ) == 115,
                 "call with parentNode width = 1000px, padding-left = 10px, padding-right = 10.5%"
             );
@@ -502,13 +527,12 @@ $(document).ready(function() {
             };
 
             ok(
-                SizesResolver._recalculateTwoSidePropertyWithPercentageValues(
+                SizesResolver._recalcTwoSidePropPtVals(
                     $testerDiv.get(0), 
                     1000,
                     computedPropertiesMock,
                     false,
-                    "padding",
-                    "horizontal"
+                    "padding"
                 ) == 210,
                 "call with parentNode width = 1000px, padding-left = 10.5%, padding-right = 10.5%"
             );
@@ -540,13 +564,12 @@ $(document).ready(function() {
             };
 
             ok(
-                SizesResolver._recalculateTwoSidePropertyWithPercentageValues(
+                SizesResolver._recalcTwoSidePropPtVals(
                     $testerDiv.get(0), 
                     1000,
                     computedPropertiesMock,
                     false,
-                    "margin",
-                    "horizontal"
+                    "margin"
                 ) == 115,
                 "call with parentNode width = 1000px, margin-left = 10.5%, margin-right = 10px"
             );
@@ -578,13 +601,12 @@ $(document).ready(function() {
             };
 
             ok(
-                SizesResolver._recalculateTwoSidePropertyWithPercentageValues(
+                SizesResolver._recalcTwoSidePropPtVals(
                     $testerDiv.get(0), 
                     1000,
                     computedPropertiesMock,
                     false,
-                    "margin",
-                    "horizontal"
+                    "margin"
                 ) == 115,
                 "call with parentNode width = 1000px, margin-left = 10px, margin-right = 10.5%"
             );
@@ -616,13 +638,12 @@ $(document).ready(function() {
             };
 
             ok(
-                SizesResolver._recalculateTwoSidePropertyWithPercentageValues(
+                SizesResolver._recalcTwoSidePropPtVals(
                     $testerDiv.get(0), 
                     1000,
                     computedPropertiesMock,
                     false,
-                    "margin",
-                    "horizontal"
+                    "margin"
                 ) == 210,
                 "call with parentNode width = 1000px, margin-left = 10.5%, margin-right = 10.5%"
             );
@@ -654,13 +675,13 @@ $(document).ready(function() {
             };
 
             ok(
-                SizesResolver._recalculateTwoSidePropertyWithPercentageValues(
+                SizesResolver._recalcTwoSidePropPtVals(
                     $testerDiv.get(0), 
                     1000,
                     computedPropertiesMock,
                     false,
                     "padding",
-                    "vertical"
+                    true
                 ) == 115,
                 "call with parentNode height = 1000px, padding-top = 10.5%, padding-bottom = 10px"
             );
@@ -692,13 +713,13 @@ $(document).ready(function() {
             };
 
             ok(
-                SizesResolver._recalculateTwoSidePropertyWithPercentageValues(
+                SizesResolver._recalcTwoSidePropPtVals(
                     $testerDiv.get(0), 
                     1000,
                     computedPropertiesMock,
                     false,
                     "padding",
-                    "vertical"
+                    true
                 ) == 115,
                 "call with parentNode height = 1000px, padding-top = 10px, padding-bottom = 10.5%"
             );
@@ -730,13 +751,13 @@ $(document).ready(function() {
             };
 
             ok(
-                SizesResolver._recalculateTwoSidePropertyWithPercentageValues(
+                SizesResolver._recalcTwoSidePropPtVals(
                     $testerDiv.get(0), 
                     1000,
                     computedPropertiesMock,
                     false,
                     "padding",
-                    "vertical"
+                    true
                 ) == 210,
                 "call with parentNode height = 1000px, padding-top = 10.5%, padding-bottom = 10.5%"
             );
@@ -769,13 +790,13 @@ $(document).ready(function() {
             };
 
             ok(
-                SizesResolver._recalculateTwoSidePropertyWithPercentageValues(
+                SizesResolver._recalcTwoSidePropPtVals(
                     $testerDiv.get(0), 
                     1000,
                     computedPropertiesMock,
                     false,
                     "margin",
-                    "vertical"
+                    true
                 ) == 115,
                 "call with parentNode height = 1000px, margin-top = 10.5%, margin-bottom = 10px"
             );
@@ -807,13 +828,13 @@ $(document).ready(function() {
             };
 
             ok(
-                SizesResolver._recalculateTwoSidePropertyWithPercentageValues(
+                SizesResolver._recalcTwoSidePropPtVals(
                     $testerDiv.get(0), 
                     1000,
                     computedPropertiesMock,
                     false,
                     "margin",
-                    "vertical"
+                    true
                 ) == 115,
                 "call with parentNode height = 1000px, margin-top = 10px, margin-bottom = 10.5%"
             );
@@ -845,13 +866,13 @@ $(document).ready(function() {
             };
 
             ok(
-                SizesResolver._recalculateTwoSidePropertyWithPercentageValues(
+                SizesResolver._recalcTwoSidePropPtVals(
                     $testerDiv.get(0), 
                     1000,
                     computedPropertiesMock,
                     false,
                     "margin",
-                    "vertical"
+                    true
                 ) == 210,
                 "call with parentNode height = 1000px, margin-top = 10.5%, margin-bottom = 10.5%"
             );

@@ -1,72 +1,74 @@
 SizesResolver.getComputedCSSFunction = function() {
-    if(window.getComputedStyle)
-    {
-        return function(DOMElem) {
-            return window.getComputedStyle(DOMElem, null);
+    if(window.getComputedStyle) {
+        return function(item) {
+            return window.getComputedStyle(item, null);
         }
     }
-    else
-    {
-        return function(DOMElem) {
-            return DOMElem.currentStyle;
+    else {
+        return function(item) {
+            return item.currentStyle;
         }
     }
 };
 
-SizesResolver.determineMaybePrefixedProperties = function() {
-    this.maybePrefixedProperties.boxSizing = Prefixer.get("boxSizing");
+SizesResolver._findPrefixedProps = function() {
+    this._prefixedProps.boxSizing = Prefixer.get("boxSizing");
 };
 
 // based on http://connect.microsoft.com/IE/feedback/details/695683/dimensions-returned-by-getcomputedstyle-are-wrong-if-element-has-box-sizing-border-box.
 // At least IE10 and FF7 returns computed width and height without padding and borders, so we should determine sizes calculation type here.
 // Looks like 'workaround', but bootstrap inspired me.(They use similar aproach as in Dom.isBrowserSupportingTransitions
 // to detect if browser is supporting transitions, they are using so-called testerEl).
-SizesResolver.determineBorderBoxComputedSizesCalculationStrategy = function() {
-    var testerDiv = document.createElement("div");
+SizesResolver._findBorderBoxType = function() {
+    var tester = Dom.div();
 
-    testerDiv.style.width = "100px";
-    testerDiv.style.padding = "10px 20px";
-    testerDiv.style.borderWidth = "10px 20px";
-    testerDiv.style.borderStyle = "solid";
+    Dom.css.set(tester, {
+        width: "100px",
+        padding: "10px 20px",
+        borderWidth: "10px 20px",
+        borderStyle: "solid"
+    });
 
-    var boxSizingProperty = this.maybePrefixedProperties.boxSizing;
-    testerDiv.style[boxSizingProperty] = "border-box";
+    var boxSizingProp = this._prefixedProps.boxSizing;
+    tester.style[boxSizingProp] = "border-box";
 
-    var rootElement = document.body || document.documentElement;
-    rootElement.appendChild(testerDiv);
+    var root = document.body || document.documentElement;
+    root.appendChild(tester);
 
-    var testerDivComputedCSS = this.getComputedCSS(testerDiv);
-    if(this.normalizeComputedCSSSizeValue(testerDivComputedCSS.width) === 100) 
-        this.borderBoxSizingStrategy = this.borderBoxSizingStrategies.OUTER;
+    var testerComputedCSS = this.getComputedCSS(tester);
+    if(this._normalizeComputedCSS(testerComputedCSS.width) === 100)
+        this._borderBoxType = this._borderBoxTypes.OUTER;
     else
-        this.borderBoxSizingStrategy = this.borderBoxSizingStrategies.INNER;
+        this._borderBoxType = this._borderBoxTypes.INNER;
 
-    rootElement.removeChild(testerDiv);
+    root.removeChild(tester);
 };
 
-SizesResolver.determinePercentageCSSValuesCalcStrategy = function() {
-    var testerDivWrapper = document.createElement("div");
-    testerDivWrapper.style.width = "1178px";
-    testerDivWrapper.style.height = "300px";
-    testerDivWrapper.style.position = "absolute";
-    testerDivWrapper.style.left = "-9000px";
-    testerDivWrapper.style.top = "0px";
-    testerDivWrapper.style.visibility = "hidden";
+SizesResolver._findPtValsCalcType = function() {
+    var testerWrap = Dom.div();
 
-    var rootElement = document.body || document.documentElement;
-    rootElement.appendChild(testerDivWrapper);
+    Dom.css.set(testerWrap, {
+        width: "1178px",
+        height: "300px",
+        position: "absolute",
+        left: "-9000px",
+        top: "0px",
+        visibility: "hidden"
+    });
 
-    var testerDiv = document.createElement("div");
-    testerDiv.style.width = "10%";
-    testerDiv.style.height = "200px";
-    testerDivWrapper.appendChild(testerDiv);
+    var root = document.body || document.documentElement;
+    root.appendChild(testerWrap);
 
-    var expectedCorrectOuterWidth = 117.796875;
-    var calculatedOuterWidth = parseFloat(this.outerWidth(testerDiv, true));
-    if(expectedCorrectOuterWidth.toFixed(1) == calculatedOuterWidth.toFixed(1))
-        this.percentageCSSValuesCalcStrategy = this.percentageCSSValuesCalcStrategies.BROWSER_NATIVE;
-    else
-        this.percentageCSSValuesCalcStrategy = this.percentageCSSValuesCalcStrategies.RECALCULATE;
+    var tester = Dom.div();
+    Dom.css.set(tester, {
+        width: "10%",
+        height: "200px"
+    });
+    testerWrap.appendChild(tester);
 
-    rootElement.removeChild(testerDivWrapper);
+    var expectedOw = 117.796875.toFixed(1);
+    var ow = parseFloat(this.outerWidth(tester, true)).toFixed(1);
+    this._ptValsCalcType = (expectedOw == ow) ? this._ptValsCalcTypes.BROWSER : this._ptValsCalcTypes.RECALC;
+
+    root.removeChild(testerWrap);
 };

@@ -23,7 +23,7 @@ $(document).ready(function() {
         },
 
         _sortItems: function(items, comparatorFn) {
-            var sortComparatorTools = this._sortApi.getSortComparatorTools();
+            var sortComparatorTools = this._sortApi.getHelpers();
 
             sortComparatorTools.saveOriginalOrder(items);
 
@@ -35,7 +35,7 @@ $(document).ready(function() {
         },
 
         _before: function() {
-            this._sortApi = new Gridifier.Api.Sort();
+            this._sortApi = new SortApi();
         },
 
         _after: function() {
@@ -45,7 +45,7 @@ $(document).ready(function() {
         runTests: function() {
             var me = this;
 
-            test("_sortComparatorTools", function(assert) {
+            test("_sortHelpers", function(assert) {
                 me._before.call(me);
 
                 me._testByOriginalPos();

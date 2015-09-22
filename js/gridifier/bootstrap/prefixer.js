@@ -1,40 +1,31 @@
 var Prefixer = {
-    prefixes: ['Moz', 'Webkit', 'ms', 'Ms', 'Khtml', 'O'],
+    _prefixes: ['Moz', 'Webkit', 'ms', 'Ms', 'Khtml', 'O'],
 
-    init: function() {
-        ;
-    },
+    _getter: function(propName, item, getterFn) {
+        item = item || document.documentElement;
+        var style = item.style;
 
-    get: function(propertyName, element) {
-        element = element || document.documentElement;
-        var style = element.style;
-
-        if(typeof style[propertyName] === "string") {
-            return propertyName;
+        if(typeof style[propName] === "string") {
+            return propName;
         }
 
-        var propertyName = propertyName.charAt(0).toUpperCase() + propertyName.slice(1);
-        for(var i = 0; i < this.prefixes.length; i++) {
-            var prefixedPropertyName = this.prefixes[i] + propertyName;
-            if(typeof style[prefixedPropertyName] === "string")
-                return prefixedPropertyName;
+        var originalPropName = propName;
+        var propName = propName.charAt(0).toUpperCase() + propName.slice(1);
+        for(var i = 0; i < this._prefixes.length; i++) {
+            var prefixedPropName = this._prefixes[i] + propName;
+            if(typeof style[prefixedPropName] === "string")
+                return getterFn(prefixedPropName, originalPropName, i);
         }
     },
 
-    getForCSS: function(propertyName, element) {
-        element = element || document.documentElement;
-        var style = element.style;
+    get: function(propName, item) {
+        return this._getter(propName, item, function(propName) { return propName; });
+    },
 
-        if(typeof style[propertyName] === "string") {
-            return propertyName;
-        }
-        
-        var originalPropertyName = propertyName;
-        var propertyName = propertyName.charAt(0).toUpperCase() + propertyName.slice(1);
-        for(var i = 0; i < this.prefixes.length; i++) {
-            var prefixedPropertyName = this.prefixes[i] + propertyName; 
-            if(typeof style[prefixedPropertyName] === "string")
-                return "-" + this.prefixes[i].toLowerCase() + "-" + originalPropertyName;
-        }
+    getForCss: function(propName, item) {
+        var me = this;
+        return this._getter(propName, item, function(propName, originalPropName, i) {
+            return "-" + me._prefixes[i].toLowerCase() + "-" + originalPropName;
+        });
     }
 }

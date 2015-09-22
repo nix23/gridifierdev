@@ -12,15 +12,14 @@ var Logger = {
     startLoggingSubaction: function() { return false; },
     stopLoggingSubaction: function() { return false; },
     log: function() { return false; },
-    startLoggingFindItemConnectionCoords: function() { return false; },
-    stopLoggingFindItemConnectionCoords: function() { return false; },
-    logFindItemConnectionCoordsInspectConnector: function() { return false; },
-    logFindItemConnectionCoordsOutOfLayoutBounds: function() { return false; },
-    logFindItemConnectionCoordsIntersectionFound: function() { return false; },
-    logFindItemConnectionCoordsWrongSorting: function() { return false; },
-    logFindItemConnectionCoordsVerticalIntersectionsError: function() { return false; },
-    logFindItemConnectionCoordsHorizontalIntersectionsError: function() { return false; },
-    logFindItemConnectionCoordsFound: function() { return false; }
+    startFindCnCoordsLog: function() { return false; },
+    stopFindCnCoordsLog: function() { return false; },
+    logInspectConnector: function() { return false; },
+    logOutOfLayoutBounds: function() { return false; },
+    logIntFound: function() { return false; },
+    logWrongSorting: function() { return false; },
+    logIntersectionsError: function() { return false; },
+    logCnCoordsFound: function() { return false; }
 }
 
 Logger.OPERATION_TYPES = {

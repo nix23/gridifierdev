@@ -1,6 +1,7 @@
 var Event = (function() {
-    var guid = 0;
-    
+    var gevents = "gridifierEvents";
+    var ghandle = "gridifierHandle";
+
     function fixEvent(event) {
         event = event || window.event;
         
@@ -58,38 +59,49 @@ var Event = (function() {
             }
             
             if(!handler.guid) {
-                handler.guid = ++guid;
+                var guid = null;
+                var w = window;
+
+                if(typeof Gridifier != "undefined") {
+                    Gridifier.EVENT_GUID = (typeof Gridifier.EVENT_GUID == "undefined") ? 0 : ++Gridifier.EVENT_GUID;
+                    guid = Gridifier.EVENT_GUID;
+                }
+                else {
+                    w.GRIDIFIER_EVENT_GUID = (typeof w.GRIDIFIER_EVENT_GUID == "undefined") ? 0 : ++w.GRIDIFIER_EVENT_GUID;
+                    guid = w.GRIDIFIER_EVENT_GUID;
+                }
+                handler.guid = guid;
             }
-            
-            if(!elem.events) {
-                elem.events = {};
+
+            if(!elem[gevents]) {
+                elem[gevents] = {};
                 
-                elem.handle = function(event) {
+                elem[ghandle] = function(event) {
                     if(typeof Event !== "undefined") {
                         return commonHandle.call(elem, event);
                     }
                 }
             }
             
-            if(!elem.events[type]) {
-                elem.events[type] = {};
+            if(!elem[gevents][type]) {
+                elem[gevents][type] = {};
                 
                 if(elem.addEventListener)
-                    elem.addEventListener(type, elem.handle, false);
+                    elem.addEventListener(type, elem[ghandle], false);
                 else if(elem.attachEvent)
-                    elem.attachEvent("on" + type, elem.handle);
+                    elem.attachEvent("on" + type, elem[ghandle]);
             }
             
-            elem.events[type][handler.guid] = handler;
+            elem[gevents][type][handler.guid] = handler;
         },
         
         remove: function(elem, type, handler) {
-            var handlers = elem.events && elem.events[type];
+            var handlers = elem[gevents] && elem[gevents][type];
             if(!handlers) return;
             
             if(!handler) {
                 for(var handle in handlers) {
-                    delete elem.events[type][handle];
+                    delete elem[gevents][type][handle];
                 }
                 return;
             }
@@ -99,19 +111,19 @@ var Event = (function() {
             }
                 
             if(elem.removeEventListener)
-                elem.removeEventListener(type, elem.handle, false);
+                elem.removeEventListener(type, elem[ghandle], false);
             else if(elem.detachEvent)
-                elem.detachEvent("on" + type, elem.handle);
+                elem.detachEvent("on" + type, elem[ghandle]);
             
-            delete elem.events[type];
+            delete elem[gevents][type];
             
-            for(var any in elem.events) return;
+            for(var any in elem[gevents]) return;
             try {
-                delete elem.handle;
-                delete elem.events;
+                delete elem[ghandle];
+                delete elem[gevents];
             } catch(e) {
-                elem.removeAttribute("handle");
-                elem.removeAttribute("events");
+                elem.removeAttribute(ghandle);
+                elem.removeAttribute(gevents);
             }
         }
     }

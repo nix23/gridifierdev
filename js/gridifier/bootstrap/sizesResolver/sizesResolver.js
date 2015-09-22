@@ -1,299 +1,223 @@
 var SizesResolver = {
     getComputedCSS: null,
-    propertiesToGet: {
-        forOuterWidth: [
+    _getProps: {
+        forOw: [
             "paddingLeft", "paddingRight", "marginLeft", "marginRight",
             "borderLeftWidth", "borderRightWidth"
         ],
-        forOuterHeight: [
+        forOh: [
             "paddingTop", "paddingBottom", "marginTop", "marginBottom",
             "borderTopWidth", "borderBottomWidth"
         ],
-        forPositionLeft: [
+        forPosLeft: [
             "marginLeft"
         ],
-        forPositionTop: [
+        forPosTop: [
             "marginTop"
         ]
     },
-    maybePrefixedProperties: {
+    _prefixedProps: {
         "boxSizing": null
     },
-    borderBoxSizingStrategy: null,
-    borderBoxSizingStrategies: {OUTER: 0, INNER: 1},
-    percentageCSSValuesCalcStrategy: null,
-    percentageCSSValuesCalcStrategies: {BROWSER_NATIVE: 0, RECALCULATE: 1},
-    recalculatePercentageWidthFunction: function(DOMElem, 
-                                                 includeMargins, 
-                                                 disablePercentageCSSRecalc, 
-                                                 disableBordersCalc) {
-        return this.outerWidth(DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc);
+    _borderBoxType: null,
+    _borderBoxTypes: {OUTER: 0, INNER: 1},
+    _ptValsCalcType: null,
+    _ptValsCalcTypes: {BROWSER: 0, RECALC: 1},
+    recalcPtWidthFn: function(item, includeMargins, disablePtCSSRecalc, disableBordersCalc) {
+        return this.outerWidth(item, includeMargins, disablePtCSSRecalc, disableBordersCalc);
     },
-    recalculatePercentageHeightFunction: function(DOMElem,
-                                                  includeMargins,
-                                                  disablePercentageCSSRecalc,
-                                                  disableBordersCalc) {
-        return this.outerHeight(DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc);
+    recalcPtHeightFn: function(item, includeMargins, disablePtCSSRecalc, disableBordersCalc) {
+        return this.outerHeight(item, includeMargins, disablePtCSSRecalc, disableBordersCalc);
     },
-    lastRecalculatedDOMElRawWidth: null,
-    lastRecalculatedDOMElRawHeight: null,
-    lastRecalculatedDOMElBorderWidth: null,
-    lastRecalculatedDOMElBorderHeight: null,
-    hasLastRecalculatedDOMElBorderBoxBS: false,
+    _lastRawWidth: null,
+    _lastRawHeight: null,
+    _lastBorderWidth: null,
+    _lastBorderHeight: null,
+    _hasLastBorderBox: false,
 
-    init: function()
-    {
+    init: function() {
         this.getComputedCSS = this.getComputedCSSFunction();
-        this.determineMaybePrefixedProperties();
-        this.determineBorderBoxComputedSizesCalculationStrategy();
-        this.determinePercentageCSSValuesCalcStrategy();
+        this._findPrefixedProps();
+        this._findBorderBoxType();
+        this._findPtValsCalcType();
     },
 
     clearRecursiveSubcallsData: function() {
-        this.lastRecalculatedDOMElRawWidth = null;
-        this.lastRecalculatedDOMElRawHeight = null;
-        this.lastRecalculatedDOMElBorderWidth = null;
-        this.lastRecalculatedDOMElBorderHeight = null;
-        this.hasLastRecalculatedDOMElBorderBoxBS = false;
+        this._lastRawWidth = null;
+        this._lastRawHeight = null;
+        this._lastBorderWidth = null;
+        this._lastBorderHeight = null;
+        this._hasLastBorderBox = false;
     },
 
-    isBrowserNativePercentageCSSValuesCalcStrategy: function() {
-        return this.percentageCSSValuesCalcStrategy == this.percentageCSSValuesCalcStrategies.BROWSER_NATIVE;
+    _areBrowserPtVals: function() {
+        return this._ptValsCalcType == this._ptValsCalcTypes.BROWSER;
     },
 
-    isRecalculatePercentageCSSValuesCalcStrategy: function() {
-        return this.percentageCSSValuesCalcStrategy == this.percentageCSSValuesCalcStrategies.RECALCULATE;
+    _areRecalcPtVals: function() {
+        return this._ptValsCalcType == this._ptValsCalcTypes.RECALC;
     },
 
-    _isPercentageCSSValue: function(cssValue) {
-        var percentageCssValueRegex = new RegExp("(.*\\d)%$");
-        if(percentageCssValueRegex.test(cssValue))
-            return true;
+    getUncomputedCSS: function(item) {
+        var parentItemClone = item.parentNode.cloneNode();
+        var itemClone = item.cloneNode();
 
-        return false;
-    },
-
-    getComputedCSSWithMaybePercentageSizes: function(DOMElem) {
-        return this._getComputedCSSWithMaybePercentageSizes(DOMElem);
-    },
-
-    _getComputedCSSWithMaybePercentageSizes: function(DOMElem) {
-        var parentDOMElemClone = DOMElem.parentNode.cloneNode();
-        var DOMElemClone = DOMElem.cloneNode();
-
-        parentDOMElemClone.appendChild(DOMElemClone);
-        parentDOMElemClone.style.display = "none";
+        parentItemClone.appendChild(itemClone);
+        parentItemClone.style.display = "none";
         
-        if(DOMElem.parentNode.nodeName == "HTML")
-            var parentDOMElemParentNode = DOMElem.parentNode;
-        else
-            var parentDOMElemParentNode = DOMElem.parentNode.parentNode;
-
-        parentDOMElemParentNode.appendChild(parentDOMElemClone);
+        var parentItemParent = (item.parentNode.nodeName == "HTML") ? item.parentNode : item.parentNode.parentNode;
+        parentItemParent.appendChild(parentItemClone);
         
-        var unrenderedComputedCSSSource = this.getComputedCSS(DOMElemClone);
-        var unrenderedComputedCSS = {};
+        var uncomputedCSSSource = this.getComputedCSS(itemClone);
+        var uncomputedCSS = {};
 
         var props = ["paddingLeft", "paddingRight", "paddingTop", "paddingBottom",
                      "marginLeft", "marginRight", "marginTop", "marginBottom",
                      "width", "height"];
-        for(var i = 0; i < props.length; i++) {
-            unrenderedComputedCSS[props[i]] = unrenderedComputedCSSSource[props[i]];
-        }
+        for(var i = 0; i < props.length; i++)
+            uncomputedCSS[props[i]] = uncomputedCSSSource[props[i]];
         
-        parentDOMElemParentNode.removeChild(parentDOMElemClone);
+        parentItemParent.removeChild(parentItemClone);
         
-        return unrenderedComputedCSS;
+        return uncomputedCSS;
     },
 
-    _ensureHasParentNode: function(DOMElem) {
-        if(DOMElem.parentNode == null
-            || !Dom.hasDOMElemOwnProperty(DOMElem.parentNode, "innerHTML")) {
-            var msg = "";
-
-            msg += "SizesResolver error: ";
-            msg += "Can't resolve element parentNode per element: ";
-            msg += DOMElem;
-            throw new Error(msg);
-        }
+    _ensureHasParentNode: function(item) {
+        if(item.parentNode == null || !Dom.hasOwnProp(item.parentNode, "innerHTML"))
+            err("Error: no parentNode");
     },
 
-    _ensureComputedCSSHasProperty: function(elementComputedCSS, cssProperty) {
-        if(!(cssProperty in elementComputedCSS)) {
-            var msg = "";
-
-            msg += "SizesResolver error: ";
-            msg += "Can't find property '" + cssProperty + "' in elementComputedCSS. ";
-            msg += "Element computed CSS: ";
-            msg += elementComputedCSS;
-            throw new Error(msg);
-        }
+    _ensureHasComputedProp: function(elementComputedCSS, cssProperty) {
+        if(!(cssProperty in elementComputedCSS))
+            err("Error: no prop " + cssProperty);
     },
 
-    hasPercentageCSSValue: function(cssProperty, DOMElem, elementComputedCSS) {
-        this._ensureHasParentNode(DOMElem);
+    _hasPtCSSVal: function(cssProp, item, itemComputedCSS) {
+        var tester = function(cssProp, item, itemComputedCSS) {
+            this._ensureHasParentNode(item);
 
-        var elementComputedCSS = elementComputedCSS || this._getComputedCSSWithMaybePercentageSizes(DOMElem);
-        this._ensureComputedCSSHasProperty(elementComputedCSS, cssProperty);
+            itemComputedCSS = itemComputedCSS || this.getUncomputedCSS(item);
+            this._ensureHasComputedProp(itemComputedCSS, cssProp);
 
-        return this._isPercentageCSSValue(elementComputedCSS[cssProperty]);
+            var ptValRegex = new RegExp("(.*\\d)%$");
+            return ptValRegex.test(itemComputedCSS[cssProp]);
+        }
+
+        if(Dom.isArray(cssProp)) {
+            for(var i = 0; i < cssProp.length; i++) {
+                if(tester.call(this, cssProp[i], item, itemComputedCSS))
+                    return true;
+            }
+
+            return false;
+        }
+        else
+            return tester.call(this, cssProp, item, itemComputedCSS);
     },
 
-    getPercentageCSSValue: function(cssProperty, DOMElem, elementComputedCSS) {
-        this._ensureHasParentNode(DOMElem);
+    _getPtCSSVal: function(cssProp, item, itemComputedCSS) {
+        this._ensureHasParentNode(item);
 
-        var elementComputedCSS = elementComputedCSS || this._getComputedCSSWithMaybePercentageSizes(DOMElem);
-        this._ensureComputedCSSHasProperty(elementComputedCSS, cssProperty);
+        itemComputedCSS = itemComputedCSS || this.getUncomputedCSS(item);
+        this._ensureHasComputedProp(itemComputedCSS, cssProp);
 
-        return elementComputedCSS[cssProperty];
+        return itemComputedCSS[cssProp];
     },
 
-    _recalculateTwoSidePropertyWithPercentageValues: function(DOMElem,
-                                                              parentDOMElemWidth,
-                                                              computedProperties,
-                                                              computedPropertiesWithMaybePercentageSizes,
-                                                              cssPropertyPrefix,
-                                                              direction) {
-        if(direction == "horizontal") {
-            var cssPropertyFirstSide = "Left";
-            var cssPropertySecondSide = "Right";
-        }
-        else if(direction == "vertical") {
-            var cssPropertyFirstSide = "Top";
-            var cssPropertySecondSide = "Bottom";
-        }
-        else {
-            throw new Error("SizesResolver error: wrong direction in twoSideProperty recalculation.");
-        }
-
-        if(cssPropertyPrefix != "margin" && cssPropertyPrefix != "padding") {
-            throw new Error("SizesResolver error: unknown CSSProperty in twoSideProperty recalculation.");
-        }
-
-        var firstSideCSSProperty = cssPropertyPrefix + cssPropertyFirstSide;
-        var secondSideCSSProperty = cssPropertyPrefix + cssPropertySecondSide;
-
-        var firstSideCSSValue = computedProperties[firstSideCSSProperty];
-        var secondSideCSSValue = computedProperties[secondSideCSSProperty];
-
-        if(this.hasPercentageCSSValue(firstSideCSSProperty, DOMElem, computedPropertiesWithMaybePercentageSizes)) {
-            var firstSidePercentageValue = parseFloat(this.getPercentageCSSValue(
-                firstSideCSSProperty, DOMElem, computedPropertiesWithMaybePercentageSizes
-            ));
-            firstSideCSSValue = parentDOMElemWidth / 100 * firstSidePercentageValue;
-        }
-
-        if(this.hasPercentageCSSValue(secondSideCSSProperty, DOMElem, computedPropertiesWithMaybePercentageSizes)) {
-            var secondSidePercentageValue = parseFloat(this.getPercentageCSSValue(
-                secondSideCSSProperty, DOMElem, computedPropertiesWithMaybePercentageSizes
-            ));
-            secondSideCSSValue = parentDOMElemWidth / 100 * secondSidePercentageValue;
-        }
-
-        return firstSideCSSValue + secondSideCSSValue;
+    _recalcPtVal: function(item,
+                           parentItemSize,
+                           uncomputedProps,
+                           propName) {
+        var ptSize = parseFloat(this._getPtCSSVal(propName, item, uncomputedProps));
+        return parentItemSize / 100 * ptSize;
     },
 
-    _recalculateWidthWithPercentageValue: function(DOMElem,
-                                                   parentDOMElemWidth,
-                                                   computedPropertiesWithMaybePercentageSizes) {
-        var percentageWidth = parseFloat(this.getPercentageCSSValue(
-            "width", DOMElem, computedPropertiesWithMaybePercentageSizes
-        ));
-        return parentDOMElemWidth / 100 * percentageWidth;
+    _recalcTwoSidePropPtVals: function(item,
+                                       parentItemWidth,
+                                       computedProps,
+                                       uncomputedProps,
+                                       cssPropPrefix,
+                                       verticalSides) {
+        var firstSideProp = cssPropPrefix + ((verticalSides) ? "Top" : "Left");
+        var secondSideProp = cssPropPrefix + ((verticalSides) ? "Bottom" : "Right");
+        var firstSideVal = computedProps[firstSideProp];
+        var secondSideVal = computedProps[secondSideProp];
+
+        if(this._hasPtCSSVal(firstSideProp, item, uncomputedProps))
+            firstSideVal = this._recalcPtVal(item, parentItemWidth, uncomputedProps, firstSideProp);
+        if(this._hasPtCSSVal(secondSideProp, item, uncomputedProps))
+            secondSideVal = this._recalcPtVal(item, parentItemWidth, uncomputedProps, secondSideProp);
+
+        return firstSideVal + secondSideVal;
     },
 
-    _recalculateHeightWithPercentageValue: function(DOMElem,
-                                                    parentDOMElemHeight,
-                                                    computedPropertiesWithMaybePercentageSizes) {
-        var percentageHeight = parseFloat(this.getPercentageCSSValue(
-            "height", DOMElem, computedPropertiesWithMaybePercentageSizes
-        ));
-        return parentDOMElemHeight / 100 * percentageHeight;
-    },
-
-    positionLeft: function(DOMElem)
-    {
-        var elementComputedCSS = this.getComputedCSS(DOMElem);
-
-        if(elementComputedCSS.display == "none")
+    positionLeft: function(item) {
+        var itemComputedCSS = this.getComputedCSS(item);
+        if(itemComputedCSS.display == "none")
             return 0;
 
-        var computedProperties = this.getComputedProperties("forPositionLeft", elementComputedCSS, DOMElem);
-        return DOMElem.offsetLeft - computedProperties.marginLeft;
+        var computedProps = this._getComputedProps("forPosLeft", itemComputedCSS, item);
+        return item.offsetLeft - computedProps.marginLeft;
     },
 
-    positionTop: function(DOMElem)
-    {
-        var elementComputedCSS = this.getComputedCSS(DOMElem);
-
-        if(elementComputedCSS.display == "none")
+    positionTop: function(item) {
+        var itemComputedCSS = this.getComputedCSS(item);
+        if(itemComputedCSS.display == "none")
             return 0;
 
-        var computedProperties = this.getComputedProperties("forPositionTop", elementComputedCSS, DOMElem);
-        return DOMElem.offsetTop - computedProperties.marginTop;
+        var computedProps = this._getComputedProps("forPosTop", itemComputedCSS, item);
+        return item.offsetTop - computedProps.marginTop;
     },
 
-    offsetLeft: function(DOMElem)
-    {
-        var clientRect = DOMElem.getBoundingClientRect();
+    offsetLeft: function(item) {
+        var clientRect = item.getBoundingClientRect();
         var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
         
         return clientRect.left + scrollLeft;
     },
 
-    offsetTop: function(DOMElem)
-    {
-        var clientRect = DOMElem.getBoundingClientRect();
+    offsetTop: function(item) {
+        var clientRect = item.getBoundingClientRect();
         var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
         
         return clientRect.top + scrollTop;
     },
 
-    getComputedProperty: function(DOMElem, propertyName)
-    {
-        var elementComputedCSS = this.getComputedCSS(DOMElem);
-        return elementComputedCSS[propertyName];
-    },
-
-    isBoxSizingBorderBox: function(elementComputedCSS)
-    {
-        var boxSizingProperty = this.maybePrefixedProperties.boxSizing;
-        if(boxSizingProperty && elementComputedCSS[boxSizingProperty]
-            && elementComputedCSS[boxSizingProperty] === "border-box")
+    _isDefBoxSizing: function(itemComputedCSS) {
+        var boxSizingProp = this._prefixedProps.boxSizing;
+        if(boxSizingProp && itemComputedCSS[boxSizingProp]
+            && itemComputedCSS[boxSizingProp] === "border-box")
             return true;
 
         return false;
     },
 
-    isOuterBorderBoxSizing: function()
-    {
-        return (this.borderBoxSizingStrategy === this.borderBoxSizingStrategies.OUTER) ? true : false;
+    _isOuterBoxSizing: function() {
+        return this._borderBoxType === this._borderBoxTypes.OUTER;
     },
 
     // Based on http://erik.eae.net/archives/2007/07/27/18.54.15/#comment-102291
     // and http://javascript.info/tutorial/styles-and-classes-getcomputedstyle.
     // IE currentStyle returns cascaded style instead of computed style,
     // so if we have unit other than px, we should recalculate it in px.
-    isCascadedCSSValue: function(CSSValue)
-    {
+    _isCascadedCSSVal: function(CSSValue) {
         return (window.getComputedStyle || CSSValue.indexOf("px") !== -1) ? false : true;
     },
 
-    transformFromCascadedToComputedStyle: function(DOMElem, CSSValue, elementComputedCSS)
-    {
+    _cascadedToComputed: function(item, CSSValue, itemComputedCSS) {
         // Check value auto, medium, etc...
         var atLeastOneDigitRegex = new RegExp("(?=.*\\d)");
         if(!atLeastOneDigitRegex.test(CSSValue))
             return CSSValue;
 
-        var inlineStyle = DOMElem.style;
-        var runtimeStyle = DOMElem.runtimeStyle;
+        var inlineStyle = item.style;
+        var runtimeStyle = item.runtimeStyle;
 
         var inlineStyleLeft = inlineStyle.left;
         var runtimeStyleLeft = runtimeStyle && runtimeStyle.left;
 
         if(runtimeStyleLeft)
-            runtimeStyle.left = elementComputedCSS.left;
+            runtimeStyle.left = itemComputedCSS.left;
 
         inlineStyle.left = CSSValue;
         CSSValue = inlineStyle.pixelLeft;
@@ -305,32 +229,30 @@ var SizesResolver = {
         return CSSValue;
     },
 
-    normalizeComputedCSSSizeValue: function(postfixedSizeValue)
-    {
+    _normalizeComputedCSS: function(postfixedSizeValue) {
         var sizeValue = parseFloat(postfixedSizeValue);
         var canBeParsedAsNumber = postfixedSizeValue.indexOf("%") === -1 && !isNaN(sizeValue);
         
         return (canBeParsedAsNumber) ? sizeValue : false;
     },
 
-    getComputedProperties: function(propertiesToGetType, elementComputedCSS, DOMElem)
-    {
-        var computedProperties = {};
+    _getComputedProps: function(getPropsType, itemComputedCSS, item) {
+        var computedProps = {};
 
-        for(var i = 0; i < this.propertiesToGet[propertiesToGetType].length; i++)
+        for(var i = 0; i < this._getProps[getPropsType].length; i++)
         {
-            var propertyName = this.propertiesToGet[propertiesToGetType][i];
-            var propertyValue = elementComputedCSS[propertyName];
+            var propName = this._getProps[getPropsType][i];
+            var propVal = itemComputedCSS[propName];
 
-            if(this.isCascadedCSSValue(propertyValue))
-                propertyValue = this.transformFromCascadedToComputedStyle(DOMElem, propertyValue, elementComputedCSS);
-            propertyValue = parseFloat(propertyValue);
-            propertyValue = isNaN(propertyValue) ? 0 : propertyValue;
+            if(this._isCascadedCSSVal(propVal))
+                propVal = this._cascadedToComputed(item, propVal, itemComputedCSS);
+            propVal = parseFloat(propVal);
+            propVal = isNaN(propVal) ? 0 : propVal;
 
-            computedProperties[propertyName] = propertyValue;
+            computedProps[propName] = propVal;
         }
 
-        return computedProperties;
+        return computedProps;
     },
 
     cloneComputedStyle: function(sourceItem, targetItem) {
@@ -353,10 +275,14 @@ var SizesResolver = {
 
         // Some properties could be overwritten by further rules.
         // For example in FF/IE borders are overwritten by some from further rules.
-        var propsToReclone = ["borderLeftWidth", "borderRightWidth", "borderTopWidth", "borderBottomWidth",
-            "borderLeftColor", "borderRightColor", "borderTopColor", "borderBottomColor",
-            "borderLeftStyle", "borderRightStyle", "borderTopStyle", "borderBottomStyle",
-            "font", "fontSize", "fontWeight", "lineHeight"];
+        var propsToReclone = ["font", "fontSize", "fontWeight", "lineHeight"];
+        var borderProps = ["Width", "Color", "Style"];
+        var borderSides = ["Left", "Right", "Top", "Bottom"];
+        for(var i = 0; i < borderProps.length; i++) {
+            for(var j = 0; j < borderSides.length; j++)
+                propsToReclone.push("border" + borderSides[j] + borderProps[i]);
+        }
+
         for(var i = 0; i < propsToReclone.length; i++) {
             var propName = propsToReclone[i];
             if(typeof sourceItemComputedStyle[propName] != "undefined" &&

@@ -1,164 +1,103 @@
-Gridifier.Renderer = function(gridifier, connections, settings, normalizer) {
-    var me = this;
+var Renderer = function() {}
 
-    this._gridifier = null;
-    this._connections = null;
-    this._settings = null;
-    this._normalizer = null;
+proto(Renderer, {
+    show: function(cns) {
+        var rc = rendererCns;
 
-    this._rendererSchedulator = null;
-    this._rendererConnections = null;
+        if(!Dom.isArray(cns))
+            var cns = [cns];
 
-    this._css = {
-    };
+        for(var i = 0; i < cns.length; i++) {
+            var cn = cns[i];
+            this.unmarkAsSchToHide(cn.item);
+            if(rc.isRendered(cn))
+                continue;
 
-    this._construct = function() {
-        me._gridifier = gridifier;
-        me._connections = connections;
-        me._settings = settings;
-        me._normalizer = normalizer;
-
-        me._rendererConnections = new Gridifier.Renderer.Connections(
-            me._settings
-        );
-        me._rendererSchedulator = new Gridifier.Renderer.Schedulator(
-            me._gridifier, me._settings, me._connections, me, me._rendererConnections
-        );
-    };
-
-    this._bindEvents = function() {
-    };
-
-    this._unbindEvents = function() {
-    };
-
-    this.destruct = function() {
-        me._unbindEvents();
-    };
-
-    this._construct();
-    return this;
-}
-
-Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR = "data-gridifier-scheduled-to-hide";
-Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR_VALUE = "yes";
-
-Gridifier.Renderer.prototype.getRendererConnections = function() {
-    return this._rendererConnections;
-}
-
-Gridifier.Renderer.prototype.setSilentRendererInstance = function(silentRenderer) {
-    this._rendererSchedulator.setSilentRendererInstance(silentRenderer);
-}
-
-Gridifier.Renderer.prototype.showConnections = function(connections) {
-    var me = this;
-
-    if(!Dom.isArray(connections))
-        var connections = [connections];
-
-    for(var i = 0; i < connections.length; i++) {
-        this.unmarkItemAsScheduledToHide(connections[i].item);
-        if(this._rendererConnections.isConnectionItemRendered(connections[i]))
-            continue;
-
-        var left = this._rendererConnections.getCssLeftPropertyValuePerConnection(connections[i]);
-        var top = this._rendererConnections.getCssTopPropertyValuePerConnection(connections[i]);
-        this._rendererConnections.markConnectionItemAsRendered(connections[i]);
-
-        this._rendererSchedulator.reinit();
-        this._rendererSchedulator.scheduleShow(connections[i], left, top);
-    }
-}
-
-Gridifier.Renderer.prototype.markItemsAsScheduledToHide = function(items) {
-    for(var i = 0; i < items.length; i++) {
-        items[i].setAttribute(
-            Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR,
-            Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR_VALUE
-        );
-    }
-}
-
-Gridifier.Renderer.prototype.unmarkItemAsScheduledToHide = function(item) {
-    item.removeAttribute(Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR);
-}
-
-Gridifier.Renderer.prototype.wasItemScheduledToHide = function(item) {
-    return Dom.hasAttribute(item, Gridifier.Renderer.SCHEDULED_ITEM_TO_HIDE_DATA_ATTR);
-}
-
-Gridifier.Renderer.prototype.hideConnections = function(connections) {
-    var me = this;
-
-    if(!Dom.isArray(connections))
-        var connections = [connections];
-
-    for(var i = 0; i < connections.length; i++) {
-        if(!this.wasItemScheduledToHide(connections[i].item)) {
-            continue;
+            rc.markAsRendered(cn);
+            rendererQueue.reinit();
+            rendererQueue.schedule(RENDER_OPS.SHOW, cn, rc.left(cn), rc.top(cn));
         }
+    },
 
-        var left = this._rendererConnections.getCssLeftPropertyValuePerConnection(connections[i]);
-        var top = this._rendererConnections.getCssTopPropertyValuePerConnection(connections[i]);
-        this._rendererConnections.unmarkConnectionItemAsRendered(connections[i]);
+    hide: function(cns) {
+        var rc = rendererCns;
 
-        this._rendererSchedulator.reinit();
-        this._rendererSchedulator.scheduleHide(connections[i], left, top);
-    }
-}
+        if(!Dom.isArray(cns))
+            var cns = [cns];
 
-Gridifier.Renderer.prototype.renderTransformedConnections = function(connections) {
-    this.renderConnections(connections, false);
-}
+        for(var i = 0; i < cns.length; i++) {
+            var cn = cns[i];
+            if(!this.wasSchToHide(cn.item))
+                continue;
 
-Gridifier.Renderer.prototype.renderConnections = function(connections, exceptConnections) {
-    var exceptConnections = exceptConnections || false;
+            rc.unmarkAsRendered(cn);
+            rendererQueue.reinit();
+            rendererQueue.schedule(RENDER_OPS.HIDE, cn, rc.left(cn), rc.top(cn));
+        }
+    },
 
-    for(var i = 0; i < connections.length; i++) {
-        if(exceptConnections) {
-            var skipConnection = false;
+    renderRepositioned: function(cns) {
+        this.render(cns, false);
+    },
 
-            for(var j = 0; j < exceptConnections.length; j++) {
-                if(connections[i].itemGUID == exceptConnections[j].itemGUID) {
-                    skipConnection = true;
-                    break;
+    render: function(cns, exceptCns) {
+        var rc = rendererCns;
+        var exceptCns = exceptCns || false;
+
+        for(var i = 0; i < cns.length; i++) {
+            var cn = cns[i];
+            if(exceptCns !== false) {
+                var skipCn = false;
+
+                for(var j = 0; j < exceptCns.length; j++) {
+                    if(cns[i].itemGUID == exceptCns[j].itemGUID) {
+                        skipCn = true;
+                        break;
+                    }
                 }
+
+                if(skipCn) continue;
             }
 
-            if(skipConnection) continue;
+            rendererQueue.reinit();
+            rendererQueue.schedule(RENDER_OPS.RENDER, cn, rc.left(cn), rc.top(cn));
+        }
+    },
+
+    // Delay in row/col updates in noIntersectionsMode is required, because without it refreshes
+    // will be called right after show method, and will be placed in the end of animation.
+    // (Example: slide show method -> calling 0ms offset translate at start, than this refresh
+    // will be called before slideOutTimeout without a delay.(Will move items instantly)
+    renderAfterDelay: function(cns, delay) {
+        var delay = delay || C.RENDER_DEF_DELAY;
+
+        for(var i = 0; i < cns.length; i++) {
+            rendererQueue.reinit();
+            rendererQueue.schedule(RENDER_OPS.DEL_RENDER, cns[i], null, null, delay);
+        }
+    },
+
+    rotate: function(items) {
+        var cns = [];
+        for(var i = 0; i < items.length; i++) {
+            var cn = cnsCore.find(items[i]);
+            rendererCns.unmarkAsRendered(cn);
+            cns.push(items[i]);
         }
 
-        var left = this._rendererConnections.getCssLeftPropertyValuePerConnection(connections[i]);
-        var top = this._rendererConnections.getCssTopPropertyValuePerConnection(connections[i]);
+        this.show(cns);
+    },
 
-        this._rendererSchedulator.reinit();
-        this._rendererSchedulator.scheduleRender(connections[i], left, top);
+    markAsSchToHide: function(cns) {
+        for(var i = 0; i < cns.length; i++)
+            Dom.css.set(cns[i].item, C.REND.SCH_TO_HIDE_DATA, "y");
+    },
+
+    unmarkAsSchToHide: function(item) {
+        Dom.rm(item, C.REND.SCH_TO_HIDE_DATA);
+    },
+
+    wasSchToHide: function(item) {
+        return Dom.has(item, C.REND.SCH_TO_HIDE_DATA);
     }
-}
-
-// Delay in row/col updates in noIntersectionsMode is required, because without it refreshes
-// will be called right after show method, and will be placed in the end of animation.
-// (Example: slide show method -> calling 0ms offset translate at start, than this refresh
-// will be called before slideOutTimeout without a delay.(Will move items instantly)
-Gridifier.Renderer.prototype.renderConnectionsAfterDelay = function(connections, delay) {
-    var me = this;
-    var delay = delay || 40;
-
-    for(var i = 0; i < connections.length; i++) {
-        this._rendererSchedulator.reinit();
-        this._rendererSchedulator.scheduleDelayedRender(connections[i], null, null, delay);
-    }
-}
-
-Gridifier.Renderer.prototype.rotateItems = function(itemsToRotate) {
-    var itemsToRotateConnections = [];
-
-    for(var i = 0; i < itemsToRotate.length; i++) {
-        var itemToRotateConnection = this._connections.findConnectionByItem(itemsToRotate[i]);
-        this._rendererConnections.unmarkConnectionItemAsRendered(itemToRotateConnection);
-        itemsToRotateConnections.push(itemToRotateConnection);
-    }
-
-    this.showConnections(itemsToRotateConnections);
-}
+});

@@ -1,83 +1,30 @@
-Gridifier.Resorter = function(gridifier,
-                              collector,
-                              connections,
-                              settings,
-                              guid) {
-    var me = this;
+var Resorter = function() {}
 
-    this._gridifier = null;
-    this._collector = null;
-    this._connections = null;
-    this._settings = null;
-    this._guid = null;
+proto(Resorter, {
+    resort: function() {
+        var connItems = collector.sort(collector.collectConnected());
+        if(settings.eq("sortDispersion", true))
+            this._resortOnSD(connItems);
 
-    this._css = {
-    };
+        guid.reinit();
+        for(var i = 0; i < connItems.length; i++)
+            guid.markForAppend(connItems[i]);
+    },
 
-    this._construct = function() {
-        me._gridifier = gridifier;
-        me._collector = collector;
-        me._connections = connections;
-        me._settings = settings;
-        me._guid = guid;
-    };
+    _resortOnSD: function(items) {
+        if(settings.eq("grid", "vertical"))
+            var c = {c1: "y", c2: "x"};
+        else
+            var c = {c1: "x", c2: "y"};
 
-    this._bindEvents = function() {
-    };
-
-    this._unbindEvents = function() {
-    };
-
-    this.destruct = function() {
-        me._unbindEvents();
-    };
-
-    this._construct();
-    return this;
-}
-
-Gridifier.Resorter.prototype.resort = function() {
-    var connectedItems = this._collector.sortCollection(
-        this._collector.collectAllConnectedItems()
-    );
-
-    if(this._settings.isCustomAllEmptySpaceSortDispersion()) {
-        if(this._settings.isHorizontalGrid()) {
-            this._resortAllHorizontalGridConnectionsPerReappend(connectedItems);
-        }
-        else if(this._settings.isVerticalGrid()) {
-            this._resortAllVerticalGridConnectionsPerReappend(connectedItems);
+        var nextFakeC = 0;
+        for(var i = 0; i < items.length; i++) {
+            var cn = cnsCore.find(items[i]);
+            cn[c1 + "1"] = nextFakeC;
+            cn[c1 + "2"] = nextFakeC;
+            cn[c2 + "1"] = 0;
+            cn[c2 + "2"] = 0;
+            nextFakeC++;
         }
     }
-
-    this._guid.reinit();
-    for(var i = 0; i < connectedItems.length; i++) {
-        this._guid.markNextAppendedItem(connectedItems[i]);
-    }
-}
-
-Gridifier.Resorter.prototype._resortAllHorizontalGridConnectionsPerReappend = function(connectedItems) {
-    var nextFakeX = 0;
-
-    for(var i = 0; i < connectedItems.length; i++) {
-        var connectedItemConnection = this._connections.findConnectionByItem(connectedItems[i]);
-        connectedItemConnection.x1 = nextFakeX;
-        connectedItemConnection.x2 = nextFakeX;
-        connectedItemConnection.y1 = 0;
-        connectedItemConnection.y2 = 0;
-        nextFakeX++;
-    }
-}
-
-Gridifier.Resorter.prototype._resortAllVerticalGridConnectionsPerReappend = function(connectedItems) {
-    var nextFakeY = 0;
-
-    for(var i = 0; i < connectedItems.length; i++) {
-        var connectedItemConnection = this._connections.findConnectionByItem(connectedItems[i]);
-        connectedItemConnection.x1 = 0;
-        connectedItemConnection.x2 = 0;
-        connectedItemConnection.y1 = nextFakeY;
-        connectedItemConnection.y2 = nextFakeY;
-        nextFakeY++;
-    }
-}
+});

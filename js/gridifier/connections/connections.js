@@ -1,288 +1,223 @@
-Gridifier.Connections = function(gridifier,
-                                 connections,
-                                 guid,
-                                 connectionsSorter,
-                                 sizesResolverManager) {
-    var me = this;
+var CnsCore = function() {}
 
-    this._gridifier = null;
-    this._connections = null;
-    this._guid = null;
-    this._sizesTransformer = null;
-    this._connectionsSorter = null;
-    this._sizesResolverManager = null;
-    this._connectedItemMarker = null;
+proto(CnsCore, {
+    find: function(item, disableCheck) {
+        var disableCheck = disableCheck || false;
+        var cns = connections.get();
 
-    this._css = {
-    };
+        if(!disableCheck && cns.length == 0)
+            err(E.NO_CNS);
 
-    this._construct = function() {
-        me._gridifier = gridifier;
-        me._connections = connections;
-        me._guid = guid;
-        me._connectionsSorter = connectionsSorter;
-        me._sizesResolverManager = sizesResolverManager;
-        me._connectedItemMarker = new Gridifier.ConnectedItemMarker();
-    };
-
-    this._bindEvents = function() {
-
-    };
-
-    this._unbindEvents = function() {
-    };
-
-    this.destruct = function() {
-        me._unbindEvents();
-    };
-
-    this._construct();
-    return this;
-}
-
-Gridifier.Connections.prototype.getMaxX2 = function() {
-    var connections = this._connections.get();
-
-    if(connections.length == 0)
-        return 0;
-    
-    var maxX2 = 0;
-    for(var i = 0; i < connections.length; i++) {
-        if(connections[i].x2 > maxX2)
-            maxX2 = connections[i].x2;
-    }
-
-    return maxX2;
-}
-
-Gridifier.Connections.prototype.getMaxY2 = function() {
-    var connections = this._connections.get();
-
-    if(connections.length == 0)
-        return 0;
-
-    var maxY2 = 0;
-    for(var i = 0; i < connections.length; i++) {
-        if(connections[i].y2 > maxY2)
-            maxY2 = connections[i].y2;
-    }
-
-    return maxY2;
-}
-
-Gridifier.Connections.prototype.setSizesTransformerInstance = function(sizesTransformer) {
-    this._sizesTransformer = sizesTransformer;
-}
-
-Gridifier.Connections.prototype.findConnectionByItem = function(item, disableWasItemFoundValidation) {
-    var connections = this._connections.get();
-
-    if(!disableWasItemFoundValidation) {
-        if(connections.length == 0)
-            new Gridifier.Error(Gridifier.Error.ERROR_TYPES.CONNECTIONS.NO_CONNECTIONS);
-    }
-
-    var itemGUID = this._guid.getItemGUID(item);
-    var connectionItem = null;
-    for(var i = 0; i < connections.length; i++) {
-        if(itemGUID == connections[i].itemGUID) {
-            connectionItem = connections[i];
-            break;
+        var itemGUID = guid.get(item);
+        var cn = null;
+        for(var i = 0; i < cns.length; i++) {
+            if(itemGUID = cns[i].itemGUID) {
+                cn = cns[i];
+                break;
+            }
         }
-    }
 
-    if(connectionItem == null) {
-        if(!this._sizesTransformer.isTransformerQueueEmpty()) {
-            var queuedConnections = this._sizesTransformer.getQueuedConnectionsPerTransform();
-            for(var i = 0; i < queuedConnections.length; i++) {
-                if(itemGUID == queuedConnections[i].itemGUID) {
-                    connectionItem = queuedConnections[i];
+        if(cn == null) {
+            // @todo -> Implement this
+            //if(!this._sizesTransformer.isTransformerQueueEmpty()) {
+            //    var queuedConnections = this._sizesTransformer.getQueuedConnectionsPerTransform();
+            //    for(var i = 0; i < queuedConnections.length; i++) {
+            //        if(itemGUID == queuedConnections[i].itemGUID) {
+            //            connectionItem = queuedConnections[i];
+            //            break;
+            //        }
+            //    }
+            //}
+        }
+
+        if(!disableCheck && cn == null)
+            err(E.CANT_FIND_CN);
+
+        return cn;
+    },
+
+    create: function(item, cn) {
+        cn.x1 = Dom.toFixed(cn.x1, 2);
+        cn.x2 = Dom.toFixed(cn.x2, 2);
+        cn.y1 = Dom.toFixed(cn.y1, 2);
+        cn.y2 = Dom.toFixed(cn.y2, 2);
+        cn.item = item;
+        cn.itemGUID = guid.get(item);
+        cn.hOffset = (Dom.hasOwnProp(cn, "hOffset")) ? cn.hOffset : 0;
+        cn.vOffset = (Dom.hasOwnProp(cn, "vOffset")) ? cn.vOffset : 0;
+        cn.restrictCollect = (Dom.hasOwnProp(cn, "restrictCollect")) ? cn.restrictCollect : false;
+
+        if(!gridItem.isConnected(item))
+            gridItem.markAsConnected(item);
+
+        return cn;
+    },
+
+    rm: function(cns, cn) {
+        for(var i = 0; i < cns.length; i++) {
+            if(guid.get(cn.item) == guid.get(cns[i].item)) {
+                cns.splice(i, 1);
+                return;
+            }
+        }
+    },
+
+    _remapGUIDS: function(cns) {
+        for(var i = 0; i < cns.length; i++)
+            cns[i].itemGUID = guid.markForAppend(cns[i].item);
+    },
+
+    remapAllGUIDS: function() {
+        guid.reinit();
+        this._remapGUIDS(cnsSorter.sortForReappend(connections.get()));
+    },
+
+    remapGUIDSIn: function(cns) {
+        this._remapGUIDS(cns);
+    },
+
+    getByGUIDS: function(guids) {
+        var allCns = connections.get();
+        var cns = [];
+
+        for(var i = 0; i < allCns.length; i++) {
+            for(var j = 0; j < guids.length; j++) {
+                if(allCns[i].itemGUID == guids[j]) {
+                    cns.push(allCns[i]);
                     break;
                 }
             }
         }
-    }
 
-    if(!disableWasItemFoundValidation) {
-        if(connectionItem == null) {
-            new Gridifier.Error(
-                Gridifier.Error.ERROR_TYPES.CONNECTIONS.CONNECTION_BY_ITEM_NOT_FOUND,
-                {item: item, connections: connections}
-            );
-        }
-    }
+        return cns;
+    },
 
-    return connectionItem;
-}
+    syncParams: function(cnsData) {
+        var cns = connections.get();
+        var params = ["x1", "x2", "y1", "y2", "hOffset", "vOffset", "restrictCollect"];
 
-Gridifier.Connections.prototype.remapAllItemGUIDS = function() {
-    this._guid.reinit();
+        for(var i = 0; i < cnsData.length; i++) {
+            for(var j = 0; j < cns.length; j++) {
+                if(cnsData[i].itemGUID == cns[j].itemGUID) {
+                    for(var k = 0; k < params.length; k++)
+                        cns[j][params[k]] = cnsData[i][params[k]];
 
-    var connections = this._connectionsSorter.sortConnectionsPerReappend(this._connections.get());
-    for(var i = 0; i < connections.length; i++) {
-        var newConnectionItemGUID = this._guid.markNextAppendedItem(connections[i].item);
-        connections[i].itemGUID = newConnectionItemGUID;
-    }
-}
-
-Gridifier.Connections.prototype.remapAllItemGUIDSInSortedConnections = function(connections) {
-    for(var i = 0; i < connections.length; i++) {
-        var newConnectionItemGUID = this._guid.markNextAppendedItem(connections[i].item);
-        connections[i].itemGUID = newConnectionItemGUID;
-    }
-}
-
-Gridifier.Connections.prototype.getConnectionsByItemGUIDS = function(itemGUIDS) {
-    var connections = this._connections.get();
-    var foundConnections = [];
-
-    for(var i = 0; i < connections.length; i++) {
-        for(var j = 0; j < itemGUIDS.length; j++) {
-            if(connections[i].itemGUID == itemGUIDS[j]) {
-                foundConnections.push(connections[i]);
-                break;
+                    break;
+                }
             }
         }
-    }
+    },
 
-    return foundConnections;
-}
+    _getMinSize: function(c1, c2, gridSize, size) {
+        var cns = connections.get();
+        if(cns.length == 0)
+            return 0;
 
-Gridifier.Connections.prototype.createItemConnection = function(item, itemConnectionCoords) {
-    var connection = itemConnectionCoords;
-
-    itemConnectionCoords.x1 = Dom.toFixed(itemConnectionCoords.x1, 2);
-    itemConnectionCoords.x2 = Dom.toFixed(itemConnectionCoords.x2, 2);
-    itemConnectionCoords.y1 = Dom.toFixed(itemConnectionCoords.y1, 2);
-    itemConnectionCoords.y2 = Dom.toFixed(itemConnectionCoords.y2, 2);
-
-    connection.item = item;
-    connection.itemGUID = Dom.toInt(this._guid.getItemGUID(item));
-
-    if(!connection.hasOwnProperty("horizontalOffset"))
-        connection.horizontalOffset = 0;
-    if(!connection.hasOwnProperty("verticalOffset"))
-        connection.verticalOffset = 0;
-    if(!connection.hasOwnProperty(Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT))
-        connection[Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT] = false;
-
-    if(!this._connectedItemMarker.isItemConnected(item))
-        this._connectedItemMarker.markItemAsConnected(item);
-
-    return connection;
-}
-
-Gridifier.Connections.prototype.syncConnectionParams = function(connectionsData) {
-    var connections = this._connections.get();
-
-    for(var i = 0; i < connectionsData.length; i++) {
-        for(var j = 0; j < connections.length; j++) {
-            if(connections[j].itemGUID == connectionsData[i].itemGUID) {
-                var restrictCollect = Gridifier.SizesTransformer.RESTRICT_CONNECTION_COLLECT;
-
-                connections[j][restrictCollect] = connectionsData[i][restrictCollect];
-                connections[j].verticalOffset = connectionsData[i].verticalOffset;
-                connections[j].horizontalOffset = connectionsData[i].horizontalOffset;
-                connections[j].x1 = connectionsData[i].x1;
-                connections[j].x2 = connectionsData[i].x2;
-                connections[j].y1 = connectionsData[i].y1;
-                connections[j].y2 = connectionsData[i].y2;
-
-                break;
-            }
-        }
-    }
-}
-
-Gridifier.Connections.prototype.getMinConnectionWidth = function() {
-    var connections = this._connections.get();
-
-    if(connections.length == 0)
-        return 0;
-
-    var me = this;
-    var gridX2 = this._gridifier.getGridX2();
-
-    // Sometimes fast dragging breaks coordinates of some connections.
-    // In such cases we should recalculate connection item width.
-    var getConnectionWidth = function(i) {
-        if(connections[i].x1 >= connections[i].x2 || connections[i].x1 < 0
-            || connections[i].x2 > gridX2) {
-            var connectionWidth = me._sizesResolverManager.outerWidth(connections[i].item, true);
-        }
-        else {
-            var connectionWidth = connections[i].x2 - connections[i].x1 + 1;
+        // Sometimes fast dragging breaks coordinates of some connections.(Fix)
+        var getCnSize = function(i) {
+            if(cns[i][c1] >= cns[i][c2] || cns[i][c1] < 0 || cns[i][c2] > gridSize)
+                return srManager["outer" + size](cns[i].item, true);
+            else
+                return cns[i][c2] - cns[i][c1] + 1;
         }
 
-        return connectionWidth;
-    };
-
-    var minConnectionWidth = getConnectionWidth(0);
-    for(var i = 1; i < connections.length; i++) {
-        var connectionWidth = getConnectionWidth(i);
-        if(connectionWidth < minConnectionWidth)
-            minConnectionWidth = connectionWidth;
-    }
-
-    return minConnectionWidth;
-}
-
-Gridifier.Connections.prototype.getMinConnectionHeight = function() {
-    var connections = this._connections.get();
-
-    if(connections.length == 0)
-        return 0;
-
-    var me = this;
-    var gridY2 = this._gridifier.getGridY2();
-
-    // Sometimes fast dragging breaks coordinates of some connections.
-    // In such cases we should recalculate connection item height.
-    var getConnectionHeight = function(i) {
-        if(connections[i].y1 >= connections[i].y2 || connections[i].y1 < 0
-            || connections[i].y2 > gridY2) {
-            var connectionHeight = me._sizesResolverManager.outerHeight(connections[i].item, true);
-        }
-        else {
-            var connectionHeight = connections[i].y2 - connections[i].y1 + 1;
+        var minSize = getCnSize(0);
+        for(var i = 1; i < cns.length; i++) {
+            var cnSize = getCnSize(i);
+            if(cnSize < minSize)
+                minSize = cnSize;
         }
 
-        return connectionHeight;
-    };
+        return minSize;
+    },
 
-    var minConnectionHeight = getConnectionHeight(0);
-    for(var i = 1; i < connections.length; i++) {
-        var connectionHeight = getConnectionHeight(i);
-        if(connectionHeight < minConnectionHeight)
-            minConnectionHeight = connectionHeight;
+    getMinWidth: function() {
+        return this._getMinSize("x1", "x2", grid.x2(), "Width");
+    },
+
+    getMinHeight: function() {
+        return this._getMinSize("y1", "y2", grid.y2(), "Height");
+    },
+
+    _compareGUIDS: function(cnsToCompare, item, compFn) {
+        var itemGUID = guid.get(item);
+        for(var i = 0; i < cnsToCompare.length; i++) {
+            if(compFn(guid.get(cnsToCompare[i].item), itemGUID))
+                return true;
+        }
+
+        return false;
+    },
+
+    isAnyGUIDSmallerThan: function(cnsToCompare, item) {
+        return this._compareGUIDS(cnsToCompare, item, function(a, b) { return a < b; });
+    },
+
+    isAnyGUIDBiggerThan: function(cnsToCompare, item) {
+        return this._compareGUIDS(cnsToCompare, item, function(a, b) { return a > b; });
+    },
+
+    getMaxY: function() {
+        var cns = connections.get();
+        var maxY = 0;
+        for(var i = 0; i < cns.length; i++) {
+            if(cns[i].y2 > maxY)
+                maxY = cns[i].y2;
+        }
+
+        return maxY;
+    },
+
+    restoreOnSortDispersion: function(cns, da, ra) {
+        var currCns = cnsSorter.sortForReappend(connections.get());
+        var lastCn = currCns[currCns.length - 1];
+        var setCn = function(cn, xv, yv) {
+            cn.x1 = xv;
+            cn.x2 = xv;
+            cn.y1 = yv;
+            cn.y2 = yv;
+        }
+
+        if(settings.eq("append", "default"))
+            da(cns, lastCn, setCn);
+        else
+            ra(cns, lastCn, setCn);
+    },
+
+    getAllBACoord: function(coord, cond) {
+        var allCns = connections.get();
+        var cns = [];
+
+        for(var i = 0; i < allCns.length; i++) {
+            if(settings.eq("sortDispersion", false) && cond(allCns[i], coord))
+                cns.push(allCns[i]);
+        }
+
+        return cns;
+    },
+
+    fixAllXYPosAfterPrepend: function(newCn, crs, c, c1, c2) {
+        if(newCn[c1] >= 0) return false;
+
+        var incXYPosBy = Math.round(Math.abs(newCn[c1]));
+        newCn[c2] = Math.abs(newCn[c1] - newCn[c2]);
+        newCn[c1] = 0;
+
+        var cns = connections.get();
+        for(var i = 0; i < cns.length; i++) {
+            if(newCn.itemGUID == cns[i].itemGUID)
+                continue;
+
+            cns[i][c1] += incXYPosBy;
+            cns[i][c2] += incXYPosBy;
+        }
+
+        for(var i = 0; i < crs.length; i++)
+            crs[i][c] += incXYPosBy;
+
+        cnsRanges.incAllBy(incXYPosBy, c1, c2);
+        cnsRanges.createPrepended(newCn[c1], newCn[c2], c1, c2);
+
+        return true;
     }
-
-    return minConnectionHeight;
-}
-
-
-Gridifier.Connections.prototype.isAnyConnectionItemGUIDSmallerThan = function(comparableConnections, 
-                                                                              item) {
-    var connectionItemGUID = this._guid.getItemGUID(item);
-
-    for(var i = 0; i < comparableConnections.length; i++) {
-        var comparableConnectionItemGUID = this._guid.getItemGUID(comparableConnections[i].item);
-        if(comparableConnectionItemGUID < connectionItemGUID)
-            return true;
-    }
-
-    return false;
-}
-
-Gridifier.Connections.prototype.isAnyConnectionItemGUIDBiggerThan = function(comparableConnections,
-                                                                             item) {
-    var connectionItemGUID = this._guid.getItemGUID(item);
-
-    for(var i = 0; i < comparableConnections.length; i++) {
-        var comparableConnectionItemGUID = this._guid.getItemGUID(comparableConnections[i].item);
-        if(comparableConnectionItemGUID > connectionItemGUID)
-            return true;
-    }
-
-    return false;
-}
+});

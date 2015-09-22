@@ -1,103 +1,76 @@
 // @disablePercentageCSSRecalc -> HTML node can't have size with fractional value,
 //                                so we should supress this calculation in IE8/Safari 5.1.7,etc...
-SizesResolver.outerWidth = function(DOMElem, includeMargins, disablePercentageCSSRecalc, disableBordersCalc) {
+SizesResolver.outerWidth = function(item, includeMargins, disablePtCSSRecalc, disableBordersCalc) {
     var includeMargins = includeMargins || false;
-    var disablePercentageCSSRecalc = disablePercentageCSSRecalc || false;
+    var disablePtCSSRecalc = disablePtCSSRecalc || false;
     var disableBordersCalc = disableBordersCalc || false;
-    var elementComputedCSS = this.getComputedCSS(DOMElem);
+    var itemComputedCSS = this.getComputedCSS(item);
     
-    if(disablePercentageCSSRecalc)
-        var recalculatePercentageCSSValues = false;
-    else if(this.isBrowserNativePercentageCSSValuesCalcStrategy())
-        var recalculatePercentageCSSValues = false;
-    else if(this.isRecalculatePercentageCSSValuesCalcStrategy()) {
-        this._ensureHasParentNode(DOMElem);
-
-        if(this.hasPercentageCSSValue("width", DOMElem))
-            var recalculatePercentageCSSValues = true;
-        else
-            var recalculatePercentageCSSValues = false;
+    if(disablePtCSSRecalc || this._areBrowserPtVals())
+        var recalcPtCSSVals = false;
+    else if(this._areRecalcPtVals()) {
+        this._ensureHasParentNode(item);
+        var recalcPtCSSVals = this._hasPtCSSVal("width", item);
     }
     
-    if(elementComputedCSS.display === "none")
+    if(itemComputedCSS.display === "none")
         return 0;
 
-    var computedProperties = this.getComputedProperties("forOuterWidth", elementComputedCSS, DOMElem);
+    var computedProps = this._getComputedProps("forOw", itemComputedCSS, item);
     
-    var paddingWidth = computedProperties.paddingLeft + computedProperties.paddingRight;
-    var marginWidth = computedProperties.marginLeft + computedProperties.marginRight;
-    var borderWidth = computedProperties.borderLeftWidth + computedProperties.borderRightWidth;
+    var paddingWidth = computedProps.paddingLeft + computedProps.paddingRight;
+    var marginWidth = computedProps.marginLeft + computedProps.marginRight;
+    var borderWidth = computedProps.borderLeftWidth + computedProps.borderRightWidth;
     
     // The HTMLElement.offsetWidth read-only property returns the layout width of an element. Typically, 
     // an element's offsetWidth is a measurement which includes the element borders, the element horizontal padding, 
     // the element vertical scrollbar (if present, if rendered) and the element CSS width.
     var outerWidth = 0;
-    var normalizedComputedWidth = this.normalizeComputedCSSSizeValue(elementComputedCSS.width);
+    var normalizedComputedWidth = this._normalizeComputedCSS(itemComputedCSS.width);
     
     if(normalizedComputedWidth !== false)
         outerWidth = normalizedComputedWidth;
 
-    var recalculatedDOMElemComputedCSS = null;
-    var parentDOMElemWidth = null; 
+    var uncomputedItemCSS = null;
+    var parentItemWidth = null;
     
-    if(recalculatePercentageCSSValues) {
-        recalculatedDOMElemComputedCSS = this._getComputedCSSWithMaybePercentageSizes(DOMElem);
-
-        if(DOMElem.parentNode.nodeName == "HTML")
-            var disablePercentageCSSRecalcPerHTMLNode = true;
-        else
-            var disablePercentageCSSRecalcPerHTMLNode = false;
-
-        parentDOMElemWidth = this.recalculatePercentageWidthFunction.call(
-            this, DOMElem.parentNode, false, disablePercentageCSSRecalcPerHTMLNode, true
+    if(recalcPtCSSVals) {
+        uncomputedItemCSS = this.getUncomputedCSS(item);
+        parentItemWidth = this.recalcPtWidthFn.call(
+            this, item.parentNode, false, (item.parentNode.nodeName == "HTML"), true
         );
 
-        if(this.hasLastRecalculatedDOMElBorderBoxBS
-            && this.hasPercentageCSSValue("width", DOMElem, recalculatedDOMElemComputedCSS)) {
-            parentDOMElemWidth -= this.lastRecalculatedDOMElBorderWidth;
-        }
+        if(this._hasLastBorderBox && this._hasPtCSSVal("width", item, uncomputedItemCSS))
+            parentItemWidth -= this._lastBorderWidth;
     }
 
-    if(recalculatePercentageCSSValues && 
-            (this.hasPercentageCSSValue("paddingLeft", DOMElem, recalculatedDOMElemComputedCSS) || 
-             this.hasPercentageCSSValue("paddingRight", DOMElem, recalculatedDOMElemComputedCSS))) {
-        paddingWidth = this._recalculateTwoSidePropertyWithPercentageValues(
-            DOMElem,
-            parentDOMElemWidth,
-            computedProperties, 
-            recalculatedDOMElemComputedCSS, 
-            "padding", 
-            "horizontal"
+    if(recalcPtCSSVals && this._hasPtCSSVal(["paddingLeft", "paddingRight"], item, uncomputedItemCSS)) {
+        paddingWidth = this._recalcTwoSidePropPtVals(
+            item, parentItemWidth, computedProps, uncomputedItemCSS, "padding"
         );
     }
     
-    if(recalculatePercentageCSSValues && this.hasPercentageCSSValue("width", DOMElem, recalculatedDOMElemComputedCSS)) {
-        outerWidth = this._recalculateWidthWithPercentageValue(
-            DOMElem, parentDOMElemWidth, recalculatedDOMElemComputedCSS
-        );
-    }
+    if(recalcPtCSSVals && this._hasPtCSSVal("width", item, uncomputedItemCSS))
+        outerWidth = this._recalcPtVal(item, parentItemWidth, uncomputedItemCSS, "width");
 
-    if(!this.isBoxSizingBorderBox(elementComputedCSS) 
-        || (this.isBoxSizingBorderBox(elementComputedCSS) && !this.isOuterBorderBoxSizing())) {
-        this.lastRecalculatedDOMElRawWidth = outerWidth;
+    if(!this._isDefBoxSizing(itemComputedCSS) || (this._isDefBoxSizing(itemComputedCSS) && !this._isOuterBoxSizing())) {
+        this._lastRawWidth = outerWidth;
         outerWidth += paddingWidth;
         if(!disableBordersCalc) outerWidth += borderWidth;
-        this.hasLastRecalculatedDOMElBorderBoxBS = false;
+        this._hasLastBorderBox = false;
     }
     else {
-        this.hasLastRecalculatedDOMElBorderBoxBS = true;
-        this.lastRecalculatedDOMElRawWidth = outerWidth;
+        this._hasLastBorderBox = true;
+        this._lastRawWidth = outerWidth;
         // If parent el has BorderBox BS, children percentage element width
         // should be calculated without borderWidth. 
-        this.lastRecalculatedDOMElBorderWidth = borderWidth;
+        this._lastBorderWidth = borderWidth;
     }
 
     if(includeMargins) {
-        if(recalculatePercentageCSSValues && 
-               (this.hasPercentageCSSValue("marginLeft", DOMElem, recalculatedDOMElemComputedCSS) ||
-                this.hasPercentageCSSValue("marginRight", DOMElem, recalculatedDOMElemComputedCSS))) {
-            marginWidth = this._recalculateTwoSidePropertyWithPercentageValues(
-                DOMElem, parentDOMElemWidth, computedProperties, recalculatedDOMElemComputedCSS, "margin", "horizontal"
+        if(recalcPtCSSVals && this._hasPtCSSVal(["marginLeft", "marginRight"], item, uncomputedItemCSS)) {
+            marginWidth = this._recalcTwoSidePropPtVals(
+                item, parentItemWidth, computedProps, uncomputedItemCSS, "margin"
             );
         }
 

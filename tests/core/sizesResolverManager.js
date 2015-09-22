@@ -69,22 +69,22 @@ $(document).ready(function() {
         },
 
         _markCachedValuesInOuterWidthCacheArray: function(sizesResolverManager) {
-            for(var i = 0; i < sizesResolverManager._outerWidthCache.length; i++) {
-                var cacheEntry = sizesResolverManager._outerWidthCache[i];
-                var cachedReturnedValues = cacheEntry.cachedReturnedValues;
+            for(var i = 0; i < sizesResolverManager._owCache.length; i++) {
+                var cacheEntry = sizesResolverManager._owCache[i];
+                var cachedReturnedValues = cacheEntry.cachedCalls;
 
-                if(cachedReturnedValues.withIncludeMarginsParam != null) {
-                    if(cachedReturnedValues.withIncludeMarginsParam.match(this._realSizesResolverOuterWidthCallMarker)) {
-                        cachedReturnedValues.withIncludeMarginsParam = cachedReturnedValues.withIncludeMarginsParam.replace(
+                if(cachedReturnedValues.withMargins != null) {
+                    if(cachedReturnedValues.withMargins.match(this._realSizesResolverOuterWidthCallMarker)) {
+                        cachedReturnedValues.withMargins = cachedReturnedValues.withMargins.replace(
                             this._realSizesResolverOuterWidthCallMarker,
                             this._cachedSizesResolverOuterWidthCallMarker
                         );
                     }
                 }
 
-                if(cachedReturnedValues.withoutIncludeMarginsParam != null) {
-                    if(cachedReturnedValues.withoutIncludeMarginsParam.match(this._realSizesResolverOuterWidthCallMarker)) {
-                        cachedReturnedValues.withoutIncludeMarginsParam = cachedReturnedValues.withoutIncludeMarginsParam.replace(
+                if(cachedReturnedValues.withoutMargins != null) {
+                    if(cachedReturnedValues.withoutMargins.match(this._realSizesResolverOuterWidthCallMarker)) {
+                        cachedReturnedValues.withoutMargins = cachedReturnedValues.withoutMargins.replace(
                             this._realSizesResolverOuterWidthCallMarker,
                             this._cachedSizesResolverOuterWidthCallMarker
                         );
@@ -122,7 +122,7 @@ $(document).ready(function() {
             var testerDiv = document.createElement("div");
             testerDiv.setAttribute(this._testDomElemGUIDDataAttr, this._testDomElemGUID);
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
 
             var expectedResponse = this._realSizesResolverOuterWidthCallMarker;
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
@@ -147,7 +147,7 @@ $(document).ready(function() {
             var testerDiv = document.createElement("div");
             testerDiv.setAttribute(this._testDomElemGUIDDataAttr, this._testDomElemGUID);
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
 
             var expectedResponse = this._cachedSizesResolverOuterWidthCallMarker;
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
@@ -170,7 +170,7 @@ $(document).ready(function() {
             var testerDiv = document.createElement("div");
             testerDiv.setAttribute(this._testDomElemGUIDDataAttr, this._testDomElemGUID);
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
 
             var expectedResponse = this._cachedSizesResolverOuterWidthCallMarker;
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
@@ -193,7 +193,7 @@ $(document).ready(function() {
             var testerDiv = document.createElement("div");
             testerDiv.setAttribute(this._testDomElemGUIDDataAttr, this._testDomElemGUID);
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
 
             var expectedResponsePrefix = this._cachedSizesResolverOuterWidthCallMarker;
             expectedResponsePrefix += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
@@ -234,7 +234,7 @@ $(document).ready(function() {
             expectedResponsePerSecondTesterDiv += secondTesterDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponsePerSecondTesterDiv += "-" + this._callWithoutIncludeMarginsParamMarker;
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
 
             sizesResolverManager.startCachingTransaction();
             sizesResolverManager.outerWidth(firstTesterDiv, false, true);
@@ -259,7 +259,7 @@ $(document).ready(function() {
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithoutIncludeMarginsParamMarker;
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
 
             sizesResolverManager.startCachingTransaction();
             sizesResolverManager.outerWidth(testerDiv, false, true);
@@ -286,7 +286,7 @@ $(document).ready(function() {
             testerDiv.style.height = "100px";
             $testContent.append($(testerDiv));
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
             sizesResolverManager.startCachingTransaction();
 
             ok(
@@ -300,7 +300,7 @@ $(document).ready(function() {
 
             sizesResolverManager.stopCachingTransaction();
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
             sizesResolverManager.startCachingTransaction();
             sizesResolverManager.setOuterWidthAntialiasValue(10.1);
 
@@ -393,22 +393,22 @@ $(document).ready(function() {
         },
 
         _markCachedValuesInOuterHeightCacheArray: function(sizesResolverManager) {
-            for(var i = 0; i < sizesResolverManager._outerHeightCache.length; i++) {
-                var cacheEntry = sizesResolverManager._outerHeightCache[i];
-                var cachedReturnedValues = cacheEntry.cachedReturnedValues;
+            for(var i = 0; i < sizesResolverManager._ohCache.length; i++) {
+                var cacheEntry = sizesResolverManager._ohCache[i];
+                var cachedReturnedValues = cacheEntry.cachedCalls;
 
-                if(cachedReturnedValues.withIncludeMarginsParam != null) {
-                    if(cachedReturnedValues.withIncludeMarginsParam.match(this._realSizesResolverOuterHeightCallMarker)) {
-                        cachedReturnedValues.withIncludeMarginsParam = cachedReturnedValues.withIncludeMarginsParam.replace(
+                if(cachedReturnedValues.withMargins != null) {
+                    if(cachedReturnedValues.withMargins.match(this._realSizesResolverOuterHeightCallMarker)) {
+                        cachedReturnedValues.withMargins = cachedReturnedValues.withMargins.replace(
                             this._realSizesResolverOuterHeightCallMarker,
                             this._cachedSizesResolverOuterHeightCallMarker
                         );
                     }
                 }
 
-                if(cachedReturnedValues.withoutIncludeMarginsParam != null) {
-                    if(cachedReturnedValues.withoutIncludeMarginsParam.match(this._realSizesResolverOuterHeightCallMarker)) {
-                        cachedReturnedValues.withoutIncludeMarginsParam = cachedReturnedValues.withoutIncludeMarginsParam.replace(
+                if(cachedReturnedValues.withoutMargins != null) {
+                    if(cachedReturnedValues.withoutMargins.match(this._realSizesResolverOuterHeightCallMarker)) {
+                        cachedReturnedValues.withoutMargins = cachedReturnedValues.withoutMargins.replace(
                             this._realSizesResolverOuterHeightCallMarker,
                             this._cachedSizesResolverOuterHeightCallMarker
                         );
@@ -446,7 +446,7 @@ $(document).ready(function() {
             var testerDiv = document.createElement("div");
             testerDiv.setAttribute(this._testDomElemGUIDDataAttr, this._testDomElemGUID);
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
 
             var expectedResponse = this._realSizesResolverOuterHeightCallMarker;
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
@@ -471,7 +471,7 @@ $(document).ready(function() {
             var testerDiv = document.createElement("div");
             testerDiv.setAttribute(this._testDomElemGUIDDataAttr, this._testDomElemGUID);
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
 
             var expectedResponse = this._cachedSizesResolverOuterHeightCallMarker;
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
@@ -498,7 +498,7 @@ $(document).ready(function() {
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithoutIncludeMarginsParamMarker;
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
 
             sizesResolverManager.startCachingTransaction();
             sizesResolverManager.outerHeight(testerDiv, false, true);
@@ -523,7 +523,7 @@ $(document).ready(function() {
             var withoutParamCallExpectedResponse = expectedResponsePrefix + "-" + this._callWithoutIncludeMarginsParamMarker;
             var withParamCallExpectedResponse = expectedResponsePrefix + "-" + this._callWithIncludeMarginsParamMarker;
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
 
             sizesResolverManager.startCachingTransaction();
             sizesResolverManager.outerHeight(testerDiv, false, true);
@@ -558,7 +558,7 @@ $(document).ready(function() {
             expectedResponsePerSecondTesterDiv += secondTesterDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponsePerSecondTesterDiv += "-" + this._callWithoutIncludeMarginsParamMarker;
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
 
             sizesResolverManager.startCachingTransaction();
             sizesResolverManager.outerHeight(firstTesterDiv, false, true);
@@ -582,7 +582,7 @@ $(document).ready(function() {
             expectedResponse += "-" + this._testDomElemGUIDMarker + testerDiv.getAttribute(this._testDomElemGUIDDataAttr);
             expectedResponse += "-" + this._callWithoutIncludeMarginsParamMarker;
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
 
             sizesResolverManager.startCachingTransaction();
             sizesResolverManager.outerHeight(testerDiv, false, true);
@@ -609,7 +609,7 @@ $(document).ready(function() {
             testerDiv.style.height = "100px";
             $testContent.append($(testerDiv));
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
             sizesResolverManager.startCachingTransaction();
 
             ok(
@@ -623,7 +623,7 @@ $(document).ready(function() {
 
             sizesResolverManager.stopCachingTransaction();
 
-            var sizesResolverManager = new Gridifier.SizesResolverManager();
+            var sizesResolverManager = new SizesResolverManager();
             sizesResolverManager.startCachingTransaction();
             sizesResolverManager.setOuterHeightAntialiasValue(10.1);
 
