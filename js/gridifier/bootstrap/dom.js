@@ -125,6 +125,10 @@ var Dom = {
         return Object.prototype.toString.call(maybeArray) == "[object Array]";
     },
 
+    isObj: function(o) {
+        return typeof o == "object" && o !== null;
+    },
+
     isChildOf: function(maybeChildElem, containerElem) {
         var currentParent = maybeChildElem.parentNode;
         while(currentParent != undefined) {
@@ -142,6 +146,15 @@ var Dom = {
 
     hasTransitions: function() {
         return this._hasTransitions;
+    },
+
+    hasVal: function(obj, val) {
+        for(var prop in obj) {
+            if(obj[prop] == val)
+                return true;
+        }
+
+        return false;
     },
 
     hasOwnProp: function(item, propToMatch) {
@@ -203,7 +216,7 @@ var Dom = {
             return /firefox|iceweasel/i.test(this._navigator);
         },
 
-        isAndroidUCBrowser: function() {
+        isAndroidUC: function() {
             if(!this.isAndroid())
                 return false;
 
@@ -223,7 +236,7 @@ var Dom = {
         set4: function(item, prop, val) {
             var sides = ["Left", "Right", "Top", "Bottom"];
             for(var i = 0; i < sides.length; i++)
-                item.style[prop + sides[i]] = (Dom.isArray(val)) ? val[prop + sides[i]] : val;
+                item.style[prop + sides[i]] = (Dom.isObj(val)) ? val[prop + sides[i]] : val;
         },
 
         hasClass: function(item, classToFind) {

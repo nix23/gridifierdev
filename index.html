@@ -103,6 +103,7 @@
         <script src="js/demoLayoutBuilder/demoLayout/demoLayout.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridifierDynamicSettings.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridItem.js"></script>
+        <script src="js/demoLayoutBuilder/demoLayout/gridifierBuilder.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridHeading/horizontalGridHeading.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridHeading/verticalGridHeading.js"></script>
         <script src="js/demoLayoutBuilder/demoLayout/gridControls/gridControlsManager.js"></script>
@@ -143,80 +144,98 @@
         <script src="js/gridifier/bootstrap/sizesResolver/outerWidth.js"></script>
         <script src="js/gridifier/bootstrap/sizesResolver/outerHeight.js"></script>
 
-        <script src="js/gridifier/core/core.js"></script>
-        <script src="js/gridifier/core/srManager.js"></script>
-        <script src="js/gridifier/core/collector.js"></script>
-        <script src="js/gridifier/core/guid.js"></script>
-        <script src="js/gridifier/core/antialiaser.js"></script>
-        <script src="js/gridifier/core/rounder.js"></script>
-        <script src="js/gridifier/core/eventEmitter.js"></script>
-        <script src="js/gridifier/core/operation.js"></script>
-        <script src="js/gridifier/core/item.js"></script>
-        <script src="js/gridifier/core/resorter.js"></script>
-        <script src="js/gridifier/core/filtrator.js"></script>
-        <script src="js/gridifier/core/disconnector.js"></script>
-        <script src="js/gridifier/core/iterator.js"></script>
-        <script src="js/gridifier/core/position.js"></script>
-        <script src="js/gridifier/core/cssManager.js"></script>
+        <script src="js/gridifier/api/coordsChanger/coordsChanger.js"></script>
+        <script src="js/gridifier/api/coordsChanger/default.js"></script>
+        <script src="js/gridifier/api/coordsChanger/position.js"></script>
+        <script src="js/gridifier/api/coordsChanger/translate.js"></script>
 
-        <script src="js/gridifier/imagesResolver/imagesResolver.js"></script>
-        <script src="js/gridifier/imagesResolver/resolvedImage.js"></script>
+        <script src="js/gridifier/api/sort/rsort.js"></script>
+        <script src="js/gridifier/api/sort/rsortHelpers.js"></script>
+        <script src="js/gridifier/api/sort/sort.js"></script>
+        <script src="js/gridifier/api/sort/sortHelpers.js"></script>
 
-        <script src="js/gridifier/settings/settings.js"></script>
-        <script src="js/gridifier/settings/coreSettingsParser.js"></script>
-        <script src="js/gridifier/settings/apiSettingsParser.js"></script>
+        <script src="js/gridifier/api/toggle/factory/rotate.js"></script>
+        <script src="js/gridifier/api/toggle/factory/scale.js"></script>
+        <script src="js/gridifier/api/toggle/factory/slide.js"></script>
 
-        <script src="js/gridifier/errors/error.js"></script>
-        <script src="js/gridifier/errors/coreSettings.js"></script>
-        <script src="js/gridifier/errors/apiSettings.js"></script>
-        <script src="js/gridifier/errors/core.js"></script>
-        <script src="js/gridifier/errors/collector.js"></script>
+        <script src="js/gridifier/api/toggle/fade.js"></script>
+        <script src="js/gridifier/api/toggle/rotate.js"></script>
+        <script src="js/gridifier/api/toggle/scale.js"></script>
+        <script src="js/gridifier/api/toggle/slide.js"></script>
+        <script src="js/gridifier/api/toggle/syncer.js"></script>
+        <script src="js/gridifier/api/toggle/toggle.js"></script>
+        <script src="js/gridifier/api/toggle/visibility.js"></script>
 
-        <script src="js/gridifier/api/settings.js"></script>
-        <script src="js/gridifier/api/slide.js"></script>
-        <script src="js/gridifier/api/rotate.js"></script>
-        <script src="js/gridifier/api/toggle.js"></script>
-        <script src="js/gridifier/api/toggleTimeouter.js"></script>
-        <script src="js/gridifier/api/sort.js"></script>
-        <script src="js/gridifier/api/sortHelpers.js"></script>
-        <script src="js/gridifier/api/filter.js"></script>
-        <script src="js/gridifier/api/coordsChanger.js"></script>
         <script src="js/gridifier/api/dragifier.js"></script>
+        <script src="js/gridifier/api/settings.js"></script>
 
-        <script src="js/gridifier/operations/queue.js"></script>
-        <script src="js/gridifier/operations/insert.js"></script>
-        <script src="js/gridifier/operations/prepend.js"></script>
-        <script src="js/gridifier/operations/append.js"></script>
+        <script src="js/gridifier/core/connections/connections.js"></script>
+        <script src="js/gridifier/core/connections/intersector.js"></script>
+        <script src="js/gridifier/core/connections/ranges.js"></script>
+        <script src="js/gridifier/core/connections/sorter.js"></script>
+        <script src="js/gridifier/core/connections/xyIntersector.js"></script>
 
-        <script src="js/gridifier/grid/grid.js"></script>
-        <script src="js/gridifier/grid/gridSizesUpdater.js"></script>
+        <script src="js/gridifier/core/connectors/connectors.js"></script>
+        <script src="js/gridifier/core/connectors/cleaner.js"></script>
+        <script src="js/gridifier/core/connectors/intersector.js"></script>
+        <script src="js/gridifier/core/connectors/reposition.js"></script>
+        <script src="js/gridifier/core/connectors/rounder.js"></script>
+        <script src="js/gridifier/core/connectors/selector.js"></script>
+        <script src="js/gridifier/core/connectors/shifter.js"></script>
+        <script src="js/gridifier/core/connectors/sorter.js"></script>
+
+        <script src="js/gridifier/core/item/collector.js"></script>
+        <script src="js/gridifier/core/item/guid.js"></script>
+        <script src="js/gridifier/core/item/item.js"></script>
+
+        <script src="js/gridifier/core/manager/cssManager.js"></script>
+        <script src="js/gridifier/core/manager/srManager.js"></script>
+
+        <script src="js/gridifier/core/operation/disconnector.js"></script>
+        <script src="js/gridifier/core/operation/filtrator.js"></script>
+        <script src="js/gridifier/core/operation/resorter.js"></script>
+
+        <script src="js/gridifier/core/antialiaser.js"></script>
+        <script src="js/gridifier/core/core.js"></script>
+        <script src="js/gridifier/core/eventEmitter.js"></script>
+        <script src="js/gridifier/core/iterator.js"></script>
+        <script src="js/gridifier/core/operation.js"></script>
+        <script src="js/gridifier/core/position.js"></script>
+        <script src="js/gridifier/core/rounder.js"></script>
 
         <script src="js/gridifier/discretizer/discretizer.js"></script>
-        <script src="js/gridifier/discretizer/horizontalCore.js"></script>
-        <script src="js/gridifier/discretizer/verticalCore.js"></script>
-        <script src="js/gridifier/discretizer/demonstrator.js"></script>
+        <script src="js/gridifier/discretizer/core.js"></script>
+        <script src="js/gridifier/discretizer/debug.js"></script>
 
         <script src="js/gridifier/dragifier/dragifier.js"></script>
         <script src="js/gridifier/dragifier/core.js"></script>
-        <script src="js/gridifier/dragifier/renderer.js"></script>
-        <script src="js/gridifier/dragifier/connectionIntersection/draggableItem.js"></script>
-        <script src="js/gridifier/dragifier/gridDiscretization/draggableItem.js"></script>
-        <script src="js/gridifier/dragifier/gridDiscretization/cells.js"></script>
+        <script src="js/gridifier/dragifier/intersection/item.js"></script>
+        <script src="js/gridifier/dragifier/discretization/cells.js"></script>
+        <script src="js/gridifier/dragifier/discretization/item.js"></script>
 
-        <script src="js/gridifier/connectors/connectors.js"></script>
-        <script src="js/gridifier/connectors/reposition.js"></script>
-        <script src="js/gridifier/connectors/shifter.js"></script>
-        <script src="js/gridifier/connectors/intersector.js"></script>
-        <script src="js/gridifier/connectors/rounder.js"></script>
-        <script src="js/gridifier/connectors/cleaner.js"></script>
-        <script src="js/gridifier/connectors/selector.js"></script>
-        <script src="js/gridifier/connectors/sorter.js"></script>
+        <script src="js/gridifier/grid/horizontal/appender.js"></script>
+        <script src="js/gridifier/grid/horizontal/connections.js"></script>
+        <script src="js/gridifier/grid/horizontal/coordsFinder.js"></script>
+        <script src="js/gridifier/grid/horizontal/prepender.js"></script>
+        <script src="js/gridifier/grid/horizontal/reversedAppender.js"></script>
+        <script src="js/gridifier/grid/horizontal/reversedPrepender.js"></script>
 
-        <script src="js/gridifier/connections/connections.js"></script>
-        <script src="js/gridifier/connections/intersector.js"></script>
-        <script src="js/gridifier/connections/xyIntersector.js"></script>
-        <script src="js/gridifier/connections/sorter.js"></script>
-        <script src="js/gridifier/connections/ranges.js"></script>
+        <script src="js/gridifier/grid/vertical/appender.js"></script>
+        <script src="js/gridifier/grid/vertical/connections.js"></script>
+        <script src="js/gridifier/grid/vertical/coordsFinder.js"></script>
+        <script src="js/gridifier/grid/vertical/prepender.js"></script>
+        <script src="js/gridifier/grid/vertical/reversedAppender.js"></script>
+        <script src="js/gridifier/grid/vertical/reversedPrepender.js"></script>
+
+        <script src="js/gridifier/grid/grid.js"></script>
+
+        <script src="js/gridifier/images/loader.js"></script>
+        <script src="js/gridifier/images/image.js"></script>
+
+        <script src="js/gridifier/inserter/queue.js"></script>
+        <script src="js/gridifier/inserter/insert.js"></script>
+        <script src="js/gridifier/inserter/prepend.js"></script>
+        <script src="js/gridifier/inserter/append.js"></script>
 
         <script src="js/gridifier/renderer/renderer.js"></script>
         <script src="js/gridifier/renderer/queue.js"></script>
@@ -227,21 +246,7 @@
         <script src="js/gridifier/reposition/queue.js"></script>
         <script src="js/gridifier/reposition/reposition.js"></script>
 
-        <script src="js/gridifier/horizontalGrid/appender.js"></script>
-        <script src="js/gridifier/horizontalGrid/prepender.js"></script>
-        <script src="js/gridifier/horizontalGrid/reversedAppender.js"></script>
-        <script src="js/gridifier/horizontalGrid/reversedPrepender.js"></script>
-        <script src="js/gridifier/horizontalGrid/coordsFinder.js"></script>
-        <script src="js/gridifier/horizontalGrid/connections.js"></script>
-
-        <script src="js/gridifier/verticalGrid/appender.js"></script>
-        <script src="js/gridifier/verticalGrid/prepender.js"></script>
-        <script src="js/gridifier/verticalGrid/reversedAppender.js"></script>
-        <script src="js/gridifier/verticalGrid/reversedPrepender.js"></script>
-        <script src="js/gridifier/verticalGrid/coordsFinder.js"></script>
-        <script src="js/gridifier/verticalGrid/connections.js"></script>
-
-        <script src="js/gridifier/gridifier.js"></script>
+        <!--<script src="js/gridifier/gridifier.js"></script>-->
 
         <script src="js/init.js"></script>
         <script>

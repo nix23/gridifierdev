@@ -16,7 +16,10 @@ proto(EventEmitter, {
 
                 (function(evName) {
                     evTarget["on" + evName] = function(cb) {
-                        me._callbacks[evName].push(cb);
+                        if(!initNull)
+                            me._callbacks[evName].push(cb);
+                        else
+                            me._callbacks[evName] = cb;
                     }
                 })(evName);
             }
@@ -27,7 +30,7 @@ proto(EventEmitter, {
     },
 
     _getArgs: function(evObj, evName, origArgs) {
-        if(!Dom.hasOwnProp(evObj, evName))
+        if(!Dom.hasVal(evObj, evName))
             err("no " + evName + " to emit");
 
         var args = [];

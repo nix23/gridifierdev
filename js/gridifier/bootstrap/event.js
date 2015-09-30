@@ -1,6 +1,14 @@
 var Event = (function() {
     var gevents = "gridifierEvents";
     var ghandle = "gridifierHandle";
+    var guid = function() {
+        var d = new Date().getTime();
+        return 'xxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            var r = (d + Math.random()*16)%16 | 0;
+            d = Math.floor(d/16);
+            return (c=='x' ? r : (r&0x3|0x8)).toString(16);
+        });
+    }
 
     function fixEvent(event) {
         event = event || window.event;
@@ -36,7 +44,7 @@ var Event = (function() {
     
     function commonHandle(event) {
         event = fixEvent(event);
-        var handlers = this.events[event.type];
+        var handlers = this[gevents][event.type];
         
         for(var g in handlers) {
             var ret = handlers[g].call(this, event);
@@ -58,20 +66,8 @@ var Event = (function() {
                 elem = window;
             }
             
-            if(!handler.guid) {
-                var guid = null;
-                var w = window;
-
-                if(typeof Gridifier != "undefined") {
-                    Gridifier.EVENT_GUID = (typeof Gridifier.EVENT_GUID == "undefined") ? 0 : ++Gridifier.EVENT_GUID;
-                    guid = Gridifier.EVENT_GUID;
-                }
-                else {
-                    w.GRIDIFIER_EVENT_GUID = (typeof w.GRIDIFIER_EVENT_GUID == "undefined") ? 0 : ++w.GRIDIFIER_EVENT_GUID;
-                    guid = w.GRIDIFIER_EVENT_GUID;
-                }
-                handler.guid = guid;
-            }
+            if(!handler.guid)
+                handler.guid = guid();
 
             if(!elem[gevents]) {
                 elem[gevents] = {};
@@ -95,7 +91,7 @@ var Event = (function() {
             elem[gevents][type][handler.guid] = handler;
         },
         
-        remove: function(elem, type, handler) {
+        rm: function(elem, type, handler) {
             var handlers = elem[gevents] && elem[gevents][type];
             if(!handlers) return;
             

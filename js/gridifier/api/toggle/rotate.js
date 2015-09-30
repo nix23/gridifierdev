@@ -1,7 +1,7 @@
 RotateToggle = function() {
     //this._time = null;
     //this._timing = null;
-    //this._event = null;
+    //this._ev = null;
     //this._sync = null;
     //this._dom = null;
     //this._api = null;
@@ -12,10 +12,10 @@ RotateToggle = function() {
 }
 
 proto(RotateToggle, {
-    setParams: function(time, timing, event, sync, dom, api, cn) {
+    setParams: function(time, timing, ev, sync, dom, api, cn) {
         this._time = time;
         this._timing = timing;
-        this._event = event;
+        this._ev = ev;
         this._sync = sync;
         this._dom = dom;
         this._api = api;
@@ -45,7 +45,7 @@ proto(RotateToggle, {
     _rotate: function(item, rotateProp, rotateMatrix, inverse) {
         var dom = this._dom;
         var api = this._api;
-        var event = this._event;
+        var ev = this._ev;
         var left = this._cn.x1;
         var top = this._cn.y1;
         var show = !inverse;
@@ -108,11 +108,11 @@ proto(RotateToggle, {
 
             if(show) {
                 dom.show(item);
-                event.emit(api.EVENT.SHOW, item);
+                ev.emit(api.EVENT.SHOW, item);
             }
             else {
                 dom.hide(item);
-                event.emit(api.EVENT.HIDE, item);
+                ev.emit(api.EVENT.HIDE, item);
             }
         }, this._time + 40));
     },

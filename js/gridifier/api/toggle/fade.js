@@ -1,10 +1,10 @@
 FadeToggle = function() {
     return {
-        show: function(item, left, top, time, timing, event, sync, dom, api) {
+        show: function(item, left, top, time, timing, ev, sync, dom, api) {
             sync.flush(item);
             if(!dom.hasTransitions()) {
                 dom.show(item);
-                event.emit(api.EVENT.SHOW, item);
+                ev.emit(api.EVENT.SHOW, item);
                 return;
             }
 
@@ -24,15 +24,15 @@ FadeToggle = function() {
 
             sync.add(item, setTimeout(function() {
                 dom.rm(item, api.TOGGLE.IS_ACTIVE);
-                event.emit(api.EVENT.SHOW, item);
+                ev.emit(api.EVENT.SHOW, item);
             }, time + 60));
         },
 
-        hide: function(item, left, top, time, timing, event, sync, dom, api) {
+        hide: function(item, left, top, time, timing, ev, sync, dom, api) {
             sync.flush(item);
             if(!dom.hasTransitions()) {
                 dom.hide(item);
-                event.emit(api.EVENT.HIDE, item);
+                ev.emit(api.EVENT.HIDE, item);
                 return;
             }
 
@@ -49,7 +49,7 @@ FadeToggle = function() {
                 dom.css3.opacity(item, "1");
                 dom.css3.transition(item, "");
 
-                event.emit(api.EVENT.HIDE, item);
+                ev.emit(api.EVENT.HIDE, item);
             }, time + 20));
         }
     }

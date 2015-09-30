@@ -17,51 +17,45 @@ module.exports = function(grunt) {
     banner = "/* Gridifier v1.0.3\n" + banner;
 
     var apiFiles = [
-        {"/api/": [
-            "coordsChanger", "dragifier", "filter", "rotate",
-            "slide", "sort", "toggle", "toggleTimeouter"
-        ]}
+        {"/api/": ["dragifier", "settings"]},
+        {"/api/coordsChanger/": ["coordsChanger", "default", "position", "translate"]},
+        {"/api/sort/": ["rsort", "rsortHelpers", "sort", "sortHelpers"]},
+        {"/api/toggle/factory/": ["rotate", "scale", "slide"]},
+        {"/api/toggle/": ["fade", "rotate", "scale", "slide", "syncer", "toggle", "visibility"]}
     ];
 
     var coreFiles = [
+        {"/bootstrap/": ["funcs", "mocks", "vars", "event", "prefixer", "dom"]},
         {"/bootstrap/sizesResolver/": ["sizesResolver", "init", "outerWidth", "outerHeight"]},
-        {"/bootstrap/": ["event", "prefixer", "dom", "bootstrap"]},
-        {"/": ["gridifier"]},
-        {"/connections/": ["connections", "connectionsIntersector"]},
-        {"/connectors/": [
-            "connectors", "connectorsIntersector", "connectorsNormalizer", "connectorsShifter", "transformerConnectors"
+        {"/core/connections/": ["connections", "intersector", "ranges", "sorter", "xyIntersector"]},
+        {"/core/connectors/": [
+            "connectors", "cleaner", "intersector", "reposition", "rounder",
+            "selector", "shifter", "sorter"
         ]},
+        {"/core/item/": ["collector", "guid", "item"]},
+        {"/core/manager/": ["cssManager", "srManager"]},
+        {"/core/operation/": ["disconnector", "filtrator", "resorter"]},
         {"/core/": [
-            "collector", "connectedItemMarker", "disconnector", "eventEmitter", "filtrator", "guid",
-            "iterator", "normalizer", "operation", "resorter", "responsiveClassesManager",
-            "sizesResolverManager"
+            "antialiaser", "core", "eventEmitter", "iterator", "operation", "position", "rounder"
         ]},
-        {"/discretizer/": ["discretizer", "horizontalCore", "verticalCore", "demonstrator"]},
-        {"/dragifier/": ["dragifier", "core", "renderer"]},
-        {"/dragifier/connectionIntersection/": ["draggableItem"]},
-        {"/dragifier/gridDiscretization/": ["cells", "draggableItem"]},
-        {"/errors/": ["apiSettings", "collector", "core", "coreSettings", "error"]},
-        {"/grid/": ["grid", "gridSizesUpdater"]},
-        {"/horizontalGrid/": ["appender", "itemCoordsExtractor", "prepender", "reversedAppender", "reversedPrepender"]},
-        {"/horizontalGrid/connections/": [
-            "connections", "connectionsHorizontalIntersector", "connectionsIntersector",
-            "connectionsRanges", "connectionsSorter"
+        {"/discretizer/": ["discretizer", "core"]},
+        {"/dragifier/": ["dragifier", "core"]},
+        {"/dragifier/intersection/": ["item"]},
+        {"/dragifier/discretization/": ["cells", "item"]},
+        {"/grid/horizontal/": [
+            "appender", "connections", "coordsFinder", "prepender",
+            "reversedAppender", "reversedPrepender"
         ]},
-        {"/horizontalGrid/connectors/": ["connectorsCleaner", "connectorsSelector", "connectorsSorter"]},
-        {"/imagesResolver/": ["imagesResolver", "resolvedImage"]},
-        {"/operations/": ["append", "prepend", "queue"]},
-        {"/renderer/": ["renderer", "rendererConnections", "schedulator", "silentRenderer"]},
-        {"/settings/": ["apiSettingsParser", "coreSettingsParser", "settings"]},
-        {"/sizesTransformer/": [
-            "itemsReappender", "itemsToReappendFinder", "sizesTransformer",
+        {"/grid/vertical/": [
+            "appender", "connections", "coordsFinder", "prepender",
+            "reversedAppender", "reversedPrepender"
         ]},
-        {"/transformerOperations/": ["transform"]},
-        {"/verticalGrid/": ["appender", "itemCoordsExtractor", "prepender", "reversedAppender", "reversedPrepender"]},
-        {"/verticalGrid/connections/": [
-            "connections", "connectionsVerticalIntersector", "connectionsIntersector",
-            "connectionsRanges", "connectionsSorter"
-        ]},
-        {"/verticalGrid/connectors/": ["connectorsCleaner", "connectorsSelector", "connectorsSorter"]}
+        {"/grid/": ["grid"]},
+        {"/images/": ["loader", "image"]},
+        {"/inserter/": ["append", "prepend", "queue", "insert"]},
+        {"/renderer/": ["renderer", "connections", "queue", "silent"]},
+        {"/reposition/": ["reposition", "data", "queue"]},
+        {"/": ["gridifier"]}
     ];
 
     var createConfigPathes = function(configArray, sourceFiles, source, target) {

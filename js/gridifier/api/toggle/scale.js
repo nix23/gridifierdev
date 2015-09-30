@@ -1,10 +1,10 @@
 ScaleToggle = function(beforeShow, onShow, beforeHide, afterHide) {
     return {
-        show: function(item, left, top, time, timing, event, sync, dom, api, cn) {
+        show: function(item, left, top, time, timing, ev, sync, dom, api, cn) {
             sync.flush(item);
             if(!dom.hasTransitions()) {
                 dom.show(item);
-                event.emit(api.EVENT.SHOW, item);
+                ev.emit(api.EVENT.SHOW, item);
                 return;
             }
 
@@ -15,11 +15,11 @@ ScaleToggle = function(beforeShow, onShow, beforeHide, afterHide) {
                 );
             }
 
-            if(!dom.has(api.TOGGLE.IS_ACTIVE)) {
+            if(!dom.has(item, api.TOGGLE.IS_ACTIVE)) {
                 dom.css3.transition(item, "none");
                 beforeShow(item, time, timing, dom, api);
                 dom.css3.transformProperty(item, "scale3d", "0,0,0");
-                dom.set(api.TOGGLE.IS_ACTIVE, "y");
+                dom.set(item, api.TOGGLE.IS_ACTIVE, "y");
             }
 
             sync.add(item, setTimeout(function() {
@@ -33,16 +33,16 @@ ScaleToggle = function(beforeShow, onShow, beforeHide, afterHide) {
 
             sync.add(item, setTimeout(function() {
                 api.toggle.resetTransformOrigin(item);
-                dom.rm(api.TOGGLE.IS_ACTIVE);
-                event.emit(api.EVENT.SHOW, item);
+                dom.rm(item, api.TOGGLE.IS_ACTIVE);
+                ev.emit(api.EVENT.SHOW, item);
             }, time + 60));
         },
 
-        hide: function(item, left, top, time, timing, event, sync, dom, api, cn) {
+        hide: function(item, left, top, time, timing, ev, sync, dom, api, cn) {
             sync.flush(item);
             if(!dom.hasTransitions()) {
                 dom.hide(item);
-                event.emit(api.EVENT.HIDE, item);
+                ev.emit(api.EVENT.HIDE, item);
                 return;
             }
 
@@ -77,7 +77,7 @@ ScaleToggle = function(beforeShow, onShow, beforeHide, afterHide) {
                 api.toggle.resetTransformOrigin(item);
 
                 dom.rm(item, api.TOGGLE.IS_ACTIVE);
-                event.emit(api.EVENT.HIDE, item);
+                ev.emit(api.EVENT.HIDE, item);
             }, time + 20));
         }
     }

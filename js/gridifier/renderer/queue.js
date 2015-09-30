@@ -28,8 +28,8 @@ proto(RendererQueue, {
     },
 
     _process: function() {
-        var getS = function(n) { return settings.get.call(settings, n) };
-        var getApi = settings.getApi;
+        var getS = bind("get", settings);
+        var getApi = bind("getApi", settings);
         var api = {
             toggle: toggleApi,
             cc: getApi("coordsChanger"),
@@ -67,18 +67,18 @@ proto(RendererQueue, {
                     r.cn.item, r.left, r.top, getS("coordsChangeTime"),
                     getS("coordsChangeTiming"), Dom, Prefixer, getS, true
                 );
-                event.emitInternal(INT_EV.BEFORE_SHOW_FOR_RSORT);
+                ev.emitInternal(INT_EV.BEFORE_SHOW_FOR_RSORT);
 
                 getApi("toggle").show(
                     r.cn.item, r.left, r.top, getS("toggleTime"), getS("toggleTiming"),
-                    event, toggleSyncerApi, Dom, api, {x1: r.left, y1: r.top}
+                    ev, toggleSyncerApi, Dom, api, {x1: r.left, y1: r.top}
                 );
             }
             else if(r.op == RENDER_OPS.HIDE) {
                 renderer.unmarkAsSchToHide(r.cn.item);
                 getApi("toggle").hide(
                     r.cn.item, r.left, r.top, getS("toggleTime"), getS("toggleTiming"),
-                    event, toggleSyncerApi, Dom, api, {x1: r.left, y1: r.top}
+                    ev, toggleSyncerApi, Dom, api, {x1: r.left, y1: r.top}
                 );
             }
             else {

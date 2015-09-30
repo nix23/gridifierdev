@@ -196,14 +196,14 @@ proto(Settings, {
         if(!Dom.isArray(val)) {
             this._check(name, "set");
             this._settings[name] = val;
-            event.emit(INT_EV.SET_SETTING_FOR_NZER, name);
+            ev.emitInternal(INT_EV.SET_SETTING_FOR_NZER, name);
             return;
         }
 
         for(var i = 0; i < name.length; i++) {
             this._check(name, "set");
             this._settings[name[i][0]] = name[i][1];
-            event.emit(INT_EV.SET_SETTING_FOR_NZER, name[i][0]);
+            ev.emitInternal(INT_EV.SET_SETTING_FOR_NZER, name[i][0]);
         }
     },
 
@@ -214,17 +214,19 @@ proto(Settings, {
             err("getApi('" + name + "') -> " + fnName + " fn not found");
         }
 
-        if(name != AS.FILTER || (name == AS.FILTER && !Dom.isArray(apiObj.selected))) {
+        if(name != AS.FILTER) {
             if(!Dom.hasOwnProp(apiObj, apiObj.selected))
                 throwErr(apiObj.selected);
             return apiObj[apiObj.selected];
         }
 
+        var selFilters = apiObj.selected;
+        if(!Dom.isArray(selFilters)) selFilters = [selFilters];
         var fns = [];
-        for(var i = 0; i < apiObj.selected.length; i++) {
-            if(!Dom.hasOwnProp(apiObj, apiObj.selected[i]))
-                throwErr(apiObj.selected[i]);
-            fns.push(apiObj[apiObj.selected[i]]);
+        for(var i = 0; i < selFilters.length; i++) {
+            if(!Dom.hasOwnProp(apiObj, selFilters[i]))
+                throwErr(selFilters[i]);
+            fns.push(apiObj[selFilters[i]]);
         }
 
         return fns;
@@ -233,6 +235,9 @@ proto(Settings, {
     setApi: function(name, fnName) {
         this._check(name, "setApi");
         this.get(name).selected = fnName;
+
+        if(name == AS.RSORT)
+            ev.emitInternal(INT_EV.RSORT_CHANGE);
     },
 
     addApi: function(name, fnName, fn) {

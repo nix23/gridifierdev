@@ -21,19 +21,13 @@ TranslateCc = function(getTrX, getTrY, beforeSyncToggle, is3d) {
         var currLeft = parseFloat(item.style.left);
         var currTop = parseFloat(item.style.top);
 
-        if(left > currLeft)
-            var trX = left - currLeft;
-        else if(left < currLeft)
-            var trX = (currLeft - left) * -1;
-        else
-            var trX = 0;
+        var getTr = function(curr, prev) {
+            if(curr > prev) return curr - prev;
+            return (curr < prev) ? (prev - curr) * -1 : 0;
+        }
 
-        if(top > currTop)
-            var trY = top - currTop;
-        else if(top < currTop)
-            var trY = (currTop - top) * -1;
-        else
-            var trY = 0;
+        var trX = getTr(left, currLeft);
+        var trY = getTr(top, currTop);
 
         var trReg = (is3d) ? /.*translate3d\((.*)\).*/ : /.*translate\((.*)\).*/;
         var matches = trReg.exec(item.style[prefix.get("transform")]);

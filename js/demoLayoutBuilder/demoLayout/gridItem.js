@@ -68,7 +68,7 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
                                                                            isBorderBoxBoxSizing,
                                                                            isContentBoxBoxSizing,
                                                                            itemBgClass) {
-    this._gridifier.markAsGridItem(this._$gridItem);
+    grid.mark(this._$gridItem);
     
     if(typeof window.borderType == "undefined")
         window.borderType = 1;
@@ -186,6 +186,7 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         "font-size": "14px",
         "font-weight": "bold",
         "margin": "15px",
+        "visibility": "hidden"
 
        //background: "url(img/test2.png)",
        // "background-size": "cover",

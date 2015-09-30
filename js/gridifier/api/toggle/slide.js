@@ -60,11 +60,11 @@ proto(SlideToggle, {
         }
 
         return {
-            show: function(item, left, top, time, timing, event, sync, dom, api, cn) {
+            show: function(item, left, top, time, timing, ev, sync, dom, api, cn) {
                 sync.flush(item);
                 if(!dom.hasTransitions()) {
                     dom.show(item);
-                    event.emit(api.EVENT.SHOW, item);
+                    ev.emit(api.EVENT.SHOW, item);
                     return;
                 }
 
@@ -100,15 +100,15 @@ proto(SlideToggle, {
                 sync.add(item, setTimeout(function() {
                     dom.rm(item, api.TOGGLE.IS_ACTIVE_WITH_CC);
                     dom.rm(item, api.TOGGLE.IS_ACTIVE);
-                    event.emit(api.EVENT.SHOW, item);
+                    ev.emit(api.EVENT.SHOW, item);
                 }, time + 60));
             },
 
-            hide: function(item, left, top, time, timing, event, sync, dom, api, cn) {
+            hide: function(item, left, top, time, timing, ev, sync, dom, api, cn) {
                 sync.flush(item);
                 if(!dom.hasTransitions()) {
                     dom.hide(item);
-                    event.emit(api.EVENT.HIDE, item);
+                    ev.emit(api.EVENT.HIDE, item);
                     return;
                 }
 
@@ -138,7 +138,7 @@ proto(SlideToggle, {
                     dom.rm(item, api.TOGGLE.IS_ACTIVE_WITH_CC);
                     dom.hide(item);
                     dom.rm(item, api.TOGGLE.IS_ACTIVE);
-                    event.emit(api.EVENT.HIDE, item);
+                    ev.emit(api.EVENT.HIDE, item);
                 }, time + 20));
             }
         };
@@ -147,20 +147,20 @@ proto(SlideToggle, {
     createCycled: function(sliderFns) {
         var slideIndex = 1;
         return {
-            show: function(item, left, top, time, timing, event, sync, dom, api, cn) {
+            show: function(item, left, top, time, timing, ev, sync, dom, api, cn) {
                 slideIndex++;
                 var nextSlideIndex = slideIndex % sliderFns.length;
                 var slider = sliderFns[nextSlideIndex];
 
-                slider.show(item, left, top, time, timing, event, sync, dom, api, cn);
+                slider.show(item, left, top, time, timing, ev, sync, dom, api, cn);
             },
 
-            hide: function(item, left, top, time, timing, event, sync, dom, api, cn) {
+            hide: function(item, left, top, time, timing, ev, sync, dom, api, cn) {
                 slideIndex++;
                 var nextSlideIndex = slideIndex % sliderFns.length;
                 var slider = sliderFns[nextSlideIndex];
 
-                slider.hide(item, left, top, time, timing, event, sync, dom, api, cn);
+                slider.hide(item, left, top, time, timing, ev, sync, dom, api, cn);
             }
         };
     }

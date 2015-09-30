@@ -14,7 +14,7 @@ proto(RendererCns, {
     },
 
     left: function(cn) {
-        var eq = settings.eq;
+        var eq = bind("eq", settings);
         if(eq("grid", "vertical"))
             var left = cn.x1;
         else
@@ -24,7 +24,7 @@ proto(RendererCns, {
     },
 
     top: function(cn) {
-        var eq = settings.eq;
+        var eq = bind("eq", settings);
         if(eq("grid", "vertical"))
             var top = eq("intersections", true) ? cn.y1 : (cn.y1 + cn.vOffset);
         else

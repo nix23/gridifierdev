@@ -129,27 +129,27 @@ DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype._selectToggleControlO
 
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.selectToggleControlRotateXOption = function() {
     this._selectToggleControlOption("RotateX(CSS3)");
-    this._gridifier.toggleBy("rotateX");
+    this._gridifier.toggle("rotateX");
 }
 
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.selectToggleControlRotateYOption = function() {
     this._selectToggleControlOption("RotateY(CSS3)");
-    this._gridifier.toggleBy("rotateY");
+    this._gridifier.toggle("rotateY");
 }
 
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.selectToggleControlScaleOption = function() {
-    this._selectToggleControlOption("Scale(CSS3)"); 
-    this._gridifier.toggleBy("scale");
+    this._selectToggleControlOption("Scale(CSS3)");
+    this._gridifier.toggle("scale");
 }
 
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.selectToggleControlFadeOption = function() {
     this._selectToggleControlOption("Opacity(CSS3)");
-    this._gridifier.toggleBy("fade");
+    this._gridifier.toggle("fade");
 }
 
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype.selectToggleControlVisibilityOption = function() {
     this._selectToggleControlOption("Visibility");
-    this._gridifier.toggleBy("visibility");
+    this._gridifier.toggle("visibility");
 }
 
 DemoLayoutBuilder.DemoLayout.GridControlsManager.prototype._selectFilterControlOption = function(sublabel) {

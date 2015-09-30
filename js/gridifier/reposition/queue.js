@@ -41,6 +41,10 @@ proto(RepositionQueue, {
         this._repositionNextBatch();
     },
 
+    getQueued: function() {
+        return this._queue;
+    },
+
     _isSameRepositionProcess: function() {
         var isSameProcess = true;
         if(settings.eq("grid", "vertical")) {
@@ -84,14 +88,14 @@ proto(RepositionQueue, {
         }
 
         srManager.stopCachingTransaction();
-        var repositionedCns = connections.getByGUIDS(repositionedGUIDS);
+        var repositionedCns = cnsCore.getByGUIDS(repositionedGUIDS);
         cssManager.emitEvents(repositionedCns);
         renderer.renderRepositioned(repositionedCns);
 
         this._queueData = this._queueData.concat(this._queue.splice(0, batchSize));
         if(this._queue.length == 0) {
-            event.emitInternal(INT_EV.REPOSITION_END_FOR_DRAG);
-            event.emit(EV.REPOSITION_END);
+            ev.emitInternal(INT_EV.REPOSITION_END_FOR_DRAG);
+            ev.emit(EV.REPOSITION_END);
             this._nextBatchTimeout = null;
             /* @system-log-start */
             Logger.stopLoggingOperation();

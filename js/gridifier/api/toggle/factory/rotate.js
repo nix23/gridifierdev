@@ -28,30 +28,30 @@ proto(RotateToggleFactory, {
 
     _create: function(name, showFnName, hideFnName, matrixOrProp, fadeType) {
         var me = this;
-        me._settings.addApi("rotate", name, {
-            show: function(item, left, top, time, timing, event, sync, dom, api, cn) {
+        me._settings.addApi("toggle", name, {
+            show: function(item, left, top, time, timing, ev, sync, dom, api, cn) {
                 sync.flush(item);
                 if(!dom.hasTransitions()) {
                     dom.show(item);
-                    event.emit(api.EVENT.SHOW, item);
+                    ev.emit(api.EVENT.SHOW, item);
                     return;
                 }
 
                 me._rotate.setFadeType(fadeType);
-                me._rotate.setParams(time, timing, event, sync, dom, api, cn);
+                me._rotate.setParams(time, timing, ev, sync, dom, api, cn);
                 me._rotate[showFnName](item, matrixOrProp);
             },
 
-            hide: function(item, left, top, time, timing, event, sync, dom, api, cn) {
+            hide: function(item, left, top, time, timing, ev, sync, dom, api, cn) {
                 sync.flush(item);
                 if(!dom.hasTransitions()) {
                     dom.hide(item);
-                    event.emit(api.EVENT.HIDE, item);
+                    ev.emit(api.EVENT.HIDE, item);
                     return;
                 }
 
                 me._rotate.setFadeType(fadeType);
-                me._rotate.setParams(time, timing, event, sync, dom, api, cn);
+                me._rotate.setParams(time, timing, ev, sync, dom, api, cn);
                 me._rotate[hideFnName](item, matrixOrProp);
             }
         });

@@ -86,7 +86,7 @@ proto(Grid, {
         this._resizeTimeout = setTimeout(function() {
             // This is required for correct work with retransformQueue.
             // (Update shouldn't fire between batches reappend at least with 'fit' gridTransformType.)
-            if(!sizesTransformer._itemsReappender.isReappendQueueEmpty()) {
+            if(!repositionQueue.isEmpty()) {
                 me.scheduleResize();
                 return;
             }
@@ -99,14 +99,14 @@ proto(Grid, {
     },
 
     _resize: function(coord, sizeType, currSizeFn) {
-        var connections = connections.get();
-        if(connections.length == 0)
+        var cns = connections.get();
+        if(cns.length == 0)
             return;
 
-        var newSize = connections[0][coord];
-        for(var i = 1; i < connections.length; i++) {
-            if(connections[i][coord] > newSize)
-                newSize = connections[i][coord];
+        var newSize = cns[0][coord];
+        for(var i = 1; i < cns.length; i++) {
+            if(cns[i][coord] > newSize)
+                newSize = cns[i][coord];
         }
 
         var cssSize = {};
@@ -116,6 +116,6 @@ proto(Grid, {
            (settings.eq("gridResize", "expand") && currSizeFn() < newSize))
             Dom.css.set(this._grid, cssSize);
 
-        event.emit(EV.GRID_RESIZE, this._grid);
+        ev.emit(EV.GRID_RESIZE, this._grid);
     }
 });

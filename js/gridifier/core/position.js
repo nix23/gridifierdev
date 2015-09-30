@@ -167,7 +167,7 @@ proto(Position, {
             /* @system-log-end */
             var itemCoords = coordsFinder.find(this._op, item, sortedCrs[i]);
 
-            if(this._canFit.call(this, itemCoords)) {
+            if(this._canFitCond.call(this, itemCoords)) {
                 /* @system-log-start */
                 Logger.logOutOfLayoutBounds(sortedCrs[i], itemCoords, connections.get());
                 /* @system-log-end */

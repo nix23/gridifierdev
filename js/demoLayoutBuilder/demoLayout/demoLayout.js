@@ -182,13 +182,6 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
                 return false;
         }
 
-        setTimeout(function() {
-            window.gridifier.setToggle("rotateXWithFadeOut");
-            //window.gridifier.disableIntersections().setAlign("center");
-            window.gridifier.setToggleDuration(5000);
-            //window.gridifier.setCoordsChangeDuration(1000);
-        }, 500);
-
         me._gridifierSettings.filter = {
             //"initial": "disabled",
             //initial: "blue",
@@ -544,7 +537,8 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //me._gridifierSettings.coordsChangeTransitionTiming = "cubic-bezier(0.550, 0.055, 0.675, 0.190)";
         //me._gridifierSettings.toggleAnimationMsDuration = 2500;
        // me._gridifierSettings.coordsChangeAnimationMsDuration = 2500;
-        me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
+        //me._gridifier = new Gridifier(me._grid.getGrid().get(0), me._gridifierSettings);
+         me._gridifier = new DemoLayoutBuilder.GridifierBuilder(me._grid.getGrid(), me._gridifierSettings);
         //
         //me._gridifier.setItemClonesManagerLifecycleCallbacks();
         //me._gridifier.setCoordsChanger("CSS3Translate3DClones");
@@ -685,17 +679,17 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         });
 
         // @todo -> Listen for correct event
-        me._gridifier.onGridSizesChange(function() {
+        me._gridifier.onGridResize(function() {
             $(me).trigger(DemoLayoutBuilder.DemoLayout.EVENT_DEMO_LAYOUT_SIZES_CHANGE);
         });
 
         $(me._grid).on(DemoLayoutBuilder.DemoLayout.HorizontalGrid.EVENT_GRID_VERTICAL_RESIZE, function() {
-            me._gridifier.triggerResize();
+            me._gridifier.reposition();
             $(me).trigger(DemoLayoutBuilder.DemoLayout.EVENT_DEMO_LAYOUT_SIZES_CHANGE);
         });
 
         $(me._grid).on(DemoLayoutBuilder.DemoLayout.VerticalGrid.EVENT_GRID_SIZES_CHANGE, function() {
-            me._gridifier.triggerResize();
+            me._gridifier.reposition();
             $(me).trigger(DemoLayoutBuilder.DemoLayout.EVENT_DEMO_LAYOUT_SIZES_CHANGE);
         });
 
@@ -752,13 +746,13 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
 
         $(me._gridifierDynamicSettings).on(DemoLayoutBuilder.DemoLayout.GridifierDynamicSettings.EVENT_FILTER_SELECTED, function(event, filterName) {
             setTimeout(function() {
-                me._gridifier.filterBy(filterName);
+                me._gridifier.filter(filterName);
             }, 250);
         });
 
         var i = 0;
         me._gridifier.onShow(function(item) {
-            var itemGUID = item.getAttribute(Gridifier.GUID.GUID_DATA_ATTR);
+            var itemGUID = item.getAttribute("data-gridifier-guid");
             //item.innerHTML = itemGUID;
             i++;
             //item.innerHTML = i;
@@ -779,7 +773,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         });
 
 
-        me._gridifier.onConnectionCreate(function() {
+        me._gridifier.onReposition(function() {
             //me._gridifier.silentRender(me._gridifier.getForSilentRender(true));
         });
 
@@ -800,7 +794,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             // console.log('item = ', item);
         //});
 
-        me._gridifier.onGridRetransform(function() {
+        me._gridifier.onRepositionEnd(function() {
             //console.log("grid retransform event!");
         });
     }
@@ -921,21 +915,21 @@ DemoLayoutBuilder.DemoLayout.prototype._getGridifierSetting = function(settingNa
 }
 
 DemoLayoutBuilder.DemoLayout.prototype.isDefaultPrependGrid = function() {
-    return this._getGridifierSetting("prependType") == Gridifier.PREPEND_TYPES.DEFAULT_PREPEND;
+    return this._getGridifierSetting("prependType") == "default";
 }
 
 DemoLayoutBuilder.DemoLayout.prototype.isReversedPrependGrid = function() {
-    return this._getGridifierSetting("prependType") == Gridifier.PREPEND_TYPES.REVERSED_PREPEND;
+    return this._getGridifierSetting("prependType") == "reversed";
 }
 
 DemoLayoutBuilder.DemoLayout.prototype.isMirroredPrependGrid = function() {
-    return this._getGridifierSetting("prependType") == Gridifier.PREPEND_TYPES.MIRRORED_PREPEND;
+    return this._getGridifierSetting("prependType") == "mirrored";
 }
 
 DemoLayoutBuilder.DemoLayout.prototype.isDefaultAppendGrid = function() {
-    return this._getGridifierSetting("appendType") == Gridifier.APPEND_TYPES.DEFAULT_APPEND;
+    return this._getGridifierSetting("appendType") == "default";
 }
 
 DemoLayoutBuilder.DemoLayout.prototype.isReversedAppendGrid = function() {
-    return this._getGridifierSetting("appendType") == Gridifier.APPEND_TYPES.REVERSED_APPEND;
+    return this._getGridifierSetting("appendType") == "reversed";
 }

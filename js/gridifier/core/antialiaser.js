@@ -12,7 +12,7 @@ Antialiaser = function() {
             me._updateZ.call(me);
         }, C.UPDATE_Z_DELAY);
     });
-    gridifier.onSetSettingForNzer(function(n) {
+    ev.onSetSettingForNzer(function(n) {
         var ns = ["widthPx", "heightPx", "widthPt", "heightPt"];
         var upd = false;
 

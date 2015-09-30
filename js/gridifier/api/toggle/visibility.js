@@ -1,15 +1,15 @@
 VisibilityToggle = function() {
     return {
-        show: function(item, left, top, time, timing, event, sync, dom, api) {
+        show: function(item, left, top, time, timing, ev, sync, dom, api) {
             sync.flush(item);
             dom.show(item);
-            event.emit(api.EVENT.SHOW, item);
+            ev.emit(api.EVENT.SHOW, item);
         },
 
-        hide: function(item, left, top, time, timing, event, sync, dom, api) {
+        hide: function(item, left, top, time, timing, ev, sync, dom, api) {
             sync.flush(item);
             dom.hide(item);
-            event.emit(api.EVENT.HIDE, item);
+            ev.emit(api.EVENT.HIDE, item);
         }
     }
 }

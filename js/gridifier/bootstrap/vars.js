@@ -34,6 +34,10 @@ var C = {
         SILENT_DATA: CP.DATA + "-sch-for-silentr"
     },
 
+    DRAGIFIER_REPOS_DELAY: 20,
+    DRAGIFIER_DISCR_REPOS_DELAY: 100,
+    IS_DRAGGABLE_DATA: CP.DATA + "-is-draggable",
+
     GUID_DATA: CP.DATA + "-guid",
     RANGE_SIZE: 500,
     REFLOW_FIX_DELAY: 0,
@@ -48,7 +52,9 @@ var C = {
     // shouldn't show on filter show)
     DISC_TYPES: {SOFT: 0, HARD: 1},
     DISC_BATCH: 12,
-    DISC_DELAY: 60
+    DISC_DELAY: 60,
+
+    RSORT_REPOS_DELAY: 20
 }
 
 // Toggle constants
@@ -87,7 +93,8 @@ var CRS = {
 // Operation constants
 var OPS = {
     PREPEND: 0, REV_PREPEND: 1, APPEND: 2,
-    REV_APPEND: 3, MIR_PREPEND: 4, INS_BEFORE: 5, INS_AFTER: 6
+    REV_APPEND: 3, MIR_PREPEND: 4, INS_BEFORE: 5, INS_AFTER: 6,
+    SIL_APPEND: 7
 }
 
 var RENDER_OPS = {
@@ -120,5 +127,5 @@ var EV = {
 // Internal event consts
 var INT_EV = {
     REPOSITION_END_FOR_DRAG: "RepositionEndForDrag", BEFORE_SHOW_FOR_RSORT: "BeforeShowForRsort",
-    SET_SETTING_FOR_NZER: "SetSettingForNzer"
+    SET_SETTING_FOR_NZER: "SetSettingForNzer", RSORT_CHANGE: "RsortChange"
 }

@@ -17,20 +17,18 @@ DemoLayoutBuilder.Configurator = function($targetEl, demoLayout) {
 
     this._gridifierSettings = {
         verticalGrid: {
-            gridType: Gridifier.GRID_TYPES.VERTICAL_GRID,
-            prependType: Gridifier.PREPEND_TYPES.DEFAULT_PREPEND,
-            appendType: Gridifier.APPEND_TYPES.DEFAULT_APPEND,
-            intersectionStrategy: Gridifier.INTERSECTION_STRATEGIES.DEFAULT,
-            sortDispersionMode: Gridifier.SORT_DISPERSION_MODES.DISABLED,
-            sortDispersionValue: null
+            grid: "vertical",
+            prepend: "default",
+            append: "default",
+            intersections: true,
+            sortDispersion: false
         },
         horizontalGrid: {
-            gridType: Gridifier.GRID_TYPES.HORIZONTAL_GRID,
-            prependType: Gridifier.PREPEND_TYPES.DEFAULT_PREPEND,
-            appendType: Gridifier.APPEND_TYPES.DEFAULT_APPEND,
-            intersectionStrategy: Gridifier.INTERSECTION_STRATEGIES.DEFAULT,
-            sortDispersionMode: Gridifier.SORT_DISPERSION_MODES.DISABLED,
-            sortDispersionValue: null
+            grid: "horizontal",
+            prepend: "default",
+            append: "default",
+            intersections: true,
+            sortDispersion: false
         }
     };
 

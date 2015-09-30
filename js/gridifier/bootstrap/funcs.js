@@ -3,9 +3,7 @@ var proto = function(c, def) {
         c.prototype[prop] = def[prop];
 }
 
-var self = function(fns, c) {
-    var c = c || gridifier;
-
+var self = function(c, fns) {
     for(var fnName in fns) {
         (function(fnName, c) {
             gridifier[fnName] = function() {
@@ -20,3 +18,7 @@ var err = function(msg) {
 }
 
 var nop = function() { return function() {}; }
+
+var bind = function(fn, obj) {
+    return function() { return obj[fn].apply(obj, arguments); };
+}
