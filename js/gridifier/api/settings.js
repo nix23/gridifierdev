@@ -10,7 +10,7 @@ var Settings = function() {
         intersections: true,
         align: "top",
         sortDispersion: false,
-        class: "grid-item",
+        "class": "grid-item",
         data: false,
         query: false,
         loadImages: false,

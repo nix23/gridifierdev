@@ -1,7 +1,7 @@
 $(document).ready(function() {
-    module("Sort API tester.");
+    module("SortHelpers");
 
-    var _sortApiSortComparatorToolsTester = {
+    var tester = {
         _sortApi: {},
 
         _createItemMock: function() {
@@ -46,7 +46,7 @@ $(document).ready(function() {
         runTests: function() {
             var me = this;
 
-            test("_sortHelpers", function(assert) {
+            test("all", function(assert) {
                 me._before.call(me);
 
                 me._testByOriginalPos();
@@ -557,5 +557,5 @@ $(document).ready(function() {
         }
     };
 
-    _sortApiSortComparatorToolsTester.runTests();
+    tester.runTests();
 });

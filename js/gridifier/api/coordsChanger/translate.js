@@ -4,7 +4,7 @@ TranslateCc = function(getTrX, getTrY, beforeSyncToggle, is3d) {
 
     return function(item, left, top, time, timing, dom, prefix, getS, syncToggle) {
         if(!dom.hasTransitions()) {
-            getS("coordsChanger").default.apply(this, arguments);
+            getS("coordsChanger")["default"].apply(this, arguments);
             return;
         }
 

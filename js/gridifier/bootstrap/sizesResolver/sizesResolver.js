@@ -36,10 +36,10 @@ var SizesResolver = {
     _hasLastBorderBox: false,
 
     init: function() {
-        this.getComputedCSS = this.getComputedCSSFunction();
+        this.getComputedCSS = this._getComputedCSSFn();
         this._findPrefixedProps();
-        this._findBorderBoxType();
-        this._findPtValsCalcType();
+        this._findBorderBoxType(Dom.div());
+        this._findPtValsCalcType(Dom.div(), Dom.div());
     },
 
     clearRecursiveSubcallsData: function() {
@@ -84,12 +84,12 @@ var SizesResolver = {
 
     _ensureHasParentNode: function(item) {
         if(item.parentNode == null || !Dom.hasOwnProp(item.parentNode, "innerHTML"))
-            err("Error: no parentNode");
+            err("no parentNode");
     },
 
-    _ensureHasComputedProp: function(elementComputedCSS, cssProperty) {
-        if(!(cssProperty in elementComputedCSS))
-            err("Error: no prop " + cssProperty);
+    _ensureHasComputedProp: function(itemComputedCSS, prop) {
+        if(!(prop in itemComputedCSS))
+            err("no prop " + prop);
     },
 
     _hasPtCSSVal: function(cssProp, item, itemComputedCSS) {
@@ -151,38 +151,6 @@ var SizesResolver = {
         return firstSideVal + secondSideVal;
     },
 
-    positionLeft: function(item) {
-        var itemComputedCSS = this.getComputedCSS(item);
-        if(itemComputedCSS.display == "none")
-            return 0;
-
-        var computedProps = this._getComputedProps("forPosLeft", itemComputedCSS, item);
-        return item.offsetLeft - computedProps.marginLeft;
-    },
-
-    positionTop: function(item) {
-        var itemComputedCSS = this.getComputedCSS(item);
-        if(itemComputedCSS.display == "none")
-            return 0;
-
-        var computedProps = this._getComputedProps("forPosTop", itemComputedCSS, item);
-        return item.offsetTop - computedProps.marginTop;
-    },
-
-    offsetLeft: function(item) {
-        var clientRect = item.getBoundingClientRect();
-        var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-        
-        return clientRect.left + scrollLeft;
-    },
-
-    offsetTop: function(item) {
-        var clientRect = item.getBoundingClientRect();
-        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        
-        return clientRect.top + scrollTop;
-    },
-
     _isDefBoxSizing: function(itemComputedCSS) {
         var boxSizingProp = this._prefixedProps.boxSizing;
         if(boxSizingProp && itemComputedCSS[boxSizingProp]
@@ -239,8 +207,7 @@ var SizesResolver = {
     _getComputedProps: function(getPropsType, itemComputedCSS, item) {
         var computedProps = {};
 
-        for(var i = 0; i < this._getProps[getPropsType].length; i++)
-        {
+        for(var i = 0; i < this._getProps[getPropsType].length; i++) {
             var propName = this._getProps[getPropsType][i];
             var propVal = itemComputedCSS[propName];
 
@@ -255,24 +222,61 @@ var SizesResolver = {
         return computedProps;
     },
 
-    cloneComputedStyle: function(sourceItem, targetItem) {
+
+    positionLeft: function(item) {
+        var itemComputedCSS = this.getComputedCSS(item);
+        if(itemComputedCSS.display == "none")
+            return 0;
+
+        var computedProps = this._getComputedProps("forPosLeft", itemComputedCSS, item);
+        return item.offsetLeft - computedProps.marginLeft;
+    },
+
+    positionTop: function(item) {
+        var itemComputedCSS = this.getComputedCSS(item);
+        if(itemComputedCSS.display == "none")
+            return 0;
+
+        var computedProps = this._getComputedProps("forPosTop", itemComputedCSS, item);
+        return item.offsetTop - computedProps.marginTop;
+    },
+
+    offsetLeft: function(item) {
+        var clientRect = item.getBoundingClientRect();
+        var scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+
+        return clientRect.left + scrollLeft;
+    },
+
+    offsetTop: function(item) {
+        var clientRect = item.getBoundingClientRect();
+        var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+
+        return clientRect.top + scrollTop;
+    },
+
+    cloneComputedStyle: function(source, target) {
         var camelize = function(text) {
-            return text.replace(/-+(.)?/g, function (match, chr) {
+            return text.replace(/-+(.)?/g, function(match, chr) {
                 return chr ? chr.toUpperCase() : '';
             });
         };
 
-        var sourceItemComputedStyle = this.getComputedCSS(sourceItem);
+        var sourceCompCSS = this.getComputedCSS(source);
 
-        for(var prop in sourceItemComputedStyle) {
+        for(var prop in sourceCompCSS) {
             if(prop == "cssText")
                 continue;
 
             var propName = camelize(prop);
-            if(targetItem.style[propName] != sourceItemComputedStyle[propName])
-                targetItem.style[propName] = sourceItemComputedStyle[propName];
+            if(target.style[propName] != sourceCompCSS[propName])
+                target.style[propName] = sourceCompCSS[propName];
         }
 
+        this._reclone(sourceCompCSS, target);
+    },
+
+    _reclone: function(sourceCompCSS, target) {
         // Some properties could be overwritten by further rules.
         // For example in FF/IE borders are overwritten by some from further rules.
         var propsToReclone = ["font", "fontSize", "fontWeight", "lineHeight"];
@@ -285,9 +289,9 @@ var SizesResolver = {
 
         for(var i = 0; i < propsToReclone.length; i++) {
             var propName = propsToReclone[i];
-            if(typeof sourceItemComputedStyle[propName] != "undefined" &&
-                targetItem.style[propName] != sourceItemComputedStyle[propName])
-                targetItem.style[propName] = sourceItemComputedStyle[propName];
+            if(typeof sourceCompCSS[propName] != "undefined" &&
+                target.style[propName] != sourceCompCSS[propName])
+                target.style[propName] = sourceCompCSS[propName];
         }
     }
 }

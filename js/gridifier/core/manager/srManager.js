@@ -1,15 +1,15 @@
 var SizesResolverManager = function() {
     this._owCache = [
-        // { cachedItemGUID: Number, DOMElem: Object, cachedReturnedValues: {
-        //      withIncludeMarginsParam: Number || null,
-        //      withoutIncludeMarginsParam: Number || null
+        // { GUID: Number, item: Object, cachedCalls: {
+        //      withMargins: Number || null,
+        //      withoutMargins: Number || null
         // }},
         // ...
     ];
     this._ohCache = [
-        // { cachedItemGUID: Number, DOMElem: Object, cachedReturnedValues: {
-        //      withIncludeMarginsParam: Number || null,
-        //      withoutIncludeMarginsParam: Number || null
+        // { GUID: Number, item: Object, cachedCalls: {
+        //      withMargins: Number || null,
+        //      withoutMargins: Number || null
         // }},
         // ...
     ];
@@ -23,12 +23,12 @@ var SizesResolverManager = function() {
 }
 
 proto(SizesResolverManager, {
-    setOuterWidthAntialiasValue: function(newValue) {
-        this._owAntialias = newValue;
+    setOuterWidthAntialiasValue: function(val) {
+        this._owAntialias = val;
     },
 
-    setOuterHeightAntialiasValue: function(newValue) {
-        this._ohAntialias = newValue;
+    setOuterHeightAntialiasValue: function(val) {
+        this._ohAntialias = val;
     },
 
     _markAsCachedPerOw: function(item, cachedItemGUID) {
@@ -69,7 +69,8 @@ proto(SizesResolverManager, {
 
     _getOhCachedItemEntry: function(item) {
         return this._getCachedItemEntry(
-            item, this._ohCache, Dom.get(item, C.SRM.CACHED_PER_OH_ITEM_GUID_DATA));
+            item, this._ohCache, Dom.get(item, C.SRM.CACHED_PER_OH_ITEM_GUID_DATA)
+        );
     },
 
     _isCallCached: function(item, includeMargins, cacheAttr, cacheGetter) {
@@ -249,9 +250,8 @@ proto(SizesResolverManager, {
             var halfOfMarginSize = marginSize / 2;
             var sideOffset = SizesResolver[offsetFnName](item) - halfOfMarginSize;
         }
-        else {
+        else
             var sideOffset = SizesResolver[offsetFnName](item);
-        }
 
         return sideOffset;
     },
@@ -296,33 +296,33 @@ proto(SizesResolverManager, {
         };
     },
 
-    copyComputedStyle: function(sourceItem, targetItem) {
+    copyComputedStyle: function(source, target) {
         var me = this;
 
-        var copyRecursive = function(sourceItem, targetItem) {
-            SizesResolver.cloneComputedStyle(sourceItem, targetItem);
+        var copyRecursive = function(source, target) {
+            SizesResolver.cloneComputedStyle(source, target);
 
-            for(var i = 0; i < sourceItem.childNodes.length; i++) {
-                if(sourceItem.childNodes[i].nodeType == 1) {
-                    copyRecursive(sourceItem.childNodes[i], targetItem.childNodes[i]);
+            for(var i = 0; i < source.childNodes.length; i++) {
+                if(source.childNodes[i].nodeType == 1) {
+                    copyRecursive(source.childNodes[i], target.childNodes[i]);
 
-                    var childNodeComputedStyle = SizesResolver.getComputedCSS(sourceItem.childNodes[i]);
+                    var childNodeComputedStyle = SizesResolver.getComputedCSS(source.childNodes[i]);
 
                     // Don't override 'auto' value
                     if(/.*px.*/.test(childNodeComputedStyle.left))
-                        targetItem.childNodes[i].style.left = me.positionLeft(sourceItem.childNodes[i]) + "px";
+                        target.childNodes[i].style.left = me.positionLeft(source.childNodes[i]) + "px";
                     if(/.*px.*/.test(childNodeComputedStyle.top))
-                        targetItem.childNodes[i].style.top = me.positionTop(sourceItem.childNodes[i]) + "px";
+                        target.childNodes[i].style.top = me.positionTop(source.childNodes[i]) + "px";
 
-                    var childNodeRawSizes = SizesResolver.getUncomputedCSS(sourceItem.childNodes[i]);
+                    var childNodeRawSizes = SizesResolver.getUncomputedCSS(source.childNodes[i]);
 
-                    targetItem.childNodes[i].style.width = me.outerWidth(sourceItem.childNodes[i]) + "px";
+                    target.childNodes[i].style.width = me.outerWidth(source.childNodes[i]) + "px";
                     if(Dom.int(childNodeRawSizes.height) != 0)
-                        targetItem.childNodes[i].style.height = me.outerHeight(sourceItem.childNodes[i]) + "px";
+                        target.childNodes[i].style.height = me.outerHeight(source.childNodes[i]) + "px";
                 }
             }
         }
 
-        copyRecursive(sourceItem, targetItem);
+        copyRecursive(source, target);
     }
 });

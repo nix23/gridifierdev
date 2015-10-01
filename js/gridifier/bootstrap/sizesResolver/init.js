@@ -1,4 +1,4 @@
-SizesResolver.getComputedCSSFunction = function() {
+SizesResolver._getComputedCSSFn = function() {
     if(window.getComputedStyle) {
         return function(item) {
             return window.getComputedStyle(item, null);
@@ -19,9 +19,7 @@ SizesResolver._findPrefixedProps = function() {
 // At least IE10 and FF7 returns computed width and height without padding and borders, so we should determine sizes calculation type here.
 // Looks like 'workaround', but bootstrap inspired me.(They use similar aproach as in Dom.isBrowserSupportingTransitions
 // to detect if browser is supporting transitions, they are using so-called testerEl).
-SizesResolver._findBorderBoxType = function() {
-    var tester = Dom.div();
-
+SizesResolver._findBorderBoxType = function(tester) {
     Dom.css.set(tester, {
         width: "100px",
         padding: "10px 20px",
@@ -44,9 +42,7 @@ SizesResolver._findBorderBoxType = function() {
     root.removeChild(tester);
 };
 
-SizesResolver._findPtValsCalcType = function() {
-    var testerWrap = Dom.div();
-
+SizesResolver._findPtValsCalcType = function(testerWrap, tester, deb) {
     Dom.css.set(testerWrap, {
         width: "1178px",
         height: "300px",
@@ -59,7 +55,6 @@ SizesResolver._findPtValsCalcType = function() {
     var root = document.body || document.documentElement;
     root.appendChild(testerWrap);
 
-    var tester = Dom.div();
     Dom.css.set(tester, {
         width: "10%",
         height: "200px"
@@ -67,7 +62,7 @@ SizesResolver._findPtValsCalcType = function() {
     testerWrap.appendChild(tester);
 
     var expectedOw = 117.796875.toFixed(1);
-    var ow = parseFloat(this.outerWidth(tester, true)).toFixed(1);
+    var ow = parseFloat(this.outerWidth(tester, true, true)).toFixed(1);
     this._ptValsCalcType = (expectedOw == ow) ? this._ptValsCalcTypes.BROWSER : this._ptValsCalcTypes.RECALC;
 
     root.removeChild(testerWrap);

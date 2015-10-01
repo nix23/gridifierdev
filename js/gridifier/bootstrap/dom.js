@@ -5,7 +5,7 @@ var Dom = {
     init: function() {
         this._createTrimFunction();
         this._createHasOwnPropFn();
-        this._checkIfHasTransitions();
+        this._checkIfHasTransitions(Dom.div());
         this.browsers.init();
         this.css3.init();
     },
@@ -44,19 +44,15 @@ var Dom = {
         rootItem.removeChild(testerDiv);
     },
 
-    _checkIfHasTransitions: function() {
-        var testerEl = Dom.div();
-
-        var transitionEndEventNames = {
-            WebkitTransition : 'webkitTransitionEnd',
-            MozTransition    : 'transitionend',
-            OTransition      : 'oTransitionEnd otransitionend',
-            transition       : 'transitionend'
-        };
+    _checkIfHasTransitions: function(testerEl) {
+        var names = [
+            'WebkitTransition', 'MozTransition',
+            'OTransition', 'msTransition', 'MsTransition', 'transition'
+        ];
 
         this._hasTransitions = false;
-        for(var eventName in transitionEndEventNames) {
-            if(testerEl.style[eventName] !== undefined)
+        for(var i = 0; i < names.length; i++) {
+            if(testerEl.style[names[i]] !== undefined)
                 this._hasTransitions = true;
         }
     },
@@ -99,8 +95,8 @@ var Dom = {
         return true;
     },
 
-    int: function(maybeNotInt) {
-        return parseInt(maybeNotInt, 10);
+    int: function(val) {
+        return parseInt(val, 10);
     },
 
     isJquery: function(obj) {
@@ -121,18 +117,21 @@ var Dom = {
             return false;
     },
 
-    isArray: function(maybeArray) {
-        return Object.prototype.toString.call(maybeArray) == "[object Array]";
+    isArray: function(val) {
+        return Object.prototype.toString.call(val) == "[object Array]";
     },
 
     isObj: function(o) {
         return typeof o == "object" && o !== null;
     },
 
-    isChildOf: function(maybeChildElem, containerElem) {
-        var currentParent = maybeChildElem.parentNode;
+    isChildOf: function(child, container) {
+        if(child == container)
+            return false;
+
+        var currentParent = child.parentNode;
         while(currentParent != undefined) {
-            if(currentParent == containerElem)
+            if(currentParent == container)
                 return true;
 
             if(currentParent == document.body)
@@ -157,13 +156,13 @@ var Dom = {
         return false;
     },
 
-    hasOwnProp: function(item, propToMatch) {
-        return this._hasOwnPropFn(item, propToMatch);
+    hasOwnProp: function(item, prop) {
+        return this._hasOwnPropFn(item, prop);
     },
 
-    hasAnyProp: function(item, propsToMatch) {
-        for(var i = 0; i < propsToMatch.length; i++) {
-            if(this._hasOwnPropFn(propsToMatch[i]))
+    hasAnyProp: function(item, props) {
+        for(var i = 0; i < props.length; i++) {
+            if(this._hasOwnPropFn(item, props[i]))
                 return true;
         }
 
@@ -229,8 +228,8 @@ var Dom = {
             if(!Dom.isNative(item))
                 err("Error: not DOM.");
 
-            for(var propName in params)
-                item.style[propName] = params[propName];
+            for(var prop in params)
+                item.style[prop] = params[prop];
         },
 
         set4: function(item, prop, val) {
@@ -240,11 +239,11 @@ var Dom = {
         },
 
         hasClass: function(item, classToFind) {
-            var classesString = item.getAttribute("class");
-            if(classesString == null || classesString.length == 0)
+            var classes = item.getAttribute("class");
+            if(classes == null || classes.length == 0)
                 return false;
 
-            var classes = classesString.split(" ");
+            classes = classes.split(" ");
 
             for(var i = 0; i < classes.length; i++) {
                 classes[i] = classes[i].gridifierTrim();
@@ -265,23 +264,24 @@ var Dom = {
             Dom.set(item, "class", newClass);
         },
 
-        removeClass: function(item, classToRemove) {
+        removeClass: function(item, classToRm) {
             var classes = item.getAttribute("class").split(" ");
-            var cleanedClass = "";
+            var newClass = "";
 
             for(var i = 0; i < classes.length; i++) {
-                if(classes[i].gridifierTrim() != classToRemove)
-                    cleanedClass += classes[i] + " ";
+                if(classes[i].gridifierTrim() != classToRm)
+                    newClass += classes[i] + " ";
             }
-            cleanedClass = cleanedClass.substring(0, cleanedClass.length - 1);
+            newClass = newClass.substring(0, newClass.length - 1);
 
-            Dom.set(item, "class", cleanedClass);
+            Dom.set(item, "class", newClass);
         }
     },
 
     css3: {
         //_transitionProps: ["transition"],
         //_transformProps: ["transform"],
+        _opacityProps: ["opacity"],
         _perspectiveProps: ["perspective"],
         _transformStyleProps: ["transformStyle"],
         _backfaceVisibilityProps: ["backfaceVisibility"],
@@ -302,6 +302,7 @@ var Dom = {
 
             for(var i = 0; i < prefixes[0].length; i++) {
                 var prefix = prefixes[0][i];
+                this._opacityProps.push(prefix + "Opacity");
                 this._perspectiveProps.push(prefix + "Perspective");
                 this._transformStyleProps.push(prefix + "TransformStyle");
                 this._backfaceVisibilityProps.push(prefix + "BackfaceVisibility");
@@ -317,44 +318,43 @@ var Dom = {
         },
 
         transitionProperty: function(item, prop) {
-            var currentTransition = item.style[Prefixer.get("transition", item)];
-            if(currentTransition.length == 0) {
+            var currentTr = item.style[Prefixer.get("transition", item)];
+            if(currentTr.length == 0) {
                 item.style[Prefixer.get("transition", item)] = prop;
                 return;
             }
 
-            var encodeCubicBezier = function(transition) {
-                return transition.replace(
+            var encodeCubicBezier = function(tr) {
+                return tr.replace(
                     /cubic-bezier\([^\)]+/g,
                     function(match) { return match.replace(/,/g, ";"); }
                 );
             };
 
-            var decodeCubicBezier = function(transition) {
-                return transition.replace(
+            var decodeCubicBezier = function(tr) {
+                return tr.replace(
                     /cubic-bezier\([^\)]+/g,
                     function(match) { return match.replace(/;/g, ","); }
                 );
             }
 
-            var newTransition = encodeCubicBezier(prop);
-            currentTransition = encodeCubicBezier(currentTransition);
-            var currentTransitionProps = currentTransition.split(",");
+            var newTr = encodeCubicBezier(prop);
+            currentTr = encodeCubicBezier(currentTr);
+            var currentTrProps = currentTr.split(",");
 
-            for(var i = 0; i < currentTransitionProps.length; i++) {
-                var currentTransitionProp = currentTransitionProps[i].gridifierTrim();
-                if(currentTransitionProp.length == 0)
+            for(var i = 0; i < currentTrProps.length; i++) {
+                var currentTrProp = currentTrProps[i].gridifierTrim();
+                if(currentTrProp.length == 0)
                     continue;
                 
-                var currentTransitionPropParts = currentTransitionProp.split(" ");
-                var currentTransitionPropName = currentTransitionPropParts[0];
+                var currentTrPropParts = currentTrProp.split(" ");
+                var currentTrPropName = currentTrPropParts[0];
                 
-                if(newTransition.search(currentTransitionPropName) === -1) {
-                    newTransition += ", " + currentTransitionProp;
-                }
+                if(newTr.search(currentTrPropName) === -1)
+                    newTr += ", " + currentTrProp;
             }
 
-            item.style[Prefixer.get("transition", item)] = decodeCubicBezier(newTransition).gridifierTrim();
+            item.style[Prefixer.get("transition", item)] = decodeCubicBezier(newTr).gridifierTrim();
         },
 
         transform: function(item, val) {
@@ -362,33 +362,32 @@ var Dom = {
         },
 
         transformProperty: function(item, prop, val) {
-            var currentTransform = item.style[Prefixer.get('transform', item)];
-            if(currentTransform.length == 0) {
+            var currentTr = item.style[Prefixer.get('transform', item)];
+            if(currentTr.length == 0) {
                 item.style[Prefixer.get('transform', item)] = prop + "(" + val + ")";
                 return;
             }
 
-            var newTransform = "";
-            var currentTransformProps = currentTransform.split(/\)/);
-            var hasCurrentTransformProperty = false;
-            for(var i = 0; i < currentTransformProps.length; i++) {
-                var currentTransformProp = currentTransformProps[i].gridifierTrim();
-                if(currentTransformProp.gridifierTrim().length == 0)
+            var newTr = "";
+            var currentTrProps = currentTr.split(/\)/);
+            var hasCurrentTrProp = false;
+            for(var i = 0; i < currentTrProps.length; i++) {
+                var currentTrProp = currentTrProps[i].gridifierTrim();
+                if(currentTrProp.length == 0)
                     continue;
                 
-                if(currentTransformProp.search(prop) !== -1) {
-                    newTransform += " " + prop + "(" + val + ")";
-                    hasCurrentTransformProperty = true;
+                if(currentTrProp.search(prop) !== -1) {
+                    newTr += " " + prop + "(" + val + ")";
+                    hasCurrentTrProp = true;
                 }
-                else {
-                    newTransform += " " + currentTransformProp + ")";
-                }
+                else
+                    newTr += " " + currentTrProp + ")";
             }
 
-            if(!hasCurrentTransformProperty)
-                newTransform += " " + prop + "(" + val + ")";
+            if(!hasCurrentTrProp)
+                newTr += " " + prop + "(" + val + ")";
 
-            item.style[Prefixer.get('transform', item)] = newTransform.gridifierTrim();
+            item.style[Prefixer.get('transform', item)] = newTr.gridifierTrim();
         },
 
         style: function(item, props, val) {
@@ -397,8 +396,7 @@ var Dom = {
         },
 
         opacity: function(item, val) {
-            var opacityProps = ["-webkit-opacity", "-moz-opacity", "opacity"];
-            this.style(item, opacityProps, val);
+            this.style(item, this._opacityProps, val);
         },
 
         perspective: function(item, val) {
@@ -451,11 +449,10 @@ var Dom = {
 
     remove: {
         byQuery: function(rootEl, selector) {
-            var domElems = Dom.find.byQuery(rootEl, selector);
-            for(var i = 0; i < domElems.length; i++)
-            {
-                var domElem = domElems[i];
-                domElem.parentNode.removeChild(domElem);
+            var items = Dom.find.byQuery(rootEl, selector);
+            for(var i = 0; i < items.length; i++) {
+                var item = items[i];
+                item.parentNode.removeChild(item);
             }
         }
     }

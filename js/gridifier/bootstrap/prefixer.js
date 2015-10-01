@@ -5,16 +5,15 @@ var Prefixer = {
         item = item || document.documentElement;
         var style = item.style;
 
-        if(typeof style[propName] === "string") {
+        if(typeof style[propName] === "string")
             return propName;
-        }
 
-        var originalPropName = propName;
+        var origPropName = propName;
         var propName = propName.charAt(0).toUpperCase() + propName.slice(1);
         for(var i = 0; i < this._prefixes.length; i++) {
             var prefixedPropName = this._prefixes[i] + propName;
             if(typeof style[prefixedPropName] === "string")
-                return getterFn(prefixedPropName, originalPropName, i);
+                return getterFn(prefixedPropName, origPropName, i);
         }
     },
 
@@ -24,8 +23,8 @@ var Prefixer = {
 
     getForCss: function(propName, item) {
         var me = this;
-        return this._getter(propName, item, function(propName, originalPropName, i) {
-            return "-" + me._prefixes[i].toLowerCase() + "-" + originalPropName;
+        return this._getter(propName, item, function(propName, origPropName, i) {
+            return "-" + me._prefixes[i].toLowerCase() + "-" + origPropName;
         });
     }
 }
