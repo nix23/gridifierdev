@@ -1,11 +1,11 @@
 Antialiaser = function() {
-    this._updateZ = false;
+    this._shouldUpdateZ = false;
     this._disableZUpdates = false;
     this._updateZTimeout = null;
 
     var me = this;
     gridifier.onReposition(function() {
-        if(!me._updateZ || me._disableZUpdates) return;
+        if(!me._shouldUpdateZ || me._disableZUpdates) return;
 
         clearTimeout(me._updateZTimeout);
         me._updateZTimeout = setTimeout(function() {
@@ -38,7 +38,7 @@ proto(Antialiaser, {
     updateAs: function() {
         var isWidthAsActive = this._updateAs("x", "width", "Width");
         var isHeightAsActive = this._updateAs("y", "height", "Height");
-        this._updateZ = (isWidthAsActive || isHeightAsActive);
+        this._shouldUpdateZ = (isWidthAsActive || isHeightAsActive);
     },
 
     _updateAs: function(c, prop, srmProp) {

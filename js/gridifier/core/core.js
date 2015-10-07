@@ -134,7 +134,7 @@ var Core = function() {
             return gridifier;
         },
 
-        triggerRotate: function(items, rotateType, batchSize, batchDelay) {
+        rotate: function(items, rotateType, batchSize, batchDelay) {
             gridifier.toggle(rotateType);
             var items = gridItem.toNative(items);
 
@@ -158,7 +158,7 @@ proto(Core, {
         var resizeTimeout = null;
 
         this._onResize = function() {
-            if(getS("resizeDelay") == null) {
+            if(getS("vpResizeDelay") == null) {
                 reposition.all();
                 return;
             }
@@ -166,7 +166,7 @@ proto(Core, {
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function() {
                 reposition.all();
-            }, getS("resizeDelay"));
+            }, getS("vpResizeDelay"));
         }
 
         Event.add(window, "resize", this._onResize);

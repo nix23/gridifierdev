@@ -25,8 +25,15 @@ proto(CssManager, {
         for(var i = 0; i < items.length; i++) {
             var added = [];
             var removed = [];
-            var addClass = function(i, c) { added.push(c); Dom.css.addClass(i, c); };
-            var rmClass = function(i, c) { removed.push(c); Dom.css.removeClass(i, c); };
+            // If app will call add/rm N-times in a row, ev should contain classname
+            var addClass = function(i, c) {
+                added.push(c);
+                if(!Dom.css.hasClass(i, c)) Dom.css.addClass(i, c);
+            };
+            var rmClass = function(i, c) {
+                removed.push(c);
+                if(Dom.css.hasClass(i, c)) Dom.css.removeClass(i, c);
+            };
 
             for(var j = 0; j < classes.length; j++) {
                 if(type == "toggle") {
@@ -35,14 +42,10 @@ proto(CssManager, {
                     else
                         addClass(items[i], classes[j]);
                 }
-                else if(type == "add") {
-                    if(!Dom.css.hasClass(items[i], classes[j]))
-                        addClass(items[i], classes[j]);
-                }
-                else if(type == "rm") {
-                    if(Dom.css.hasClass(items[i], classes[j]))
-                        rmClass(items[i], classes[j]);
-                }
+                else if(type == "add")
+                    addClass(items[i], classes[j]);
+                else if(type == "rm")
+                    rmClass(items[i], classes[j]);
             }
 
             this._saveEventData(items[i], added, removed);
@@ -53,23 +56,23 @@ proto(CssManager, {
 
     _saveEventData: function(item, added, removed) {
         var itemGUID = guid.get(item);
-        var itemEventData = null;
+        var eventData = null;
 
         for(var i = 0; i < this._eventsData.length; i++) {
             if(this._eventsData[i].itemGUID == itemGUID) {
-                itemEventData = this._eventsData[i];
+                eventData = this._eventsData[i];
                 break;
             }
         }
 
-        if(itemEventData == null) {
-            itemEventData = {};
-            this._eventsData.push(itemEventData);
+        if(eventData == null) {
+            eventData = {};
+            this._eventsData.push(eventData);
         }
 
-        itemEventData.itemGUID = itemGUID;
-        itemEventData.added = added;
-        itemEventData.removed = removed;
+        eventData.itemGUID = itemGUID;
+        eventData.added = added;
+        eventData.removed = removed;
     },
 
     emitEvents: function(cns) {

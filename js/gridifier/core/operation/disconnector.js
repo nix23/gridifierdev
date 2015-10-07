@@ -1,10 +1,12 @@
 var Disconnector = function() {
     self(this, {
         disconnect: function(items) {
+            var me = this;
             items = gridItem.filterConnected(gridItem.toNative(items));
+
             setTimeout(function() {
                 reposition.sync();
-                this.disconnect(items, C.DISC_TYPES.HARD);
+                me.disconnect(items, C.DISC_TYPES.HARD);
                 reposition.all();
             }, C.REFLOW_FIX_DELAY);
 

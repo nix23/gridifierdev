@@ -11,7 +11,7 @@ proto(CnsCore, {
         var itemGUID = guid.get(item);
         var cn = null;
         for(var i = 0; i < cns.length; i++) {
-            if(itemGUID = cns[i].itemGUID) {
+            if(itemGUID == cns[i].itemGUID) {
                 cn = cns[i];
                 break;
             }

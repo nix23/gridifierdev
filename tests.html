@@ -87,8 +87,10 @@
     <script src="js/gridifier/api/toggle/toggle.js"></script>
     <script src="js/gridifier/api/toggle/visibility.js"></script>
 
-    <script src="js/gridifier/api/dragifier.js"></script>
-    <script src="js/gridifier/api/settings.js"></script>
+    <script src="js/gridifier/api/dragifier/dragifier.js"></script>
+
+    <script src="js/gridifier/api/settings/settings.js"></script>
+    <script src="js/gridifier/api/settings/funcs.js"></script>
 
     <script src="js/gridifier/core/connections/connections.js"></script>
     <script src="js/gridifier/core/connections/intersector.js"></script>
@@ -169,6 +171,47 @@
 
     <!-- Tests includes -->
     <script>
+        window.asyncTests = {
+            _data: [],
+            _isExecuted: false,
+
+            add: function(assert, initFn, checkFn, checkDelay, context) {
+                var done = assert.async();
+                var me = this;
+
+                setTimeout(function() {
+                    me._data.push({
+                        done: done,
+                        initFn: initFn,
+                        checkFn: checkFn,
+                        checkDelay: checkDelay,
+                        context: context
+                    });
+
+                    me.exec();
+                }, 100);
+            },
+
+            exec: function() {
+                if(this._data.length == 0 || this._isExecuted)
+                    return;
+
+                var me = this;
+                this._isExecuted = true;
+                var next = this._data.shift();
+
+                next.initFn.call(next.context);
+                setTimeout(function() {
+                    next.checkFn.call(next.context);
+                    next.done();
+                    clearTestData();
+
+                    me._isExecuted = false;
+                    me.exec();
+                }, next.checkDelay);
+            }
+        };
+
         var gridifier = window;
 
         Dom.init();
@@ -186,6 +229,8 @@
             }
 
             window.clearTestData = function() {
+                sourceSettings = undefined;
+                sourceGrid = undefined;
                 $testStyles.html("");
                 $testContent.html("");
             }
@@ -222,13 +267,26 @@
     <script src="tests/bootstrap/funcs.js"></script>
     <script src="tests/bootstrap/prefixer.js"></script>
 
+    <script src="tests/api/settings.js"></script>
     <script src="tests/api/sort/sortHelpers.js"></script>
 
+    <script src="tests/core/item/guid.js"></script>
+    <script src="tests/core/item/item.js"></script>
+    <script src="tests/core/item/collector.js"></script>
+
+    <script src="tests/core/manager/cssManager.js"></script>
     <script src="tests/core/manager/srManager/srManager.js"></script>
     <script src="tests/core/manager/srManager/outerWidth.js"></script>
     <script src="tests/core/manager/srManager/outerHeight.js"></script>
 
+    <script src="tests/core/operation/disconnector.js"></script>
+
+    <script src="tests/core/antialiaser.js"></script>
+    <script src="tests/core/rounder.js"></script>
+
     <script src="tests/discretizer/yCore.js"></script>
     <script src="tests/discretizer/xCore.js"></script>
+
+    <script src="tests/grid/grid.js"></script>
 </body>
 </html>

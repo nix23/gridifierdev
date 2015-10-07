@@ -176,7 +176,8 @@ proto(Dragifier, {
 
     _findClosestConnected: function(child) {
         if(child == grid.get()) return null;
-        var checkClass = (typeof settings.get("dragifier") != "boolean");
+        var dr = settings.get("dragifier");
+        var checkClass = typeof dr == "string" || dr instanceof String;
 
         var connected = null;
         var parentNode = null;

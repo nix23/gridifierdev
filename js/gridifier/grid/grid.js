@@ -31,7 +31,7 @@ proto(Grid, {
             this._grid = grid.get(0);
         else if(Dom.isNative(grid))
             this._grid = grid;
-        else if(Dom.isArray(grid) && Dom.isNative(grid))
+        else if(Dom.isArray(grid) && Dom.isNative(grid[0]))
             this._grid = grid[0];
         else
             err(E.GRID_NOT_NATIVE);
