@@ -14,7 +14,7 @@ proto(RepositionCrs, {
 
     _recreate: function(item, cn, reappender, at) {
         connections.reinitRanges();
-        bind("recreateCrs", reappender);
+        bind("recreateCrs", reappender)();
         /* @system-log-start */
         var fn = "recreateCrs";
         Logger.log(

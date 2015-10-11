@@ -55,17 +55,17 @@ proto(CrsIntersector, {
         );
     },
 
-    mostTopFromBottomOrBottomRight: function(cr) {
-        var i = this;
-        return this._mostYClose(
-            cr, i._crXSmCnX1, i._crYSmCnY1, i._cnY1SmCnY1, i._intXAndLowerCns, i._intYAndRightCns
-        );
-    },
-
     mostTopFromBottomOrBottomLeft: function(cr) {
         var i = this;
         return this._mostYClose(
             cr, i._crXBgCnX2, i._crYSmCnY1, i._cnY1SmCnY1, i._intXAndLowerCns, i._intYAndLeftCns
+        );
+    },
+
+    mostTopFromBottomOrBottomRight: function(cr) {
+        var i = this;
+        return this._mostYClose(
+            cr, i._crXSmCnX1, i._crYSmCnY1, i._cnY1SmCnY1, i._intXAndLowerCns, i._intYAndRightCns
         );
     },
 
@@ -78,7 +78,7 @@ proto(CrsIntersector, {
                 if(mostCloseCn == null)
                     mostCloseCn = cn;
                 else {
-                    if(cond2(cr, cn))
+                    if(cond2(cn, mostCloseCn))
                         mostCloseCn = cn;
                 }
             }
@@ -92,7 +92,7 @@ proto(CrsIntersector, {
         else {
             var intCnIndexes = getIntCnsHg(cr);
             for(var i = 0; i < intCnIndexes.length; i++) {
-                for(var j = 0; j < intCnIndexes.length; j++)
+                for(var j = 0; j < intCnIndexes[i].length; j++)
                     cnFinder(cns[intCnIndexes[i][j]]);
             }
         }

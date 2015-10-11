@@ -14,8 +14,8 @@ proto(CrsSorter, {
                     else return ((first.x < second.x) ? 1 : -1);
                 }
                 else {
-                    if(isDef) return ((first.x > second.x) ? -1 : 1);
-                    else return ((first.x < second.x) ? -1 : 1);
+                    if(isDef) return ((first.x > second.x) ? 1 : -1);
+                    else return ((first.x < second.x) ? 1 : -1);
                 }
             }
             else {

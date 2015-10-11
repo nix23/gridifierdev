@@ -49,16 +49,20 @@ proto(CrsShifter, {
 
     _shiftLeftTop: function(cr) {
         var mostBottomCn = crsIntersector.mostBottomFromTopOrTopLeft(cr);
-        if(mostBottomCn != null && mostBottomCn.y2 + 1 != cr.y)
-            this._createShifted(cr.x, mostBottomCn.y2 + 1, cr);
+        if(mostBottomCn != null) {
+            if(mostBottomCn.y2 + 1 != cr.y)
+                this._createShifted(cr.x, mostBottomCn.y2 + 1, cr);
+        }
         else if(cr.y != 0)
             this._createShifted(cr.x, 0, cr);
     },
 
     _shiftLeftBottom: function(cr) {
         var mostTopCn = crsIntersector.mostTopFromBottomOrBottomLeft(cr);
-        if(mostTopCn != null && mostTopCn.y1 - 1 != cr.y)
-            this._createShifted(cr.x, mostTopCn.y1 - 1, cr);
+        if(mostTopCn != null) {
+            if(mostTopCn.y1 - 1 != cr.y)
+                this._createShifted(cr.x, mostTopCn.y1 - 1, cr);
+        }
         else {
             var maxY = cnsCore.getMaxY();
             if(maxY != 0 && maxY - 1 != cr.y)
@@ -68,8 +72,10 @@ proto(CrsShifter, {
 
     _shiftBottomRight: function(cr) {
         var mostLeftCn = crsIntersector.mostLeftFromRight(cr);
-        if(mostLeftCn != null && mostLeftCn.x1 - 1 != cr.x)
-            this._createShifted(mostLeftCn.x1 - 1, cr.y, cr);
+        if(mostLeftCn != null) {
+            if(mostLeftCn.x1 - 1 != cr.x)
+                this._createShifted(mostLeftCn.x1 - 1, cr.y, cr);
+        }
         else {
             // We shouldn't align prepended HG items to right corner(Layout will break)
             if(settings.eq("grid", "horizontal") && cr.type == CRS.PREPEND.DEF)
@@ -82,16 +88,20 @@ proto(CrsShifter, {
 
     _shiftTopLeft: function(cr) {
         var mostRightCn = crsIntersector.mostRightFromLeft(cr);
-        if(mostRightCn != null && mostRightCn.x2 + 1 != cr.x)
-            this._createShifted(mostRightCn.x2 + 1, cr.y, cr);
+        if(mostRightCn != null) {
+            if(mostRightCn.x2 + 1 != cr.x)
+                this._createShifted(mostRightCn.x2 + 1, cr.y, cr);
+        }
         else if(cr.x != 0)
             this._createShifted(0, cr.y, cr);
     },
 
     _shiftRightBottom: function(cr) {
         var mostTopCn = crsIntersector.mostTopFromBottomOrBottomRight(cr);
-        if(mostTopCn != null && mostTopCn.y1 - 1 != cr.y)
-            this._createShifted(cr.x, mostTopCn.y1 - 1, cr);
+        if(mostTopCn != null) {
+            if(mostTopCn.y1 - 1 != cr.y)
+                this._createShifted(cr.x, mostTopCn.y1 - 1, cr);
+        }
         else {
             var maxY = cnsCore.getMaxY();
             if(maxY != 0 && maxY - 1 != cr.y)
@@ -101,8 +111,10 @@ proto(CrsShifter, {
 
     _shiftRightTop: function(cr) {
         var mostBottomCn = crsIntersector.mostBottomFromTopOrTopRight(cr);
-        if(mostBottomCn != null && mostBottomCn.y2 + 1 != cr.y)
-            this._createShifted(cr.x, mostBottomCn.y2 + 1, cr);
+        if(mostBottomCn != null) {
+            if(mostBottomCn.y2 + 1 != cr.y)
+                this._createShifted(cr.x, mostBottomCn.y2 + 1, cr);
+        }
         else if(cr.y != 0)
             this._createShifted(cr.x, 0, cr);
     },
@@ -118,5 +130,5 @@ proto(CrsShifter, {
     shiftAllToRight: function(side) { this._shiftAllTo(side, "x", grid.x2()); },
     shiftAllToLeft: function(side) { this._shiftAllTo(side, "x", 0); },
     shiftAllToTop: function(side) { this._shiftAllTo(side, "y", 0); },
-    shiftAllToBottom: function(side) { this._shiftAllTo(side, "y", grid.y()); }
+    shiftAllToBottom: function(side) { this._shiftAllTo(side, "y", grid.y2()); }
 });

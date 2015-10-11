@@ -1,11 +1,11 @@
 var Iterator = function() {
-    var g = this.get;
+    var me = this;
     self(this, {
-        first: function() { return g("first"); },
-        last: function() { return g("last"); },
-        next: function(i) { return g("next", i); },
-        prev: function(i) { return g("prev", i); },
-        all: function() { return g("all"); }
+        first: function() { return me.get("first"); },
+        last: function() { return me.get("last"); },
+        next: function(i) { return me.get("next", i); },
+        prev: function(i) { return me.get("prev", i); },
+        all: function() { return me.get("all"); }
     });
 }
 

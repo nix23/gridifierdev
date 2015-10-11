@@ -20,10 +20,10 @@ proto(Resorter, {
         var nextFakeC = 0;
         for(var i = 0; i < items.length; i++) {
             var cn = cnsCore.find(items[i]);
-            cn[c1 + "1"] = nextFakeC;
-            cn[c1 + "2"] = nextFakeC;
-            cn[c2 + "1"] = 0;
-            cn[c2 + "2"] = 0;
+            cn[c.c1 + "1"] = nextFakeC;
+            cn[c.c1 + "2"] = nextFakeC;
+            cn[c.c2 + "1"] = 0;
+            cn[c.c2 + "2"] = 0;
             nextFakeC++;
         }
     }

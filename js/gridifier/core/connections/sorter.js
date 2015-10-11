@@ -36,6 +36,6 @@ proto(CnsSorter, {
         if(settings.eq("grid", "vertical"))
             return this._sortForReappend(cns, "y1", "x1", "x2");
         else
-            return this._.sortForReappend(cns, "x1", "y2", "y1");
+            return this._sortForReappend(cns, "x1", "y2", "y1");
     }
 });

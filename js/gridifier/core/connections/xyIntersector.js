@@ -86,7 +86,7 @@ proto(CnsXYIntersector, {
     },
 
     expandXYAllCnsToMostBig: function(cn, c1, c2, offset, outer) {
-        var eq = settings.eq;
+        var eq = bind("eq", settings);
         var mostBigCn = this.getMostBigFromAllXYIntCns(cn, c1, c2);
         if(mostBigCn == null) return;
 
@@ -109,6 +109,7 @@ proto(CnsXYIntersector, {
                     var newOffset = (Math.abs(cnsToE[i][c2] - cnsToE[i][c1] + 1) / 2) - (itemSize / 2);
                 else
                     var newOffset = Math.abs(cnsToE[i][c2] - cnsToE[i][c1] + 1) - itemSize;
+
                 if(cnsToE[i][offset] != newOffset) {
                     cnsToE[i][offset] = newOffset;
                     expandedCns.push(cnsToE[i]);

@@ -38,22 +38,22 @@ proto(CrsCleaner, {
 
     _isMappedCrIntAnyTopCn: function(mappedCr) {
         return this._isMappedCrIntAnySideCn(mappedCr, "x", "x1", "x2", function(cr, cn) {
-            return (this._isInsideCleaner()) ? (cr.y >= cn.y1) : (cr.y >= cn.y1 && cr.y <= cn.y2);
+            return (this._isInsideCleaner()) ? (cr.y >= cn.y1 && cr.y <= cn.y2) : (cr.y >= cn.y1);
         });
     },
     _isMappedCrIntAnyBottomCn: function(mappedCr) {
         return this._isMappedCrIntAnySideCn(mappedCr, "x", "x1", "x2", function(cr, cn) {
-            return (this._isInsideCleaner()) ? (cr.y <= cn.y2) : (cr.y <= cn.y2 && cr.y >= cn.y1);
+            return (this._isInsideCleaner()) ? (cr.y <= cn.y2 && cr.y >= cn.y1) : (cr.y <= cn.y2);
         });
     },
     _isMappedCrIntAnyLeftCn: function(mappedCr) {
         return this._isMappedCrIntAnySideCn(mappedCr, "y", "y1", "y2", function(cr, cn) {
-            return (this._isInsideCleaner()) ? (cr.x >= cn.x1) : (cr.x >= cn.x1 && cr.x <= cn.x2);
+            return (this._isInsideCleaner()) ? (cr.x >= cn.x1 && cr.x <= cn.x2) : (cr.x >= cn.x1);
         });
     },
     _isMappedCrIntAnyRightCn: function(mappedCr) {
         return this._isMappedCrIntAnySideCn(mappedCr, "y", "y1", "y2", function(cr, cn) {
-            return (this._isInsideCleaner()) ? (cr.x <= cn.x2) : (cr.x <= cn.x2 && cr.x >= cn.x1);
+            return (this._isInsideCleaner()) ? (cr.x <= cn.x2 && cr.x >= cn.x1) : (cr.x <= cn.x2);
         });
     },
 

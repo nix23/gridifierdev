@@ -22,7 +22,7 @@ proto(CnsCore, {
                 var queued = repositionQueue.getQueued();
                 for(var i = 0; i < queued.length; i++) {
                     if(itemGUID == queued[i].cn.itemGUID) {
-                        cn = queuedConnections[i].cn;
+                        cn = queued[i].cn;
                         break;
                     }
                 }

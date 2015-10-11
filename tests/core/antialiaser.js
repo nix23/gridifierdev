@@ -234,7 +234,7 @@ $(document).ready(function() {
                 C.UPDATE_Z_DELAY = 100;
             };
 
-            asyncTests.add(assert, initFn, checkFn, 20, this);
+            asyncTests.add(assert, initFn, checkFn, 40, this);
         },
 
         _updateZCallWhenZUpdatesDisabled: function(assert) {

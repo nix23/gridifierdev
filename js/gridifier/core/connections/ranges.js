@@ -10,10 +10,10 @@ proto(CnsRanges, {
     init: function(c1, c2) {
         var range = {cnIndexes: []};
         range[c1] = -1;
-        range[c2] = C.RANGE_SIZE;
+        range[c2] = C.RANGE_SIZE - 1;
 
         this._ranges = [range];
-        this._attachAllCns();
+        this._attachAllCns(c1, c2);
     },
 
     incAllBy: function(val, c1, c2) {
@@ -34,7 +34,7 @@ proto(CnsRanges, {
         var nextC1 = this._ranges[this._ranges.length - 1][c2] + 1;
         var range = {cnIndexes: []};
         range[c1] = nextC1;
-        range[c2] = nextC1 + C.RANGE_SIZE;
+        range[c2] = nextC1 + C.RANGE_SIZE - 1;
         this._ranges.push(range);
     },
 
@@ -56,10 +56,10 @@ proto(CnsRanges, {
         if(!attached) err("Range for cn NF");
     },
 
-    _attachAllCns: function() {
+    _attachAllCns: function(c1, c2) {
         var cns = connections.get();
         for(var i = 0; i < cns.length; i++)
-            this.attachCn(cns[i], i);
+            this.attachCn(cns[i], i, c1, c2);
     },
 
     mapAllIntAndSideCns: function(sortedCrs, c, c1, c2, getRangeIndex, getRangeIndex2, getCrCnIndexes, getNext) {

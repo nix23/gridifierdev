@@ -14,13 +14,9 @@ proto(Filtrator, {
     },
 
     _findConnItemsToHide: function(connItems) {
-        var items = [];
-        for(var i = 0; i < connItems.length; i++) {
-            if(collector.filter([connItems[i]]).length == 0)
-                items.push(connItems[i]);
-        }
-
-        return items;
+        return Dom.filter(connItems, function(ci) {
+            return collector.filter([ci]).length == 0;
+        }, this);
     },
 
     _recreateGUIDS: function(items) {

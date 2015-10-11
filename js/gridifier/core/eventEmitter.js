@@ -75,7 +75,7 @@ proto(EventEmitter, {
         if(this._insertEvTimeout != null) {
             clearTimeout(this._insertEvTimeout);
             this._insertEvTimeout = null;
-            items.concat(this._insertEvItems);
+            items = items.concat(this._insertEvItems);
         }
 
         var me = this;
