@@ -229,6 +229,7 @@
             }
 
             window.clearTestData = function() {
+                Logger = null;
                 sourceSettings = undefined;
                 sourceGrid = undefined;
                 $testStyles.html("");
@@ -302,11 +303,18 @@
     <script src="tests/core/eventEmitter.js"></script>
     <script src="tests/core/iterator.js"></script>
     <script src="tests/core/operation.js"></script>
+    <script src="tests/core/position.js"></script>
     <script src="tests/core/rounder.js"></script>
 
     <script src="tests/discretizer/yCore.js"></script>
     <script src="tests/discretizer/xCore.js"></script>
 
+    <script src="tests/grid/vertical/connections.js"></script>
+
+    <script src="tests/grid/horizontal/connections.js"></script>
+
     <script src="tests/grid/grid.js"></script>
+
+    <script src="//gridifier.lh:35729/livereload.js"></script>
 </body>
 </html>

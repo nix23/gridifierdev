@@ -1,8 +1,8 @@
-var Position = function(inserter, op, crInitialCr, addItemCrs, canFitCond) {
+var Position = function(inserter, op, crInitialCr, addItemCrs, cantFitCond) {
     this._op = op;
     this._crInitialCr = crInitialCr;
     this._addItemCrs = addItemCrs;
-    this._canFitCond = canFitCond;
+    this._cantFitCond = cantFitCond;
 
     inserter.recreateCrs = this._recreateCrs;
     inserter.createInitialCr = this._createInitialCr;
@@ -167,7 +167,7 @@ proto(Position, {
             /* @system-log-end */
             var itemCoords = coordsFinder.find(this._op, item, sortedCrs[i]);
 
-            if(this._canFitCond.call(this, itemCoords)) {
+            if(this._cantFitCond.call(this, itemCoords)) {
                 /* @system-log-start */
                 Logger.logOutOfLayoutBounds(sortedCrs[i], itemCoords, connections.get());
                 /* @system-log-end */

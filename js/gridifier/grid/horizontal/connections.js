@@ -27,7 +27,7 @@ proto(HgConnections, {
     getLastColXExpandedCns: function() { return cnsXYIntersector.getLastXYExpandedCns(); },
 
     isIntMoreThanOneCnX: function(ic) { return cnsXYIntersector.isIntMoreThanOneCnXY(ic, "x1", "x2"); },
-    getMostWideFromAllYIntCns: function(ic) { return cnsXYIntersector.getMostBigFromAllXYIntCns(ic, "x1", "x2"); },
+    getMostWideFromAllXIntCns: function(ic) { return cnsXYIntersector.getMostBigFromAllXYIntCns(ic, "x1", "x2"); },
     getAllXIntCns: function(ic) { return cnsXYIntersector.getAllXYIntCns(ic, "x1", "x2"); },
     expandXAllColCnsToMostWide: function(ic) {
         return cnsXYIntersector.expandXYAllCnsToMostBig(ic, "x1", "x2", "hOffset", "Width");
