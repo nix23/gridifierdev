@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    module("Discretizer horizontalCore tests.");
+    module("Discretizer xCore");
 
     var _transposeCellsTester = {
         _before: function() {
@@ -107,7 +107,7 @@ $(document).ready(function() {
         runTests: function() {
             var me = this;
 
-            test("discretizeGridWithDefaultAppend", function(assert) {
+            test("onDefaultAppend", function(assert) {
                 me._before.call(me);
 
                 me._testCallOn21pxWidth21pxHeightGridAnd10pxHorizontal10pxVerticalDiscretizationStep.call(me);
@@ -180,7 +180,7 @@ $(document).ready(function() {
         runTests: function() {
             var me = this;
 
-            test("discretizeGridWithReversedAppend", function(assert) {
+            test("onRevAppend", function(assert) {
                 me._before.call(me);
 
                 me._testCallOn20pxWidth20pxHeightGridAnd10pxHorizontal10pxVerticalDiscretizationStep.call(me);
@@ -197,6 +197,7 @@ $(document).ready(function() {
                 y2: function() { return 19; }
             };
             settings.set("grid", "horizontal");
+            settings.set("append", "reversed");
 
             var discretizerHorizontalCore = new DiscretizerCore();
             var discretizationCells = discretizerHorizontalCore.discretizeOnRevAppend(10, 10);

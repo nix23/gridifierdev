@@ -4,8 +4,9 @@ var Position = function(inserter, op, crInitialCr, addItemCrs, cantFitCond) {
     this._addItemCrs = addItemCrs;
     this._cantFitCond = cantFitCond;
 
-    inserter.recreateCrs = this._recreateCrs;
-    inserter.createInitialCr = this._createInitialCr;
+    var me = this;
+    inserter.recreateCrs = bind("_recreateCrs", this);
+    inserter.createInitialCr = bind("_createInitialCr", this);
 }
 
 proto(Position, {

@@ -31,7 +31,7 @@ proto(Discretizer, {
         return coords;
     },
 
-    markIntCellsBy: function(item, cn) {
+    markIntCellsBy: function(cn) {
         for(var row = 0; row < this._cells.length; row++) {
             for(var col = 0; col < this._cells[row].length; col++) {
                 var cell = this._cells[row][col];

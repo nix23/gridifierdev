@@ -3,7 +3,7 @@ var RepositionData = function() {}
 proto(RepositionData, {
     get: function(cnsToRps, firstRpsCn) {
         var cns = connections.get();
-        var eq = settings.eq;
+        var eq = bind("eq", settings);
 
         for(var i = 0; i < cns.length; i++) {
             if(cns[i].restrictCollect)
@@ -55,12 +55,12 @@ proto(RepositionData, {
     },
 
     _getSDCond: function(cn, fcn) {
-        var eq = settings.eq;
+        var eq = bind("eq", settings);
         if(eq("grid", "vertical")) {
             if(eq("append", "default"))
-                var cond = (cn.y1 > fcn.y1 || (cn.y1 == fcn.y1 && cn.x1 <= fcn.x2));
-            else
                 var cond = (cn.y1 > fcn.y1 || (cn.y1 == fcn.y1 && cn.x1 >= fcn.x1));
+            else
+                var cond = (cn.y1 > fcn.y1 || (cn.y1 == fcn.y1 && cn.x1 <= fcn.x2));
         }
         else {
             if(eq("append", "default"))
@@ -70,5 +70,57 @@ proto(RepositionData, {
         }
 
         return cond;
+    },
+
+    getForRepositionAll: function(cns) {
+        var itemsToRps = [];
+        var cnsToKeep = [];
+        var cnsToRps = [];
+
+        this._findCns(cns, itemsToRps, cnsToKeep, cnsToRps);
+        var firstCnToRps = this._findFirstCnToRps(cns, cnsToKeep);
+
+        return {items: itemsToRps, cns: cnsToRps, firstCn: firstCnToRps};
+    },
+
+    _findCns: function(cns, itemsToRps, cnsToKeep, cnsToRps) {
+        for(var i = 0; i < cns.length; i++) {
+            if(!cns[i].restrictCollect) {
+                itemsToRps.push(cns[i].item);
+                cnsToRps.push(cns[i]);
+            }
+            else
+                cnsToKeep.push(cns[i]);
+        }
+    },
+
+    _findFirstCnToRps: function(cns, cnsToKeep) {
+        var first = null;
+        if(cnsToKeep.length == 0) {
+            first = cns[0];
+            cns.splice(0, cns.length);
+        }
+        else {
+            for(var i = 0; i < cns.length; i++) {
+                var shouldRpsCn = true;
+                for(var j = 0; j < cnsToKeep.length; j++) {
+                    if(cnsToKeep[j].itemGUID == cns[i].itemGUID) {
+                        shouldRpsCn = false;
+                        break;
+                    }
+                }
+
+                if(shouldRpsCn) {
+                    first = cns[i];
+                    break;
+                }
+            }
+
+            cns.splice(0, cns.length);
+            for(var i = 0; i < cnsToKeep.length; i++)
+                cns.push(cnsToKeep[i]);
+        }
+
+        return first;
     }
 });

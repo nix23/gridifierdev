@@ -25,7 +25,7 @@ proto(DiscrDraggableItem, {
         this._pointer = dragifierCore.createPointer(item);
 
         discretizer.discretize();
-        discretizer.markIntCellsBy(this._item, this._itemCn);
+        discretizer.markIntCellsBy(this._itemCn);
         discretizerDebug.create();
 
         dragifierCore.hideItem(item);
@@ -69,7 +69,7 @@ proto(DiscrDraggableItem, {
         cnCoords = discretizerCore.normalizeCnYCoords(this._item, cnCoords);
 
         this._adjustPosition(cnCoords);
-        discretizer.markIntCellsBy(this._item, cnCoords);
+        discretizer.markIntCellsBy(cnCoords);
         setTimeout(function() { dragifierCore.repositionItems(); }, C.DRAGIFIER_DISCR_REPOS_DELAY);
     },
 

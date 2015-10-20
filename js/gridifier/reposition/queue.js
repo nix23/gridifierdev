@@ -77,6 +77,13 @@ proto(RepositionQueue, {
             return;
         }
 
+        this._execNextBatchReposition(batchSize);
+        this._updateQueue(batchSize);
+        if(this.isEmpty()) return;
+        this._scheduleNextBatchReposition();
+    },
+
+    _execNextBatchReposition: function(batchSize) {
         var repositionedGUIDS = [];
         for(var i = 0; i < batchSize; i++) {
             this._repositionItem(this._queue[i].item);
@@ -91,7 +98,9 @@ proto(RepositionQueue, {
         var repositionedCns = cnsCore.getByGUIDS(repositionedGUIDS);
         cssManager.emitEvents(repositionedCns);
         renderer.renderRepositioned(repositionedCns);
+    },
 
+    _updateQueue: function(batchSize) {
         this._queueData = this._queueData.concat(this._queue.splice(0, batchSize));
         if(this._queue.length == 0) {
             ev.emitInternal(INT_EV.REPOSITION_END_FOR_DRAG);
@@ -100,9 +109,10 @@ proto(RepositionQueue, {
             /* @system-log-start */
             Logger.stopLoggingOperation();
             /* @system-log-end */
-            return;
         }
+    },
 
+    _scheduleNextBatchReposition: function() {
         var me = this;
         this._nextBatchTimeout = setTimeout(function() {
             me._repositionNextBatch.call(me, true);

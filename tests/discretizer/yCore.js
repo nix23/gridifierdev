@@ -1,5 +1,5 @@
 $(document).ready(function() {
-    module("Discretizer verticalCore tests.");
+    module("Discretizer yCore");
 
     var discretizeGridWithDefaultAppendTester = {
         _before: function() {
@@ -13,7 +13,7 @@ $(document).ready(function() {
         runTests: function() {
             var me = this;
 
-            test("discretizeGridWithDefaultAppend", function(assert) {
+            test("onDefaultAppend", function(assert) {
                 me._before.call(me);
 
                 me._testCallOn20pxWidth20pxHeightGridAnd10pxHorizontal10pxVerticalDiscretizationStep.call(me);
@@ -85,7 +85,7 @@ $(document).ready(function() {
         runTests: function() {
             var me = this;
 
-            test("discretizeGridWithDefaultAppend", function(assert) {
+            test("onRevAppend", function(assert) {
                 me._before.call(me);
 
                 me._testCallOn20pxWidth20pxHeightGridAnd10pxHorizontal10pxVerticalDiscretizationStep.call(me);
@@ -96,6 +96,7 @@ $(document).ready(function() {
 
         _testCallOn20pxWidth20pxHeightGridAnd10pxHorizontal10pxVerticalDiscretizationStep: function() {
             ev = new EventEmitter();
+            sourceSettings = {append: "reversed"};
             settings = new Settings();
             grid = {
                 x2: function() { return 19; },

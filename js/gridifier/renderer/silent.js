@@ -48,7 +48,7 @@ proto(SilentRenderer, {
                 y2: gridOffset.top + itemCn.y2
             };
 
-            if(!cnsIntersector.isIntersectingAny([vpCoords], fakeCoords))
+            if(cnsIntersector.isIntersectingAny([vpCoords], fakeCoords))
                 itemsInsideVp.push(items[i]);
         }
 
@@ -76,7 +76,7 @@ proto(SilentRenderer, {
     },
 
     _exec: function(items, batchSize, batchTm) {
-        if(typeof items != "undefined" && items != null && items)
+        if(typeof items == "undefined" || items == null || !items)
             var scheduled = this.getScheduled();
         else
             var scheduled = items;
@@ -102,19 +102,24 @@ proto(SilentRenderer, {
             return;
         }
 
+        this._execByBatches(scheduledItems, scheduledCns, batchSize, batchTm);
+    },
+
+    _execByBatches: function(items, cns, batchSize, batchTm) {
         if(typeof batchTm == "undefined")
             var batchTm = C.INSERT_BATCH_DELAY;
 
+        var itemBatches = insertQueue.itemsToBatches(items, batchSize);
+        var cnBatches = insertQueue.itemsToBatches(cns, batchSize);
+        for(var i = 0; i < itemBatches.length; i++)
+            this._execBatch(itemBatches[i], cnBatches[i], i * batchTm);
+    },
+
+    _execBatch: function(items, cns, delay) {
         var me = this;
-        var itemBatches = insertQueue.itemsToBatches(scheduledItems, batchSize);
-        var cnBatches = insertQueue.itemsToBatches(scheduledCns, batchSize);
-        for(var i = 0; i < itemBatches.length; i++) {
-            (function(itemBatch, i, cnBatch) {
-                setTimeout(function() {
-                    me._render.call(me, itemBatch, cnBatch);
-                }, batchTm * i);
-            })(itemBatches[i], i, cnBatches[i]);
-        }
+        setTimeout(function() {
+            me._render.call(me, items, cns);
+        }, delay);
     },
 
     _render: function(items, cns) {

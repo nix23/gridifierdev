@@ -33,6 +33,16 @@ proto(InsertOp, {
         cns = cnsSorter.sortForReappend(cns);
         var cnsToRps = [];
 
+        var targetItem = this._getTargetItem(targetItem, cns, getIndex);
+        var targetItemGUID = this._getTargetItemGuid(targetItem, spliceCns, cns, cnsToRps);
+
+        if(targetItemGUID == null)
+            err(E.WRONG_IBA_ITEM);
+
+        this._reposition(cnsToRps, items, targetItemGUID, insertFn, rev, rpsFn);
+    },
+
+    _getTargetItem: function(targetItem, cns, getIndex) {
         if(typeof targetItem == "undefined" || targetItem == null)
             var targetItem = cns[getIndex(cns)].item;
         else {
@@ -42,37 +52,40 @@ proto(InsertOp, {
                 targetItem = cns[getIndex(cns)].item;
         }
 
+        return targetItem;
+    },
+
+    _getTargetItemGuid: function(targetItem, spliceCns, cns, cnsToRps) {
         var targetItemGUID = null;
         for(var i = 0; i < cns.length; i++) {
             if(guid.get(cns[i].item) == guid.get(targetItem)) {
                 targetItemGUID = cns[i].itemGUID;
-                cnsToRps = cnsToRps.concat(spliceCns(cns, i));
+                Array.prototype.push.apply(cnsToRps, spliceCns(cns, i));
                 break;
             }
         }
 
-        if(targetItemGUID == null) {
-            err(E.WRONG_IBA_ITEM);
-            return;
-        }
+        return targetItemGUID;
+    },
 
+    _reposition: function(cns, items, targetGuid, insertFn, rev, rpsFn) {
         connections.reinitRanges();
-        guid.reinitMax(targetItemGUID + 1 * rev);
+        guid.reinitMax(targetGuid + 1 * rev);
 
-        var appender = (settings.eq("append", "default")) ? appender : reversedAppender;
-        appender.recreateCrs();
+        var reappender = (settings.eq("append", "default")) ? appender : reversedAppender;
+        reappender.recreateCrs();
 
         insertFn(items);
 
         if(settings.eq("sortDispersion", false)) {
-            connections.restore(cnsToRps);
-            cnsCore.remapAllGUIDSIn(cnsToRps);
+            connections.restore(cns);
+            cnsCore.remapGUIDSIn(cns);
         }
         else {
-            connections.restoreOnSortDispersion(cnsToRps);
-            connections.remapAllGUIDS();
+            connections.restoreOnSortDispersion(cns);
+            cnsCore.remapAllGUIDS();
         }
 
-        rpsFn(cnsToRps);
+        rpsFn(cns);
     }
-})
+});

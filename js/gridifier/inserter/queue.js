@@ -1,7 +1,7 @@
 var InsertQueue = function() {
     // Array({'op' => 'op', 'items/item' => 'i', 'opSpecificParam1' => 'osp1', ...},
     //       ...., n )
-    this._queue = null;
+    this._queue = [];
     this._isWaitingForRpsQueue = false;
 }
 
@@ -52,34 +52,40 @@ proto(InsertQueue, {
         var me = this;
         var schedule = function(items) {
             setTimeout(function() {
-                if(repositionQueue.isEmpty())
-                    opFn(items, targetItem, op);
-                else {
-                    me._queue.push({
-                        op: op,
-                        items: items,
-                        targetItem: targetItem
-                    });
-
-                    if(me._isWaitingForRpsQueue)
-                        return;
-
-                    setTimeout(function() {
-                        me._isWaitingForRpsQueue = true;
-                        me._process.call(me);
-                    }, C.INSERT_QUEUE_DELAY);
-                }
+                me._execSchedule.call(me, items, targetItem, op, opFn);
             }, 0);
         }
 
         if(typeof batchSize == "undefined") {
-            schedule.call(me, items);
+            schedule(items);
             return;
         }
 
         this.scheduleFnExec(items, batchSize, batchDelay, function(items) {
-            schedule.call(me, items);
+            schedule(items);
         });
+    },
+
+    _execSchedule: function(items, targetItem, op, opFn) {
+        var me = this;
+
+        if(repositionQueue.isEmpty())
+            opFn(items, targetItem, op);
+        else {
+            me._queue.push({
+                op: op,
+                items: items,
+                targetItem: targetItem
+            });
+
+            if(me._isWaitingForRpsQueue)
+                return;
+
+            setTimeout(function() {
+                me._isWaitingForRpsQueue = true;
+                me._process.call(me);
+            }, C.INSERT_QUEUE_DELAY);
+        }
     },
 
     _process: function() {

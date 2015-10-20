@@ -231,7 +231,12 @@ $(document).ready(function() {
             var hideCalls = 0;
             var discCns = [];
 
+            var origDiscBatch = null;
+            var origDiscDelay = null;
+
             var initFn = function() {
+                origDiscBatch = C.DISC_BATCH;
+                origDiscDelay = C.DISC_DELAY;
                 C.DISC_BATCH = 2;
                 C.DISC_DELAY = 0;
 
@@ -269,8 +274,8 @@ $(document).ready(function() {
                    && hideCalls == 2,
                    "scheduleRender call ok");
 
-                C.DISC_BATCH = 12;
-                C.DISC_DELAY = 60;
+                C.DISC_BATCH = origDiscBatch;
+                C.DISC_DELAY = origDiscDelay;
             };
 
             asyncTests.add(assert, initFn, checkFn, 20, this);

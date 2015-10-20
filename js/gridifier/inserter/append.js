@@ -34,10 +34,11 @@ proto(AppendOp, {
         }
     },
 
-    execInsBefore: function(items, afterItem) {
+    execInsBefore: function(items, beforeItem) {
         var me = this;
         insertOp.execInsertBA(
             items,
+            beforeItem,
             function(items) { me._exec.call(me, items); },
             function() { return 0; },
             function(cns, i) { return cns.splice(i, cns.length - i); },
@@ -50,6 +51,7 @@ proto(AppendOp, {
         var me = this;
         insertOp.execInsertBA(
             items,
+            afterItem,
             function(items) { me._exec.call(me, items); },
             function(cns) { return cns.length - 1; },
             function(cns, i) { return cns.splice(i + 1, cns.length - i - 1); },

@@ -190,8 +190,10 @@ $(document).ready(function() {
 
         _updateZCallWhenDisabled: function(assert) {
             var wasUpdateZCalled = false;
+            var origDelay = null;
 
             var initFn = function() {
+                origDelay = C.UPDATE_Z_DELAY;
                 C.UPDATE_Z_DELAY = 0;
                 srManager = new SizesResolverManager();
                 ev = new EventEmitter();
@@ -206,7 +208,7 @@ $(document).ready(function() {
             };
             var checkFn = function() {
                 ok(!wasUpdateZCalled, "updateZ was not called when disabled");
-                C.UPDATE_Z_DELAY = 100;
+                C.UPDATE_Z_DELAY = origDelay;
             };
 
             asyncTests.add(assert, initFn, checkFn, 20, this);
@@ -214,8 +216,11 @@ $(document).ready(function() {
 
         _updateZCallWhenEnabled: function(assert) {
             var wasUpdateZCalled = false;
+            var origDelay = null;
+            var callsCount = 0;
 
             var initFn = function() {
+                origDelay = C.UPDATE_Z_DELAY;
                 C.UPDATE_Z_DELAY = 0;
                 srManager = new SizesResolverManager();
                 ev = new EventEmitter();
@@ -224,24 +229,28 @@ $(document).ready(function() {
                 var antialiaser = new Antialiaser();
                 antialiaser._updateZ = function() {
                     wasUpdateZCalled = true;
+                    callsCount++;
                 };
 
                 settings.set("widthPxAs", 1);
                 ev.emit(EV.REPOSITION);
+                ev.emit(EV.REPOSITION);
             };
             var checkFn = function() {
-                ok(wasUpdateZCalled, "updateZ was called when enabled");
-                C.UPDATE_Z_DELAY = 100;
+                ok(wasUpdateZCalled && callsCount == 1, "updateZ was called when enabled");
+                C.UPDATE_Z_DELAY = origDelay;
             };
 
-            asyncTests.add(assert, initFn, checkFn, 40, this);
+            asyncTests.add(assert, initFn, checkFn, 20, this);
         },
 
         _updateZCallWhenZUpdatesDisabled: function(assert) {
             var wasUpdateZCalled = false;
             var disableZUpdatesRes = null;
+            var origDelay = null;
 
             var initFn = function() {
+                origDelay = C.UPDATE_Z_DELAY;
                 C.UPDATE_Z_DELAY = 0;
                 srManager = new SizesResolverManager();
                 ev = new EventEmitter();
@@ -260,7 +269,7 @@ $(document).ready(function() {
             var checkFn = function() {
                 ok(!wasUpdateZCalled && disableZUpdatesRes == gridifier,
                    "updateZ was not called when disableZUpdates was called");
-                C.UPDATE_Z_DELAY = 100;
+                C.UPDATE_Z_DELAY = origDelay;
             };
 
             asyncTests.add(assert, initFn, checkFn, 20, this);

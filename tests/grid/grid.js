@@ -416,6 +416,7 @@ $(document).ready(function() {
             var coord = null;
             var size = null;
             var getC2 = null;
+            var callsCount = 0;
 
             var initFn = function() {
                 var sgrid = Dom.div();
@@ -436,13 +437,15 @@ $(document).ready(function() {
                     coord = fncoord;
                     size = fnsize;
                     getC2 = fngetC2;
+                    callsCount++;
                 };
 
                 grid.scheduleResize();
                 grid.scheduleResize();
             };
             var checkFn = function() {
-                ok(coord == "x2" && size == "width" && getC2() == 0, "schedule hg resize ok");
+                ok(coord == "x2" && size == "width" && getC2() == 0 && callsCount == 1,
+                   "schedule hg resize ok");
             };
 
             asyncTests.add(assert, initFn, checkFn, 20, this);

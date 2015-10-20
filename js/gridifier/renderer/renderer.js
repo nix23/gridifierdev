@@ -14,7 +14,6 @@ proto(Renderer, {
                 continue;
 
             rc.markAsRendered(cn);
-            rendererQueue.reinit();
             rendererQueue.schedule(RENDER_OPS.SHOW, cn, rc.left(cn), rc.top(cn));
         }
     },
@@ -31,7 +30,6 @@ proto(Renderer, {
                 continue;
 
             rc.unmarkAsRendered(cn);
-            rendererQueue.reinit();
             rendererQueue.schedule(RENDER_OPS.HIDE, cn, rc.left(cn), rc.top(cn));
         }
     },
@@ -59,7 +57,6 @@ proto(Renderer, {
                 if(skipCn) continue;
             }
 
-            rendererQueue.reinit();
             rendererQueue.schedule(RENDER_OPS.RENDER, cn, rc.left(cn), rc.top(cn));
         }
     },
@@ -71,10 +68,8 @@ proto(Renderer, {
     renderAfterDelay: function(cns, delay) {
         var delay = delay || C.RENDER_DEF_DELAY;
 
-        for(var i = 0; i < cns.length; i++) {
-            rendererQueue.reinit();
+        for(var i = 0; i < cns.length; i++)
             rendererQueue.schedule(RENDER_OPS.DEL_RENDER, cns[i], null, null, delay);
-        }
     },
 
     rotate: function(items) {
@@ -90,7 +85,7 @@ proto(Renderer, {
 
     markAsSchToHide: function(cns) {
         for(var i = 0; i < cns.length; i++)
-            Dom.css.set(cns[i].item, C.REND.SCH_TO_HIDE_DATA, "y");
+            Dom.set(cns[i].item, C.REND.SCH_TO_HIDE_DATA, "y");
     },
 
     unmarkAsSchToHide: function(item) {
