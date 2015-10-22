@@ -76,7 +76,6 @@ proto(Collector, {
     },
 
     sort: function(items) {
-        var sortHelpers = sortApi.getHelpers();
         this.saveOriginalOrder(items);
 
         items.sort(

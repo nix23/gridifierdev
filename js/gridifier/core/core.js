@@ -27,7 +27,7 @@ var Core = function() {
             reposition.all();
             return gridifier;
         },
-        resort: function(fn) {
+        resort: function() {
             reposition.sync();
             resorter.resort();
             reposition.all();
@@ -50,7 +50,7 @@ var Core = function() {
         },
 
         prepend: function(items, batchSize, batchDelay) {
-            var eq = settings.eq;
+            var eq = bind("eq", settings)
             if(eq("loadImages", true)) {
                 var op = (eq("prepend", "mirrored")) ? OPS.INS_BEFORE : OPS.PREPEND;
                 imagesLoader.schedule(gridItem.toNative(items), op, {

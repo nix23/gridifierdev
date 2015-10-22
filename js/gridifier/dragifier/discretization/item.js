@@ -52,7 +52,7 @@ proto(DiscrDraggableItem, {
         dragifier.render(this._clone, newDocPos.x, newDocPos.y);
 
         var itemIntCellsData = dragifierCells.getIntCellsData(this._itemCn);
-        var cloneIntCellsData = dragifierCells.getIntCellsData(newGridPos);
+        var cloneIntCellsData = discretizer.getAllCellsWithIntCenter(newGridPos);
 
         if(!dragifierCells.isAnyIntCellEmpty(cloneIntCellsData)) return;
         if(!dragifierCells.isIntEnoughRowsAndCols(itemIntCellsData, cloneIntCellsData)) return;
@@ -78,7 +78,7 @@ proto(DiscrDraggableItem, {
         for(var i = 0; i < coords.length; i++)
             this._itemCn[coords[i]] = newCoords[coords[i]];
 
-        var getS = settings.get;
+        var getS = bind("get", settings);
         settings.getApi("coordsChanger")(
             this._item, newCoords.x1 + "px", newCoords.y1 + "px",
             getS("coordsChangeTime"), getS("coordsChangeTiming"),

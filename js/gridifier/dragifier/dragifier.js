@@ -1,6 +1,6 @@
 Dragifier = function() {
-    this._touch = {start: null, move: null, end: null};
-    this._mouse = {down: null, move: null, up: null};
+    //this._touch = {start: null, move: null, end: null};
+    //this._mouse = {down: null, move: null, up: null};
 
     this._items = [];
     this._isDragging = false;
@@ -23,94 +23,104 @@ Dragifier = function() {
 
 proto(Dragifier, {
     _createEvents: function() {
-        this._createTouchEvents();
-        this._createClickEvents();
-    },
-
-    _createTouchEvents: function() {
         var me = this;
-        this._touch.start = function(event) {
-            var touch = event.changedTouches[0];
-            var item = me._findClosestConnected(event.target);
-            if(item == null) return;
 
-            me._initDrag.call(me, event);
-            if(me._isAlreadyDraggable(item)) {
-                me._findAlreadyDraggable(item).addDragId(touch.identifier);
-                return;
+        this._touch = {
+            start: function(e) { me._touchStart.call(me, e); },
+            end: function(e) {
+                if(!me._isDragging) return;
+                e.preventDefault();
+
+                setTimeout(function() { me._touchEnd.call(me, e); }, 0);
+            },
+            move: function(e) {
+                if(!me._isDragging) return;
+                e.preventDefault();
+
+                setTimeout(function() { me._touchMove.call(me, e); }, 0);
             }
-
-            me._initDraggableItem.call(me, item, touch, true);
         };
 
-        this._touch.end = function(event) {
-            if(!me._isDragging) return;
-            event.preventDefault();
-
-            setTimeout(function() {
-                if(!me._isDragging) return;
-
-                var touches = event.changedTouches;
-                for(var i = 0; i < touches.length; i++) {
-                    var itemData = me._findDraggableById(touches[i].identifier, true);
-                    if(itemData.item == null) continue;
-                    itemData.item.rmDragId(touches[i].identifier);
-
-                    if(itemData.item.getDragIdsCount() == 0) {
-                        itemData.item.unbind();
-                        me._items.splice(itemData.itemIndex, 1);
-                    }
-                }
-
-                if(me._items.length == 0) me._endDrag();
-            }, 0);
-        };
-
-        this._touch.move = function(event) {
-            if(!me._isDragging) return;
-            event.preventDefault();
-
-            setTimeout(function() {
-                if(!me._isDragging) return;
-                me._reposQueueSync();
-
-                var touches = event.changedTouches;
-                for(var i = 0; i < touches.length; i++) {
-                    var item = me._findDraggableById(touches[i].identifier);
-                    if(item == null) continue;
-                    item.dragMove(touches[i].pageX, touches[i].pageY);
-                }
-            }, 0);
+        this._mouse = {
+            down: function(e) { me._mouseDown.call(me, e); },
+            up: function(e) { setTimeout(function() { me._mouseUp.call(me, e); }, 0); },
+            move: function(e) { setTimeout(function() { me._mouseMove.call(me, e); }, 0); }
         };
     },
 
-    _createClickEvents: function() {
+    _touchStart: function(event) {
         var me = this;
-        this._mouse.down = function(event) {
-            var item = me._findClosestConnected(event.target);
-            // UCBrowser will fire and process mouse handlers first
-            if(item == null || Dom.browsers.isAndroidUC()) return;
+        var touch = event.changedTouches[0];
+        var item = me._findClosestConnected(event.target);
+        if(item == null) return;
 
-            me._initDrag.call(me, event);
-            me._initDraggableItem.call(me, item, event, false);
-        };
+        me._initDrag.call(me, event);
+        if(me._isAlreadyDraggable(item)) {
+            me._findAlreadyDraggable(item).addDragId(touch.identifier);
+            return;
+        }
 
-        this._mouse.up = function(event) {
-            setTimeout(function() {
-                if(!me._isDragging || Dom.browsers.isAndroidUC()) return;
-                me._endDrag();
-                me._items[0].unbind();
-                me._items.splice(0, 1);
-            }, 0);
-        };
+        me._initDraggableItem.call(me, item, touch, true);
+    },
 
-        this._mouse.move = function(event) {
-            setTimeout(function() {
-                if(!me._isDragging || Dom.browsers.isAndroidUC()) return;
-                me._reposQueueSync();
-                me._items[0].dragMove(event.pageX, event.pageY);
-            }, 0);
-        };
+    _touchEnd: function(event) {
+        var me = this;
+        if(!me._isDragging) return;
+
+        var touches = event.changedTouches;
+        for(var i = 0; i < touches.length; i++) {
+            var itemData = me._findDraggableById(touches[i].identifier, true);
+            if(itemData.item == null) continue;
+            itemData.item.rmDragId(touches[i].identifier);
+
+            if(itemData.item.getDragIdsCount() == 0) {
+                itemData.item.unbind();
+                me._items.splice(itemData.itemIndex, 1);
+            }
+        }
+
+        if(me._items.length == 0) me._endDrag();
+    },
+
+    _touchMove: function(event) {
+        var me = this;
+        if(!me._isDragging) return;
+        me._reposQueueSync();
+
+        var touches = event.changedTouches;
+        for(var i = 0; i < touches.length; i++) {
+            var item = me._findDraggableById(touches[i].identifier);
+            if(item == null) continue;
+            item.dragMove(touches[i].pageX, touches[i].pageY);
+        }
+    },
+
+    _mouseDown: function(event) {
+        var me = this;
+
+        var item = me._findClosestConnected(event.target);
+        // UCBrowser will fire and process mouse handlers first
+        if(item == null || Dom.browsers.isAndroidUC()) return;
+
+        me._initDrag.call(me, event);
+        me._initDraggableItem.call(me, item, event, false);
+    },
+
+    _mouseUp: function(event) {
+        var me = this;
+
+        if(!me._isDragging || Dom.browsers.isAndroidUC()) return;
+        me._endDrag();
+        me._items[0].unbind();
+        me._items.splice(0, 1);
+    },
+
+    _mouseMove: function(event) {
+        var me = this;
+
+        if(!me._isDragging || Dom.browsers.isAndroidUC()) return;
+        me._reposQueueSync();
+        me._items[0].dragMove(event.pageX, event.pageY);
     },
 
     _initDrag: function(event) {
@@ -187,7 +197,7 @@ proto(Dragifier, {
             parentNode = (parentNode == null) ? child : parentNode.parentNode;
 
             if(checkClass) {
-                if(Dom.css.hasClass(parentNode, settings.get("dragifier")))
+                if(Dom.css.hasClass(parentNode, dr))
                     hasClass = true;
             }
 
@@ -199,7 +209,7 @@ proto(Dragifier, {
     },
 
     _createDraggableItem: function() {
-        return (settings.get("dragifierMode", "i")) ? new IntDraggableItem() : new DiscrDraggableItem();
+        return (settings.eq("dragifierMode", "i")) ? new IntDraggableItem() : new DiscrDraggableItem();
     },
 
     _isAlreadyDraggable: function(item) {

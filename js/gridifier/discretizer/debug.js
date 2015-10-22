@@ -4,11 +4,11 @@ DiscretizerDebug = function() {
 }
 
 proto(DiscretizerDebug, {
-    create: function(cells) {
+    create: function() {
         this._create();
         this._decorate();
         this._bindRmOnClick();
-        this._createCells(cells);
+        this._createCells(discretizer.cells());
     },
 
     _create: function() {
@@ -45,11 +45,11 @@ proto(DiscretizerDebug, {
         this._debug = null;
     },
 
-    update: function(cells) {
+    update: function() {
         if(this._debug != null)
             this.rm.call(this);
 
-        this.create(cells);
+        this.create();
     },
 
     _createCells: function(cells) {

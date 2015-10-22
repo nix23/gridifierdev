@@ -23,7 +23,7 @@ $(document).ready(function() {
         },
 
         _sortItems: function(items, comparatorFn) {
-            var sortComparatorTools = this._sortApi.getHelpers();
+            var sortComparatorTools = this._sortHelpers;
             var collector = new Collector();
 
             collector.saveOriginalOrder(items);
@@ -36,7 +36,7 @@ $(document).ready(function() {
         },
 
         _before: function() {
-            this._sortApi = new SortApi();
+            this._sortHelpers = new SortHelpers();
         },
 
         _after: function() {
@@ -56,6 +56,7 @@ $(document).ready(function() {
                 me._testByDataSortWithOneComparatorOnArrayWithSomeEqualItems();
                 me._testByDataSortWithMultipleComparatorsOnArrayWithAllUniqueItems();
                 me._testByDataSortWithMultipleComparatorsOnArrayWithSomeEqualItems();
+                me._testByDataSortWithMultipleComparatorsWithOneDescComparator();
 
                 me._testByDataIntSortOnMixedArray();
                 me._testByDataFloatSortOnMixedArray();
@@ -231,6 +232,42 @@ $(document).ready(function() {
                 items[2].getAttribute("data-sort-id") == 13 &&
                 items[3].getAttribute("data-sort-id") == 16,
                 "comparatorTools sort.byData(2 comparators) array with all unique items"
+            );
+        },
+
+        _testByDataSortWithMultipleComparatorsWithOneDescComparator: function() {
+            var items = [];
+            for(var i = 0; i < 4; i++)
+                items.push(this._createItemMock())
+
+            var comparatorFn = function(firstItem, secondItem, sort) {
+                return sort.byData(firstItem, secondItem, ["data-sort-id", "data-sort-subid|desc"]);
+            }
+
+            items[0].setAttribute("data-sort-id", 14);
+            items[0].setAttribute("data-sort-subid", 2);
+
+            items[1].setAttribute("data-sort-id", 14);
+            items[1].setAttribute("data-sort-subid", 1);
+
+            items[2].setAttribute("data-sort-id", 12);
+            items[2].setAttribute("data-sort-subid", 1);
+
+            items[3].setAttribute("data-sort-id", 12);
+            items[3].setAttribute("data-sort-subid", 2);
+
+            items = this._sortItems(items, comparatorFn);
+
+            ok(
+                items[0].getAttribute("data-sort-id") == 12 &&
+                items[1].getAttribute("data-sort-id") == 12 &&
+                items[2].getAttribute("data-sort-id") == 14 &&
+                items[3].getAttribute("data-sort-id") == 14 &&
+                items[0].getAttribute("data-sort-subid") == 2 &&
+                items[1].getAttribute("data-sort-subid") == 1 &&
+                items[2].getAttribute("data-sort-subid") == 2 &&
+                items[3].getAttribute("data-sort-subid") == 1,
+                "comparatorTools sort.byData(2 comparators) array with second desc"
             );
         },
 

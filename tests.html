@@ -72,7 +72,6 @@
 
     <script src="js/gridifier/api/sort/rsort.js"></script>
     <script src="js/gridifier/api/sort/rsortHelpers.js"></script>
-    <script src="js/gridifier/api/sort/sort.js"></script>
     <script src="js/gridifier/api/sort/sortHelpers.js"></script>
 
     <script src="js/gridifier/api/toggle/factory/rotate.js"></script>
@@ -171,6 +170,12 @@
 
     <!-- Tests includes -->
     <script>
+        window.fns = {
+            nop: function() { return function() {}; },
+            t: function() { return function() { return true; }; },
+            f: function() { return function() { return false; }; }
+        };
+
         window.asyncTests = {
             _data: [],
             _isExecuted: false,
@@ -300,6 +305,7 @@
     <script src="tests/core/operation/resorter.js"></script>
 
     <script src="tests/core/antialiaser.js"></script>
+    <script src="tests/core/core.js"></script>
     <script src="tests/core/eventEmitter.js"></script>
     <script src="tests/core/iterator.js"></script>
     <script src="tests/core/operation.js"></script>
@@ -310,6 +316,15 @@
     <script src="tests/discretizer/discretizer.js"></script>
     <script src="tests/discretizer/yCore.js"></script>
     <script src="tests/discretizer/xCore.js"></script>
+
+    <script src="tests/dragifier/discretization/cells.js"></script>
+    <script src="tests/dragifier/discretization/item.js"></script>
+    <script src="tests/dragifier/intersection/item.js"></script>
+    <script src="tests/dragifier/core.js"></script>
+
+    <script src="tests/dragifier/dragifier/dragifier.js"></script>
+    <script src="tests/dragifier/dragifier/touchHandlers.js"></script>
+    <script src="tests/dragifier/dragifier/mouseHandlers.js"></script>
 
     <script src="tests/grid/grid.js"></script>
     <script src="tests/grid/positionCore.js"></script>

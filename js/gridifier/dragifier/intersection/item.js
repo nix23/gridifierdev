@@ -82,14 +82,21 @@ proto(IntDraggableItem, {
         if(itemCn == null)
             return false;
 
-        var cns = cnsSorter.sortForReappend(cns);
+        cns = cnsSorter.sortForReappend(cns);
         var cnWithSmallestPos = cns[0];
+
         var cnWithSmallestPosGUID = guid.get(cnWithSmallestPos.item);
         var itemGUID = guid.get(this._item);
 
         guid.set(this._item, cnWithSmallestPosGUID);
         guid.set(cnWithSmallestPos.item, itemGUID);
 
+        this._swapCnData(itemCn, cnWithSmallestPos, cnWithSmallestPosGUID);
+
+        return true;
+    },
+
+    _swapCnData: function(itemCn, cnWithSmallestPos, cnWithSmallestPosGUID) {
         var tmpItem = itemCn.item;
         itemCn.item = cnWithSmallestPos.item;
         cnWithSmallestPos.item = tmpItem;
@@ -97,7 +104,5 @@ proto(IntDraggableItem, {
         var tmpGUID = itemCn.itemGUID;
         itemCn.itemGUID = cnWithSmallestPosGUID;
         cnWithSmallestPos.itemGUID = tmpGUID;
-
-        return true;
     }
 });

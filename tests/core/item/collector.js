@@ -203,7 +203,7 @@ $(document).ready(function() {
         },
 
         _sort: function() {
-            sortApi = new SortApi();
+            sortHelpers = new SortHelpers();
             var items = [];
             for(var i = 0; i < 5; i++) {
                 var item = Dom.div();

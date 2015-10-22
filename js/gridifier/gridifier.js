@@ -64,7 +64,7 @@ var insertOp = new InsertOp();
 
 var ccApi = new CcApi();
 var rsortApi = new RsortApi();
-var sortApi = new SortApi();
+var sortHelpers = new SortHelpers();
 var toggleApi = new ToggleApi();
 var toggleSyncerApi = new ToggleSyncerApi();
 var dragifierApi = new DragifierApi();

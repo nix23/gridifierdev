@@ -65,7 +65,7 @@ proto(DragifierCore, {
         var clone = item.cloneNode(true);
         var offset = {left: this._getOffsetLeft(item), top: this._getOffsetTop(item)};
 
-        collector.markAsNotCollectable(item);
+        collector.markAsNotCollectable(clone);
         settings.getApi("drag")(clone, item, srManager);
 
         if(Dom.hasTransitions()) {
