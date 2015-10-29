@@ -36,7 +36,7 @@ $(document).ready(function() {
         },
 
         _self: function() {
-            var fns = ["toggle", "add", "remove"];
+            var fns = ["toggle", "add", "rm"];
             for(var i = 0; i < fns.length; i++) {
                 var targetFnName = fns[i];
                 var wasUpdateAsCalled = false;

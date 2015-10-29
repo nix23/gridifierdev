@@ -1,14 +1,16 @@
-DiscretizerDebug = function() {
+var DiscretizerDebug = function() {
+    this._on = false;
     this._debug = null;
     this._onClick = null;
 }
 
 proto(DiscretizerDebug, {
-    create: function() {
+    create: function(cells) {
+        if(!this._on) return;
         this._create();
         this._decorate();
         this._bindRmOnClick();
-        this._createCells(discretizer.cells());
+        this._createCells(cells);
     },
 
     _create: function() {
@@ -22,7 +24,7 @@ proto(DiscretizerDebug, {
     },
 
     _decorate: function() {
-        Dom.css.set(this.debug, {
+        Dom.css.set(this._debug, {
             background: "rgb(235,235,235)", zIndex: "100", opacity: "0.8"
         });
     },
@@ -38,6 +40,7 @@ proto(DiscretizerDebug, {
     },
 
     rm: function() {
+        if(!this._on) return;
         if(this._debug == null)
             return;
 
@@ -45,11 +48,12 @@ proto(DiscretizerDebug, {
         this._debug = null;
     },
 
-    update: function() {
+    update: function(cells) {
+        if(!this._on) return;
         if(this._debug != null)
             this.rm.call(this);
 
-        this.create();
+        this.create(cells);
     },
 
     _createCells: function(cells) {
@@ -86,7 +90,7 @@ proto(DiscretizerDebug, {
                 Dom.css.set(centerPoint, {
                     position: "absolute",
                     left: cells[row][col].centerX + "px", top: cells[row][col].centerY + "px",
-                    width: "5px", height: "5px", backround: "black"
+                    width: "5px", height: "5px", background: "black"
                 });
 
                 this._debug.appendChild(centerPoint);

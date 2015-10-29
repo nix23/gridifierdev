@@ -47,8 +47,8 @@ $(document).ready(function() {
             settings = new Settings();
             var grid = new Grid();
 
-            ok(typeof gridifier.getGrid == "function" && typeof gridifier.getGridWidth == "function"
-               && typeof gridifier.getGridHeight == "function", "expose fns to self ok");
+            ok(typeof gridifier.grid == "function" && typeof gridifier.gridWidth == "function"
+               && typeof gridifier.gridHeight == "function", "expose fns to self ok");
 
             clearTestData();
         },

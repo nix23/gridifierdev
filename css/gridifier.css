@@ -237,10 +237,20 @@ body {
     background: rgb(170,170,170);
 }
 
+.bigGridItem {
+    width: 400px !important;
+    height: 400px !important;
+}
+
+.blackGridItem {
+    background: black !important;
+}
+
 @media screen and ( max-width: 1200px ) {
     .gridItem {
         width: 100% !important;
         animation-name: test;
+        height: 200px;
     }
 }
 

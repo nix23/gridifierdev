@@ -70,7 +70,7 @@ proto(SlideToggle, {
 
                 var initC = getInitCoords(item, api);
                 sync.add(item, setTimeout(function() {
-                    dom.set(item, api.TOGGLE.IS_ACTIVE_WITH_CC);
+                    dom.set(item, api.TOGGLE.IS_ACTIVE_WITH_CC, "y");
 
                     if(!dom.has(item, api.TOGGLE.IS_ACTIVE)) {
                         if(fade) {
@@ -147,20 +147,20 @@ proto(SlideToggle, {
     createCycled: function(sliderFns) {
         var slideIndex = 1;
         return {
-            show: function(item, left, top, time, timing, ev, sync, dom, api, cn) {
+            show: function() {
                 slideIndex++;
                 var nextSlideIndex = slideIndex % sliderFns.length;
                 var slider = sliderFns[nextSlideIndex];
 
-                slider.show(item, left, top, time, timing, ev, sync, dom, api, cn);
+                slider.show.apply(this, arguments);
             },
 
-            hide: function(item, left, top, time, timing, ev, sync, dom, api, cn) {
+            hide: function() {
                 slideIndex++;
                 var nextSlideIndex = slideIndex % sliderFns.length;
                 var slider = sliderFns[nextSlideIndex];
 
-                slider.hide(item, left, top, time, timing, ev, sync, dom, api, cn);
+                slider.hide.apply(this, arguments);
             }
         };
     }

@@ -54,7 +54,8 @@ var C = {
     DISC_BATCH: 12,
     DISC_DELAY: 60,
 
-    RSORT_REPOS_DELAY: 20
+    RSORT_REPOS_DELAY: 20,
+    MAX_Z: "16777271"
 }
 
 // Toggle constants

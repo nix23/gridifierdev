@@ -1,7 +1,7 @@
 var CssManager = function() {
     this._eventsData = [];
 
-    var publicFns = ["toggle", "add", "remove"];
+    var publicFns = ["toggle", "add", "rm"];
     for(var i = 0; i < publicFns.length; i++) {
         (function(c, fnName) {
             var fns = {};

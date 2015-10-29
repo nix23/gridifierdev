@@ -142,7 +142,7 @@ var Core = function() {
                 renderer.rotate(items);
                 return gridifier;
             }
-
+            
             insertQueue.scheduleFnExec(items, batchSize, batchDelay, function(batch) {
                 renderer.rotate(batch);
             });

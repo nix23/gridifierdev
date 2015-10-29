@@ -50,7 +50,7 @@ proto(EventEmitter, {
         }
 
         for(var i = 0; i < this._callbacks[evName].length; i++) {
-            if(evName == EV.REPOSITION) {
+            if(evName == EV.REPOSITION || evName == EV.REPOSITION_END) {
                 (function(cb, args) {
                     // Delay for silentRender() call imm-ly after silentAppend()
                     setTimeout(function() { cb.apply(me, args); }, 0);

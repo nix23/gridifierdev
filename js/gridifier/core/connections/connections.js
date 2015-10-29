@@ -36,10 +36,14 @@ proto(CnsCore, {
     },
 
     create: function(item, cn) {
-        cn.x1 = Dom.toFixed(cn.x1, 2);
-        cn.x2 = Dom.toFixed(cn.x2, 2);
-        cn.y1 = Dom.toFixed(cn.y1, 2);
-        cn.y2 = Dom.toFixed(cn.y2, 2);
+        var props = ["x1", "x2", "y1", "y2"];
+        for(var i = 0; i < props.length; i++) {
+            var prop = props[i];
+            var orig = cn[prop];
+            cn[prop] = Dom.toFixed(cn[prop], 2);
+            if(isNaN(cn[prop])) cn[prop] = orig;
+        }
+        
         cn.item = item;
         cn.itemGUID = guid.get(item);
         cn.hOffset = (Dom.hasOwnProp(cn, "hOffset")) ? cn.hOffset : 0;

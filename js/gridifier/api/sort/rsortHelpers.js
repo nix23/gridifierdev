@@ -6,7 +6,7 @@ proto(RsortHelpers, {
     _createBySizesRsorts: function(settings) {
         var me = this;
         var oneBatch = 100000;
-        var api = settings.addApi;
+        var api = bind("addApi", settings);
 
         var calculateAreas = function(cns) {
             for(var i = 0; i < cns.length; i++) {
@@ -48,14 +48,14 @@ proto(RsortHelpers, {
             return areasWithCns;
         }
 
-        var sortEvenly = function(cns, fstGroupSize, packByOrientation) {
-            var packByOrientation = packByOrientation || false;
+        var sortEvenly = function(cns, fstGroupSize, byOrientation) {
+            var byOrientation = byOrientation || false;
 
-            if(!packByOrientation) {
+            if(!byOrientation) {
                 var areasWithCns = packByAreas(cns);
                 // Stable sort here(all areas are unique, desc)
                 areasWithCns.sort(function(fst, snd) {
-                    return parseFloat(fst.area) - parseFloat(snd.area);
+                    return parseFloat(snd.area) - parseFloat(fst.area);
                 });
             }
             else
@@ -124,7 +124,7 @@ proto(RsortHelpers, {
                 calculateAreas(cns);
                 savePositions(cns);
 
-                var cnBatches = cnsToBatches(cns, batchSize);
+                var cnBatches = cnsToBatches(cns, batchSize); 
                 for(var i = 0; i < cnBatches.length; i++)
                     cnBatches[i] = sortEvenly(cnBatches[i], fstGroupSize);
 
@@ -138,9 +138,13 @@ proto(RsortHelpers, {
         var evenlySorts = [];
         for(var i = 0; i < sizes.length; i++)
             evenlySorts.push(["areaEvenlyAll-" + sizes[i], oneBatch, sizes[i]]);
-        for(var i = 5; i <= 50; i += 5) {
+
+        var bs = [1,2,3,4];
+        for(var i = 5; i <= 50; i += 5) 
+            bs.push(i);
+        for(var i = 0; i < bs.length; i++) {
             for(var j = 1; j <= 5; j++)
-                evenlySorts.push(["areaEvenly" + i + "-" + j, i, j]);
+                evenlySorts.push(["areaEvenly" + bs[i] + "-" + j, bs[i], j]);
         }
 
         for(var i = 0; i < evenlySorts.length; i++) {

@@ -39,7 +39,7 @@ proto(AppendOp, {
         insertOp.execInsertBA(
             items,
             beforeItem,
-            function(items) { me._exec.call(me, items); },
+            function(items) { me.exec.call(me, items); },
             function() { return 0; },
             function(cns, i) { return cns.splice(i, cns.length - i); },
             -1,
@@ -52,7 +52,7 @@ proto(AppendOp, {
         insertOp.execInsertBA(
             items,
             afterItem,
-            function(items) { me._exec.call(me, items); },
+            function(items) { me.exec.call(me, items); },
             function(cns) { return cns.length - 1; },
             function(cns, i) { return cns.splice(i + 1, cns.length - i - 1); },
             1,

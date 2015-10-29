@@ -27,7 +27,7 @@ $(document).ready(function() {
                     "calcGridOffsets",
                     "getOffset",
                     "findItemCenterCursorOffsets",
-                    "getMaxCnItemZ",
+                    //"getMaxCnItemZ",
                     "createClone",
                     "createPointer",
                     "calcCloneNewDocPosition",
@@ -145,26 +145,26 @@ $(document).ready(function() {
             clearTestData();
         },
 
-        _getMaxCnItemZ: function() {
-            connections = {};
-            connections.get = function() {
-                return [
-                    {item: {style: {zIndex: 4}}},
-                    {item: {style: {zIndex: 1}}},
-                    {item: {style: {zIndex: 3}}},
-                    {item: {style: {zIndex: 2}}}
-                ];
-            };
+        // _getMaxCnItemZ: function() {
+        //     connections = {};
+        //     connections.get = function() {
+        //         return [
+        //             {item: {style: {zIndex: 4}}},
+        //             {item: {style: {zIndex: 1}}},
+        //             {item: {style: {zIndex: 3}}},
+        //             {item: {style: {zIndex: 2}}}
+        //         ];
+        //     };
 
-            var origDom = Dom;
-            Dom = {int: function(i) { return parseInt(i, 10); }};
+        //     var origDom = Dom;
+        //     Dom = {int: function(i) { return parseInt(i, 10); }};
 
-            var core = new DragifierCore();
-            ok(core._getMaxCnItemZ() == 4, "getMaxCnItemZ ok");
+        //     var core = new DragifierCore();
+        //     ok(core._getMaxCnItemZ() == 4, "getMaxCnItemZ ok");
 
-            Dom = origDom;
-            clearTestData();
-        },
+        //     Dom = origDom;
+        //     clearTestData();
+        // },
 
         _createClone: function() {
             var origDom = Dom;
@@ -191,7 +191,7 @@ $(document).ready(function() {
                 if(!$(clone).hasClass("nodeClone")) return null;
                 data.cssSetParams = params;
             };
-            Dom.set4 = function(clone, param, compCss) {
+            Dom.css.set4 = function(clone, param, compCss) {
                 data.set4Param = param;
                 data.set4CompCss = compCss;
                 clone.setAttribute("class", "testCreateCloneSet4");
@@ -213,7 +213,7 @@ $(document).ready(function() {
                 if(item.id != "item") return null;
                 return 20;
             };
-            core._getMaxCnItemZ = function() { return 45; };
+            // core._getMaxCnItemZ = function() { return 45; };
 
             var data = {
                 cloned: false,
@@ -275,7 +275,7 @@ $(document).ready(function() {
                 data.css3transition &&
                 data.cssSetParams.width == "10px" &&
                 data.cssSetParams.height == "20px" &&
-                data.cssSetParams.zIndex == 46 &&
+                data.cssSetParams.zIndex == C.MAX_Z &&
                 data.cssSetParams.left == "10px" &&
                 data.cssSetParams.top == "20px" &&
                 data.set4Param == "margin" &&

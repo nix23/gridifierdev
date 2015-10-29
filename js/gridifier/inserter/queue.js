@@ -43,7 +43,7 @@ proto(InsertQueue, {
 
         for(var i = 0; i < itemBatches.length; i++) {
             (function(ib, i) {
-                setTimeout(fn(ib), batchDelay * i);
+                setTimeout(function() { fn(ib); }, batchDelay * i);
             })(itemBatches[i], i);
         }
     },

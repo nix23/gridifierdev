@@ -1,9 +1,7 @@
 DragifierCells = function() {}
 
 proto(DragifierCells, {
-    getIntCellsData: function(cn) {
-        var intCells = discretizer.getAllCellsWithIntCenter(cn);
-
+    getIntCellsData: function(intCells) {
         // If we have started drag from not covered by discretizator corner,
         // we can get into situation, when dragged item isn't intersecting any discretizator cell center,
         // so we should fix it. (In this situation item should cover 1 cell center).

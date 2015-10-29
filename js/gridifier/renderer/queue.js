@@ -120,7 +120,7 @@ proto(RendererQueue, {
 
     _execRender: function(item, left, top, api) {
         var getS = bind("get", settings);
-
+        
         if(Dom.has(item, TOGGLE.IS_ACTIVE_WITH_CC)) {
             var time = getS("toggleTime");
             var timing = getS("toggleTiming");

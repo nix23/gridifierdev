@@ -2,20 +2,28 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="99a2be20-eb8d-4090-9e0f-2401c1885506" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/js/gridifier/api/sort/sort.js" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/core/item/collector.js" afterPath="$PROJECT_DIR$/js/gridifier/core/item/collector.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/core/item/collector.js" afterPath="$PROJECT_DIR$/tests/core/item/collector.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/dragifier/core.js" afterPath="$PROJECT_DIR$/js/gridifier/dragifier/core.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/discretizer/debug.js" afterPath="$PROJECT_DIR$/js/gridifier/discretizer/debug.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/discretizer/discretizer.js" afterPath="$PROJECT_DIR$/tests/discretizer/discretizer.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/dragifier/dragifier.js" afterPath="$PROJECT_DIR$/js/gridifier/dragifier/dragifier.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/gridifier.js" afterPath="$PROJECT_DIR$/js/gridifier/gridifier.js" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/tests/api/settings.js" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/core/connectors/cleaner.js" afterPath="$PROJECT_DIR$/js/gridifier/core/connectors/cleaner.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/api/coordsChanger/coordsChanger.js" afterPath="$PROJECT_DIR$/js/gridifier/api/coordsChanger/coordsChanger.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/core/core.js" afterPath="$PROJECT_DIR$/tests/core/core.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/api/dragifier/dragifier.js" afterPath="$PROJECT_DIR$/js/gridifier/api/dragifier/dragifier.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/api/toggle/fade.js" afterPath="$PROJECT_DIR$/js/gridifier/api/toggle/fade.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/gridifierBuilder.js" afterPath="$PROJECT_DIR$/js/demoLayoutBuilder/demoLayout/gridifierBuilder.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/images/image.js" afterPath="$PROJECT_DIR$/js/gridifier/images/image.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/index.html" afterPath="$PROJECT_DIR$/index.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/dragifier/discretization/item.js" afterPath="$PROJECT_DIR$/js/gridifier/dragifier/discretization/item.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/dragifier/intersection/item.js" afterPath="$PROJECT_DIR$/js/gridifier/dragifier/intersection/item.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests/api/sort/sortHelpers.js" afterPath="$PROJECT_DIR$/tests/api/sort/sortHelpers.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/images/loader.js" afterPath="$PROJECT_DIR$/js/gridifier/images/loader.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/bootstrap/mocks.js" afterPath="$PROJECT_DIR$/js/gridifier/bootstrap/mocks.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/core/position.js" afterPath="$PROJECT_DIR$/js/gridifier/core/position.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/core/connections/ranges.js" afterPath="$PROJECT_DIR$/js/gridifier/core/connections/ranges.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/api/toggle/rotate.js" afterPath="$PROJECT_DIR$/js/gridifier/api/toggle/rotate.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/api/sort/rsort.js" afterPath="$PROJECT_DIR$/js/gridifier/api/sort/rsort.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/api/sort/rsortHelpers.js" afterPath="$PROJECT_DIR$/js/gridifier/api/sort/rsortHelpers.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/api/toggle/scale.js" afterPath="$PROJECT_DIR$/js/gridifier/api/toggle/scale.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/api/toggle/factory/scale.js" afterPath="$PROJECT_DIR$/js/gridifier/api/toggle/factory/scale.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/api/settings/settings.js" afterPath="$PROJECT_DIR$/js/gridifier/api/settings/settings.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/api/toggle/slide.js" afterPath="$PROJECT_DIR$/js/gridifier/api/toggle/slide.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/tests.html" afterPath="$PROJECT_DIR$/tests.html" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/js/gridifier/api/toggle/toggle.js" afterPath="$PROJECT_DIR$/js/gridifier/api/toggle/toggle.js" />
     </list>
     <ignored path="gridifier.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -53,8 +61,8 @@
       <file leaf-file-name="tests.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/tests.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0" vertical-offset="1821" max-vertical-offset="9542">
-              <caret line="75" column="0" selection-start-line="75" selection-start-column="0" selection-end-line="75" selection-end-column="0" />
+            <state vertical-scroll-proportion="0.0" vertical-offset="2003" max-vertical-offset="9724">
+              <caret line="82" column="0" selection-start-line="82" selection-start-column="0" selection-end-line="82" selection-end-column="0" />
               <folding>
                 <element signature="n#style#0;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
@@ -1176,13 +1184,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/tests/api/settings.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.25950414" vertical-offset="157" max-vertical-offset="7722">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/js/gridifier/api/settings/funcs.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0" vertical-offset="0" max-vertical-offset="3926">
@@ -1235,8 +1236,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/tests.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0" vertical-offset="1821" max-vertical-offset="9542">
-          <caret line="75" column="0" selection-start-line="75" selection-start-column="0" selection-end-line="75" selection-end-column="0" />
+        <state vertical-scroll-proportion="0.0" vertical-offset="2003" max-vertical-offset="9724">
+          <caret line="82" column="0" selection-start-line="82" selection-start-column="0" selection-end-line="82" selection-end-column="0" />
           <folding>
             <element signature="n#style#0;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />

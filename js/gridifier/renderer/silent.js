@@ -109,8 +109,8 @@ proto(SilentRenderer, {
         if(typeof batchTm == "undefined")
             var batchTm = C.INSERT_BATCH_DELAY;
 
-        var itemBatches = insertQueue.itemsToBatches(items, batchSize);
-        var cnBatches = insertQueue.itemsToBatches(cns, batchSize);
+        var itemBatches = insertQueue.itemsToBatches(items, batchSize); 
+        var cnBatches = insertQueue.itemsToBatches(cns, batchSize, true);
         for(var i = 0; i < itemBatches.length; i++)
             this._execBatch(itemBatches[i], cnBatches[i], i * batchTm);
     },

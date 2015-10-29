@@ -2,15 +2,15 @@ var Item = function() {};
 
 proto(Item, {
     markAsConnected: function(item) {
-        Dom.css.addClass(item, C.ITEM.IS_CONNECTED_DATA);
+        Dom.set(item, C.ITEM.IS_CONNECTED_DATA, "y");
     },
 
     unmarkAsConnected: function(item) {
-        Dom.css.removeClass(item, C.ITEM.IS_CONNECTED_DATA);
+        Dom.rm(item, C.ITEM.IS_CONNECTED_DATA);
     },
 
     isConnected: function(item) {
-        return Dom.css.hasClass(item, C.ITEM.IS_CONNECTED_DATA);
+        return Dom.has(item, C.ITEM.IS_CONNECTED_DATA);
     },
 
     filterConnected: function(items) {

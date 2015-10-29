@@ -33,19 +33,12 @@ $(document).ready(function() {
         },
 
         _getIntCellsData: function() {
-            discretizer = {};
-            discretizer.getAllCellsWithIntCenter = function(cn) {
-                if(cn != "cn" && cn != "cn2") return null;
-                if(cn == "cn") return {int: {cols: 0, rows: 0}};
-                if(cn == "cn2") return {int: {cols: 2, rows: 0}};
-            };
-
             var cells = new DragifierCells();
-            var intCells = cells.getIntCellsData("cn");
+            var intCells = cells.getIntCellsData({int: {cols: 0, rows: 0}});
             ok(intCells.int.rows == 1 && intCells.int.cols == 1,
                "getIntCellsData with fix ok");
 
-            intCells = cells.getIntCellsData("cn2");
+            intCells = cells.getIntCellsData({int: {cols: 2, rows: 0}});
             ok(intCells.int.rows == 0 && intCells.int.cols == 2,
                "getIntCellsData ok");
 

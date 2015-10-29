@@ -11,8 +11,8 @@ var CcApi = function() {
     var ccs = [
         ["default", new DefaultCc()],
         ["position", new PositionCc()],
-        ["translate", new TranslateCc(retTr(), retTr(), nop())],
-        ["translateInt", new TranslateCc(roundTr(), roundTr(), beforeSyncToggle())],
+        ["translate", new TranslateCc(retTr(), retTr(), nop(), false)],
+        ["translateInt", new TranslateCc(roundTr(), roundTr(), beforeSyncToggle(), false)],
         ["translate3d", new TranslateCc(retTr(), retTr(), nop(), true)],
         ["translate3dInt", new TranslateCc(roundTr(), roundTr(), beforeSyncToggle(), true)]
     ];

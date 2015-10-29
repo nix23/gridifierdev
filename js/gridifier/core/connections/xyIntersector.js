@@ -16,7 +16,7 @@ proto(CnsXYIntersector, {
         var intCnIndexes = [];
 
         var isIntXYAnyFromAlreadyInt = function(cn) {
-            if(intCnIndexes == 0)
+            if(intCnIndexes.length == 0)
                 return false;
 
             for(var j = 0; j < intCnIndexes.length; j++) {
@@ -48,7 +48,7 @@ proto(CnsXYIntersector, {
                 intCnsCount++;
             }
         }
-
+        
         return intCnsCount > 1;
     },
 

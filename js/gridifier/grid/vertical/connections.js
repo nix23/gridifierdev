@@ -45,15 +45,15 @@ proto(VgConnections, {
     rm: function(cn) { cnsCore.rm(this._cns, cn); },
 
     restoreOnSortDispersion: function(cns) {
-        cnsCore.restore(cns, function(cns, lastCn, setCn) {
-            var nextFakeX = lastCn.x1 - 1;
-            for(var i = 0; i < cns.length; i++) {
-                setCn(cns[i], nextFakeX--, lastCn.y1);
-            }
-        }, function(cns, lastCn, setCn) {
+        cnsCore.restoreOnSortDispersion(cns, function(cns, lastCn, setCn) {
             var nextFakeX = lastCn.x2 + 1;
             for(var i = 0; i < cns.length; i++) {
                 setCn(cns[i], nextFakeX++, lastCn.y1);
+            }
+        }, function(cns, lastCn, setCn) {
+            var nextFakeX = lastCn.x1 - 1;
+            for(var i = 0; i < cns.length; i++) {
+                setCn(cns[i], nextFakeX--, lastCn.y1);
             }
         });
         this.restore(cns);

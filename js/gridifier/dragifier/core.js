@@ -45,21 +45,27 @@ proto(DragifierCore, {
         this._itemCenterCursorOffset = {x: itemCenterX - cursorX, y: itemCenterY - cursorY};
     },
 
-    _getMaxCnItemZ: function() {
-        var maxZ = null;
-        var cns = connections.get();
+    // We don't have to get max-zindex of all cns -> clone is appended to BODY
+    // _getMaxCnItemZ: function() {
+    //     var maxZ = null;
+    //     var cns = connections.get();
 
-        for(var i = 0; i < cns.length; i++) {
-            if(maxZ == null)
-                maxZ = Dom.int(cns[i].item.style.zIndex);
-            else {
-                if(Dom.int(cns[i].item.style.zIndex) > maxZ)
-                    maxZ = Dom.int(cns[i].item.style.zIndex);
-            }
-        }
+    //     for(var i = 0; i < cns.length; i++) {
+    //         if(maxZ == null)
+    //             maxZ = Dom.int(cns[i].item.style.zIndex);
+    //         else {
+    //             if(Dom.int(cns[i].item.style.zIndex) > maxZ)
+    //                 maxZ = Dom.int(cns[i].item.style.zIndex);
+    //         }
+    //     }
 
-        return Dom.int(maxZ);
-    },
+        // If antialiasing were not used(zIndexes weren't setted up through style),
+        // we will take last added item zIndex.(In most cases all z-indexes will have same vals)
+    //     if(isNaN(maxZ))
+    //         maxZ = SizesResolver.getComputedCSS(cns[cns.length - 1].item).zIndex;
+
+    //     return Dom.int(maxZ);
+    // },
 
     createClone: function(item) {
         var clone = item.cloneNode(true);
@@ -72,14 +78,16 @@ proto(DragifierCore, {
             Dom.css3.transform(clone, "");
             Dom.css3.transition(clone, "none");
         }
+        
         Dom.css.set(clone, {
             width: srManager.outerWidth(item) + "px",
             height: srManager.outerHeight(item) + "px",
-            zIndex: this._getMaxCnItemZ() + 1,
+            //zIndex: this._getMaxCnItemZ() + 1,
+            zIndex: C.MAX_Z,
             left: offset.left + "px", top: offset.top + "px" //, margin: "0px"
         });
-
-        Dom.set4(clone, "margin", SizesResolver.getComputedCSS(item));
+        
+        Dom.css.set4(clone, "margin", SizesResolver.getComputedCSS(item));
         document.body.appendChild(clone);
         dragifier.render(clone, offset.left, offset.top);
 
@@ -101,10 +109,13 @@ proto(DragifierCore, {
         var itemComputedCss = SizesResolver.getComputedCSS(item);
         grid.get().appendChild(pointer);
         dragifierApi.getPointerStyler()(pointer, Dom);
+
+        var mleft = parseFloat(itemComputedCss.marginLeft);
+        var mtop = parseFloat(itemComputedCss.marginTop);
         dragifier.render(
             pointer,
-            offset.left - this._gridOffset.left + parseFloat(itemComputedCss.marginLeft),
-            offset.top - this._gridOffset.top + parseFloat(itemComputedCss.marginTop)
+            offset.left - this._gridOffset.left + ((isNaN(mleft)) ? 0 : mleft),
+            offset.top - this._gridOffset.top + ((isNaN(mtop)) ? 0 : mtop)
         );
 
         return pointer;

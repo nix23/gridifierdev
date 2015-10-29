@@ -25,6 +25,7 @@ proto(RepositionQueue, {
 
     stop: function() {
         clearTimeout(this._nextBatchTimeout);
+        this._nextBatchTimeout = null;
         return {
             queue: this._queue,
             queueData: this._queueData
@@ -65,7 +66,7 @@ proto(RepositionQueue, {
         return isSameProcess;
     },
 
-    _repositionNextBatch: function(checkSameProcess) {
+    _repositionNextBatch: function(checkSameProcess) { 
         var batchSize = settings.get("queueSize");
         if(batchSize > this._queue.length)
             batchSize = this._queue.length;
@@ -78,9 +79,7 @@ proto(RepositionQueue, {
         }
 
         this._execNextBatchReposition(batchSize);
-        this._updateQueue(batchSize);
-        if(this.isEmpty()) return;
-        this._scheduleNextBatchReposition();
+        this._processQueue(batchSize);
     },
 
     _execNextBatchReposition: function(batchSize) {
@@ -100,16 +99,18 @@ proto(RepositionQueue, {
         renderer.renderRepositioned(repositionedCns);
     },
 
-    _updateQueue: function(batchSize) {
-        this._queueData = this._queueData.concat(this._queue.splice(0, batchSize));
-        if(this._queue.length == 0) {
+    _processQueue: function(batchSize) {
+        this._queueData = this._queueData.concat(this._queue.splice(0, batchSize)); 
+        if(this._queue.length == 0) { 
             ev.emitInternal(INT_EV.REPOSITION_END_FOR_DRAG);
             ev.emit(EV.REPOSITION_END);
             this._nextBatchTimeout = null;
             /* @system-log-start */
             Logger.stopLoggingOperation();
             /* @system-log-end */
+            return;
         }
+        this._scheduleNextBatchReposition();
     },
 
     _scheduleNextBatchReposition: function() {

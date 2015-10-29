@@ -100,13 +100,13 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
     else
         var isFirst = false;
 
-    //if(typeof window.num == "undefined")
-    //    window.num = 0;
-    //window.num++;
-    //if(window.num % 3 == 0)
-    //    var itemHeight = "100%";
-    //else
-    //    var itemHeight = "50%";
+    if(typeof window.num == "undefined")
+       window.num = 0;
+    window.num++;
+    if(window.num % 3 == 0)
+        var itemHeight = "20%";
+    else
+        var itemHeight = "10%";
 
     this._$gridItem.css({
         //width: (isFirst) ? "25%" : "12.5%",
@@ -116,16 +116,18 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
        //height: 0,
        //"padding-bottom": "12.5%",
        width: itemSizes.width,
+        //width: "10%",
         //width: "25%",
         //"margin-left": "2.5%",
         //"margin-right": "2.5%",
         //"margin-top": "20px",
         //width: "200px",
-       height: itemSizes.height,
-       //height: 0,
-       //"padding-bottom": itemSizes.height,
+       //height: "100px",
+       //height: "33.33%",
+       // height: 0,
+       // "padding-bottom": "5%",
         //margin: "5px",
-        //height: itemHeight,
+        height: itemSizes.height,
         //height: "200px",
 
         //"padding-bottom": parseFloat(itemSizes.height) + "%",
@@ -141,8 +143,8 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
 
 
         // width: "60px",
-        // height: "60px",
-        //"padding-bottom": "15%",
+        //  height: "0px",
+        // "padding-bottom": "10%",
 
         // width: "100px",
         // height: "100px",
@@ -185,8 +187,9 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         "color": "white",
         "font-size": "14px",
         "font-weight": "bold",
-        "margin": "15px",
+        //"margin": "15px",
         "visibility": "hidden"
+        //"margin": "2%"
 
        //background: "url(img/test2.png)",
        // "background-size": "cover",
@@ -209,8 +212,8 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
 
     var $gridItemBg = $("<div/>");
     var $gridItemImg = $("<img/>").css("max-width", "100%");
-    //$gridItemImg.attr("src", "http://deelay.me/1000?http://g3.delphi.lv/images/pix/355x215/9mCnxFYV_ho/litex-jelgava-46198655.jpg");
-    //$gridItemImg.css({"max-width": "100%"});
+    // $gridItemImg.attr("src", "http://deelay.me/1000?http://g3.delphi.lv/images/pix/355x215/9mCnxFYV_ho/litex-jelgava-46198655.jpg");
+    // $gridItemImg.css({"max-width": "100%"});
 
     if(typeof window.num == "undefined")
         window.num = 1;

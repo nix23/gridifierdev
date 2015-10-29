@@ -34,52 +34,51 @@ DemoLayoutBuilder.GridifierBuilder = function(sgrid, ssettings) {
     coordsFinder = (eq("grid", "vertical")) ? new VgCoordsFinder() : new HgCoordsFinder();
     connections = (eq("grid", "vertical")) ? new VgConnections() : new HgConnections();
 
-    cnsCore = new CnsCore();
-    cnsIntersector = new CnsIntersector();
-    cnsRanges = new CnsRanges();
-    cnsSorter = new CnsSorter();
-    cnsXYIntersector = new CnsXYIntersector();
+     cnsCore = new CnsCore();
+     cnsIntersector = new CnsIntersector();
+     cnsRanges = new CnsRanges();
+     cnsSorter = new CnsSorter();
+     cnsXYIntersector = new CnsXYIntersector();
 
-    cssManager = new CssManager();
-    iterator = new Iterator();
+     cssManager = new CssManager();
+     iterator = new Iterator();
 
-    renderer = new Renderer();
-    rendererCns = new RendererCns();
-    rendererQueue = new RendererQueue();
-    silentRenderer = new SilentRenderer();
+     renderer = new Renderer();
+     rendererCns = new RendererCns();
+     rendererQueue = new RendererQueue();
+     silentRenderer = new SilentRenderer();
 
-    appender = (eq("grid", "vertical")) ? new VgAppender() : new HgAppender();
-    prepender = (eq("grid", "vertical")) ? new VgPrepender() : new HgPrepender();
-    reversedAppender = (eq("grid", "vertical")) ? new VgReversedAppender() : new HgReversedAppender();
-    reversedPrepender = (eq("grid", "vertical")) ? new VgReversedPrepender() : new HgReversedPrepender();
+     appender = (eq("grid", "vertical")) ? new VgAppender() : new HgAppender();
+     prepender = (eq("grid", "vertical")) ? new VgPrepender() : new HgPrepender();
+     reversedAppender = (eq("grid", "vertical")) ? new VgReversedAppender() : new HgReversedAppender();
+     reversedPrepender = (eq("grid", "vertical")) ? new VgReversedPrepender() : new HgReversedPrepender();
 
-    resorter = new Resorter();
-    disconnector = new Disconnector();
-    filtrator = new Filtrator();
+     resorter = new Resorter();
+     disconnector = new Disconnector();
+     filtrator = new Filtrator();
 
-    reposition = new Reposition();
-    repositionQueue = new RepositionQueue();
-    repositionData = new RepositionData();
+     reposition = new Reposition();
+     repositionQueue = new RepositionQueue();
+     repositionData = new RepositionData();
 
-    insertQueue = new InsertQueue();
-    appendOp = new AppendOp();
-    prependOp = new PrependOp();
-    insertOp = new InsertOp();
+     insertQueue = new InsertQueue();
+     appendOp = new AppendOp();
+     prependOp = new PrependOp();
+     insertOp = new InsertOp();
 
-    ccApi = new CcApi();
-    rsortApi = new RsortApi();
-    sortApi = new SortApi();
-    toggleApi = new ToggleApi();
-    toggleSyncerApi = new ToggleSyncerApi();
-    dragifierApi = new DragifierApi();
+     ccApi = new CcApi();
+     rsortApi = new RsortApi();
+     sortHelpers = new SortHelpers();
+     toggleApi = new ToggleApi();
+     toggleSyncerApi = new ToggleSyncerApi();
+     dragifierApi = new DragifierApi();
 
-    discretizer = new Discretizer();
-    discretizerCore = new DiscretizerCore();
-    discretizerDebug = new DiscretizerDebug();
+     discretizerCore = new DiscretizerCore();
+     discretizerDebug = new DiscretizerDebug();
 
-    dragifierCore = new DragifierCore();
-    dragifierCells = new DragifierCells();
-    dragifier = new Dragifier();
+     dragifierCore = new DragifierCore();
+     dragifierCells = new DragifierCells();
+     dragifier = new Dragifier();
 
     return gridifier;
 }

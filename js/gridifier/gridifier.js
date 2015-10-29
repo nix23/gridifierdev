@@ -69,7 +69,6 @@ var toggleApi = new ToggleApi();
 var toggleSyncerApi = new ToggleSyncerApi();
 var dragifierApi = new DragifierApi();
 
-var discretizer = new Discretizer();
 var discretizerCore = new DiscretizerCore();
 var discretizerDebug = new DiscretizerDebug();
 

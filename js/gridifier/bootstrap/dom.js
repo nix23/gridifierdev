@@ -228,7 +228,7 @@ var Dom = {
             if(!Dom.isNative(item))
                 err("Error: not DOM.");
 
-            for(var prop in params)
+            for(var prop in params) 
                 item.style[prop] = params[prop];
         },
 

@@ -64,6 +64,6 @@ SizesResolver._findPtValsCalcType = function(testerWrap, tester, deb) {
     var expectedOw = 117.796875.toFixed(1);
     var ow = parseFloat(this.outerWidth(tester, true, true)).toFixed(1);
     this._ptValsCalcType = (expectedOw == ow) ? this._ptValsCalcTypes.BROWSER : this._ptValsCalcTypes.RECALC;
-
+    
     root.removeChild(testerWrap);
 };

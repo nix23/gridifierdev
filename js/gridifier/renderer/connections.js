@@ -17,9 +17,9 @@ proto(RendererCns, {
         var eq = bind("eq", settings);
         if(eq("grid", "vertical"))
             var left = cn.x1;
-        else
+        else 
             var left = eq("intersections", true) ? cn.x1 : (cn.x1 + cn.hOffset);
-
+        
         return left + "px";
     },
 

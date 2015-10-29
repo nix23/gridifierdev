@@ -29,7 +29,7 @@ proto(ImagesLoader, {
         for(var i = 0; i < items.length; i++) {
             if(items[i].nodeName == "IMG") {
                 if(!this._isAlreadyLoaded(items[i]))
-                    images.push(new Image(items[i]));
+                    images.push(new LoadedImage(items[i]));
 
                 continue;
             }
@@ -40,7 +40,7 @@ proto(ImagesLoader, {
             var childs = items[i].querySelectorAll('img');
             for(var j = 0; j < childs.length; j++) {
                 if(!this._isAlreadyLoaded(childs[j]))
-                    images.push(new Image(childs[j]));
+                    images.push(new LoadedImage(childs[j]));
             }
         }
 

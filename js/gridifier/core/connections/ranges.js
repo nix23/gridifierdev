@@ -69,7 +69,7 @@ proto(CnsRanges, {
 
         for(var crIndex = 0; crIndex < sortedCrs.length; crIndex++) {
             var crRangeIndexFound = false;
-            var isCrRangeEqPrev = (crRangeIndex == getRangeIndex(rgs));
+            var isCrRangeEqPrev = (crRangeIndex != getRangeIndex(rgs));
 
             while(!crRangeIndexFound) {
                 // Sometimes cr may become 1px out of range.(Spot on w=%,h=0,pb=%) -> Ret all

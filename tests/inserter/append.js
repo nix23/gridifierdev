@@ -139,7 +139,7 @@ $(document).ready(function() {
             };
 
             var appendOp = new AppendOp();
-            appendOp._exec = function(items) {
+            appendOp.exec = function(items) {
                 data.insertItems = items;
             };
             appendOp.execInsBefore([{id: 1}, {id: 2}], "target");
@@ -193,7 +193,7 @@ $(document).ready(function() {
             };
 
             var appendOp = new AppendOp();
-            appendOp._exec = function(items) {
+            appendOp.exec = function(items) {
                 data.insertItems = items;
             };
             appendOp.execInsAfter([{id: 1}, {id: 2}], "target");

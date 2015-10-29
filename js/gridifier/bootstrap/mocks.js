@@ -7,7 +7,7 @@ var SilentRenderer = function() {
 var Antialiaser = nop();
 
 var ImagesLoader = nop();
-var Image = nop();
+var LoadedImage = nop();
 
 var DefaultCc = nop();
 var PositionCc = nop();
@@ -23,9 +23,9 @@ var SlideToggle = nop();
 var RotateToggleFactory = nop();
 var RotateToggle = nop();
 
-var DiscretizerDebug = function() {
-    return {create: nop(), update: nop(), rm: nop()}
-}
+// var DiscretizerDebug = function() {
+//     return {create: nop(), update: nop(), rm: nop()}
+// }
 var Discretizer = nop();
 var DiscretizerCore = nop();
 

@@ -82,9 +82,6 @@ $(document).ready(function() {
                 hidden: null,
                 shown: null
             };
-            discretizer = {};
-            discretizer.discretize = function() { data.discretized = true; };
-            discretizer.markIntCellsBy = function(cn) { data.markedCn = cn; };
             discretizerDebug = {};
             discretizerDebug.create = function() { data.debugCreated = true; };
             dragifierCore = {
@@ -107,6 +104,9 @@ $(document).ready(function() {
             };
 
             var item = new DiscrDraggableItem();
+            item._discretizer.discretize = function() { data.discretized = true; };
+            item._discretizer.markIntCellsBy = function(cn) { data.markedCn = cn; };
+
             item.bind("item", 10, 20);
             ok(
                 data.item == "item" &&
@@ -181,15 +181,9 @@ $(document).ready(function() {
                 data.renderY = y;
             };
 
-            discretizer = {};
-            discretizer.getAllCellsWithIntCenter = function(itemcn) {
-                if(itemcn != "itemCn" && itemcn != "newGridPos") return null;
-                return {intCells: "itemIntCellsData"};
-            };
-
             dragifierCells = {};
             dragifierCells.getIntCellsData = function(itemcn) {
-                if(itemcn != "itemCn" && itemcn != "newGridPos") return null;
+                if(itemcn.intCells != "itemIntCellsData") return null;
                 return {intCells: "itemIntCellsData"};
             };
             dragifierCells.isAnyIntCellEmpty = function(intCellsData) {
@@ -216,6 +210,11 @@ $(document).ready(function() {
             };
 
             var item = new DiscrDraggableItem();
+            item._discretizer.getAllCellsWithIntCenter = function(itemcn) {
+                if(itemcn != "itemCn" && itemcn != "newGridPos") return null;
+                return {intCells: "itemIntCellsData"};
+            };
+
             item._item = "item";
             item._itemCn = "itemCn";
             item._clone = "clone";
@@ -249,15 +248,6 @@ $(document).ready(function() {
                 origDelay = C.DRAGIFIER_DISCR_REPOS_DELAY;
                 C.DRAGIFIER_DISCR_REPOS_DELAY = 0;
 
-                discretizer = {};
-                discretizer.intCellsToCoords = function(cells) {
-                    if(cells != "intCells") return null;
-                    return "cnCoords";
-                };
-                discretizer.markIntCellsBy = function(cnCoords) {
-                    if(cnCoords == "cn2coords") data.markCoords = cnCoords;
-                };
-
                 discretizerCore = {};
                 discretizerCore.normalizeCnXCoords = function(item, cnCoords) {
                     if(item != "item" || cnCoords != "cnCoords") return null;
@@ -274,6 +264,14 @@ $(document).ready(function() {
                 };
 
                 var item = new DiscrDraggableItem();
+                item._discretizer.intCellsToCoords = function(cells) {
+                    if(cells != "intCells") return null;
+                    return "cnCoords";
+                };
+                item._discretizer.markIntCellsBy = function(cnCoords) {
+                    if(cnCoords == "cn2coords") data.markCoords = cnCoords;
+                };
+
                 item._item = "item";
                 item._adjustPosition = function(cnCoords) {
                     if(cnCoords == "cn2coords") data.adjustCoords = cnCoords;

@@ -4,6 +4,7 @@ DiscrDraggableItem = function() {
     this._itemCn = null;
     this._clone = null;
     this._pointer = null;
+    this._discretizer = new Discretizer();
 }
 
 proto(DiscrDraggableItem, {
@@ -24,9 +25,11 @@ proto(DiscrDraggableItem, {
         this._clone = dragifierCore.createClone(item);
         this._pointer = dragifierCore.createPointer(item);
 
-        discretizer.discretize();
-        discretizer.markIntCellsBy(this._itemCn);
-        discretizerDebug.create();
+        this._discretizer.discretize();
+        this._discretizer.markIntCellsBy(this._itemCn);
+        /* @system-log-start */
+        discretizerDebug.create(this._discretizer.cells());
+        /* @system-log-end */
 
         dragifierCore.hideItem(item);
     },
@@ -43,7 +46,9 @@ proto(DiscrDraggableItem, {
         dragifierCore.showItem(this._item);
         this._item = null;
         this._itemCn.restrictCollect = false;
+        /* @system-log-start */
         discretizerDebug.rm();
+        /* @system-log-end */
     },
 
     dragMove: function(cursorX, cursorY) {
@@ -51,25 +56,29 @@ proto(DiscrDraggableItem, {
         var newGridPos = dragifierCore.calcCloneNewGridPosition(this._item, newDocPos);
         dragifier.render(this._clone, newDocPos.x, newDocPos.y);
 
-        var itemIntCellsData = dragifierCells.getIntCellsData(this._itemCn);
-        var cloneIntCellsData = discretizer.getAllCellsWithIntCenter(newGridPos);
+        var itemIntCellsData = dragifierCells.getIntCellsData(
+            this._discretizer.getAllCellsWithIntCenter(this._itemCn)
+        );
+        var cloneIntCellsData = this._discretizer.getAllCellsWithIntCenter(newGridPos);
 
         if(!dragifierCells.isAnyIntCellEmpty(cloneIntCellsData)) return;
         if(!dragifierCells.isIntEnoughRowsAndCols(itemIntCellsData, cloneIntCellsData)) return;
-
+        
         this._repositionGrid(dragifierCells.normalizeOverflowedCells(
             cloneIntCellsData.intCells, itemIntCellsData, cloneIntCellsData
         ));
-        discretizerDebug.update();
+        /* @system-log-start */
+        discretizerDebug.update(this._discretizer.cells());
+        /* @system-log-end */
     },
 
     _repositionGrid: function(intCells) {
-        var cnCoords = discretizer.intCellsToCoords(intCells);
-        cnCoords = discretizerCore.normalizeCnXCoords(this._item, cnCoords);
-        cnCoords = discretizerCore.normalizeCnYCoords(this._item, cnCoords);
+        var cnCoords = this._discretizer.intCellsToCoords(intCells); 
+        cnCoords = discretizerCore.normalizeCnXCoords(this._item, cnCoords); 
+        cnCoords = discretizerCore.normalizeCnYCoords(this._item, cnCoords); 
 
         this._adjustPosition(cnCoords);
-        discretizer.markIntCellsBy(cnCoords);
+        this._discretizer.markIntCellsBy(cnCoords);
         setTimeout(function() { dragifierCore.repositionItems(); }, C.DRAGIFIER_DISCR_REPOS_DELAY);
     },
 

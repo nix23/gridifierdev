@@ -322,7 +322,7 @@ $(document).ready(function() {
 
         _restoreOnSortDispersionDefAppend: function() {
             cnsCore = {};
-            cnsCore.restore = function(cns, fn1, fn2) {
+            cnsCore.restoreOnSortDispersion = function(cns, fn1, fn2) {
                 fn1(cns, cns[cns.length - 1], function(cn, newX, newY) {
                     cn.x1 = newX; cn.x2 = newX; cn.y1 = newY; cn.y2 = newY;
                 });
@@ -349,7 +349,7 @@ $(document).ready(function() {
 
         _restoreOnSortDispersionRevAppend: function() {
             cnsCore = {};
-            cnsCore.restore = function(cns, fn1, fn2) {
+            cnsCore.restoreOnSortDispersion = function(cns, fn1, fn2) {
                 fn2(cns, cns[cns.length - 1], function(cn, newX, newY) {
                     cn.x1 = newX; cn.x2 = newX; cn.y1 = newY; cn.y2 = newY;
                 });

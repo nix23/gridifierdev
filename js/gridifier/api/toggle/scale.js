@@ -8,10 +8,10 @@ ScaleToggle = function(beforeShow, onShow, beforeHide, afterHide) {
                 return;
             }
 
-            if(api.toggle.hasTranslateTransform(item)) {
+            if(api.toggle.hasTranslateTransform(item, api.prefix)) {
                 var srm = api.srManager;
                 api.toggle.updateTransformOrigin(
-                   item, cn.x1, cn.y1, srm.outerWidth(item, true), srm.outerHeight(item, true)
+                   item, cn.x1, cn.y1, srm.outerWidth(item, true), srm.outerHeight(item, true), dom
                 );
             }
 
@@ -32,7 +32,7 @@ ScaleToggle = function(beforeShow, onShow, beforeHide, afterHide) {
             }, 40));
 
             sync.add(item, setTimeout(function() {
-                api.toggle.resetTransformOrigin(item);
+                api.toggle.resetTransformOrigin(item, dom);
                 dom.rm(item, api.TOGGLE.IS_ACTIVE);
                 ev.emit(api.EVENT.SHOW, item);
             }, time + 60));
@@ -46,10 +46,10 @@ ScaleToggle = function(beforeShow, onShow, beforeHide, afterHide) {
                 return;
             }
 
-            if(api.toggle.hasTranslateTransform(item)) {
+            if(api.toggle.hasTranslateTransform(item, api.prefix)) {
                 var srm = api.srManager;
                 api.toggle.updateTransformOrigin(
-                    item, cn.x1, cn.y1, srm.outerWidth(item, true), srm.outerHeight(item, true)
+                    item, cn.x1, cn.y1, srm.outerWidth(item, true), srm.outerHeight(item, true), dom
                 );
             }
 
@@ -74,7 +74,7 @@ ScaleToggle = function(beforeShow, onShow, beforeHide, afterHide) {
 
                 afterHide(item, time, timing, dom, api);
                 dom.css3.transition(item, "");
-                api.toggle.resetTransformOrigin(item);
+                api.toggle.resetTransformOrigin(item, dom);
 
                 dom.rm(item, api.TOGGLE.IS_ACTIVE);
                 ev.emit(api.EVENT.HIDE, item);

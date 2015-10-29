@@ -322,35 +322,8 @@ $(document).ready(function() {
 
         _restoreOnSortDispersionDefAppend: function() {
             cnsCore = {};
-            cnsCore.restore = function(cns, fn1, fn2) {
+            cnsCore.restoreOnSortDispersion = function(cns, fn1, fn2) {
                 fn1(cns, cns[cns.length - 1], function(cn, newX, newY) {
-                    cn.x1 = newX; cn.x2 = newX; cn.y1 = newY; cn.y2 = newY;
-                });
-            };
-            var sourceCns = [
-                {x1: 30,  x2: 100, y1: 0, y2: 100},
-                {x1: 50,  x2: 100, y1: 100, y2: 200},
-                {x1: 100, x2: 100, y1: 200, y2: 300}
-            ];
-
-            var restored = false;
-            var connections = new VgConnections();
-            connections.restore = function(cns) { if(cns.length == 3) restored = true; };
-
-            connections.restoreOnSortDispersion(sourceCns);
-            ok(sourceCns[0].x1 == 99 && sourceCns[1].x1 == 98 && sourceCns[2].x1 == 97 &&
-               sourceCns[0].x2 == 99 && sourceCns[1].x2 == 98 && sourceCns[2].x2 == 97 &&
-               sourceCns[0].y1 == 200 && sourceCns[1].y1 == 200 && sourceCns[2].y1 == 200 &&
-               sourceCns[0].y2 == 200 && sourceCns[1].y2 == 200 && sourceCns[2].y2 == 200 && restored,
-               "restoreOnSortDispersion def app ok");
-
-            clearTestData();
-        },
-
-        _restoreOnSortDispersionRevAppend: function() {
-            cnsCore = {};
-            cnsCore.restore = function(cns, fn1, fn2) {
-                fn2(cns, cns[cns.length - 1], function(cn, newX, newY) {
                     cn.x1 = newX; cn.x2 = newX; cn.y1 = newY; cn.y2 = newY;
                 });
             };
@@ -369,7 +342,34 @@ $(document).ready(function() {
                 sourceCns[0].x2 == 141 && sourceCns[1].x2 == 142 && sourceCns[2].x2 == 143 &&
                 sourceCns[0].y1 == 200 && sourceCns[1].y1 == 200 && sourceCns[2].y1 == 200 &&
                 sourceCns[0].y2 == 200 && sourceCns[1].y2 == 200 && sourceCns[2].y2 == 200 && restored,
-                "restoreOnSortDispersion rev app ok");
+                "restoreOnSortDispersion def app ok");
+
+            clearTestData();
+        },
+
+        _restoreOnSortDispersionRevAppend: function() {
+            cnsCore = {};
+            cnsCore.restoreOnSortDispersion = function(cns, fn1, fn2) {
+                fn2(cns, cns[cns.length - 1], function(cn, newX, newY) {
+                    cn.x1 = newX; cn.x2 = newX; cn.y1 = newY; cn.y2 = newY;
+                });
+            };
+            var sourceCns = [
+                {x1: 30,  x2: 100, y1: 0, y2: 100},
+                {x1: 50,  x2: 100, y1: 100, y2: 200},
+                {x1: 100, x2: 100, y1: 200, y2: 300}
+            ];
+
+            var restored = false;
+            var connections = new VgConnections();
+            connections.restore = function(cns) { if(cns.length == 3) restored = true; };
+
+            connections.restoreOnSortDispersion(sourceCns);
+            ok(sourceCns[0].x1 == 99 && sourceCns[1].x1 == 98 && sourceCns[2].x1 == 97 &&
+               sourceCns[0].x2 == 99 && sourceCns[1].x2 == 98 && sourceCns[2].x2 == 97 &&
+               sourceCns[0].y1 == 200 && sourceCns[1].y1 == 200 && sourceCns[2].y1 == 200 &&
+               sourceCns[0].y2 == 200 && sourceCns[1].y2 == 200 && sourceCns[2].y2 == 200 && restored,
+               "restoreOnSortDispersion rev app ok");
 
             clearTestData();
         },

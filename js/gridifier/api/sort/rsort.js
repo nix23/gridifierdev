@@ -4,22 +4,27 @@ var RsortApi = function() {
 
     var me = this;
     ev.onRsortChange(function() {
-        me._change.call(me);
+        me._update.call(me);
     });
 
-    this._change();
+    this._update();
 }
 
 proto(RsortApi, {
-    _change: function() {
+    _update: function() {
         var me = this;
         var rsort = settings.get("rsort").selected;
 
         if(rsort != "default" && !this._created) {
             this._created = true;
-            var rsortHelpers = new RsortHelpers(settings);
+            new RsortHelpers(settings);
         }
 
+        me._change(rsort);
+    },
+
+    _change: function(rsort) {
+        var me = this;
         // Don't remove def rSorter. (Unnecessary rep-ions will be triggered.)
         if(rsort == "default")
             ev.onBeforeShowForRsort(null);
@@ -27,22 +32,26 @@ proto(RsortApi, {
             ev.onBeforeShowForRsort(function() {
                 clearTimeout(me._repositionTimeout);
                 me._repositionTimeout = setTimeout(function() {
-                    if(settings.get("repackSize") == null) {
-                        reposition.all();
-                        return;
-                    }
-
-                    var repackSize = settings.get("repackSize");
-                    var items = gridifier.all();
-
-                    if(items.length < repackSize) {
-                        reposition.all();
-                        return;
-                    }
-
-                    reposition.fromFirstSortedCn(items[items.length - repackSize]);
+                    me._reposition();
                 }, C.RESORT_REPOS_DELAY);
             });
         }
+    },
+
+    _reposition: function() {
+        if(settings.get("repackSize") == null) {
+            reposition.all();
+            return;
+        }
+
+        var repackSize = settings.get("repackSize");
+        var items = gridifier.all();
+
+        if(items.length < repackSize) {
+            reposition.all();
+            return;
+        }
+
+        reposition.fromFirstSortedCn([items[items.length - repackSize]]);
     }
 });

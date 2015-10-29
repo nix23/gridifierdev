@@ -77,7 +77,7 @@ proto(Renderer, {
         for(var i = 0; i < items.length; i++) {
             var cn = cnsCore.find(items[i]);
             rendererCns.unmarkAsRendered(cn);
-            cns.push(items[i]);
+            cns.push(cn);
         }
 
         this.show(cns);

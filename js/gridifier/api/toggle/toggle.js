@@ -9,42 +9,36 @@ var ToggleApi = function() {
 }
 
 proto(ToggleApi, {
-    hasTranslateTransform: function(item) {
+    hasTranslateTransform: function(item, prefix) {
         var reg = /.*translate\((.*)\).*/;
         var reg3d = /.*translate3d\((.*)\).*/;
 
-        if(reg.test(item.style[Prefixer.get("transform", item)]) ||
-            reg3d.test(item.style[Prefixer.get("transform", item)]))
+        if(reg.test(item.style[prefix.get("transform", item)]) ||
+            reg3d.test(item.style[prefix.get("transform", item)]))
             return true;
 
         return false;
     },
 
-    updateTransformOrigin: function(item, cnLeft, cnTop, iWidth, iHeight) {
+    updateTransformOrigin: function(item, cnLeft, cnTop, iWidth, iHeight, dom) {
         var newLeft = parseFloat(cnLeft);
         var newTop = parseFloat(cnTop);
 
         var currLeft = parseFloat(item.style.left);
         var currTop = parseFloat(item.style.top);
 
-        if(newLeft > currLeft)
-            var x = newLeft - currLeft;
-        else if(newLeft < currLeft)
-            var x = (currLeft - newLeft) * -1;
-        else
-            var x = 0;
+        var getC = function(curr, prev) {
+            if(curr > prev) return curr - prev;
+            return (curr < prev) ? (prev - curr) * -1 : 0;
+        }
 
-        if(newTop > currTop)
-            var y = newTop - currTop;
-        else if(newTop < currTop)
-            var y = (currTop - newTop) * -1;
-        else
-            var y = 0;
+        var x = getC(newLeft, currLeft);
+        var y = getC(newTop, currTop);
 
-        Dom.css3.transformOrigin(item, (x + iWidth / 2) + "px " + (y + iHeight / 2) + "px");
+        dom.css3.transformOrigin(item, (x + iWidth / 2) + "px " + (y + iHeight / 2) + "px");
     },
 
-    resetTransformOrigin: function(item) {
-        Dom.css3.transformOrigin(item, "50% 50%");
+    resetTransformOrigin: function(item, dom) {
+        dom.css3.transformOrigin(item, "50% 50%");
     }
 });

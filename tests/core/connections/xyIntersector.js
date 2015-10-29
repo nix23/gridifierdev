@@ -43,7 +43,7 @@ $(document).ready(function() {
         _isIntMoreThanOneCnY: function() {
             var cns = [
                 {x1: 100, x2: 199, y1: 0, y2: 49, itemGUID: 2},
-                {x1: 200, x2: 299, y1: 0, y2: 79, itemGUID: 3},
+                {x1: 200, x2: 299, y1: 50, y2: 79, itemGUID: 3},
                 {x1: 300, x2: 399, y1: 0, y2: 109, itemGUID: 4}
             ];
             connections = {get: function() { return cns; }};
@@ -68,7 +68,7 @@ $(document).ready(function() {
         _isIntMoreThanOneCnX: function() {
             var cns = [
                 {x1: 0, x2: 49,  y1: 100, y2: 199, itemGUID: 2},
-                {x1: 0, x2: 79,  y1: 200, y2: 299, itemGUID: 3},
+                {x1: 50, x2: 79,  y1: 200, y2: 299, itemGUID: 3},
                 {x1: 0, x2: 109, y1: 300, y2: 399, itemGUID: 4}
             ];
             connections = {get: function() { return cns; }};

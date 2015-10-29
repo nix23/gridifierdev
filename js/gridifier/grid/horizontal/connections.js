@@ -45,7 +45,7 @@ proto(HgConnections, {
     rm: function(cn) { cnsCore.rm(this._cns, cn); },
 
     restoreOnSortDispersion: function(cns) {
-        cnsCore.restore(cns, function(cns, lastCn, setCn) {
+        cnsCore.restoreOnSortDispersion(cns, function(cns, lastCn, setCn) {
             var nextFakeY = lastCn.y2 + 1;
             for(var i = 0; i < cns.length; i++) {
                 setCn(cns[i], lastCn.x1, nextFakeY++);

@@ -59,7 +59,7 @@ proto(Collector, {
     },
 
     filter: function(filtered) {
-        var filters = settings.getApi("filter");
+        var filters = settings.getApi("filter"); 
 
         for(var i = 0; i < filters.length; i++) {
             var currentFiltered = [];

@@ -71,8 +71,8 @@ var Settings = function() {
         // Read about drag decorators at http://gridifier.io/dragifiers/decorators
         drag: {
             selected: "cloneCss",
-            cloneCss: function(itemClone, item, srManager) {
-                srManager.copyComputedStyle(item, itemClone);
+            cloneCss: function(clone, item, srManager) {
+                srManager.copyComputedStyle(item, clone);
             }
             // , customDrag: function(itemClone, item, srManager) {
             //       // Style item clone here
@@ -81,8 +81,8 @@ var Settings = function() {
         // Read about retransform sorts at http://gridifier.io/sortings/retransform-sorts
         rsort: {
             selected: "default",
-            "default": function(connections) {
-                return connections;
+            "default": function(cns) {
+                return cns;
             }
             // , customRsort: function(connections) {
             //       // Sort connections here. Each connections

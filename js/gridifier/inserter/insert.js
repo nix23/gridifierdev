@@ -38,7 +38,7 @@ proto(InsertOp, {
 
         if(targetItemGUID == null)
             err(E.WRONG_IBA_ITEM);
-
+        
         this._reposition(cnsToRps, items, targetItemGUID, insertFn, rev, rpsFn);
     },
 

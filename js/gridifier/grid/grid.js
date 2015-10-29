@@ -8,9 +8,9 @@ var Grid = function() {
     this._adjustCSS();
 
     self(this, {
-        getGrid: this.get,
-        getGridWidth: this.width,
-        getGridHeight: this.height
+        grid: this.get,
+        gridWidth: this.width,
+        gridHeight: this.height
     });
 }
 
@@ -111,7 +111,7 @@ proto(Grid, {
 
         var cssSize = {};
         cssSize[sizeType] = (newSize + 1) + "px";
-
+        
         if((settings.eq("gridResize", "fit")) ||
            (settings.eq("gridResize", "expand") && currSizeFn() < newSize))
             Dom.css.set(this._grid, cssSize);

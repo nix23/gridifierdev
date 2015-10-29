@@ -27,7 +27,7 @@ proto(DragifierApi, {
             dom.css3.transitionProperty(item, "none");
             dom.css3.perspective(item, "1000");
             dom.css3.backfaceVisibility(item, "hidden");
-            dom.css3.transformProperty(item, "translate3d", trX + "px," + trY + "px, 0px");
+            dom.css3.transformProperty(item, "translate3d", trX + "px," + trY + "px,0px");
         };
     },
 
@@ -43,26 +43,27 @@ proto(DragifierApi, {
             return this._selectToggler;
 
         this._selectToggler = {
-            _props: ["webkitTouchCallout", "webkit", "khtml", "moz", "ms", ""],
+            _target: document.body,
+            _props: ["webkitTouchCallout", "webkit", "khtml", "moz", "ms", "userSelect"],
             _origProps: {},
 
             _hasProp: function(prop) {
-                return (typeof document.body.style[prop] != "undefined");
+                return (typeof this._target["style"][prop] != "undefined");
             },
 
             disableSelect: function() {
                 for(var i = 0; i < this._props.length; i++) {
-                    var prop = (i == 0) ? this._props[i] : this._props[i] + "UserSelect";
+                    var prop = (i == 0 || i == 5) ? this._props[i] : this._props[i] + "UserSelect";
                     if(this._hasProp(prop)) {
-                        this._origProps[prop] = document.body.style[prop];
-                        document.body.style[prop] = "none";
+                        this._origProps[prop] = this._target["style"][prop];
+                        this._target["style"][prop] = "none";
                     }
                 }
             },
 
             enableSelect: function() {
                 for(var prop in this._origProps)
-                    document.body.style[prop] = this._origProps[prop];
+                    this._target["style"][prop] = this._origProps[prop];
 
                 this._origProps = {};
             }

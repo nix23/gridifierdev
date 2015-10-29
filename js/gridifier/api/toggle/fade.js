@@ -38,11 +38,11 @@ FadeToggle = function() {
 
             var prefix = api.prefix.getForCss('opacity', item);
             dom.css3.transition(item, prefix + " " + time + "ms " + timing);
-            dom.set(api.TOGGLE.IS_ACTIVE, "y");
+            dom.set(item, api.TOGGLE.IS_ACTIVE, "y");
             dom.css3.opacity(item, "0");
 
             sync.add(item, setTimeout(function() {
-                dom.rm(api.TOGGLE.IS_ACTIVE);
+                dom.rm(item, api.TOGGLE.IS_ACTIVE);
                 dom.hide(item);
 
                 dom.css3.transition(item, "none");

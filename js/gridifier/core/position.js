@@ -104,7 +104,7 @@ proto(Position, {
         Logger.log(
             "createCn",
             "filterCrs -> selectOnlyFrom" + logm,
-            connectors,
+            crs,
             connections.get()
         );
         /* @system-log-end */
@@ -117,7 +117,7 @@ proto(Position, {
             Logger.log(
                 "createCn",
                 "filterCrs -> intersections(true) -> shiftAll crs",
-                connectors,
+                crs,
                 connections.get()
             );
             /* @system-log-end */
@@ -131,7 +131,7 @@ proto(Position, {
             Logger.log(
                 "createCn",
                 "filterCrs -> intersections(false) -> selectOnlyMost" + logm,
-                connectors,
+                crs,
                 connections.get()
             );
             /* @system-log-end */
@@ -144,7 +144,7 @@ proto(Position, {
             Logger.log(
                 "createCn",
                 "filterCrs -> intersections(false) -> shiftAllTo" + logm,
-                connectors,
+                crs,
                 connections.get()
             );
             /* @system-log-end */

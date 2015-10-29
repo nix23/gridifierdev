@@ -28,7 +28,7 @@ $(document).ready(function() {
                     "isSameRepositionProcess",
                     "repositionNextBatch",
                     "execNextBatchReposition",
-                    "updateQueue",
+                    "processQueue",
                     "scheduleNextBatchReposition",
                     "repositionItem"
                 ]);
@@ -149,8 +149,7 @@ $(document).ready(function() {
                 started: false,
                 stopped: false,
                 execBatch: null,
-                queueBatch: false,
-                scheduled: false
+                processBatch: null
             };
 
             srManager = {};
@@ -161,22 +160,19 @@ $(document).ready(function() {
             repositionQueue._queue = [];
             repositionQueue._isSameRepositionProcess = function() { return false; };
             repositionQueue._execNextBatchReposition = function(bs) { data.execBatch = bs; };
-            repositionQueue._updateQueue = function(bs) { data.queueBatch = bs; };
-            repositionQueue.isEmpty = function() { return true; };
-            repositionQueue._scheduleNextBatchReposition = function() { data.scheduled = true; };
+            repositionQueue._processQueue = function(bs) { data.processBatch = bs; };
 
             repositionQueue._repositionNextBatch(true);
             ok(data.started && data.stopped && data.execBatch == null,
                "repositionNextBatch on not same reappend process ok");
 
             repositionQueue._repositionNextBatch();
-            ok(data.execBatch == 0 && data.queueBatch == 0 && !data.scheduled,
+            ok(data.execBatch == 0 && data.processBatch == 0,
                "repositionNextBatch on empty queue ok");
 
             repositionQueue._queue = [{id: 1}, {id: 2}];
-            repositionQueue.isEmpty = function() { return false; };
             repositionQueue._repositionNextBatch();
-            ok(data.execBatch == 1 && data.queueBatch == 1 && data.scheduled,
+            ok(data.execBatch == 1 && data.processBatch == 1,
                "repositionNextBatch on not empty queue ok");
 
             clearTestData();
@@ -245,11 +241,11 @@ $(document).ready(function() {
             clearTestData();
         },
 
-        _updateQueue: function() {
+        _processQueue: function() {
             Logger = {};
             Logger.stopLoggingOperation = function() {};
 
-            var data = {ev: null, ev2: null};
+            var data = {ev: null, ev2: null, scheduled: false};
 
             ev = {
                 emitInternal: function(ev) { data.ev = ev; },
@@ -259,8 +255,11 @@ $(document).ready(function() {
             var repositionQueue = new RepositionQueue();
             repositionQueue._queue = [{id: 1}, {id: 2}];
             repositionQueue._queueData = [];
+            repositionQueue._scheduleNextBatchReposition = function() {
+                data.scheduled = true;
+            };
 
-            repositionQueue._updateQueue(2);
+            repositionQueue._processQueue(2);
             ok(
                 repositionQueue._nextBatchTimeout == null &&
                 repositionQueue._queue.length == 0 &&
@@ -268,9 +267,15 @@ $(document).ready(function() {
                 repositionQueue._queueData[0].id == 1 &&
                 repositionQueue._queueData[1].id == 2 &&
                 data.ev == INT_EV.REPOSITION_END_FOR_DRAG &&
-                data.ev2 == EV.REPOSITION_END,
-                "updateQueue ok"
+                data.ev2 == EV.REPOSITION_END && 
+                !data.scheduled,
+                "updateQueue with all items ok"
             );
+
+            repositionQueue._queue = [{id: 1}, {id: 2}];
+            repositionQueue._queueData = [];
+            repositionQueue._processQueue(1);
+            ok(data.scheduled, "updateQueue with schedule next items repos ok");
 
             clearTestData();
         },

@@ -8,7 +8,7 @@ RotateToggle = function() {
     //this._cn = null;
 
     this._fadeType = null;
-    this._nextRotateGUID = null;
+    this._nextRotateGUID = 0;
 }
 
 proto(RotateToggle, {
@@ -52,14 +52,14 @@ proto(RotateToggle, {
 
         if(!dom.has(item, api.ROTATE.GUID_DATA)) {
             var isNewRotate = true;
-            dom.set(api.ROTATE.GUID_DATA, ++this._nextRotateGUID);
+            dom.set(item, api.ROTATE.GUID_DATA, ++this._nextRotateGUID);
 
             var scene = this._createScene(item, left, top);
             var frames = this._createFrames(scene);
             var itemClone = this._createClone(item);
 
             dom.css.addClass(scene, api.ROTATE.SCENE_CLASS_PREFIX + this._nextRotateGUID);
-            dom.set(api.TOGGLE.IS_ACTIVE, "y");
+            dom.set(item, api.TOGGLE.IS_ACTIVE, "y");
 
             var frontFrame = this._createFrame(true, frames, rotateProp, rotateMatrix, show, 2);
             var backFrame = this._createFrame(false, frames, rotateProp, rotateMatrix, show, 1);
@@ -89,8 +89,8 @@ proto(RotateToggle, {
 
         this._sync.add(item, setTimeout(function() {
             var angles = api.getS("rotateAngles");
-            var frontFrameTA = (show) ? 2 : 0;
-            var backFrameTA = (show) ? 3 : 1;
+            var frontFrameTA = angles[(show) ? 2 : 0];
+            var backFrameTA = angles[(show) ? 3 : 1];
 
             dom.css3.transformProperty(frontFrame, rotateProp, rotateMatrix + frontFrameTA + "deg");
             dom.css3.transformProperty(backFrame, rotateProp, rotateMatrix + backFrameTA + "deg");
@@ -161,7 +161,7 @@ proto(RotateToggle, {
 
         api.collect.markAsNotCollectable(clone);
         var uCss = api.sr.getUncomputedCSS(item);
-        var origHeight = parseInt(uCss.height);
+        var origHeight = dom.int(uCss.height);
 
         dom.css.set(clone, {
             left: "0px", top: "0px", visibility: "visible",
@@ -196,7 +196,7 @@ proto(RotateToggle, {
         var prefix = api.prefix.getForCss("transform", frame);
         dom.css3.transitionProperty(frame, prefix + " 0ms " + this._timing);
 
-        var angles = api.getS("rotateAngles");
+        var angles = api.getS("rotateAngles"); 
         if(isFront) var initAI = (show) ? 0 : 2;
         if(!isFront) var initAI = (show) ? 1 : 3;
 

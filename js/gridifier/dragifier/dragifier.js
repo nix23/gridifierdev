@@ -97,11 +97,11 @@ proto(Dragifier, {
 
     _mouseDown: function(event) {
         var me = this;
-
+        
         var item = me._findClosestConnected(event.target);
         // UCBrowser will fire and process mouse handlers first
         if(item == null || Dom.browsers.isAndroidUC()) return;
-
+        
         me._initDrag.call(me, event);
         me._initDraggableItem.call(me, item, event, false);
     },
@@ -125,8 +125,8 @@ proto(Dragifier, {
 
     _initDrag: function(event) {
         event.preventDefault();
-        this._reposQueueOff();
-        dragifierApi.getSelectToggler().disableSelect();
+        this._reposQueueOff(); 
+        dragifierApi.getSelectToggler().disableSelect(); 
         srManager.startCachingTransaction();
         this._isDragging = true;
     },

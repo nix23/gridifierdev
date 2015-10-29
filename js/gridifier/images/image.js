@@ -1,4 +1,4 @@
-Image = function(image) {
+LoadedImage = function(image) {
     this._image = image;
     this._loadedImage = null;
     this._isLoaded = false;
@@ -7,11 +7,11 @@ Image = function(image) {
     this._onError = null;
 }
 
-proto(Image, {
+proto(LoadedImage, {
     _bindEvents: function() {
         var me = this;
-        me._onLoad = function() { me._onLoad.call(me); };
-        me._onError = function() { me._onError.call(me); };
+        me._onLoad = function() { me._load.call(me); };
+        me._onError = function() { me._error.call(me); };
 
         Event.add(me._loadedImage, "load", me._onLoad);
         Event.add(me._loadedImage, "error", me._onError);
@@ -36,9 +36,13 @@ proto(Image, {
             return;
         }
 
-        this._loadedImage = new Image();
+        this._loadedImage = this._loader();
         this._bindEvents();
         this._loadedImage.src = this._image.src;
+    },
+
+    _loader: function() {
+        return new Image();
     },
 
     isLoaded: function() {
@@ -50,12 +54,12 @@ proto(Image, {
                 && this._image.naturalWidth !== 0);
     },
 
-    _onLoad: function() {
+    _load: function() {
         this._isLoaded = true;
         imagesLoader.onLoad(this._image);
     },
 
-    _onError: function() {
+    _error: function() {
         this._isLoaded = true;
         imagesLoader.onLoad(this._image);
     }

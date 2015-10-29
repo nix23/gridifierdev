@@ -72,9 +72,9 @@ proto(CrsCleaner, {
             var fn = "_isMappedCrIntAny" + side + "Cn";
             crs[mappedCrs[i].crIndex].isInt = this[fn](mappedCrs[i]);
         }
-
+        
         for(var i = 0; i < crs.length; i++) {
-            if(crs[i].isInt) {
+            if(crs[i].isInt) { 
                 crs.splice(i, 1);
                 i--;
             }
