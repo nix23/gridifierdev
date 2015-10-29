@@ -82,8 +82,7 @@ $(document).ready(function() {
                 hidden: null,
                 shown: null
             };
-            discretizerDebug = {};
-            discretizerDebug.create = function() { data.debugCreated = true; };
+
             dragifierCore = {
                 initItem: function(item) { data.item = item; },
                 calcGridOffsets: function() { data.calced = true; },
@@ -120,7 +119,6 @@ $(document).ready(function() {
                 data.findOffsets[2] == 20 &&
                 data.discretized &&
                 data.markedCn.id == "itemCn" &&
-                data.debugCreated &&
                 data.hidden == "item",
                 "bind ok"
             );
@@ -135,7 +133,6 @@ $(document).ready(function() {
             grid.get = function() { return gridDiv; };
 
             var removed = false;
-            discretizerDebug.rm = function() { removed = true; };
 
             item._clone = Dom.div();
             Dom.css.addClass(item._clone, "testdragtest");
@@ -147,8 +144,7 @@ $(document).ready(function() {
                 item._item == null &&
                 !item._itemCn.restrictCollect &&
                 $(".testdragtest").length == 0 &&
-                $(".testdragpointer").length == 0 &&
-                removed,
+                $(".testdragpointer").length == 0,
                 "unbind ok"
             );
 
@@ -204,11 +200,6 @@ $(document).ready(function() {
                 return "intOk";
             };
 
-            discretizerDebug = {};
-            discretizerDebug.update = function() {
-                data.discUpdated = true;
-            };
-
             var item = new DiscrDraggableItem();
             item._discretizer.getAllCellsWithIntCenter = function(itemcn) {
                 if(itemcn != "itemCn" && itemcn != "newGridPos") return null;
@@ -228,8 +219,7 @@ $(document).ready(function() {
                 data.renderClone == "clone" &&
                 data.renderX == 10 &&
                 data.renderY == 20 &&
-                data.gridReposed &&
-                data.discUpdated,
+                data.gridReposed,
                 "dragMove ok"
             );
 

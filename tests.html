@@ -37,21 +37,6 @@
     <script src="js/vendor/jquery-1.10.2.min.js"></script>
     <script src="js/vendor/qunit.js"></script>
     <script src="js/vendor/modernizr.custom.js"></script>
-    <script src="js/vendor/twig.min.js"></script>
-    <script src="js/vendor/jquery.transit.min.js"></script>
-    <script src="js/vendor/jquery.nouislider.all.js"></script>
-    <!--<script src="js/vendor/jquery2.js"></script>-->
-    <script src="js/vendor/codeHighlighter/shMain.min.js"></script>
-    <script src="js/vendor/codeHighlighter/shJavascriptDom.js"></script>
-    <script src="js/vendor/codeHighlighter/shHtml.js"></script>
-    <script src="js/vendor/codeHighlighter/shCss.js"></script>
-
-    <script src="js/services/cssCalcNormalizer.js"></script>
-    <script src="js/services/profiler.js"></script>
-    <script src="js/services/view.js"></script>
-    <script src="js/services/accordion.js"></script>
-    <script src="js/services/browserDetector.js"></script>
-    <script src="js/services/resizeEventNormalizer.js"></script>
 
     <!-- Gridifier includes -->
     <script src="js/gridifier/bootstrap/funcs.js"></script>
@@ -214,6 +199,20 @@
                     me._isExecuted = false;
                     me.exec();
                 }, next.checkDelay);
+            }
+        };
+
+        window.browserDetector = {
+            isIe8: function() {
+                var hasIe8CondClass = false;
+
+                var htmlClasses = document.querySelector("html").className.split(' ');
+                for(var i = 0; i < htmlClasses.length; i++) {
+                    if(htmlClasses[i] == "lt-ie9")
+                        hasIe8CondClass = true;
+                }
+
+                return !Modernizr.csscalc && hasIe8CondClass;
             }
         };
 

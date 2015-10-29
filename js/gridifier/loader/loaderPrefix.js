@@ -7,3 +7,4 @@
         root.Gridifier = factory();
     }
 }(this, function () {
+    var Gridifier = function(sourceGrid, sourceSettings) {

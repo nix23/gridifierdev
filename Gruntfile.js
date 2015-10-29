@@ -12,20 +12,25 @@ module.exports = function(grunt) {
     banner += " */\n\n";
 
     var staticBanner = banner.slice(0);
-    staticBanner = "/* Gridifier v1.~.~ source file for custom build.\n" + banner;
+    staticBanner = "/* Gridifier v2.~.~ source file for custom build.\n" + banner;
 
-    banner = "/* Gridifier v1.0.3\n" + banner;
+    banner = "/* Gridifier v2.0.0\n" + banner;
+
+    var apiCoreFiles = [
+        {"/bootstrap/": ["funcs", "mocks", "vars"]}
+    ];
 
     var apiFiles = [
-        {"/api/": ["dragifier", "settings"]},
         {"/api/coordsChanger/": ["coordsChanger", "default", "position", "translate"]},
-        {"/api/sort/": ["rsort", "rsortHelpers", "sort", "sortHelpers"]},
+        {"/api/dragifier/": ["dragifier"]},
+        {"/api/settings/": ["settings", "funcs"]},
+        {"/api/sort/": ["rsort", "rsortHelpers", "sortHelpers"]},
         {"/api/toggle/factory/": ["rotate", "scale", "slide"]},
-        {"/api/toggle/": ["fade", "rotate", "scale", "slide", "syncer", "toggle", "visibility"]}
+        {"/api/toggle/": ["toggle", "syncer", "fade", "rotate", "scale", "slide", "visibility"]}
     ];
 
     var coreFiles = [
-        {"/bootstrap/": ["funcs", "mocks", "vars", "event", "prefixer", "dom"]},
+        {"/bootstrap/": ["event", "prefixer", "dom"]},
         {"/bootstrap/sizesResolver/": ["sizesResolver", "init", "outerWidth", "outerHeight"]},
         {"/core/connections/": ["connections", "intersector", "ranges", "sorter", "xyIntersector"]},
         {"/core/connectors/": [
@@ -58,6 +63,32 @@ module.exports = function(grunt) {
         {"/": ["gridifier"]}
     ];
 
+    // Additional test files
+    var testFiles = [
+        {"/bootstrap/dom/": ["css3TransformProp", "css3TransitionProp", "dom"]},
+        {"/bootstrap/": ["event", "funcs", "prefixer"]},
+        {"/bootstrap/sizesResolver/outerWidth/": [
+            "ptWidthGrid", "ptWidthPtMarginGrid", "ptWidthPtPaddingGrid",
+            "pxWidthGrid", "pxWidthPxBorderGrid", "pxWidthPxMarginGrid",
+            "pxWidthPxPaddingGrid"
+        ]},
+        {"/bootstrap/sizesResolver/outerHeight/": [
+            "ptHeightGrid", "ptHeightPtMarginGrid", "ptHeightPtPaddingGrid",
+            "pxHeightGrid", "pxHeightPxBorderGrid", "pxHeightPxMarginGrid",
+            "pxHeightPxPaddingGrid"
+        ]},
+        {"/bootstrap/sizesResolver/sizesResolver/": [
+            "getPtCSSVal", "hasPtCSSVal", "init", "outerHeight",
+            "outerWidth", "rcTwoSidePropPtVals", "sizesResolver"
+        ]},
+        {"/core/manager/srManager/": [
+            "outerHeight", "outerWidth", "srManager"
+        ]},
+        {"/discretizer/": ["xCore", "yCore"]},
+        {"/dragifier/dragifier/": ["dragifier", "mouseHandlers", "touchHandlers"]},
+        {"/grid/": ["positionCore"]}
+    ];
+
     var createConfigPathes = function(configArray, sourceFiles, source, target) {
         for(var i = 0; i < sourceFiles.length; i++) {
             for(var prop in sourceFiles[i]) {
@@ -87,7 +118,15 @@ module.exports = function(grunt) {
     var copyApiTarget = "/var/www/gridifier/src";
     var copyApiConfig = [];
 
+    createConfigPathes(copyApiConfig, apiCoreFiles, copyApiSource, target);
     createConfigPathes(copyApiConfig, apiFiles, copyApiSource, copyApiTarget);
+
+    var copyTestsSource = "/var/www/gridifierdev/tests";
+    var copyTestsTarget = "/var/www/gridifier/test";
+    var copyTestsConfig = [];
+    createConfigPathes(copyTestsConfig, apiFiles, copyTestsSource, copyTestsTarget);
+    createConfigPathes(copyTestsConfig, coreFiles, copyTestsSource, copyTestsTarget);
+    createConfigPathes(copyTestsConfig, testFiles, copyTestsSource, copyTestsTarget);
 
     var concatOptions = {
         banner: banner,
@@ -131,19 +170,17 @@ module.exports = function(grunt) {
 
     var buildDataSource = source;
     var buildData = [
-        {dest: "/var/www/gridifier/build/gridifier", src: [], exclude: []},
-        {dest: "/var/www/gridifier/build/gridifier-vg", src: [], exclude: [
-            "/horizontalGrid/", "/horizontalGrid/connections/", "/horizontalGrid/connectors/"
-        ]},
-        {dest: "/var/www/gridifier/build/gridifier-hg", src: [], exclude: [
-            "/verticalGrid/", "/verticalGrid/connections/", "/verticalGrid/connectors/"
-        ]}
+        {dest: "/var/www/gridifier/dist/gridifier", src: [], exclude: []}
+        // , {dest: "/var/www/gridifier/build/gridifier-hg", src: [], exclude: [
+        //     "/grid/vertical/"
+        // ]}
     ];
 
     for(var i = 0; i < buildData.length; i++) {
         buildData[i].src.push(buildDataSource + "/loader/loaderPrefix.js");
-        createBuildDataSrcPathes(buildData[i], coreFiles, buildDataSource);
+        createBuildDataSrcPathes(buildData[i], apiCoreFiles, buildDataSource);
         createBuildDataSrcPathes(buildData[i], apiFiles, buildDataSource);
+        createBuildDataSrcPathes(buildData[i], coreFiles, buildDataSource);
         buildData[i].src.push(buildDataSource + "/loader/loaderPostfix.js");
     }
 
@@ -168,28 +205,13 @@ module.exports = function(grunt) {
                 options: concatOptions,
                 files: [{src: buildData[0].src, dest: buildData[0].dest + ".js"}]
             },
-            buildVg: {
-                options: concatOptions,
-                files: [{src: buildData[1].src, dest: buildData[1].dest + ".js"}]
-            },
-            buildHg: {
-                options: concatOptions,
-                files: [{src: buildData[2].src, dest: buildData[2].dest + ".js"}]
-            },
             buildFullMin: {
                 options: concatOptions,
                 files: [{src: buildData[0].src, dest: buildData[0].dest + ".min.js"}]
             },
-            buildVgMin: {
-                options: concatOptions,
-                files: [{src: buildData[1].src, dest: buildData[1].dest + ".min.js"}]
-            },
-            buildHgMin: {
-                options: concatOptions,
-                files: [{src: buildData[2].src, dest: buildData[2].dest + ".min.js"}]
-            },
             copyCore: { options: concatWithStaticBannerOptions, files: copyCoreConfig },
-            copyApi: { options: concatWithStaticBannerOptions, files: copyApiConfig }
+            copyApi: { options: concatWithStaticBannerOptions, files: copyApiConfig },
+            copyTests: { files: copyTestsConfig }
         },
 
         uglify: {
@@ -197,32 +219,10 @@ module.exports = function(grunt) {
                 options: uglifierBuildOptions,
                 files: [{src: buildData[0].dest + ".js", dest: buildData[0].dest + ".js"}]
             },
-
-            buildVg: {
-                options: uglifierBuildOptions,
-                files: [{src: buildData[1].dest + ".js", dest: buildData[1].dest + ".js"}]
-            },
-
-            buildHg: {
-                options: uglifierBuildOptions,
-                files: [{src: buildData[2].dest + ".js", dest: buildData[2].dest + ".js"}]
-            },
-
             buildFullMin: {
                 options: uglifierBuildMinOptions,
                 files: [{src: buildData[0].dest + ".min.js", dest: buildData[0].dest + ".min.js"}]
             },
-
-            buildVgMin: {
-                options: uglifierBuildMinOptions,
-                files: [{src: buildData[1].dest + ".min.js", dest: buildData[1].dest + ".min.js"}]
-            },
-
-            buildHgMin: {
-                options: uglifierBuildMinOptions,
-                files: [{src: buildData[2].dest + ".min.js", dest: buildData[2].dest + ".min.js"}]
-            },
-
             copyCore: {
                 options: {
                     banner: staticBanner,
@@ -244,26 +244,12 @@ module.exports = function(grunt) {
                     mode: 'gzip'
                 },
                 files: [{
-                    src: ['/var/www/gridifier/build/gridifier.min.js'],
-                    dest: '/var/www/gridifier/build/gzip/gridifier.min.gz.js'
-                },
-                {
-                    src: ['/var/www/gridifier/build/gridifier-vg.min.js'],
-                    dest: '/var/www/gridifier/build/gzip/gridifier-vg.min.gz.js'
-                },
-                {
-                    src: ['/var/www/gridifier/build/gridifier-hg.min.js'],
-                    dest: '/var/www/gridifier/build/gzip/gridifier-hg.min.gz.js'
+                    src: ['/var/www/gridifier/dist/gridifier.min.js'],
+                    dest: '/var/www/gridifier/dist/gzip/gridifier.min.gz.js'
                 }]
             }
-        }
-    });
+        },
 
-    grunt.loadNpmTasks('grunt-contrib-uglify');
-    grunt.loadNpmTasks('grunt-contrib-concat');
-    grunt.loadNpmTasks('grunt-contrib-compress');
-    grunt.loadNpmTasks('grunt-contrib-watch');
-    grunt.initConfig({
         watch: {
             options: {
                 livereload: true
@@ -274,12 +260,20 @@ module.exports = function(grunt) {
         }
     });
 
+    grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-compress');
+    grunt.loadNpmTasks('grunt-contrib-watch');
+
     grunt.registerTask('default', [
-        'concat:copyCore', 'uglify:copyCore', 'concat:copyApi',
-        'concat:buildFull', 'concat:buildVg', 'concat:buildHg',
-        'uglify:buildFull', 'uglify:buildVg', 'uglify:buildHg',
-        'concat:buildFullMin', 'concat:buildVgMin', 'concat:buildHgMin',
-        'uglify:buildFullMin', 'uglify:buildVgMin', 'uglify:buildHgMin',
+        'concat:copyCore', 
+        'uglify:copyCore', 
+        'concat:copyApi',
+        'concat:copyTests',
+        'concat:buildFull', 
+        'uglify:buildFull', 
+        'concat:buildFullMin', 
+        'uglify:buildFullMin', 
         'compress:build'
     ]);
 };

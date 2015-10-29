@@ -1,123 +1,298 @@
 module.exports = function(grunt) {
-  var test = "/var/www/gridifier";
+    var banner = "";
 
-  // Project configuration.
-  grunt.initConfig({
-    pkg: grunt.file.readJSON('package.json'),
+    banner += " * Async Responsive HTML Grids\n";
+    banner += " * http://gridifier.io\n";
+    banner += " * \n";
+    banner += " * Gridifier is dual-licensed:\n";
+    banner += " *   GPLV3 per non-commercial usage; \n";
+    banner += " *   Commercial license per commercial usage.\n";
+    banner += " * Read http://gridifier.io/license for details.\n";
+    banner += " * Copyright 2015 nTech\n";
+    banner += " */\n\n";
 
-    concat: {
-      options: {
-        separator: '\r\n\r\n'
-      },
+    var staticBanner = banner.slice(0);
+    staticBanner = "/* Gridifier v2.~.~ source file for custom build.\n" + banner;
 
-      core: {
-         files: [{
-            dest: test + '/src/core/sizesTransformer/sizesTransformer.js',
-            src: ['js/gridifier/sizesTransformer/sizesTransformer.js']
-         }
-         ]
-      },
+    banner = "/* Gridifier v2.0.0\n" + banner;
 
-      dist: {
-        src: [
-          'js/gridifier/loader/loaderPrefix.js',
+    var apiFiles = [
+        {"/bootstrap/": ["funcs", "mocks", "vars"]},
+        {"/api/coordsChanger/": ["coordsChanger", "default", "position", "translate"]},
+        {"/api/dragifier/": ["dragifier"]},
+        {"/api/settings/": ["settings", "funcs"]},
+        {"/api/sort/": ["rsort", "rsortHelpers", "sortHelpers"]},
+        {"/api/toggle/factory/": ["rotate", "scale", "slide"]},
+        {"/api/toggle/": ["toggle", "syncer", "fade", "rotate", "scale", "slide", "visibility"]}
+    ];
 
-          /* Bootstrap */
-          'js/gridifier/bootstrap/sizesResolver/sizesResolver.js',
-          'js/gridifier/bootstrap/sizesResolver/init.js',
-          'js/gridifier/bootstrap/sizesResolver/outerWidth.js',
-          'js/gridifier/bootstrap/sizesResolver/outerHeight.js',
-          'js/gridifier/bootstrap/event.js',
-          'js/gridifier/bootstrap/prefixer.js',
-          'js/gridifier/bootstrap/dom.js',
-          'js/gridifier/bootstrap/bootstrap.js',
+    var coreFiles = [
+        {"/bootstrap/": ["event", "prefixer", "dom"]},
+        {"/bootstrap/sizesResolver/": ["sizesResolver", "init", "outerWidth", "outerHeight"]},
+        {"/core/connections/": ["connections", "intersector", "ranges", "sorter", "xyIntersector"]},
+        {"/core/connectors/": [
+            "connectors", "cleaner", "intersector", "reposition", "rounder",
+            "selector", "shifter", "sorter"
+        ]},
+        {"/core/item/": ["collector", "guid", "item"]},
+        {"/core/manager/": ["cssManager", "srManager"]},
+        {"/core/operation/": ["disconnector", "filtrator", "resorter"]},
+        {"/core/": [
+            "antialiaser", "core", "eventEmitter", "iterator", "operation", "position", "rounder"
+        ]},
+        {"/discretizer/": ["discretizer", "core"]},
+        {"/dragifier/": ["dragifier", "core"]},
+        {"/dragifier/intersection/": ["item"]},
+        {"/dragifier/discretization/": ["cells", "item"]},
+        {"/grid/horizontal/": [
+            "appender", "connections", "coordsFinder", "prepender",
+            "reversedAppender", "reversedPrepender"
+        ]},
+        {"/grid/vertical/": [
+            "appender", "connections", "coordsFinder", "prepender",
+            "reversedAppender", "reversedPrepender"
+        ]},
+        {"/grid/": ["grid"]},
+        {"/images/": ["loader", "image"]},
+        {"/inserter/": ["append", "prepend", "queue", "insert"]},
+        {"/renderer/": ["renderer", "connections", "queue", "silent"]},
+        {"/reposition/": ["reposition", "data", "queue"]},
+        {"/": ["gridifier"]}
+    ];
 
-          /* Core */
-          'js/gridifier/gridifier.js',
-          'js/gridifier/api/**/*.js',
-          'js/gridifier/connections/**/*.js',
-          'js/gridifier/connectors/**/*.js',
-          'js/gridifier/core/**/*.js',
-          
-          'js/gridifier/discretizer/discretizer.js',
-          'js/gridifier/discretizer/horizontalCore.js',
-          'js/gridifier/discretizer/verticalCore.js',
-          'js/gridifier/discretizer/demonstrator.js',
+    var createConfigPathes = function(configArray, sourceFiles, source, target) {
+        for(var i = 0; i < sourceFiles.length; i++) {
+            for(var prop in sourceFiles[i]) {
+                var dir = prop;
+                var files = sourceFiles[i][dir];
 
-          'js/gridifier/dragifier/dragifier.js',
-          'js/gridifier/dragifier/core.js',
-          'js/gridifier/dragifier/renderer.js',
-          'js/gridifier/dragifier/connectionIntersection/draggableItem.js',
-          'js/gridifier/dragifier/gridDiscretization/cells.js',
-          'js/gridifier/dragifier/gridDiscretization/draggableItem.js',
-
-          'js/gridifier/errors/**/*.js',
-          'js/gridifier/grid/**/*.js',
-          'js/gridifier/horizontalGrid/**/*.js',
-          'js/gridifier/operations/**/*.js',
-          
-          'js/gridifier/renderer/renderer.js',
-          'js/gridifier/renderer/rendererConnections.js',
-          'js/gridifier/renderer/schedulator.js',
-          'js/gridifier/renderer/silentRenderer.js',
-
-          'js/gridifier/settings/**/*.js',
-          'js/gridifier/sizesTransformer/**/*.js',
-          'js/gridifier/transformerOperations/**/*.js',
-          'js/gridifier/verticalGrid/**/*.js',
-
-          'js/gridifier/loader/loaderPostfix.js'
-        ],
-        dest: 'build/gridifier.js'
-      }
-    },
-
-    strip_code: {
-      options: {
-        start_comment: '@system-log-start',
-        end_comment: '@system-log-end'
-      },
-      dist: {
-        src: 'build/gridifier.js',
-        dest: 'build/gridifier.js'
-      }
-    },
-
-    uglify: {
-      options: {
-        banner: '/*! <%= pkg.name %> <%= grunt.template.today("yyyy-mm-dd") %> */\n',
-        compress: false
-      },
-      dist: {
-        files: {
-          'build/gridifier.min.js': ['<%= concat.dist.dest %>']
+                for(var j = 0; j < files.length; j++) {
+                    configArray.push({
+                        src: [source + dir + files[j] + ".js"], dest: target + dir + files[j] + ".js"
+                    });
+                }
+            }
         }
-      },
-
-      core: {
-        options: {
-            beautify: true
-        },
-        files: [{
-            //'/var/www/gridifier/src/core/sizesTransformer/sizesTransformer.js': ['/var/www/gridifier/src/core/sizesTransformer/sizesTransformer.js']
-            expand: true,
-            cwd: '/var/www/gridifier/src',
-            src: '**/*.js',
-            dest: '/var/www/gridifier/src'
-        }]
-      }
     }
-  });
 
-  // Load the plugin that provides the "uglify" task.
-  grunt.loadNpmTasks('grunt-contrib-uglify');
-  grunt.loadNpmTasks('grunt-contrib-concat');
-  grunt.loadNpmTasks('grunt-strip-code');
+    var source = "/var/www/gridifierdev/js/gridifier";
+    var target = "/var/www/gridifier/src/core";
+    var copyCoreSource = source;
+    var copyCoreTarget = target;
+    var copyCoreConfig = [];
 
-  // Default task(s).
-  grunt.registerTask('build-dev-with-logs', ['concat']);
-  grunt.registerTask('build-dev', ['concat', 'strip_code']);
-  grunt.registerTask('build-prod', ['concat', 'strip_code', 'uglify']);
+    copyCoreConfig.push({src: [source + "/loader/loaderPrefix.js"], dest: target + "/loader/loaderPrefix.js"});
+    createConfigPathes(copyCoreConfig, coreFiles, source, target);
+    copyCoreConfig.push({src: [source + "/loader/loaderPostfix.js"], dest: target + "/loader/loaderPostfix.js"});
 
-  grunt.registerTask('build-core', ['concat:core', 'uglify:core']);
+    var copyApiSource = source;
+    var copyApiTarget = "/var/www/gridifier/src";
+    var copyApiConfig = [];
+
+    createConfigPathes(copyApiConfig, apiFiles, copyApiSource, copyApiTarget);
+
+    var concatOptions = {
+        banner: banner,
+        separator: '\r\n\r\n',
+        process: function(src, filepath) {
+            var fullreg = /\/\*(.*?)@system-log-start(.*?)\*\/([\s\S]*?)\/\*(.*?)@system-log-end(.*?)\*\//g;
+            var shortreg = /\/\/(.*?)@system-log-start(.*?)([\s\S]*?)\/\/(.*?)@system-log-end/g;
+
+            return src.replace(fullreg, "").replace(shortreg, "");
+        }
+    };
+
+    var concatWithStaticBannerOptions = {
+        banner: staticBanner
+    };
+    concatWithStaticBannerOptions.separator = concatOptions.separator;
+    concatWithStaticBannerOptions.process = concatOptions.process;
+
+    var createBuildDataSrcPathes = function(buildData, sourceFiles, source) {
+        for(var i = 0; i < sourceFiles.length; i++) {
+            for(var prop in sourceFiles[i]) {
+                var dir = prop;
+                var files = sourceFiles[i][dir];
+
+                var skipFiles = false;
+                for(var j = 0; j < buildData.exclude.length; j++) {
+                    if(dir == buildData.exclude[j]) {
+                        skipFiles = true;
+                        break;
+                    }
+                }
+
+                if(skipFiles) continue;
+
+                for(var j = 0; j < files.length; j++) {
+                    buildData.src.push(source + dir + files[j] + ".js");
+                }
+            }
+        }
+    }
+
+    var buildDataSource = source;
+    var buildData = [
+        {dest: "/var/www/gridifier/build/gridifier", src: [], exclude: []},
+        {dest: "/var/www/gridifier/build/gridifier-vg", src: [], exclude: [
+            "/api/dragifier/", "/discretizer/", "/dragifier/",
+            "/dragifier/discretization/", "/dragifier/intersection/",
+            "/api/toggle/"
+            // "/api/toggle", "/api/toggle/factory"
+        ]},
+        {dest: "/var/www/gridifier/build/gridifier-hg", src: [], exclude: [
+            "/grid/vertical/"
+        ]}
+    ];
+
+    for(var i = 0; i < buildData.length; i++) {
+        buildData[i].src.push(buildDataSource + "/loader/loaderPrefix.js");
+        createBuildDataSrcPathes(buildData[i], apiFiles, buildDataSource);
+        createBuildDataSrcPathes(buildData[i], coreFiles, buildDataSource);
+        buildData[i].src.push(buildDataSource + "/loader/loaderPostfix.js");
+    }
+
+    var uglifierBuildMinOptions =  {
+        banner: banner,
+        compress: {
+            drop_console: true
+        }
+    };
+
+    var uglifierBuildOptions = {
+        banner: banner,
+        compress: false,
+        beautify: true
+    }
+
+    grunt.initConfig({
+        pkg: grunt.file.readJSON('package.json'),
+
+        concat: {
+            buildFull: {
+                options: concatOptions,
+                files: [{src: buildData[0].src, dest: buildData[0].dest + ".js"}]
+            },
+            buildVg: {
+                options: concatOptions,
+                files: [{src: buildData[1].src, dest: buildData[1].dest + ".js"}]
+            },
+            buildHg: {
+                options: concatOptions,
+                files: [{src: buildData[2].src, dest: buildData[2].dest + ".js"}]
+            },
+            buildFullMin: {
+                options: concatOptions,
+                files: [{src: buildData[0].src, dest: buildData[0].dest + ".min.js"}]
+            },
+            buildVgMin: {
+                options: concatOptions,
+                files: [{src: buildData[1].src, dest: buildData[1].dest + ".min.js"}]
+            },
+            buildHgMin: {
+                options: concatOptions,
+                files: [{src: buildData[2].src, dest: buildData[2].dest + ".min.js"}]
+            },
+            copyCore: { options: concatWithStaticBannerOptions, files: copyCoreConfig },
+            copyApi: { options: concatWithStaticBannerOptions, files: copyApiConfig }
+        },
+
+        uglify: {
+            buildFull: {
+                options: uglifierBuildOptions,
+                files: [{src: buildData[0].dest + ".js", dest: buildData[0].dest + ".js"}]
+            },
+
+            buildVg: {
+                options: uglifierBuildOptions,
+                files: [{src: buildData[1].dest + ".js", dest: buildData[1].dest + ".js"}]
+            },
+
+            buildHg: {
+                options: uglifierBuildOptions,
+                files: [{src: buildData[2].dest + ".js", dest: buildData[2].dest + ".js"}]
+            },
+
+            buildFullMin: {
+                options: uglifierBuildMinOptions,
+                files: [{src: buildData[0].dest + ".min.js", dest: buildData[0].dest + ".min.js"}]
+            },
+
+            buildVgMin: {
+                options: uglifierBuildMinOptions,
+                files: [{src: buildData[1].dest + ".min.js", dest: buildData[1].dest + ".min.js"}]
+            },
+
+            buildHgMin: {
+                options: uglifierBuildMinOptions,
+                files: [{src: buildData[2].dest + ".min.js", dest: buildData[2].dest + ".min.js"}]
+            },
+
+            copyCore: {
+                options: {
+                    banner: staticBanner,
+                    compress: false,
+                    beautify: true
+                },
+                files: [{
+                    expand: true,
+                    cwd: copyCoreTarget,
+                    src: ['**/*.js', '!loader/loaderPrefix.js', '!loader/loaderPostfix.js'],
+                    dest: copyCoreTarget
+                }]
+            }
+        },
+
+        compress: {
+            build: {
+                options: {
+                    mode: 'gzip'
+                },
+                files: [{
+                    src: ['/var/www/gridifier/build/gridifier.min.js'],
+                    dest: '/var/www/gridifier/build/gzip/gridifier.min.gz.js'
+                },
+                {
+                    src: ['/var/www/gridifier/build/gridifier-vg.min.js'],
+                    dest: '/var/www/gridifier/build/gzip/gridifier-vg.min.gz.js'
+                },
+                {
+                    src: ['/var/www/gridifier/build/gridifier-hg.min.js'],
+                    dest: '/var/www/gridifier/build/gzip/gridifier-hg.min.gz.js'
+                }]
+            }
+        },
+        watch: {
+            options: {
+                livereload: true
+            },
+            js: {
+                files: ['**/*.js']
+            }
+        }
+    });
+
+    grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-contrib-concat');
+    grunt.loadNpmTasks('grunt-contrib-compress');
+    grunt.loadNpmTasks('grunt-contrib-watch');
+
+    grunt.registerTask('default', [
+        'concat:copyCore', 
+        'uglify:copyCore', 
+        'concat:copyApi',
+        'concat:buildFull', 
+        'concat:buildVg', 
+        'concat:buildHg',
+        'uglify:buildFull', 
+        'uglify:buildVg', 
+        'uglify:buildHg',
+        'concat:buildFullMin', 
+        'concat:buildVgMin', 
+        'concat:buildHgMin',
+        'uglify:buildFullMin', 
+        'uglify:buildVgMin', 
+        'uglify:buildHgMin',
+        'compress:build'
+    ]);
 };

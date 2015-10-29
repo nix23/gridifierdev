@@ -1,2 +1,6 @@
+        
+        return this;
+    };
+    
     return Gridifier;
 }));

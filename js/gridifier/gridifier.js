@@ -70,10 +70,7 @@ var toggleSyncerApi = new ToggleSyncerApi();
 var dragifierApi = new DragifierApi();
 
 var discretizerCore = new DiscretizerCore();
-var discretizerDebug = new DiscretizerDebug();
 
 var dragifierCore = new DragifierCore();
 var dragifierCells = new DragifierCells();
 var dragifier = new Dragifier();
-
-//return this;
