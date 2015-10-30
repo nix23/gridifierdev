@@ -82,6 +82,7 @@ $(document).ready(function() {
                 hidden: null,
                 shown: null
             };
+            discretizerDebug = {create: fns.nop(), rm: fns.nop()};
 
             dragifierCore = {
                 initItem: function(item) { data.item = item; },
@@ -159,6 +160,7 @@ $(document).ready(function() {
                 gridReposed: false,
                 discUpdated: false
             };
+            discretizerDebug = {update: fns.nop()};
 
             dragifierCore = {};
             dragifierCore.calcCloneNewDocPosition = function(item, cx, cy) {

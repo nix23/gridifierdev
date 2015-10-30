@@ -96,7 +96,7 @@ var Core = function() {
             return gridifier;
         },
 
-        getForSilentRender: function(onlyInsideVp) {
+        getSilent: function(onlyInsideVp) {
             return silentRenderer.getScheduled(onlyInsideVp);
         },
 

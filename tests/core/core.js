@@ -453,7 +453,7 @@ $(document).ready(function() {
                 "silent render ok"
             );
 
-            res = gridifier.getForSilentRender("vp");
+            res = gridifier.getSilent("vp");
             ok(
                 res == "ok" && data.insideVp == "vp",
                 "getForSilentRender ok"
