@@ -54,7 +54,7 @@ proto(Antialiaser, {
             var newPxAs = (grid[c + "2"]() + 1) * (ptAs / 100);
         else
             var newPxAs = pxAs;
-
+        
         srManager["setOuter" + srmProp + "AntialiasValue"](newPxAs);
         return true;
     },

@@ -128,6 +128,8 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
        // "padding-bottom": "5%",
         //margin: "5px",
         height: itemSizes.height,
+        //height: 0,
+        //paddingBottom: itemSizes.height,
         //height: "200px",
 
         //"padding-bottom": parseFloat(itemSizes.height) + "%",
@@ -182,7 +184,7 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         // "-webkit-box-shadow": "2px 2px 2px rgb(60,60,60)",
         // "box-shadow": "2px 2px 2px rgb(60,60,60)",
         // "-moz-box-shadow": "2px 2px 2px rgb(60,60,60)",
-        "position": "relative",
+        //"position": "relative",
 
         "color": "white",
         "font-size": "14px",

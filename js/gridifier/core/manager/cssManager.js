@@ -1,20 +1,21 @@
 var CssManager = function() {
     this._eventsData = [];
 
-    var publicFns = ["toggle", "add", "rm"];
-    for(var i = 0; i < publicFns.length; i++) {
-        (function(c, fnName) {
-            var fns = {};
-            fns[fnName + "Css"] = function(i, cl) {
-                var items = this.changeCss(fnName, i, cl);
-                antialiaser.updateAs();
-                reposition.fromFirstSortedCn(items);
+    var publicFn = function(fnName) {
+        return function(i, cl) {
+            var items = this.changeCss(fnName, i, cl);
+            antialiaser.updateAs();
+            reposition.fromFirstSortedCn(items);
 
-                return gridifier;
-            }
-            self(c, fns);
-        })(this, publicFns[i]);
-    }
+            return gridifier;
+        };
+    };
+
+    self(this, {
+        toggleCss: publicFn("toggle"),
+        addCss: publicFn("add"),
+        rmCss: publicFn("rm")
+    });
 }
 
 proto(CssManager, {

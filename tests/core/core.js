@@ -42,8 +42,8 @@ $(document).ready(function() {
                     "execSilentAppend"
                 ]);
                 Core.prototype._bindEvents = origBind;
-                // me._events.call(me, assert);
-                // me._eventsWithDelay.call(me, assert);
+                me._events.call(me, assert);
+                me._eventsWithDelay.call(me, assert);
             });
         },
 
@@ -64,7 +64,10 @@ $(document).ready(function() {
         _setters: function() {
             var data = {
                 setName: null, setVal: null,
-                setApiName: null, setApiVal: null
+                setApiName: null, setApiVal: null,
+                addApiName: null, addApiVal: null,
+                addApiFn: null,
+                getName: null
             };
 
             settings = {};
@@ -76,6 +79,14 @@ $(document).ready(function() {
                 data.setApiName = n;
                 data.setApiVal = v;
             };
+            settings.addApi = function(n, v, vfn) {
+                data.addApiName = n;
+                data.addApiVal = v;
+                data.addApiFn = vfn;
+            };
+            settings.get = function(n) {
+                data.getName = n;
+            };
 
             var core = new Core();
             var ret1 = gridifier.set("s1", "v1");
@@ -86,6 +97,13 @@ $(document).ready(function() {
 
             ok(ret2 == gridifier && data.setApiName == "sa1" && data.setApiVal == "sav1",
                 "setApi ok");
+
+            var ret3 = gridifier.addApi("sa2", "sav2", "sav2fn");
+            gridifier.get("gv1");
+            ok(ret3 == gridifier && data.addApiName == "sa2" && data.addApiVal == "sav2" &&
+                data.addApiFn == "sav2fn",
+               "addApi ok");
+            ok(data.getName == "gv1");
 
             clearTestData();
         },
@@ -618,8 +636,8 @@ $(document).ready(function() {
                 data.handler = handler;
             };
             var core = new Core();
-            reposition = {};
-            reposition.all = function() { reposed = true; };
+            gridifier = {};
+            gridifier.reposition = function() { reposed = true; };
 
             ok(data.obj == window && data.evName == "resize" && data.handler != null,
                "bind resize event ok");
@@ -655,8 +673,9 @@ $(document).ready(function() {
                 Event.add = function(obj, evName, handler) {};
 
                 core = new Core();
-                reposition = {};
-                reposition.all = function() { reposed = true; cc++; };
+                gridifier = {};
+                gridifier.reposition = function() { reposed = true; cc++; };
+                gridifier.isDragifierOn = fns.f();
 
                 core._onResize();
                 core._onResize();

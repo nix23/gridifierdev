@@ -18,6 +18,14 @@ var Core = function() {
             return gridifier;
         },
 
+        addApi: function(name, fnName, fn) {
+            settings.addApi(name, fnName, fn);
+            return gridifier;
+        },
+        get: function(name) {
+            return settings.get(name);
+        },
+
         toggle: function(fn) { return gridifier.setApi("toggle", fn); },
         sort: function(fn) { return gridifier.setApi("sort", fn); },
         coordsChanger: function(fn) { return gridifier.setApi("coordsChanger", fn); },
@@ -159,13 +167,13 @@ proto(Core, {
 
         this._onResize = function() {
             if(getS("vpResizeDelay") == null) {
-                reposition.all();
+                gridifier.reposition();
                 return;
             }
 
             clearTimeout(resizeTimeout);
             resizeTimeout = setTimeout(function() {
-                reposition.all();
+                gridifier.reposition();
             }, getS("vpResizeDelay"));
         }
 

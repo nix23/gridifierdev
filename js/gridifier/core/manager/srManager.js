@@ -151,7 +151,7 @@ proto(SizesResolverManager, {
 
         if(!disableAntialiasing)
             returnedValue -= (!isOhCall) ? this._owAntialias : this._ohAntialias;
-
+        
         SizesResolver.recalcPtWidthFn = realRecalcPtWidthFn;
         SizesResolver.recalcPtHeightFn = realRecalcPtHeightFn;
 

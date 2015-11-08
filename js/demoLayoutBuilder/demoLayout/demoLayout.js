@@ -348,6 +348,9 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         //    me._gridifierDynamicSettings._itemSizes[i].height = sizes[i].height;
         //}
 
+        // me._gridifierSettings.widthPtAs = 0.1;
+        // me._gridifierSettings.heightPxAs = 1;
+        // me._gridifierSettings.sortDispersion = true;
         me._gridifierDynamicSettings._batchSize = 10;
         //me._gridifierDynamicSettings._batchSize = 25;
         //me._gridifierDynamicSettings._batchSize = 3;
@@ -396,16 +399,16 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             {width: "100px", height: "100px"},
             {width: "200px", height: "200px"},
             {width: "200px", height: "200px"}
-            // {width: "15%", height: "5%"},
-            // {width: "35%", height: "50%"},
-            // {width: "5%", height: "50%"},
-            // {width: "15%", height: "100%"},
-            // {width: "35%", height: "50%"},
-            // {width: "5%", height: "50%"},
-            // {width: "10%", height: "100%"},
-            // {width: "10%", height: "50%"},
-            // {width: "10%", height: "50%"},
-            // {width: "10%", height: "50%"}
+            // {width: "12.6%", height: "12.5%"},
+            // {width: "12.6%", height: "12.5%"},
+            // {width: "25.1%", height: "calc(25% - 1px)"},
+            // {width: "12.6%", height: "12.5%"},
+            // {width: "12.6%", height: "12.5%"},
+            // {width: "12.6%", height: "12.5%"},
+            // {width: "25.1%", height: "calc(25% - 1px)"},
+            // {width: "12.6%", height: "12.5%"},
+            // {width: "12.6%", height: "12.5%"},
+            // {width: "12.6%", height: "12.5%"}
 
 
             //
