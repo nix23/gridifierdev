@@ -5,16 +5,16 @@ module.exports = function(grunt) {
     banner += " * http://gridifier.io\n";
     banner += " * \n";
     banner += " * Gridifier is dual-licensed:\n";
-    banner += " *   GPLV3 per non-commercial usage; \n";
-    banner += " *   Commercial license per commercial usage.\n";
+    banner += " *   Non-commercial license - https://creativecommons.org/licenses/by-nc-sa/4.0/.\n";
+    banner += " *   Commercial license - http://gridifier.io/license (Commercial license).\n";
     banner += " * Read http://gridifier.io/license for details.\n";
-    banner += " * Copyright 2015 nTech\n";
+    banner += " * Copyright " + (new Date()).getFullYear() + " nTech\n";
     banner += " */\n\n";
 
     var staticBanner = banner.slice(0);
     staticBanner = "/* Gridifier v2.~.~ source file for custom build.\n" + banner;
 
-    banner = "/* Gridifier v2.0.0\n" + banner;
+    banner = "/* Gridifier v2.0.1\n" + banner;
 
     var apiCoreFiles = [
         {"/bootstrap/": ["funcs", "mocks", "vars"]}
