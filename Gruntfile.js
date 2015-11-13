@@ -14,7 +14,7 @@ module.exports = function(grunt) {
     var staticBanner = banner.slice(0);
     staticBanner = "/* Gridifier v2.~.~ source file for custom build.\n" + banner;
 
-    banner = "/* Gridifier v2.0.1\n" + banner;
+    banner = "/* Gridifier v2.0.3\n" + banner;
 
     var apiCoreFiles = [
         {"/bootstrap/": ["funcs", "mocks", "vars"]}
@@ -245,7 +245,7 @@ module.exports = function(grunt) {
                 },
                 files: [{
                     src: ['/var/www/gridifier/dist/gridifier.min.js'],
-                    dest: '/var/www/gridifier/dist/gzip/gridifier.min.gz.js'
+                    dest: '/var/www/gridifier/dist/gzip/gridifier.min.js.gz'
                 }]
             }
         },

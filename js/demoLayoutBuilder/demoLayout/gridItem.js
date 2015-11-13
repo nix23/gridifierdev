@@ -206,6 +206,67 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
     //    var itemBgClass = "gridSecondBg";
     //this._$gridItem.addClass(itemBgClass);
 
+    var $resizer = $("<div/>");
+    this._$gridItem.append($resizer);
+    $resizer.css({
+        position: "absolute",
+        right: "0px",
+        bottom: "0px",
+        width: "20px",
+        height: "20px",
+        background: "red"
+    }).text("R");
+    window.gridifier.dragifierOff();
+    var isRes = false; 
+    var lastX = null;
+    var lastY = null;
+    var totalDeltaX = null;
+    var totalDeltaY = null;
+    var $target = null;
+    $resizer.on("mousedown", function(event) {
+        isRes = true; 
+        lastX = event.pageX;
+        lastY = event.pageY;
+        $target = $(event.target.parentNode);
+        totalDeltaX = 0;
+        totalDeltaY = 0;
+    })
+    $("body").on("mouseup", function() {
+        isRes = false;
+    });
+    $("body").on("mousemove", function(event) {
+        if(!isRes) return;
+        var deltaX = event.pageX - lastX;
+        var deltaY = event.pageY - lastY;
+        lastX = event.pageX;
+        lastY = event.pageY;
+        totalDeltaY += deltaY;
+        totalDeltaX += deltaX;
+
+        if(Math.abs(totalDeltaX) >= 100) { 
+            var currWidth = $target.outerWidth();
+            var count = Math.round(totalDeltaX / 100);
+            $target.css({width: (currWidth + (count * 100)) + "px"});
+            totalDeltaX = 0;
+            window.gridifier.reposition();
+        }
+        if(Math.abs(totalDeltaY) >= 100) {
+            var currHeight = $target.outerHeight();
+            var count = Math.round(totalDeltaY / 100);
+            $target.css({height: (currHeight + (count * 100)) + "px"});
+            totalDeltaY = 0;
+            window.gridifier.reposition();
+        }
+
+        // var currWidth = $target.outerWidth();
+        // var currHeight = $target.outerHeight();
+        // $target.css({
+        //     width: (currWidth + deltaX) + "px",
+        //     height: (currHeight + deltaY) + "px"
+        // });
+        // window.gridifier.reposition();
+    });
+
     var res = Math.floor(Math.random()*(2-1+1)+1);
     if(res == 1) 
         var bgs = "url(img/Cars1.jpg)";

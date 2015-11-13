@@ -389,16 +389,16 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             //
 
 
-            {width: "200px", height: "200px"},
+            // {width: "200px", height: "200px"},
+            // {width: "100px", height: "100px"},
+            // {width: "100px", height: "100px"},
+            // {width: "100px", height: "100px"},
+            // {width: "200px", height: "200px"},
             {width: "100px", height: "100px"},
             {width: "100px", height: "100px"},
             {width: "100px", height: "100px"},
-            {width: "200px", height: "200px"},
-            {width: "100px", height: "100px"},
-            {width: "100px", height: "100px"},
-            {width: "100px", height: "100px"},
-            {width: "200px", height: "200px"},
-            {width: "200px", height: "200px"}
+            // {width: "200px", height: "200px"},
+            // {width: "200px", height: "200px"}
             // {width: "12.6%", height: "12.5%"},
             // {width: "12.6%", height: "12.5%"},
             // {width: "25.1%", height: "calc(25% - 1px)"},
@@ -744,7 +744,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
             //gridifier.disconnect($(this));
             //console.log($(this).get(0));
             //console.log($(this).attr("data-gridifier-guid"));
-            gridifier.toggleCss($(this), ["bigGridItem", "blackGridItem"]);
+            //gridifier.toggleCss($(this), ["bigGridItem", "blackGridItem"]);
             return;
             me._gridifier.toggleResponsiveClasses([$(this), $(this).next(".gridifier-connected-item")], ["wideItem", "wideBlackItem"]);
             return;
