@@ -2,16 +2,12 @@ var InsertOp = function() {}
 
 proto(InsertOp, {
     exec: function(items, insertFn) {
-        var items = gridItem.filterNotConnected(gridItem.toNative(items));
-        if(items.length == 0) return;
-
         srManager.startCachingTransaction();
         grid.ensureCanFit(items);
 
         items = collector.sort(collector.filter(items));
         for(var i = 0; i < items.length; i++) {
             collector.unmarkAsNotCollectable(items[i]);
-            grid.add(items[i]);
             insertFn(items[i]);
         }
 
@@ -21,9 +17,6 @@ proto(InsertOp, {
     },
 
     execInsertBA: function(items, targetItem, insertFn, getIndex, spliceCns, rev, rpsFn) {
-        var items = gridItem.filterNotConnected(gridItem.toNative(items));
-        if(items.length == 0) return;
-
         var cns = connections.get();
         if(cns.length == 0) {
             insertFn(items);

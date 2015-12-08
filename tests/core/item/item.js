@@ -24,7 +24,7 @@ $(document).ready(function() {
                 }
 
                 test([
-                    "crud", "filter", "toNative"
+                    "crud", "filter", "toNative", "getNew"
                 ]);
             });
         },
@@ -74,6 +74,26 @@ $(document).ready(function() {
                 /(.*)one of items is not jQuery(.*)Native DOM object(.*)/,
                 "toNative with false object ok"
             );
+        },
+
+        _getNew: function(assert) {
+            var gridItem = new Item();
+            gridItem.filterNotConnected = function(items) { 
+                return (items == "i") ? "fi" : null; 
+            };
+            gridItem.toNative = function(items) { 
+                return (items == "items") ? "i" : null; 
+            };
+
+            var wasAdded = false;
+            grid = {
+                add: function(items) {
+                    wasAdded = (items == "fi");
+                }
+            };
+
+            var items = gridItem.getNew("items"); 
+            ok(items == "fi" && wasAdded, "getNew items ok");
         }
     }
 

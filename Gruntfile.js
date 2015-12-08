@@ -1,4 +1,6 @@
 module.exports = function(grunt) {
+    var gridifierDevRoot = "/var/www/gridifier/gridifierdev/";
+    var gridifierRoot = "/var/www/gridifier/";
     var banner = "";
 
     banner += " * Async Responsive HTML Grids\n";
@@ -104,8 +106,8 @@ module.exports = function(grunt) {
         }
     }
 
-    var source = "/var/www/gridifierdev/js/gridifier";
-    var target = "/var/www/gridifier/src/core";
+    var source = gridifierDevRoot + "js/gridifier";
+    var target = gridifierRoot + "src/core";
     var copyCoreSource = source;
     var copyCoreTarget = target;
     var copyCoreConfig = [];
@@ -115,14 +117,14 @@ module.exports = function(grunt) {
     copyCoreConfig.push({src: [source + "/loader/loaderPostfix.js"], dest: target + "/loader/loaderPostfix.js"});
 
     var copyApiSource = source;
-    var copyApiTarget = "/var/www/gridifier/src";
+    var copyApiTarget = gridifierRoot + "src";
     var copyApiConfig = [];
 
     createConfigPathes(copyApiConfig, apiCoreFiles, copyApiSource, target);
     createConfigPathes(copyApiConfig, apiFiles, copyApiSource, copyApiTarget);
 
-    var copyTestsSource = "/var/www/gridifierdev/tests";
-    var copyTestsTarget = "/var/www/gridifier/test";
+    var copyTestsSource = gridifierDevRoot + "tests";
+    var copyTestsTarget = gridifierRoot + "test";
     var copyTestsConfig = [];
     createConfigPathes(copyTestsConfig, apiFiles, copyTestsSource, copyTestsTarget);
     createConfigPathes(copyTestsConfig, coreFiles, copyTestsSource, copyTestsTarget);
@@ -170,7 +172,7 @@ module.exports = function(grunt) {
 
     var buildDataSource = source;
     var buildData = [
-        {dest: "/var/www/gridifier/dist/gridifier", src: [], exclude: []}
+        {dest: gridifierRoot + "dist/gridifier", src: [], exclude: []}
         // , {dest: "/var/www/gridifier/build/gridifier-hg", src: [], exclude: [
         //     "/grid/vertical/"
         // ]}
@@ -244,8 +246,8 @@ module.exports = function(grunt) {
                     mode: 'gzip'
                 },
                 files: [{
-                    src: ['/var/www/gridifier/dist/gridifier.min.js'],
-                    dest: '/var/www/gridifier/dist/gzip/gridifier.min.js.gz'
+                    src: [gridifierRoot + 'dist/gridifier.min.js'],
+                    dest: gridifierRoot + 'dist/gzip/gridifier.min.js.gz'
                 }]
             }
         },

@@ -207,7 +207,10 @@ $(document).ready(function() {
             var data = {items: null, op: null, params: null};
 
             gridItem = {};
-            gridItem.toNative = function(items) { return items; };
+            // gridItem.toNative = function(items) { return items; };
+            gridItem.getNew = function(items) {
+                return [];
+            };
 
             imagesLoader = {};
             imagesLoader.schedule = function(items, op, params) {
@@ -217,6 +220,11 @@ $(document).ready(function() {
             };
 
             var core = new Core();
+            var ret = gridifier.prepend([]);
+            ok(ret == gridifier && data.items == null, "prepend without new items ok");
+
+            gridItem.getNew = function(items) { return items; };
+
             var ret = gridifier.prepend("items", "bs", "bd");
             ok(
                 ret == gridifier &&
@@ -278,7 +286,10 @@ $(document).ready(function() {
             var data = {items: null, op: null, params: null};
 
             gridItem = {};
-            gridItem.toNative = function(items) { return items; };
+            // gridItem.toNative = function(items) { return items; };
+            gridItem.getNew = function(items) {
+                return [];
+            };
 
             imagesLoader = {};
             imagesLoader.schedule = function(items, op, params) {
@@ -286,6 +297,12 @@ $(document).ready(function() {
                 data.op = op;
                 data.params = params;
             };
+
+            var core = new Core();
+            var ret = gridifier.append([]);
+            ok(ret == gridifier && data.items == null, "append without new items ok");
+
+            gridItem.getNew = function(items) { return items; };
 
             var core = new Core();
             var ret = gridifier.append("items", "bs", "bd");
@@ -323,7 +340,10 @@ $(document).ready(function() {
             var data = {items: null, op: null, params: null};
 
             gridItem = {};
-            gridItem.toNative = function(items) { return items; };
+            // gridItem.toNative = function(items) { return items; };
+            gridItem.getNew = function(items) {
+                return [];
+            };
 
             imagesLoader = {};
             imagesLoader.schedule = function(items, op, params) {
@@ -331,6 +351,12 @@ $(document).ready(function() {
                 data.op = op;
                 data.params = params;
             };
+
+            var core = new Core();
+            var ret = gridifier.silentAppend([]);
+            ok(ret == gridifier && data.items == null, "silentAppend without new items ok");
+
+            gridItem.getNew = function(items) { return items; };
 
             var core = new Core();
             var ret = gridifier.silentAppend("items", "bs", "bd");
@@ -367,7 +393,10 @@ $(document).ready(function() {
             var data = {items: null, op: null, params: null};
 
             gridItem = {};
-            gridItem.toNative = function(items) { return items; };
+            // gridItem.toNative = function(items) { return items; };
+            gridItem.getNew = function(items) {
+                return [];
+            };
 
             imagesLoader = {};
             imagesLoader.schedule = function(items, op, params) {
@@ -375,6 +404,12 @@ $(document).ready(function() {
                 data.op = op;
                 data.params = params;
             };
+
+            var core = new Core();
+            var ret = gridifier.insertBefore([]);
+            ok(ret == gridifier && data.items == null, "insertBefore without new items ok");
+
+            gridItem.getNew = function(items) { return items; };
 
             var core = new Core();
             var ret = gridifier.insertBefore("items", "target", "bs", "bd");
@@ -412,7 +447,10 @@ $(document).ready(function() {
             var data = {items: null, op: null, params: null};
 
             gridItem = {};
-            gridItem.toNative = function(items) { return items; };
+            // gridItem.toNative = function(items) { return items; };
+            gridItem.getNew = function(items) {
+                return [];
+            };
 
             imagesLoader = {};
             imagesLoader.schedule = function(items, op, params) {
@@ -420,6 +458,12 @@ $(document).ready(function() {
                 data.op = op;
                 data.params = params;
             };
+
+            var core = new Core();
+            var ret = gridifier.insertAfter([]);
+            ok(ret == gridifier && data.items == null, "insertAfter without new items ok");
+
+            gridItem.getNew = function(items) { return items; };
 
             var core = new Core();
             var ret = gridifier.insertAfter("items", "target", "bs", "bd");

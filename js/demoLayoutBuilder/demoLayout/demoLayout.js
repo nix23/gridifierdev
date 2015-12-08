@@ -93,6 +93,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
          //  me._gridifierSettings.intersections = false;
          // me._gridifierSettings.prepend = "reversed";
           me._gridifierSettings.sortDispersion = true;
+          me._gridifierSettings.queueSize = 1000;
          //  me._gridifierSettings.align = "center";s
 
          // me._gridifierSettings.widthPxAs = 100;
@@ -567,6 +568,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
         me._gridDebugger = new DemoLayoutBuilder.DemoLayout.GridDebugger(me, me._grid.getGrid().get(0));
         Logger.setGrid(me._grid.getGrid().get(0));
         
+        // me._gridifierSettings.queueSize = 500;
         me._gridifierSettings.toggleAnimationMsDuration = 500;
         me._gridifierSettings.coordsChangeAnimationMsDuration = 300;
         //me._gridifierSettings.toggleTransitionTiming = "cubic-bezier(0.550, 0.055, 0.675, 0.190)";
@@ -809,7 +811,7 @@ DemoLayoutBuilder.DemoLayout = function($targetEl, gridType, gridifierSettings, 
                 fontSize: "20px"
             }).addClass("dragHandle");
             $(item).append($div);
-            $div.get(0).innerHTML = itemGUID;
+            //$div.get(0).innerHTML = itemGUID;
         });
 
         //me._gridifier.setSort("byColor");
@@ -888,7 +890,8 @@ DemoLayoutBuilder.DemoLayout.prototype.getView = function() {
 DemoLayoutBuilder.DemoLayout.prototype._appendNextItems = function() {
     var itemSizes = this._gridifierDynamicSettings.getAllItemSizes();
     var itemsToAppend = [];
-    for(var i = 0; i < this._gridifierDynamicSettings.getBatchSize(); i++) {
+    for(var i = 0; i < 100; i++) {
+    //for(var i = 0; i < this._gridifierDynamicSettings.getBatchSize(); i++) {
         var gridItem = new DemoLayoutBuilder.DemoLayout.GridItem(
             this._grid.getGrid(),
             this._gridifier,

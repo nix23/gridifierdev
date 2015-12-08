@@ -35,12 +35,12 @@ $(document).ready(function() {
 
         _exec: function() {
             var data = {
-                filterNotConnected: null,
-                toNative: null,
+                // filterNotConnected: null,
+                // toNative: null,
                 startCaching: false,
                 stopCaching: false,
                 ensureCanFit: null,
-                add: [],
+                //add: [],
                 scheduleResize: false,
                 sort: null,
                 filter: null,
@@ -49,16 +49,16 @@ $(document).ready(function() {
                 evItems: null,
                 insertFnItems: []
             };
-            gridItem = {
-                filterNotConnected: function(item) {
-                    data.filterNotConnected = item;
-                    return item;
-                },
-                toNative: function(item) {
-                    data.toNative = item;
-                    return item;
-                }
-            };
+            // gridItem = {
+            //     filterNotConnected: function(item) {
+            //         data.filterNotConnected = item;
+            //         return item;
+            //     },
+            //     toNative: function(item) {
+            //         data.toNative = item;
+            //         return item;
+            //     }
+            // };
             srManager = {
                 startCachingTransaction: function() {
                     data.startCaching = true;
@@ -71,9 +71,9 @@ $(document).ready(function() {
                 ensureCanFit: function(item) {
                     data.ensureCanFit = item;
                 },
-                add: function(item) {
-                    data.add.push(item);
-                },
+                // add: function(item) {
+                //     data.add.push(item);
+                // },
                 scheduleResize: function() { data.scheduleResize = true; }
             };
             collector = {
@@ -104,13 +104,13 @@ $(document).ready(function() {
             insertOp.exec([{id: 1}, {id: 2}], insertFn);
 
             ok(
-                data.filterNotConnected.length == 2 &&
-                data.toNative.length == 2 &&
+                // data.filterNotConnected.length == 2 &&
+                // data.toNative.length == 2 &&
                 data.startCaching &&
                 data.stopCaching &&
                 data.ensureCanFit.length == 2 &&
-                data.add[0].id == 1 &&
-                data.add[1].id == 2 &&
+                // data.add[0].id == 1 &&
+                // data.add[1].id == 2 &&
                 data.scheduleResize &&
                 data.sort.length == 2 &&
                 data.filter.length == 2 &&
@@ -127,11 +127,11 @@ $(document).ready(function() {
         },
 
         _execInsertBA: function(assert) {
-            var getGridItemData = function() {
-                return {
-                    filtered: null, native: null
-                };
-            };
+            // var getGridItemData = function() {
+            //     return {
+            //         filtered: null, native: null
+            //     };
+            // };
             var getData = function() {
                 return {
                     insertFnItems: null,
@@ -157,21 +157,21 @@ $(document).ready(function() {
                     rpsFn: null
                 };
             };
-            var gridItemData = getGridItemData();
+            //var gridItemData = getGridItemData();
             var data = getData();
             var targetItemData = getTargetItemData();
             var repositionData = getRepositionData();
 
-            gridItem = {
-                toNative: function(items) {
-                    gridItemData.native = items;
-                    return items;
-                },
-                filterNotConnected: function(items) {
-                    gridItemData.filtered = items;
-                    return items;
-                }
-            };
+            // gridItem = {
+            //     toNative: function(items) {
+            //         gridItemData.native = items;
+            //         return items;
+            //     },
+            //     filterNotConnected: function(items) {
+            //         gridItemData.filtered = items;
+            //         return items;
+            //     }
+            // };
             cnsSorter = {
                 sortForReappend: function(cns) {
                     data.sortedItems = cns;
@@ -206,13 +206,13 @@ $(document).ready(function() {
                 return targetItem;
             };
 
-            insertOp.execInsertBA([], null, insertFn);
-            ok(data.insertFnItems == null && repositionData.insertFn == null, "call without items ok");
+            // insertOp.execInsertBA([], null, insertFn);
+            // ok(data.insertFnItems == null && repositionData.insertFn == null, "call without items ok");
 
             insertOp.execInsertBA([{id: 1}, {id: 2}], null, insertFn);
             ok(
-                gridItemData.filtered.length == 2 &&
-                gridItemData.native.length == 2 &&
+                // gridItemData.filtered.length == 2 &&
+                // gridItemData.native.length == 2 &&
                 data.insertFnItems[0].id == 1 &&
                 data.insertFnItems[1].id == 2 &&
                 repositionData.insertFn == null,

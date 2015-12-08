@@ -109,13 +109,16 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
         var itemHeight = "10%";
 
     this._$gridItem.css({
+        width: "10px",
+        height: "10px",
+        margin: "5px",
         //width: (isFirst) ? "25%" : "12.5%",
         //height: 0,
        // "padding-bottom": (isFirst) ? "-webkit-calc(25% + 6px)" : "12.5%",
        //width: "12.5%",
        //height: 0,
        //"padding-bottom": "12.5%",
-       width: itemSizes.width,
+       //width: itemSizes.width,
         //width: "10%",
         //width: "25%",
         //"margin-left": "2.5%",
@@ -127,7 +130,7 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
        // height: 0,
        // "padding-bottom": "5%",
         //margin: "5px",
-        height: itemSizes.height,
+        //height: itemSizes.height,
         //height: 0,
         //paddingBottom: itemSizes.height,
         //height: "200px",
@@ -207,7 +210,7 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
     //this._$gridItem.addClass(itemBgClass);
 
     var $resizer = $("<div/>");
-    this._$gridItem.append($resizer);
+    //this._$gridItem.append($resizer);
     $resizer.css({
         position: "absolute",
         right: "0px",

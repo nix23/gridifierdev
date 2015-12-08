@@ -246,13 +246,13 @@ body {
     background: black !important;
 }
 
-@media screen and ( max-width: 1200px ) {
+/*@media screen and ( max-width: 1200px ) {
     .gridItem {
         width: 100% !important;
         animation-name: test;
         height: 200px;
     }
-}
+}*/
 
 .disableSelect {
     -webkit-user-select: none;  /* Chrome all / Safari all */

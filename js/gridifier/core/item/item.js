@@ -46,5 +46,12 @@ proto(Item, {
             err(E.NOT_NATIVE);
 
         return native;
+    },
+
+    getNew: function(items) {
+        var items = this.filterNotConnected(this.toNative(items));
+        grid.add(items);
+
+        return items;
     }
 });

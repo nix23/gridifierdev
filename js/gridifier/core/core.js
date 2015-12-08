@@ -58,10 +58,13 @@ var Core = function() {
         },
 
         prepend: function(items, batchSize, batchDelay) {
-            var eq = bind("eq", settings)
+            var items = gridItem.getNew(items);
+            if(items.length == 0) return gridifier;
+
+            var eq = bind("eq", settings);
             if(eq("loadImages", true)) {
                 var op = (eq("prepend", "mirrored")) ? OPS.INS_BEFORE : OPS.PREPEND;
-                imagesLoader.schedule(gridItem.toNative(items), op, {
+                imagesLoader.schedule(items, op, {
                     batchSize: batchSize, batchDelay: batchDelay, beforeItem: null
                 });
             }
@@ -76,8 +79,11 @@ var Core = function() {
         },
 
         append: function(items, batchSize, batchDelay) {
+            var items = gridItem.getNew(items);
+            if(items.length == 0) return gridifier;
+
             if(settings.eq("loadImages", true)) {
-                imagesLoader.schedule(gridItem.toNative(items), OPS.APPEND, {
+                imagesLoader.schedule(items, OPS.APPEND, {
                     batchSize: batchSize, batchDelay: batchDelay
                 });
             }
@@ -88,8 +94,11 @@ var Core = function() {
         },
 
         silentAppend: function(items, batchSize, batchDelay) {
+            var items = gridItem.getNew(items);
+            if(items.length == 0) return gridifier;
+
             if(settings.eq("loadImages", true)) {
-                imagesLoader.schedule(gridItem.toNative(items), OPS.SIL_APPEND, {
+                imagesLoader.schedule(items, OPS.SIL_APPEND, {
                     batchSize: batchSize, batchDelay: batchDelay
                 });
             }
@@ -109,8 +118,11 @@ var Core = function() {
         },
 
         insertBefore: function(items, beforeItem, batchSize, batchDelay) {
+            var items = gridItem.getNew(items);
+            if(items.length == 0) return gridifier;
+
             if(settings.eq("loadImages", true)) {
-                imagesLoader.schedule(gridItem.toNative(items), OPS.INS_BEFORE, {
+                imagesLoader.schedule(items, OPS.INS_BEFORE, {
                     batchSize: batchSize, batchDelay: batchDelay, beforeItem: beforeItem
                 });
             }
@@ -121,8 +133,11 @@ var Core = function() {
         },
 
         insertAfter: function(items, afterItem, batchSize, batchDelay) {
+            var items = gridItem.getNew(items);
+            if(items.length == 0) return gridifier;
+
             if(settings.eq("loadImages", true)) {
-                imagesLoader.schedule(gridItem.toNative(items), OPS.INS_AFTER, {
+                imagesLoader.schedule(items, OPS.INS_AFTER, {
                     batchSize: batchSize, batchDelay: batchDelay, afterItem: afterItem
                 });
             }
