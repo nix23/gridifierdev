@@ -94,11 +94,34 @@ proto(Position, {
     },
 
     filterCrs: function(selType, crSide, crSide1, crSide2, sortType) {
-        var crs = connectors.getClone();
+        if(typeof window.init == "undefined") {
+            window.getClone = 0;
+            window.select = 0;
+            window.intr1 = 0;
+            window.intr2 = 0;
+            window.intr3 = 0;
+            window.sort = 0;
+            window.init = true;
 
+            window.showDebug = function() {
+                console.log("getClone: " + window.getClone);
+                console.log("select: " + window.select);
+                console.log("intr: " + window.intr1);
+                console.log("intr2: " + window.intr2);
+                console.log("intr3: " + window.intr3);
+                console.log("sort: " + window.sort);
+            }
+        }
+
+        microProfiler.start();
+        var crs = connectors.getClone();
+        window.getClone += parseFloat(microProfiler.get());
+
+        microProfiler.start();
         crsSelector.attach(crs);
         crsSelector["selectOnlyFrom" + selType](crSide);
         crs = crsSelector.getSelected();
+        window.select += parseFloat(microProfiler.get());
         /* @system-log-start */
         var logm = selType + "(" + crSide1 + "." + crSide2 + ")";
         Logger.log(
@@ -108,10 +131,15 @@ proto(Position, {
             connections.get()
         );
         /* @system-log-end */
+        microProfiler.start();
 
         if(settings.eq("intersections", true)) {
             crsShifter.attach(crs);
+            window.intr1 += parseFloat(microProfiler.get());
+            microProfiler.start();
             crsShifter.shiftAll();
+            window.intr2 += parseFloat(microProfiler.get());
+            microProfiler.start();
             crs = crsShifter.getNew();
             /* @system-log-start */
             Logger.log(
@@ -121,6 +149,7 @@ proto(Position, {
                 connections.get()
             );
             /* @system-log-end */
+            window.intr3 += parseFloat(microProfiler.get());
         }
         else {
             crsSelector.attach(crs);
@@ -150,8 +179,11 @@ proto(Position, {
             /* @system-log-end */
         }
 
+        microProfiler.start();
         crsSorter.attach(crs);
         crsSorter["sortFor" + sortType]();
+        crsSorter.getSorted();
+        window.sort += parseFloat(microProfiler.get());
 
         return crsSorter.getSorted();
     },

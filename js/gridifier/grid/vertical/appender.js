@@ -28,50 +28,19 @@ var VgAppender = function() {
 
 proto(VgAppender, {
     position: function(item) {
-        if(typeof window.isProfiling == "undefined") {
-            window.isProfiling = true;
-            window.profileInitCrs = 0;
-            window.profileSort = 0;
-            window.profileCreateCn = 0;
-            window.profileAttach = 0;
-            window.profileClean = 0;
-            window.profileRender = 0;
-
-            window.debugProfiler = function() {
-                console.log("isProf: " + window.isProfiling);
-                console.log("profileInitCrs: " + window.profileInitCrs);
-                console.log("profileSort: " + window.profileSort);
-                console.log("profileCreateCn: " + window.profileCreateCn);
-                console.log("profileAttach: " + window.profileAttach);
-                console.log("profileClean: " + window.profileClean);
-                console.log("profileRender: " + window.profileRender);
-            }
-        }
-
-        microProfiler.start("init");
         var position = this._position;
         position.initCrs("Bottom", "Top", "Bottom");
-        window.profileInitCrs += parseFloat(microProfiler.get());
 
-        microProfiler.start("sort");
         var sortedCrs = position.filterCrs(
             "Prepended", CRS.BOTTOM.LEFT, "Bottom", "Left", "Append"
         );
-        window.profileSort += parseFloat(microProfiler.get());
-        microProfiler.start("create cn");
         var cn = position.createCn(item, position.findCnCoords(
             item, sortedCrs, "VgAppend", "BelowY", "y2", "Smaller", "Y"
         ), sortedCrs);
-        window.profileCreateCn = parseFloat(microProfiler.get());
-
-        microProfiler.start("attachToRanges");
+        
         connections.attachToRanges(cn);
-        window.profileAttach += parseFloat(microProfiler.get());
-        microProfiler.start("cleanCrs");
         position.cleanCrs("Bottom", "Top", "Bottom");
-        window.profileClean += parseFloat(microProfiler.get());
-        microProfiler.start("render");
+
         position.render(item, cn);
-        window.profileRender += parseFloat(microProfiler.get());
     }
 });
