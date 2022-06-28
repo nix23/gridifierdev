@@ -1,6 +1,6 @@
 module.exports = function(grunt) {
     var gridifierDevRoot = "/var/www/gridifier/gridifierdev/";
-    var gridifierRoot = "/var/www/gridifier/";
+    var gridifierRoot = "/var/www/gridifier/gridifier/";
     var banner = "";
 
     banner += " * Async Responsive HTML Grids\n";

@@ -108,9 +108,13 @@ DemoLayoutBuilder.DemoLayout.GridItem.prototype._adjustGridItem = function(itemS
     else
         var itemHeight = "10%";
 
+    var testSizes = [[44, 22], [22, 44]];
+    var res = Math.floor(Math.random()*(2-1+1)+1);
+    res -= 1;
+
     this._$gridItem.css({
-        width: "10px",
-        height: "10px",
+        width: testSizes[res][0] + "px",
+        height: testSizes[res][1] + "px",
         margin: "5px",
         //width: (isFirst) ? "25%" : "12.5%",
         //height: 0,

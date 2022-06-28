@@ -51,9 +51,17 @@ var Core = function() {
             return gridifier;
         },
 
-        reposition: function() {
+        reposition: function() { 
+            /* @system-log-start */
+            var start = window.performance.now();
+            /* @system-log-end */
             antialiaser.updateAs();
             reposition.all();
+            /* @system-log-start */
+            var stop = window.performance.now();
+            console.log(stop - start);
+            /* @system-log-end */
+
             return gridifier;
         },
 

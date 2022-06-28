@@ -94,6 +94,7 @@ proto(Position, {
     },
 
     filterCrs: function(selType, crSide, crSide1, crSide2, sortType) {
+        /* @system-log-start */
         if(typeof window.init == "undefined") {
             window.getClone = 0;
             window.select = 0;
@@ -114,14 +115,19 @@ proto(Position, {
         }
 
         microProfiler.start();
+        /* @system-log-end */
         var crs = connectors.getClone();
+        /* @system-log-start */
         window.getClone += parseFloat(microProfiler.get());
 
         microProfiler.start();
+        /* @system-log-end */
         crsSelector.attach(crs);
         crsSelector["selectOnlyFrom" + selType](crSide);
         crs = crsSelector.getSelected();
+        /* @system-log-start */
         window.select += parseFloat(microProfiler.get());
+        /* @system-log-end */
         /* @system-log-start */
         var logm = selType + "(" + crSide1 + "." + crSide2 + ")";
         Logger.log(
@@ -131,15 +137,21 @@ proto(Position, {
             connections.get()
         );
         /* @system-log-end */
+        /* @system-log-start */
         microProfiler.start();
+        /* @system-log-end */
 
         if(settings.eq("intersections", true)) {
             crsShifter.attach(crs);
+            /* @system-log-start */
             window.intr1 += parseFloat(microProfiler.get());
             microProfiler.start();
+            /* @system-log-end */
             crsShifter.shiftAll();
+            /* @system-log-start */
             window.intr2 += parseFloat(microProfiler.get());
             microProfiler.start();
+            /* @system-log-end */
             crs = crsShifter.getNew();
             /* @system-log-start */
             Logger.log(
@@ -149,7 +161,9 @@ proto(Position, {
                 connections.get()
             );
             /* @system-log-end */
+            /* @system-log-start */
             window.intr3 += parseFloat(microProfiler.get());
+            /* @system-log-end */
         }
         else {
             crsSelector.attach(crs);
@@ -179,13 +193,17 @@ proto(Position, {
             /* @system-log-end */
         }
 
+        /* @system-log-start */
         microProfiler.start();
+        /* @system-log-end */
         crsSorter.attach(crs);
         crsSorter["sortFor" + sortType]();
-        crsSorter.getSorted();
+        var sorted = crsSorter.getSorted();
+        /* @system-log-start */
         window.sort += parseFloat(microProfiler.get());
+        /* @system-log-end */
 
-        return crsSorter.getSorted();
+        return sorted;
     },
 
     findCnCoords: function(item, sortedCrs, intType, guidSide, guidC, guidDir, intC) {
