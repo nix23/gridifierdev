@@ -545,10 +545,10 @@
 ![alt text](img/screen/4.png)
 
 <div align="center">
-  <a href="http://45.55.240.120/app.php/">
     <h3 align="center">Website with documentation</h3>
-  </a>
 </div>
+
+<a href="http://45.55.240.120/app.php/">Open</a>
 
 ![alt text](img/screen/5.png)
 
