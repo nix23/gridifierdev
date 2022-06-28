@@ -524,25 +524,25 @@
   <h3 align="center">Grid configurator: horizontal grid</h3>
 </div>
 
-![alt text](public/img/screen/1.jpg)
+![alt text](img/screen/1.jpg)
 
 <div align="center">
   <h3 align="center">Grid configurator: vertical grid</h3>
 </div>
 
-![alt text](public/img/screen/2.jpg)
+![alt text](img/screen/2.jpg)
 
 <div align="center">
   <h3 align="center">Library builder main page</h3>
 </div>
 
-![alt text](public/img/screen/3.jpg)
+![alt text](img/screen/3.jpg)
 
 <div align="center">
   <h3 align="center">Tests suite page</h3>
 </div>
 
-![alt text](public/img/screen/4.jpg)
+![alt text](img/screen/4.jpg)
 
 <div align="center">
   <a href="http://45.55.240.120/app.php/">
@@ -550,6 +550,6 @@
   </a>
 </div>
 
-![alt text](public/img/screen/5.jpg)
+![alt text](img/screen/5.jpg)
 
 <p align="right">(<a href="#top">back to top</a>)</p>
