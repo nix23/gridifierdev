@@ -564,7 +564,9 @@
     <h3 align="center">Website with documentation</h3>
 </div>
 
-<a href="http://45.55.240.120/app.php/">Open website with docs</a>
+<p align="center">
+    <a href="http://45.55.240.120/app.php/">Open website with docs</a>
+</p>
 
 <a href="img/screen/5.png?raw=true">
   <p align="center">
