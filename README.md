@@ -524,32 +524,52 @@
   <h3 align="center">Grid configurator: horizontal grid</h3>
 </div>
 
-![alt text](img/screen/1.png)
+<a href="img/screen/1.png?raw=true">
+  <p align="center">
+    <img src="img/screen/1.png" width="50%">
+  </p>
+</a>
 
 <div align="center">
   <h3 align="center">Grid configurator: vertical grid</h3>
 </div>
 
-![alt text](img/screen/2.png)
+<a href="img/screen/2.png?raw=true">
+  <p align="center">
+    <img src="img/screen/2.png" width="50%">
+  </p>
+</a>
 
 <div align="center">
   <h3 align="center">Library builder main page</h3>
 </div>
 
-![alt text](img/screen/3.png)
+<a href="img/screen/3.png?raw=true">
+  <p align="center">
+    <img src="img/screen/3.png" width="50%">
+  </p>
+</a>
 
 <div align="center">
   <h3 align="center">Tests suite page</h3>
 </div>
 
-![alt text](img/screen/4.png)
+<a href="img/screen/4.png?raw=true">
+  <p align="center">
+    <img src="img/screen/4.png" width="50%">
+  </p>
+</a>
 
 <div align="center">
     <h3 align="center">Website with documentation</h3>
 </div>
 
-<a href="http://45.55.240.120/app.php/">Open</a>
+<a href="http://45.55.240.120/app.php/">Open website with docs</a>
 
-![alt text](img/screen/5.png)
+<a href="img/screen/5.png?raw=true">
+  <p align="center">
+    <img src="img/screen/5.png" width="50%">
+  </p>
+</a>
 
 <p align="right">(<a href="#top">back to top</a>)</p>
